@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Test</title>
+  <style>
+    body { 
+      background: #0f0f0f; 
+      color: #f0f0f0; 
+      font-family: monospace;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .status { margin: 10px 0; padding: 10px; border: 1px solid #555; }
+    .success { border-color: #22c55e; color: #22c55e; }
+    .error { border-color: #ef4444; color: #ef4444; }
+    input { 
+      background: #1f1f1f; 
+      color: #f0f0f0; 
+      border: 1px solid #555; 
+      padding: 8px; 
+      margin: 5px; 
+      width: 200px;
+    }
+    button { 
+      background: #22c55e; 
+      color: #000; 
+      border: none; 
+      padding: 10px 20px; 
+      cursor: pointer; 
+      font-weight: bold;
+    }
+    button:hover { background: #16a34a; }
+    textarea { 
+      width: 100%; 
+      height: 200px; 
+      background: #1f1f1f; 
+      color: #f0f0f0; 
+      border: 1px solid #555; 
+      padding: 10px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Rentra Registration Debug</h1>
+  
+  <div id="backend-status" class="status">Checking backend...</div>
+  
+  <h2>Test Registration:</h2>
+  <input id="fullName" placeholder="Full Name" value="Test User" />
+  <input id="email" placeholder="Email" value="debug@test.com" />
+  <input id="phone" placeholder="Phone" value="+923001234567" />
+  <input id="cnic" placeholder="CNIC" value="35202-1234567-9" />
+  <input id="password" placeholder="Password" value="test123" />
+  <br />
+  <button onclick="testRegister()">Test Register</button>
+  
+  <h2>Response:</h2>
+  <textarea id="response" placeholder="Response will appear here..."></textarea>
+  
+  <script>
+    const apiUrl = 'http://localhost:3000/api';
+    
+    // Check backend
+    async function checkBackend() {
+      try {
+        const res = await fetch(apiUrl + '/docs');
+        document.getElementById('backend-status').innerHTML = 
+          '✅ Backend: Running (' + res.status + ')';
+        document.getElementById('backend-status').classList.add('success');
+      } catch (e) {
+        document.getElementById('backend-status').innerHTML = 
+          '❌ Backend: Not running - ' + e.message;
+        document.getElementById('backend-status').classList.add('error');
+      }
+    }
+    
+    async function testRegister() {
+      const data = {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value + Math.random().toString().slice(2, 8),
+        phone: document.getElementById('phone').value,
+        cnic: document.getElementById('cnic').value,
+        password: document.getElementById('password').value,
+        role: 'TENANT'
+      };
+      
+      try {
+        const res = await fetch(apiUrl + '/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        const json = await res.json();
+        document.getElementById('response').value = 
+          'Status: ' + res.status + '\n\n' + JSON.stringify(json, null, 2);
+        
+        if (res.ok) {
+          document.getElementById('response').style.color = '#22c55e';
+          alert('✅ Registration successful!');
+        } else {
+          document.getElementById('response').style.color = '#ef4444';
+        }
+      } catch (e) {
+        document.getElementById('response').value = 'ERROR: ' + e.message;
+        document.getElementById('response').style.color = '#ef4444';
+      }
+    }
+    
+    checkBackend();
+  </script>
+</body>
+</html>

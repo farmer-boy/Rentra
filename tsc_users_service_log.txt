@@ -1,0 +1,108 @@
+﻿apps/backend/src/modules/users/dto/create-user.dto.ts(11,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "fullName"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(12,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "fullName"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(15,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "email"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(16,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "email"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(19,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "phone"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(20,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "phone"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(23,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "cnic"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(24,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "cnic"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(25,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "cnic"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(28,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "password"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(29,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "password"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(30,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, string> & { name: "password"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(33,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, Role> & { name: "role"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(34,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, Role> & { name: "role"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(35,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, Role> & { name: "role"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(38,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/create-user.dto.ts(39,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<CreateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(11,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "fullName"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(12,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "fullName"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(13,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "fullName"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(16,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "email"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(17,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "email"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(18,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "email"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(21,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "phone"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(22,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "phone"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(23,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "phone"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(26,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "cnic"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(27,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "cnic"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(28,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, string> & { name: "cnic"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(31,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, Role> & { name: "role"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(32,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, Role> & { name: "role"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(33,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, Role> & { name: "role"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(36,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(37,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(38,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(39,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(40,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, number> & { name: "trustScore"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(43,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, boolean> & { name: "isVerified"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(44,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, boolean> & { name: "isVerified"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(45,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, boolean> & { name: "isVerified"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(48,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, boolean> & { name: "isSuspended"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(49,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, boolean> & { name: "isSuspended"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+apps/backend/src/modules/users/dto/update-user.dto.ts(50,4): error TS1240: Unable to resolve signature of property decorator when called as an expression.
+  Argument of type 'ClassFieldDecoratorContext<UpdateUserDto, boolean> & { name: "isSuspended"; private: false; static: false; }' is not assignable to parameter of type 'string | symbol'.
+node_modules/.pnpm/@nestjs+common@10.4.22_clas_eedbb13f64ab56e6c0d820549cb5d1ce/node_modules/@nestjs/common/decorators/http/route-params.decorator.d.ts(324,63): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+node_modules/.pnpm/@nestjs+common@10.4.22_clas_eedbb13f64ab56e6c0d820549cb5d1ce/node_modules/@nestjs/common/decorators/http/route-params.decorator.d.ts(324,100): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+node_modules/.pnpm/@nestjs+common@10.4.22_clas_eedbb13f64ab56e6c0d820549cb5d1ce/node_modules/@nestjs/common/file-stream/streamable-file.d.ts(1,26): error TS2307: Cannot find module 'stream' or its corresponding type declarations.
+node_modules/.pnpm/@nestjs+common@10.4.22_clas_eedbb13f64ab56e6c0d820549cb5d1ce/node_modules/@nestjs/common/interfaces/http/raw-body-request.interface.d.ts(5,15): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+node_modules/.pnpm/@nestjs+common@10.4.22_clas_eedbb13f64ab56e6c0d820549cb5d1ce/node_modules/@nestjs/common/pipes/file/interfaces/file.interface.d.ts(4,14): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(566,15): error TS2583: Cannot find name 'BigInt'. Do you need to change your target library? Try changing the 'lib' compiler option to 'es2020' or later.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(2221,22): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(3483,22): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(4604,22): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(5682,22): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(6715,22): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/.prisma/client/index.d.ts(7704,22): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(280,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(1584,26): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2319,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2328,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2391,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2398,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2405,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2411,13): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/@prisma+client@5.22.0_prisma@5.22.0/node_modules/@prisma/client/runtime/library.d.ts(2693,17): error TS2339: Property 'toStringTag' does not exist on type 'SymbolConstructor'.
+node_modules/.pnpm/rxjs@7.8.2/node_modules/rxjs/dist/types/internal/Observable.d.ts(117,35): error TS2585: 'Promise' only refers to a type, but is being used as a value here. Do you need to change your target library? Try changing the 'lib' compiler option to es2015 or later.

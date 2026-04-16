@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  phone       String   @unique
+  password    String
+  fullName    String
+  cnic        String   @unique
+  role        Role     @default(TENANT)
+  trustScore  Int      @default(50)
+  isVerified  Boolean  @default(false)
+  isSuspended Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  listings           Listing[]
+  tenantAgreements   Agreement[] @relation("TenantAgreements")
+  landlordAgreements Agreement[] @relation("LandlordAgreements")
+  payments           Payment[]
+  tenantDisputes     Dispute[]   @relation("TenantDisputes")
+  reviews            Review[]
+}
+
+model Listing {
+  id          String        @id @default(cuid())
+  title       String
+  description String
+  area        String
+  city        String
+  address     String
+  type        PropertyType
+  bedrooms    Int
+  bathrooms   Int
+  sqft        Int
+  rent        Int
+  deposit     Int
+  status      ListingStatus @default(PENDING)
+  fraudScore  Float         @default(0)
+  photos      String[]
+  landlordId  String
+  landlord    User          @relation(fields: [landlordId], references: [id])
+  agreements  Agreement[]
+  reviews     Review[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Agreement {
+  id         String          @id @default(cuid())
+  listingId  String
+  listing    Listing         @relation(fields: [listingId], references: [id])
+  tenantId   String
+  tenant     User            @relation("TenantAgreements", fields: [tenantId], references: [id])
+  landlordId String
+  landlord   User            @relation("LandlordAgreements", fields: [landlordId], references: [id])
+  rent       Int
+  deposit    Int
+  startDate  DateTime
+  endDate    DateTime
+  pdfUrl     String?
+  status     AgreementStatus @default(PENDING)
+  payments   Payment[]
+  disputes   Dispute[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  agreementId   String
+  agreement     Agreement     @relation(fields: [agreementId], references: [id])
+  tenantId      String
+  tenant        User          @relation(fields: [tenantId], references: [id])
+  amount        Int
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  transactionId String?
+  receiptUrl    String?
+  month         DateTime
+  createdAt     DateTime      @default(now())
+}
+
+model Dispute {
+  id          String        @id @default(cuid())
+  agreementId String
+  agreement   Agreement     @relation(fields: [agreementId], references: [id])
+  tenantId    String
+  tenant      User          @relation("TenantDisputes", fields: [tenantId], references: [id])
+  title       String
+  description String
+  amount      Int?
+  status      DisputeStatus @default(OPEN)
+  resolution  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  TENANT
+  LANDLORD
+  ADMIN
+}
+
+enum PropertyType {
+  FLAT
+  ROOM
+  HOUSE
+  STUDIO
+}
+
+enum ListingStatus {
+  PENDING
+  VERIFIED
+  FLAGGED
+  REMOVED
+}
+
+enum AgreementStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  JAZZCASH
+  EASYPAISA
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum DisputeStatus {
+  OPEN
+  MEDIATION
+  RESOLVED
+  CLOSED
+}

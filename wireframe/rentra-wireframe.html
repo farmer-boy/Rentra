@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rentra — App Wireframe</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0f0f0f;
+  --surface: #171717;
+  --surface2: #1f1f1f;
+  --surface3: #2a2a2a;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --yellow: #eab308;
+  --yellow-dim: rgba(234,179,8,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+  --accent: #22c55e;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+.logo-mark {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.03em;
+}
+.logo-sub {
+  font-size: 0.62rem;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+}
+
+.sidebar-section {
+  padding: 0.75rem 0.75rem 0.25rem;
+}
+.sidebar-section-label {
+  font-size: 0.6rem;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0 0.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.82rem;
+  color: var(--text2);
+  font-weight: 500;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--green-dim); color: var(--green); }
+.nav-item .icon { font-size: 0.95rem; width: 18px; text-align: center; }
+.nav-item .badge {
+  margin-left: auto;
+  font-size: 0.6rem;
+  background: var(--green);
+  color: #000;
+  padding: 1px 5px;
+  border-radius: 99px;
+  font-weight: 700;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem;
+  border-top: 1px solid var(--border);
+}
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.user-chip:hover { background: var(--surface2); }
+.avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--green-dim);
+  border: 1px solid var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--green);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.user-name { font-size: 0.78rem; font-weight: 600; }
+.user-role { font-size: 0.6rem; color: var(--text3); }
+
+/* MAIN AREA */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* TOP BAR */
+.topbar {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+.page-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex: 1;
+}
+.topbar-actions { display: flex; gap: 0.5rem; align-items: center; }
+.tb-btn {
+  padding: 0.35rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: 'Outfit', sans-serif;
+  transition: opacity 0.2s;
+}
+.tb-btn:hover { opacity: 0.85; }
+.tb-btn.primary { background: var(--green); color: #000; }
+.tb-btn.ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+
+/* CONTENT */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* PAGE VIEWS */
+.page { display: none; }
+.page.active { display: block; }
+
+/* STATS ROW */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  transition: border-color 0.2s;
+}
+.stat-card:hover { border-color: var(--border2); }
+.stat-label { font-size: 0.68rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+.stat-value { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; }
+.stat-change { font-size: 0.7rem; margin-top: 0.3rem; }
+.stat-change.up { color: var(--green); }
+.stat-change.down { color: var(--red); }
+
+/* GRID 2 */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+.card-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.card-title span { color: var(--text3); font-size: 0.65rem; font-weight: 400; font-family: 'JetBrains Mono', monospace; }
+
+/* LISTING CARD */
+.listing-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: pointer;
+}
+.listing-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+
+.listing-img {
+  height: 130px;
+  background: var(--surface3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  position: relative;
+}
+.listing-badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  font-size: 0.6rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+}
+.badge-verified { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+.badge-flagged { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+.badge-pending { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(234,179,8,0.2); }
+
+.listing-body { padding: 0.9rem; }
+.listing-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.2rem; }
+.listing-loc { font-size: 0.7rem; color: var(--text3); margin-bottom: 0.5rem; }
+.listing-price { font-size: 1rem; font-weight: 800; color: var(--green); letter-spacing: -0.02em; }
+.listing-price span { font-size: 0.65rem; color: var(--text3); font-weight: 400; }
+.listing-meta { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+.listing-meta-item { font-size: 0.65rem; color: var(--text3); }
+
+/* TRUST SCORE */
+.trust-ring {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 1.4rem;
+  font-weight: 800;
+  position: relative;
+  flex-shrink: 0;
+}
+.trust-ring.high { background: var(--green-dim); color: var(--green); border: 3px solid var(--green); }
+.trust-ring.mid { background: var(--yellow-dim); color: var(--yellow); border: 3px solid var(--yellow); }
+.trust-ring.low { background: var(--red-dim); color: var(--red); border: 3px solid var(--red); }
+.trust-ring small { font-size: 0.5rem; font-weight: 400; color: inherit; opacity: 0.7; }
+
+/* TABLE */
+.table { width: 100%; border-collapse: collapse; }
+.table th {
+  text-align: left;
+  font-size: 0.62rem;
+  color: var(--text3);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.table td {
+  padding: 0.65rem 0.75rem;
+  font-size: 0.78rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+.table tr:last-child td { border-bottom: none; }
+.table tr:hover td { background: var(--surface2); color: var(--text); }
+
+/* STATUS PILLS */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+}
+.pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.pill.green { background: var(--green-dim); color: var(--green); }
+.pill.red { background: var(--red-dim); color: var(--red); }
+.pill.yellow { background: var(--yellow-dim); color: var(--yellow); }
+.pill.blue { background: var(--blue-dim); color: var(--blue); }
+
+/* FORM ELEMENTS */
+.form-group { margin-bottom: 1rem; }
+.form-label { font-size: 0.7rem; color: var(--text3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; margin-bottom: 0.35rem; display: block; }
+.form-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--green); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+/* SEARCH BAR */
+.search-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  align-items: center;
+}
+.search-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  outline: none;
+}
+.search-input::placeholder { color: var(--text3); }
+.filter-chip {
+  padding: 0.5rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.72rem;
+  color: var(--text2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-chip.active { background: var(--green-dim); color: var(--green); border-color: rgba(34,197,94,0.3); }
+
+/* AI SCORE BAR */
+.ai-bar {
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.ai-bar-fill { height: 100%; border-radius: 99px; }
+
+/* CHAT BUBBLES */
+.chat-bubble {
+  padding: 0.65rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  max-width: 80%;
+  margin-bottom: 0.6rem;
+}
+.chat-bubble.tenant { background: var(--surface3); align-self: flex-start; border-bottom-left-radius: 2px; }
+.chat-bubble.landlord { background: var(--green-dim); border: 1px solid rgba(34,197,94,0.2); align-self: flex-end; margin-left: auto; border-bottom-right-radius: 2px; color: var(--green); }
+
+/* AGREEMENT PREVIEW */
+.agreement-box {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1.8;
+  color: var(--text2);
+}
+.agreement-box h4 { color: var(--text); font-size: 0.82rem; margin-bottom: 0.5rem; text-align: center; }
+.agreement-box .clause { margin-bottom: 0.5rem; }
+.agreement-box .clause strong { color: var(--text); }
+
+/* PAYMENT */
+.payment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+.payment-row:last-child { border-bottom: none; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+
+/* PAGE HEADER */
+.page-header { margin-bottom: 1.5rem; }
+.page-header h2 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+.page-header p { font-size: 0.78rem; color: var(--text3); margin-top: 0.25rem; }
+
+/* NOTIFICATION DOT */
+.notif-dot {
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  margin-left: auto;
+}
+
+/* PROGRESS STEPS */
+.steps { display: flex; gap: 0; margin-bottom: 1.5rem; }
+.step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+.step::after {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+}
+.step:last-child::after { display: none; }
+.step-dot {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin: 0 auto 0.4rem;
+  position: relative;
+  z-index: 1;
+}
+.step-dot.done { background: var(--green); color: #000; }
+.step-dot.active { background: var(--surface3); color: var(--text); border: 2px solid var(--green); }
+.step-dot.pending { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.step-label { font-size: 0.6rem; color: var(--text3); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Rentra</div>
+    <div class="logo-sub">Transparent Renting</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Main</div>
+    <div class="nav-item active" onclick="showPage('dashboard', this)">
+      <span class="icon">📊</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('listings', this)">
+      <span class="icon">🏠</span> Browse Listings
+    </div>
+    <div class="nav-item" onclick="showPage('post', this)">
+      <span class="icon">➕</span> Post Property
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">AI Features</div>
+    <div class="nav-item" onclick="showPage('detector', this)">
+      <span class="icon">🤖</span> Fake Detector
+    </div>
+    <div class="nav-item" onclick="showPage('estimator', this)">
+      <span class="icon">💡</span> Rent Estimator
+    </div>
+    <div class="nav-item" onclick="showPage('trust', this)">
+      <span class="icon">⭐</span> Trust Scores
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Tenancy</div>
+    <div class="nav-item" onclick="showPage('agreement', this)">
+      <span class="icon">📄</span> Agreements
+    </div>
+    <div class="nav-item" onclick="showPage('payments', this)">
+      <span class="icon">💳</span> Payments
+    </div>
+    <div class="nav-item" onclick="showPage('disputes', this)">
+      <span class="icon">⚖️</span> Disputes
+      <span class="badge">2</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">System</div>
+    <div class="nav-item" onclick="showPage('admin', this)">
+      <span class="icon">🛡️</span> Admin Panel
+    </div>
+    <div class="nav-item" onclick="showPage('profile', this)">
+      <span class="icon">👤</span> Profile
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <div class="avatar">AR</div>
+      <div>
+        <div class="user-name">Ali Raza</div>
+        <div class="user-role">Tenant · Lahore</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-actions">
+      <button class="tb-btn ghost">🔔</button>
+      <button class="tb-btn ghost">🌐 EN / اردو</button>
+      <button class="tb-btn primary" id="topBtn" onclick="showPage('post', null)">+ Post Property</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h2>Welcome back, Ali 👋</h2>
+        <p>Pakistan ka pehla AI-powered transparent rental platform</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">ACTIVE LISTINGS</div>
+          <div class="stat-value">1,284</div>
+          <div class="stat-change up">↑ 12% this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">FAKE DETECTED</div>
+          <div class="stat-value" style="color:var(--red)">47</div>
+          <div class="stat-change down">AI flagged today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">AGREEMENTS SIGNED</div>
+          <div class="stat-value" style="color:var(--green)">328</div>
+          <div class="stat-change up">↑ 8% this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">DISPUTES RESOLVED</div>
+          <div class="stat-value" style="color:var(--yellow)">19</div>
+          <div class="stat-change up">↑ 3 this week</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Recent Listings <span>View All →</span></div>
+          <table class="table">
+            <thead><tr><th>Property</th><th>Area</th><th>Rent</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>2 Bed Flat</td><td>Gulberg</td><td style="color:var(--green)">Rs 22,000</td><td><span class="pill green">Verified</span></td></tr>
+              <tr><td>1 Room</td><td>Johar Town</td><td style="color:var(--green)">Rs 9,500</td><td><span class="pill green">Verified</span></td></tr>
+              <tr><td>Studio Flat</td><td>DHA Ph 5</td><td style="color:var(--green)">Rs 31,000</td><td><span class="pill yellow">Pending</span></td></tr>
+              <tr><td>3 Bed House</td><td>Model Town</td><td style="color:var(--red)">Rs 35,000</td><td><span class="pill red">Flagged 🤖</span></td></tr>
+              <tr><td>Room Share</td><td>Ichra</td><td style="color:var(--green)">Rs 8,000</td><td><span class="pill green">Verified</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">My Trust Score</div>
+          <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1rem;">
+            <div class="trust-ring high">82<small>/100</small></div>
+            <div>
+              <div style="font-size:0.9rem;font-weight:700;margin-bottom:0.3rem;">Good Standing</div>
+              <div style="font-size:0.72rem;color:var(--text3);line-height:1.6;">Rent history: Clean<br>Disputes: 0<br>Reviews: 4.7 ★</div>
+            </div>
+          </div>
+          <div style="font-size:0.7rem;color:var(--text3);margin-bottom:0.4rem;font-family:'JetBrains Mono',monospace;">SCORE BREAKDOWN</div>
+          <div style="margin-bottom:0.5rem;">
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:3px;"><span>Payment History</span><span style="color:var(--green)">95</span></div>
+            <div class="ai-bar"><div class="ai-bar-fill" style="width:95%;background:var(--green)"></div></div>
+          </div>
+          <div style="margin-bottom:0.5rem;">
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:3px;"><span>Property Care</span><span style="color:var(--green)">80</span></div>
+            <div class="ai-bar"><div class="ai-bar-fill" style="width:80%;background:var(--green)"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:3px;"><span>Communication</span><span style="color:var(--yellow)">70</span></div>
+            <div class="ai-bar"><div class="ai-bar-fill" style="width:70%;background:var(--yellow)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Recent Activity</div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.78rem;">
+            <span style="font-size:1rem;">🤖</span>
+            <div><span style="color:var(--text)">AI flagged</span> <span style="color:var(--red)">3 Bed House, Model Town</span> as potentially fake listing</div>
+            <span style="margin-left:auto;color:var(--text3);font-size:0.65rem;white-space:nowrap;">2 min ago</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.78rem;">
+            <span style="font-size:1rem;">📄</span>
+            <div><span style="color:var(--text)">Rent agreement</span> signed with <span style="color:var(--green)">Landlord Ahmed Malik</span> for Johar Town flat</div>
+            <span style="margin-left:auto;color:var(--text3);font-size:0.65rem;white-space:nowrap;">1 hour ago</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.78rem;">
+            <span style="font-size:1rem;">💳</span>
+            <div><span style="color:var(--text)">Rent payment</span> of <span style="color:var(--green)">Rs 9,500</span> sent via JazzCash — receipt saved</div>
+            <span style="margin-left:auto;color:var(--text3);font-size:0.65rem;white-space:nowrap;">Yesterday</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LISTINGS ===== -->
+    <div class="page" id="page-listings">
+      <div class="page-header">
+        <h2>Browse Listings 🏠</h2>
+        <p>Lahore mein available kiraye ke ghar</p>
+      </div>
+
+      <div class="search-bar">
+        <input class="search-input" placeholder="🔍  Area ya property search karo...">
+        <div class="filter-chip active">Sab</div>
+        <div class="filter-chip">Flat</div>
+        <div class="filter-chip">Room</div>
+        <div class="filter-chip">House</div>
+        <div class="filter-chip">Rs 8k–15k</div>
+        <div class="filter-chip">Rs 15k–25k</div>
+        <div class="filter-chip">Rs 25k–35k</div>
+      </div>
+
+      <div class="grid-3">
+        <div class="listing-card">
+          <div class="listing-img">🏢<span class="listing-badge badge-verified">✓ AI Verified</span></div>
+          <div class="listing-body">
+            <div class="listing-title">2 Bedroom Flat</div>
+            <div class="listing-loc">📍 Gulberg III, Lahore</div>
+            <div class="listing-price">Rs 22,000 <span>/ month</span></div>
+            <div class="listing-meta">
+              <span class="listing-meta-item">🛏 2 Beds</span>
+              <span class="listing-meta-item">🚿 1 Bath</span>
+              <span class="listing-meta-item">📐 850 sqft</span>
+            </div>
+          </div>
+        </div>
+        <div class="listing-card">
+          <div class="listing-img">🏠<span class="listing-badge badge-verified">✓ AI Verified</span></div>
+          <div class="listing-body">
+            <div class="listing-title">Single Room</div>
+            <div class="listing-loc">📍 Johar Town, Lahore</div>
+            <div class="listing-price">Rs 9,500 <span>/ month</span></div>
+            <div class="listing-meta">
+              <span class="listing-meta-item">🛏 1 Bed</span>
+              <span class="listing-meta-item">🚿 1 Bath</span>
+              <span class="listing-meta-item">📐 300 sqft</span>
+            </div>
+          </div>
+        </div>
+        <div class="listing-card">
+          <div class="listing-img">🏗️<span class="listing-badge badge-flagged">⚠ AI Flagged</span></div>
+          <div class="listing-body">
+            <div class="listing-title">3 Bed House</div>
+            <div class="listing-loc">📍 Model Town, Lahore</div>
+            <div class="listing-price" style="color:var(--red)">Rs 35,000 <span>/ month</span></div>
+            <div class="listing-meta">
+              <span class="listing-meta-item">🛏 3 Beds</span>
+              <span class="listing-meta-item">🚿 2 Bath</span>
+              <span class="listing-meta-item">📐 1200 sqft</span>
+            </div>
+          </div>
+        </div>
+        <div class="listing-card">
+          <div class="listing-img">🏢<span class="listing-badge badge-pending">⏳ Pending</span></div>
+          <div class="listing-body">
+            <div class="listing-title">Studio Flat</div>
+            <div class="listing-loc">📍 DHA Phase 5, Lahore</div>
+            <div class="listing-price">Rs 31,000 <span>/ month</span></div>
+            <div class="listing-meta">
+              <span class="listing-meta-item">🛏 Studio</span>
+              <span class="listing-meta-item">🚿 1 Bath</span>
+              <span class="listing-meta-item">📐 600 sqft</span>
+            </div>
+          </div>
+        </div>
+        <div class="listing-card">
+          <div class="listing-img">🏠<span class="listing-badge badge-verified">✓ AI Verified</span></div>
+          <div class="listing-body">
+            <div class="listing-title">Room Share (2 Boys)</div>
+            <div class="listing-loc">📍 Ichra, Lahore</div>
+            <div class="listing-price">Rs 8,000 <span>/ month</span></div>
+            <div class="listing-meta">
+              <span class="listing-meta-item">🛏 Shared</span>
+              <span class="listing-meta-item">🚿 1 Bath</span>
+              <span class="listing-meta-item">📐 200 sqft</span>
+            </div>
+          </div>
+        </div>
+        <div class="listing-card">
+          <div class="listing-img">🏢<span class="listing-badge badge-verified">✓ AI Verified</span></div>
+          <div class="listing-body">
+            <div class="listing-title">2 Bed Upper Portion</div>
+            <div class="listing-loc">📍 Faisal Town, Lahore</div>
+            <div class="listing-price">Rs 18,000 <span>/ month</span></div>
+            <div class="listing-meta">
+              <span class="listing-meta-item">🛏 2 Beds</span>
+              <span class="listing-meta-item">🚿 1 Bath</span>
+              <span class="listing-meta-item">📐 700 sqft</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== POST PROPERTY ===== -->
+    <div class="page" id="page-post">
+      <div class="page-header">
+        <h2>Post Property ➕</h2>
+        <p>Apna ghar kiraye pe dene ke liye yahan post karo</p>
+      </div>
+
+      <div class="steps">
+        <div class="step"><div class="step-dot done">✓</div><div class="step-label">Basic Info</div></div>
+        <div class="step"><div class="step-dot active">2</div><div class="step-label">Details</div></div>
+        <div class="step"><div class="step-dot pending">3</div><div class="step-label">Photos</div></div>
+        <div class="step"><div class="step-dot pending">4</div><div class="step-label">AI Scan</div></div>
+        <div class="step"><div class="step-dot pending">5</div><div class="step-label">Publish</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Property Details</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">PROPERTY TYPE</label>
+              <select class="form-input"><option>Flat</option><option>Room</option><option>House</option><option>Studio</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">CITY</label>
+              <select class="form-input"><option>Lahore</option><option>Karachi</option><option>Islamabad</option></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">AREA / MOHALLA</label>
+            <input class="form-input" placeholder="e.g. Gulberg III, Johar Town...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">COMPLETE ADDRESS</label>
+            <input class="form-input" placeholder="Street number, house number...">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">MONTHLY RENT (Rs)</label>
+              <input class="form-input" placeholder="e.g. 15000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">SECURITY DEPOSIT (Rs)</label>
+              <input class="form-input" placeholder="e.g. 30000">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">BEDROOMS</label>
+              <select class="form-input"><option>1</option><option>2</option><option>3</option><option>4+</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">AREA (SQFT)</label>
+              <input class="form-input" placeholder="e.g. 800">
+            </div>
+          </div>
+          <button class="tb-btn primary" style="width:100%;padding:0.7rem;">Continue → AI Scan</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🤖 AI Pre-Check</div>
+          <div style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem;line-height:1.6;">
+            Listing submit karne se pehle AI automatically check karega:
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.7rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem;background:var(--surface2);border-radius:8px;font-size:0.78rem;">
+              <span>📸</span><span>Photos real hain ya stolen</span><span style="margin-left:auto;" class="pill yellow">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem;background:var(--surface2);border-radius:8px;font-size:0.78rem;">
+              <span>💰</span><span>Price area ke hisaab se theek hai</span><span style="margin-left:auto;" class="pill yellow">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem;background:var(--surface2);border-radius:8px;font-size:0.78rem;">
+              <span>👤</span><span>Account posting frequency normal hai</span><span style="margin-left:auto;" class="pill yellow">Pending</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem;background:var(--surface2);border-radius:8px;font-size:0.78rem;">
+              <span>📝</span><span>Description genuine lagti hai</span><span style="margin-left:auto;" class="pill yellow">Pending</span>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding:0.75rem;background:var(--green-dim);border:1px solid rgba(34,197,94,0.2);border-radius:8px;font-size:0.75rem;color:var(--green);">
+            ✅ AI scan complete hone ke baad hi listing live hogi — tenant ka time waste nahi hoga!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FAKE DETECTOR ===== -->
+    <div class="page" id="page-detector">
+      <div class="page-header">
+        <h2>AI Fake Listing Detector 🤖</h2>
+        <p>Machine learning se fraudulent listings pakadta hai</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Flagged Listings — Review Queue</div>
+          <table class="table">
+            <thead><tr><th>Listing</th><th>Fraud %</th><th>Reason</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>3 Bed, Model Town</td>
+                <td style="color:var(--red);font-weight:700;">87%</td>
+                <td style="color:var(--text3);font-size:0.7rem;">Stolen photos</td>
+                <td><span class="pill red">Remove</span></td>
+              </tr>
+              <tr>
+                <td>Luxury Villa, DHA</td>
+                <td style="color:var(--red);font-weight:700;">91%</td>
+                <td style="color:var(--text3);font-size:0.7rem;">Price anomaly</td>
+                <td><span class="pill red">Remove</span></td>
+              </tr>
+              <tr>
+                <td>Room, Samanabad</td>
+                <td style="color:var(--yellow);font-weight:700;">54%</td>
+                <td style="color:var(--text3);font-size:0.7rem;">Low photo count</td>
+                <td><span class="pill yellow">Review</span></td>
+              </tr>
+              <tr>
+                <td>Flat, Bahria Town</td>
+                <td style="color:var(--yellow);font-weight:700;">61%</td>
+                <td style="color:var(--text3);font-size:0.7rem;">Spam account</td>
+                <td><span class="pill yellow">Review</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AI Detection Signals</div>
+          <div style="display:flex;flex-direction:column;gap:0.85rem;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text2);margin-bottom:4px;"><span>📸 Photo Authenticity</span><span style="color:var(--red)">HIGH RISK</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:87%;background:var(--red)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text2);margin-bottom:4px;"><span>💰 Price vs Area Ratio</span><span style="color:var(--yellow)">SUSPICIOUS</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:61%;background:var(--yellow)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text2);margin-bottom:4px;"><span>📝 Description Pattern</span><span style="color:var(--green)">NORMAL</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:20%;background:var(--green)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--text2);margin-bottom:4px;"><span>👤 Account Posting Freq</span><span style="color:var(--red)">HIGH RISK</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:91%;background:var(--red)"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding:0.75rem;background:var(--red-dim);border:1px solid rgba(239,68,68,0.2);border-radius:8px;font-size:0.75rem;color:var(--red);">
+            ⚠️ Overall Fraud Probability: <strong>87%</strong> — Admin review required
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== RENT ESTIMATOR ===== -->
+    <div class="page" id="page-estimator">
+      <div class="page-header">
+        <h2>AI Fair Rent Estimator 💡</h2>
+        <p>Area aur amenities ke hisaab se fair rent pata karo</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Property Details Dalo</div>
+          <div class="form-group">
+            <label class="form-label">AREA / LOCATION</label>
+            <select class="form-input">
+              <option>Gulberg III</option><option>Johar Town</option><option>DHA Phase 5</option>
+              <option>Model Town</option><option>Faisal Town</option><option>Ichra</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">PROPERTY TYPE</label>
+              <select class="form-input"><option>Flat</option><option>Room</option><option>House</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">SIZE (SQFT)</label>
+              <input class="form-input" value="800">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">BEDROOMS</label>
+              <select class="form-input"><option>1</option><option selected>2</option><option>3</option></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">FLOOR</label>
+              <select class="form-input"><option>Ground</option><option>1st</option><option>2nd</option></select>
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+            <span class="filter-chip active">Gas ✓</span>
+            <span class="filter-chip active">Electricity ✓</span>
+            <span class="filter-chip active">Water ✓</span>
+            <span class="filter-chip">Parking</span>
+            <span class="filter-chip">Generator</span>
+          </div>
+          <button class="tb-btn primary" style="width:100%;padding:0.7rem;">🤖 Estimate Karo</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AI Estimation Result</div>
+          <div style="text-align:center;padding:1.5rem 0;">
+            <div style="font-size:0.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;margin-bottom:0.5rem;">FAIR RENT RANGE</div>
+            <div style="font-size:2.5rem;font-weight:800;color:var(--green);letter-spacing:-0.04em;">Rs 19,500</div>
+            <div style="font-size:0.8rem;color:var(--text3);margin-top:0.25rem;">Range: Rs 17,000 – Rs 22,000</div>
+            <div style="margin:1.25rem 0;padding:0.75rem;background:var(--green-dim);border-radius:8px;font-size:0.78rem;color:var(--green);">
+              ✅ Gulberg III mein 2 bed flat ke liye yeh price fair hai
+            </div>
+          </div>
+          <div style="font-size:0.7rem;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-bottom:0.5rem;">SIMILAR LISTINGS</div>
+          <table class="table">
+            <thead><tr><th>Listing</th><th>Rent</th><th>vs Fair</th></tr></thead>
+            <tbody>
+              <tr><td>Flat A, Gulberg</td><td>Rs 20,000</td><td><span class="pill green">Fair</span></td></tr>
+              <tr><td>Flat B, Gulberg</td><td>Rs 28,000</td><td><span class="pill red">+44% Over</span></td></tr>
+              <tr><td>Flat C, Gulberg</td><td>Rs 18,000</td><td><span class="pill green">Fair</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TRUST SCORES ===== -->
+    <div class="page" id="page-trust">
+      <div class="page-header">
+        <h2>Trust Scores ⭐</h2>
+        <p>Tenant aur landlord dono ke AI-generated trust scores</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Tenant Scores</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:var(--surface2);border-radius:10px;">
+              <div class="trust-ring high">82<small>/100</small></div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:700;">Ali Raza</div>
+                <div style="font-size:0.7rem;color:var(--text3);">3 rentals · 0 disputes · On-time 98%</div>
+                <div style="margin-top:0.4rem;" class="pill green">Highly Trusted</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:var(--surface2);border-radius:10px;">
+              <div class="trust-ring mid">61<small>/100</small></div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:700;">Usman Khan</div>
+                <div style="font-size:0.7rem;color:var(--text3);">1 rental · 1 dispute · On-time 70%</div>
+                <div style="margin-top:0.4rem;" class="pill yellow">Average</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:var(--surface2);border-radius:10px;">
+              <div class="trust-ring low">28<small>/100</small></div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:700;">Bilal Ahmed</div>
+                <div style="font-size:0.7rem;color:var(--text3);">2 rentals · 3 disputes · On-time 40%</div>
+                <div style="margin-top:0.4rem;" class="pill red">Low Trust</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Landlord Scores</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:var(--surface2);border-radius:10px;">
+              <div class="trust-ring high">91<small>/100</small></div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:700;">Ahmed Malik</div>
+                <div style="font-size:0.7rem;color:var(--text3);">5 tenants · Deposit returned 100%</div>
+                <div style="margin-top:0.4rem;" class="pill green">Excellent</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:var(--surface2);border-radius:10px;">
+              <div class="trust-ring mid">55<small>/100</small></div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:700;">Tariq Hussain</div>
+                <div style="font-size:0.7rem;color:var(--text3);">3 tenants · Deposit returned 60%</div>
+                <div style="margin-top:0.4rem;" class="pill yellow">Moderate</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;background:var(--surface2);border-radius:10px;">
+              <div class="trust-ring low">19<small>/100</small></div>
+              <div style="flex:1;">
+                <div style="font-size:0.85rem;font-weight:700;">Rafiq Chaudhry</div>
+                <div style="font-size:0.7rem;color:var(--text3);">4 tenants · 3 illegal evictions reported</div>
+                <div style="margin-top:0.4rem;" class="pill red">Avoid</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AGREEMENT ===== -->
+    <div class="page" id="page-agreement">
+      <div class="page-header">
+        <h2>Digital Rent Agreements 📄</h2>
+        <p>AI-generated legally structured agreements — court mein bhi valid</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Active Agreements</div>
+          <table class="table">
+            <thead><tr><th>Property</th><th>Parties</th><th>Rent</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Johar Town Flat</td><td>Ali ↔ Ahmed</td><td>Rs 9,500</td><td><span class="pill green">Active</span></td></tr>
+              <tr><td>Gulberg Room</td><td>Sara ↔ Tariq</td><td>Rs 14,000</td><td><span class="pill blue">Pending Sign</span></td></tr>
+              <tr><td>DHA Studio</td><td>Hamza ↔ Rafiq</td><td>Rs 28,000</td><td><span class="pill yellow">Expired</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Agreement Preview — Johar Town</div>
+          <div class="agreement-box">
+            <h4>🏠 KIRAYANAMA (RENT AGREEMENT)</h4>
+            <div class="clause"><strong>Tenant:</strong> Ali Raza (CNIC: 35202-XXXXX)</div>
+            <div class="clause"><strong>Landlord:</strong> Ahmed Malik (CNIC: 35201-XXXXX)</div>
+            <div class="clause"><strong>Property:</strong> Room, Street 5, Johar Town, Lahore</div>
+            <div class="clause"><strong>Monthly Rent:</strong> Rs 9,500/- (Nine Thousand Five Hundred)</div>
+            <div class="clause"><strong>Security Deposit:</strong> Rs 19,000/-</div>
+            <div class="clause"><strong>Duration:</strong> 12 months (Jan 2025 – Jan 2026)</div>
+            <div class="clause"><strong>Terms:</strong> Rent 5 tarikh tak, 1 month notice zaroori hai...</div>
+            <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
+              <span class="pill green">✓ Tenant Signed</span>
+              <span class="pill green">✓ Landlord Signed</span>
+            </div>
+          </div>
+          <button class="tb-btn primary" style="margin-top:0.75rem;">📥 Download PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAYMENTS ===== -->
+    <div class="page" id="page-payments">
+      <div class="page-header">
+        <h2>Rent Payments 💳</h2>
+        <p>JazzCash / EasyPaisa se rent do — automatic receipt milegi</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Pay Rent Now</div>
+          <div style="padding:1rem;background:var(--surface2);border-radius:10px;margin-bottom:1rem;">
+            <div style="font-size:0.7rem;color:var(--text3);margin-bottom:0.25rem;">CURRENT MONTH DUE</div>
+            <div style="font-size:1.8rem;font-weight:800;color:var(--green);letter-spacing:-0.03em;">Rs 9,500</div>
+            <div style="font-size:0.72rem;color:var(--text3);">Johar Town Room · Due: 5 Feb 2025</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">PAYMENT METHOD</label>
+            <select class="form-input">
+              <option>📱 JazzCash</option>
+              <option>📱 EasyPaisa</option>
+              <option>🏦 Bank Transfer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">MOBILE NUMBER</label>
+            <input class="form-input" value="+92 306 41411">
+          </div>
+          <button class="tb-btn primary" style="width:100%;padding:0.7rem;">Pay Rs 9,500 →</button>
+          <div style="margin-top:0.75rem;font-size:0.7rem;color:var(--text3);text-align:center;">Auto receipt generate hogi aur save hogi</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Payment History</div>
+          <div class="payment-row">
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">February 2025</div>
+              <div style="font-size:0.7rem;color:var(--text3);">JazzCash · 3 Feb 2025</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:var(--green);font-weight:700;">Rs 9,500</div>
+              <span class="pill green">Paid</span>
+            </div>
+          </div>
+          <div class="payment-row">
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">January 2025</div>
+              <div style="font-size:0.7rem;color:var(--text3);">JazzCash · 5 Jan 2025</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:var(--green);font-weight:700;">Rs 9,500</div>
+              <span class="pill green">Paid</span>
+            </div>
+          </div>
+          <div class="payment-row">
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">December 2024</div>
+              <div style="font-size:0.7rem;color:var(--text3);">EasyPaisa · 7 Dec 2024</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:var(--yellow);font-weight:700;">Rs 9,500</div>
+              <span class="pill yellow">Late</span>
+            </div>
+          </div>
+          <div class="payment-row">
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">November 2024</div>
+              <div style="font-size:0.7rem;color:var(--text3);">JazzCash · 4 Nov 2024</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="color:var(--green);font-weight:700;">Rs 9,500</div>
+              <span class="pill green">Paid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DISPUTES ===== -->
+    <div class="page" id="page-disputes">
+      <div class="page-header">
+        <h2>Dispute Resolution ⚖️</h2>
+        <p>Jhagra app ke andar solve karo — thane jaane ki zaroorat nahi</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Active Disputes</div>
+          <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="padding:1rem;background:var(--surface2);border-radius:10px;border-left:3px solid var(--red);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;">
+                <span style="font-size:0.82rem;font-weight:700;">Security Deposit Nahi Mili</span>
+                <span class="pill red">Open</span>
+              </div>
+              <div style="font-size:0.72rem;color:var(--text3);">Ali Raza vs Tariq Hussain · DHA Studio</div>
+              <div style="font-size:0.72rem;color:var(--text3);margin-top:0.25rem;">Filed: 15 Jan 2025 · Amount: Rs 56,000</div>
+              <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
+                <button class="tb-btn ghost" style="font-size:0.7rem;padding:0.3rem 0.75rem;">Evidence Add</button>
+                <button class="tb-btn primary" style="font-size:0.7rem;padding:0.3rem 0.75rem;">Message →</button>
+              </div>
+            </div>
+            <div style="padding:1rem;background:var(--surface2);border-radius:10px;border-left:3px solid var(--yellow);">
+              <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;">
+                <span style="font-size:0.82rem;font-weight:700;">Maintenance Issue</span>
+                <span class="pill yellow">Mediation</span>
+              </div>
+              <div style="font-size:0.72rem;color:var(--text3);">Sara Khan vs Ahmed Malik · Gulberg Flat</div>
+              <div style="font-size:0.72rem;color:var(--text3);margin-top:0.25rem;">Filed: 10 Jan 2025 · Plumbing problem</div>
+            </div>
+          </div>
+          <button class="tb-btn primary" style="width:100%;margin-top:1rem;padding:0.65rem;">+ Naya Dispute File Karo</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Dispute Chat — Security Deposit Case</div>
+          <div style="display:flex;flex-direction:column;min-height:200px;margin-bottom:0.75rem;">
+            <div class="chat-bubble tenant">Maine ghar 31 Dec ko khali kar diya tha. Aapko deposit 2 hafte mein deni thi agreement ke mutabiq.</div>
+            <div class="chat-bubble landlord">Ghar mein damage tha. Maine repair karwaya — Rs 15,000 kharch hua.</div>
+            <div class="chat-bubble tenant">Damage ki koi proof nahi thi agreement mein. Main puri deposit maangta hon.</div>
+            <div style="padding:0.5rem;background:var(--yellow-dim);border-radius:8px;font-size:0.7rem;color:var(--yellow);text-align:center;border:1px solid rgba(234,179,8,0.2);">
+              🤖 Platform Mediator: Dono parties se evidence maanga ja raha hai — 7 din mein submit karo
+            </div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <input class="form-input" placeholder="Message likho..." style="flex:1;">
+            <button class="tb-btn primary">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADMIN ===== -->
+    <div class="page" id="page-admin">
+      <div class="page-header">
+        <h2>Admin Dashboard 🛡️</h2>
+        <p>Platform moderation, users, aur analytics</p>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">TOTAL USERS</div>
+          <div class="stat-value">4,821</div>
+          <div class="stat-change up">↑ 234 this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">LISTINGS (LIVE)</div>
+          <div class="stat-value">1,284</div>
+          <div class="stat-change up">↑ 89 today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">FLAGGED TODAY</div>
+          <div class="stat-value" style="color:var(--red)">47</div>
+          <div class="stat-change down">Need review</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">OPEN DISPUTES</div>
+          <div class="stat-value" style="color:var(--yellow)">12</div>
+          <div class="stat-change down">Action needed</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Pending Moderation Queue</div>
+          <table class="table">
+            <thead><tr><th>Listing</th><th>AI Score</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td>DHA Villa — Fake Photos</td><td style="color:var(--red)">91% fraud</td><td><span class="pill red">Remove</span></td></tr>
+              <tr><td>Gulberg Flat — Price Anomaly</td><td style="color:var(--yellow)">61% fraud</td><td><span class="pill yellow">Review</span></td></tr>
+              <tr><td>Johar Flat — New User</td><td style="color:var(--green)">12% fraud</td><td><span class="pill green">Approve</span></td></tr>
+              <tr><td>Ichra Room — Low Photos</td><td style="color:var(--yellow)">45% fraud</td><td><span class="pill yellow">Review</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">User Management</div>
+          <table class="table">
+            <thead><tr><th>User</th><th>Role</th><th>Trust</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Ali Raza</td><td style="color:var(--text3)">Tenant</td><td style="color:var(--green)">82</td><td><span class="pill green">Active</span></td></tr>
+              <tr><td>Ahmed Malik</td><td style="color:var(--text3)">Landlord</td><td style="color:var(--green)">91</td><td><span class="pill green">Active</span></td></tr>
+              <tr><td>Bilal Ahmed</td><td style="color:var(--text3)">Tenant</td><td style="color:var(--red)">28</td><td><span class="pill red">Flagged</span></td></tr>
+              <tr><td>Rafiq Chaudhry</td><td style="color:var(--text3)">Landlord</td><td style="color:var(--red)">19</td><td><span class="pill red">Suspended</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PROFILE ===== -->
+    <div class="page" id="page-profile">
+      <div class="page-header">
+        <h2>My Profile 👤</h2>
+        <p>Apni details aur trust score dekho</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Personal Information</div>
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;padding:1rem;background:var(--surface2);border-radius:10px;">
+            <div style="width:55px;height:55px;border-radius:50%;background:var(--green-dim);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:var(--green);">AR</div>
+            <div>
+              <div style="font-size:1rem;font-weight:700;">Ali Raza</div>
+              <div style="font-size:0.75rem;color:var(--text3);">subssems336@gmail.com</div>
+              <div style="font-size:0.75rem;color:var(--text3);">+92 306 41411 · Lahore</div>
+            </div>
+            <div style="margin-left:auto;"><span class="pill green">Verified</span></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">FULL NAME</label>
+            <input class="form-input" value="Ali Raza">
+          </div>
+          <div class="form-group">
+            <label class="form-label">PHONE</label>
+            <input class="form-input" value="+92 306 41411">
+          </div>
+          <div class="form-group">
+            <label class="form-label">CNIC</label>
+            <input class="form-input" value="35202-XXXXXXX-X">
+          </div>
+          <button class="tb-btn primary" style="width:100%;padding:0.65rem;">Save Changes</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title">My Trust Score</div>
+          <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;">
+            <div class="trust-ring high" style="width:90px;height:90px;font-size:1.7rem;">82<small>/100</small></div>
+            <div>
+              <div style="font-size:1rem;font-weight:700;margin-bottom:0.3rem;">Good Standing 🟢</div>
+              <div style="font-size:0.75rem;color:var(--text3);line-height:1.7;">
+                Total Rentals: 3<br>
+                On-time Payments: 98%<br>
+                Disputes Filed: 0<br>
+                Avg Rating: 4.7 ★
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.7rem;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:4px;"><span>Payment History</span><span>95/100</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:95%;background:var(--green)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:4px;"><span>Property Care</span><span>80/100</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:80%;background:var(--green)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:4px;"><span>Communication</span><span>70/100</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:70%;background:var(--yellow)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--text2);margin-bottom:4px;"><span>Dispute History</span><span>100/100</span></div>
+              <div class="ai-bar"><div class="ai-bar-fill" style="width:100%;background:var(--green)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if(el) el.classList.add('active');
+
+  const titles = {
+    dashboard: 'Dashboard', listings: 'Browse Listings', post: 'Post Property',
+    detector: 'AI Fake Detector', estimator: 'Rent Estimator', trust: 'Trust Scores',
+    agreement: 'Digital Agreements', payments: 'Rent Payments', disputes: 'Dispute Resolution',
+    admin: 'Admin Dashboard', profile: 'My Profile'
+  };
+  document.getElementById('pageTitle').textContent = titles[name];
+}
+</script>
+</body>
+</html>
