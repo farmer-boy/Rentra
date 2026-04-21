@@ -30,7 +30,7 @@ export class ListingsController {
   ) {
     const listing = await this.listingsService.create(user.sub, dto);
     return {
-      message: 'Listing publish ho gaya',
+      message: 'Listing published successfully',
       data: listing,
     };
   }
@@ -45,7 +45,7 @@ export class ListingsController {
       propertyType: type,
     });
     return {
-      message: 'Tamam listings',
+      message: 'All listings',
       data: listings,
       count: listings.length,
     };
@@ -70,7 +70,7 @@ export class ListingsController {
   ) {
     const listing = await this.listingsService.update(id, user.sub, dto);
     return {
-      message: 'Listing update ho gaya',
+      message: 'Listing updated successfully',
       data: listing,
     };
   }
@@ -84,7 +84,7 @@ export class ListingsController {
   ) {
     await this.listingsService.delete(id, user.sub);
     return {
-      message: 'Listing delete ho gaya',
+      message: 'Listing deleted successfully',
     };
   }
 
@@ -94,7 +94,7 @@ export class ListingsController {
   async getMyListings(@CurrentUser() user: JwtPayload) {
     const listings = await this.listingsService.getByLandlord(user.sub);
     return {
-      message: 'Aapki listings',
+      message: 'Your listings',
       data: listings,
       count: listings.length,
     };

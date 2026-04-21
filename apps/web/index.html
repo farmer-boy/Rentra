@@ -1,10 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon2.html.png" />
+    <link rel="icon" type="image/jpeg" href="/logo.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rentra - Transparent Rental Platform</title>
+    <script>
+      // Apply theme on initial load before React renders
+      (function() {
+        const savedTheme = localStorage.getItem('themeMode') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

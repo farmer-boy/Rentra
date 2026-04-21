@@ -11,7 +11,7 @@ export default function RentEstimator() {
         <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Area aur amenities ke hisaab se fair rent pata karo</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Input Form */}
         <Card>
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Property Details Dalo</div>
@@ -81,7 +81,8 @@ export default function RentEstimator() {
             ✅ Gulberg III mein 2 bed flat ke liye yeh price fair hai
           </div>
           <div className="text-[11px] font-mono text-gray-500 mb-2">SIMILAR LISTINGS</div>
-          <table className="w-full text-[12px]">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-max text-[12px]">
             <thead>
               <tr className="border-b border-gray-300">
                 <th className="text-left text-[10px] font-mono text-gray-500 pb-2">LISTING</th>
@@ -107,6 +108,7 @@ export default function RentEstimator() {
               </tr>
             </tbody>
           </table>
+          </div>
         </Card>
       </div>
     </div>

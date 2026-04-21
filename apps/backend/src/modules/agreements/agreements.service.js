@@ -75,8 +75,12 @@ let AgreementsService = (() => {
             const agreement = await this.prisma.agreement.findUnique({
                 where: { id },
                 include: {
-                    tenant: { select: { id: true, fullName: true, email: true, phone: true } },
-                    landlord: { select: { id: true, fullName: true, email: true, phone: true } },
+                    tenant: {
+                        select: { id: true, fullName: true, email: true, phone: true },
+                    },
+                    landlord: {
+                        select: { id: true, fullName: true, email: true, phone: true },
+                    },
                 },
             });
             if (!agreement)

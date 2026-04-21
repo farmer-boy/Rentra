@@ -28,7 +28,7 @@ export class RolesGuard implements CanActivate {
 
     if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException(
-        'Aapke paas yeh karne ki permission nahi hai',
+        'You do not have permission to perform this action',
       );
     }
 

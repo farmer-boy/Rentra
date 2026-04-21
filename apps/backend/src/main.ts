@@ -52,7 +52,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Rentra API')
     .setDescription(
-      'Pakistan ka pehla AI-powered transparent rental platform API',
+      'Pakistan\'s first AI-powered transparent rental platform API',
     )
     .setVersion('1.0')
     .addBearerAuth()
@@ -65,7 +65,7 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(`
-  🚀 Rentra Backend chal raha hai!
+  🚀 Rentra Backend is running!
   📡 API: http://localhost:${port}/api
   📖 Swagger Docs: http://localhost:${port}/api/docs
   `);

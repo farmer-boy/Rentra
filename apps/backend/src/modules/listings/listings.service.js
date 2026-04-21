@@ -70,13 +70,19 @@ let ListingsService = (() => {
         async findAll(filters) {
             return await this.prisma.listing.findMany({
                 where: filters,
-                include: { landlord: { select: { id: true, fullName: true, phone: true } } },
+                include: {
+                    landlord: { select: { id: true, fullName: true, phone: true } },
+                },
             });
         }
         async findById(id) {
             const listing = await this.prisma.listing.findUnique({
                 where: { id },
-                include: { landlord: { select: { id: true, fullName: true, email: true, phone: true } } },
+                include: {
+                    landlord: {
+                        select: { id: true, fullName: true, email: true, phone: true },
+                    },
+                },
             });
             if (!listing) {
                 throw new common_1.BadRequestException('Listing nahi mila');

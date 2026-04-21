@@ -45,7 +45,7 @@ export class ListingsService {
     });
 
     if (!listing) {
-      throw new BadRequestException('Listing nahi mila');
+      throw new BadRequestException('Listing not found');
     }
 
     return listing;
@@ -54,7 +54,7 @@ export class ListingsService {
   async update(id: string, landlordId: string, dto: Partial<CreateListingDto>) {
     const listing = await this.prisma.listing.findUnique({ where: { id } });
     if (!listing || listing.landlordId !== landlordId) {
-      throw new BadRequestException('Listing update nahi kar sakte');
+      throw new BadRequestException('Cannot update this listing');
     }
 
     return await this.prisma.listing.update({
@@ -66,7 +66,7 @@ export class ListingsService {
   async delete(id: string, landlordId: string) {
     const listing = await this.prisma.listing.findUnique({ where: { id } });
     if (!listing || listing.landlordId !== landlordId) {
-      throw new BadRequestException('Listing delete nahi kar sakte');
+      throw new BadRequestException('Cannot delete this listing');
     }
 
     return await this.prisma.listing.delete({ where: { id } });

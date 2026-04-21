@@ -11,7 +11,7 @@ export default function Payments() {
         <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>JazzCash / EasyPaisa se rent do — automatic receipt milegi</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Pay Rent Now */}
         <Card>
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Pay Rent Now</div>

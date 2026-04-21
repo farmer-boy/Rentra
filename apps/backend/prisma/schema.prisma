@@ -8,25 +8,27 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  phone       String   @unique
-  password    String
-  fullName    String
-  cnic        String   @unique
-  role        Role     @default(TENANT)
-  trustScore  Int      @default(50)
-  isVerified  Boolean  @default(false)
-  isSuspended Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
+  id                 String         @id @default(cuid())
+  email              String         @unique
+  phone              String         @unique
+  password           String
+  fullName           String
+  cnic               String         @unique
+  role               Role           @default(TENANT)
+  trustScore         Int            @default(50)
+  isVerified         Boolean        @default(false)
+  isSuspended        Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  landlordAgreements Agreement[]    @relation("LandlordAgreements")
+  tenantAgreements   Agreement[]    @relation("TenantAgreements")
+  tenantDisputes     Dispute[]      @relation("TenantDisputes")
   listings           Listing[]
-  tenantAgreements   Agreement[] @relation("TenantAgreements")
-  landlordAgreements Agreement[] @relation("LandlordAgreements")
   payments           Payment[]
-  tenantDisputes     Dispute[]   @relation("TenantDisputes")
   reviews            Review[]
+  conversation1      Conversation[] @relation("Conversation1")
+  conversation2      Conversation[] @relation("Conversation2")
+  messages           Message[]
 }
 
 model Listing {
@@ -46,39 +48,37 @@ model Listing {
   fraudScore  Float         @default(0)
   photos      String[]
   landlordId  String
-  landlord    User          @relation(fields: [landlordId], references: [id])
-  agreements  Agreement[]
-  reviews     Review[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  agreements  Agreement[]
+  landlord    User          @relation(fields: [landlordId], references: [id])
+  reviews     Review[]
 }
 
 model Agreement {
   id         String          @id @default(cuid())
   listingId  String
-  listing    Listing         @relation(fields: [listingId], references: [id])
   tenantId   String
-  tenant     User            @relation("TenantAgreements", fields: [tenantId], references: [id])
   landlordId String
-  landlord   User            @relation("LandlordAgreements", fields: [landlordId], references: [id])
   rent       Int
   deposit    Int
   startDate  DateTime
   endDate    DateTime
   pdfUrl     String?
   status     AgreementStatus @default(PENDING)
-  payments   Payment[]
-  disputes   Dispute[]
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
+  landlord   User            @relation("LandlordAgreements", fields: [landlordId], references: [id])
+  listing    Listing         @relation(fields: [listingId], references: [id])
+  tenant     User            @relation("TenantAgreements", fields: [tenantId], references: [id])
+  disputes   Dispute[]
+  payments   Payment[]
 }
 
 model Payment {
   id            String        @id @default(cuid())
   agreementId   String
-  agreement     Agreement     @relation(fields: [agreementId], references: [id])
   tenantId      String
-  tenant        User          @relation(fields: [tenantId], references: [id])
   amount        Int
   method        PaymentMethod
   status        PaymentStatus @default(PENDING)
@@ -86,14 +86,14 @@ model Payment {
   receiptUrl    String?
   month         DateTime
   createdAt     DateTime      @default(now())
+  agreement     Agreement     @relation(fields: [agreementId], references: [id])
+  tenant        User          @relation(fields: [tenantId], references: [id])
 }
 
 model Dispute {
   id          String        @id @default(cuid())
   agreementId String
-  agreement   Agreement     @relation(fields: [agreementId], references: [id])
   tenantId    String
-  tenant      User          @relation("TenantDisputes", fields: [tenantId], references: [id])
   title       String
   description String
   amount      Int?
@@ -101,16 +101,63 @@ model Dispute {
   resolution  String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+  agreement   Agreement     @relation(fields: [agreementId], references: [id])
+  tenant      User          @relation("TenantDisputes", fields: [tenantId], references: [id])
 }
 
 model Review {
   id        String   @id @default(cuid())
   listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id])
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
   rating    Int
   comment   String
+  createdAt DateTime @default(now())
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id             String    @id @default(cuid())
+  participant1Id String
+  participant2Id String
+  listingId      String?
+  agreementId    String?
+  lastMessageAt  DateTime  @updatedAt
+  createdAt      DateTime  @default(now())
+  messages       Message[]
+  participant1   User      @relation("Conversation1", fields: [participant1Id], references: [id])
+  participant2   User      @relation("Conversation2", fields: [participant2Id], references: [id])
+
+  @@unique([participant1Id, participant2Id])
+  @@index([participant1Id])
+  @@index([participant2Id])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  attachmentUrl  String?
+  isRead         Boolean      @default(false)
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  message   String
+  status    String   @default("new")
+  read      Boolean  @default(false)
   createdAt DateTime @default(now())
 }
 
@@ -158,4 +205,13 @@ enum DisputeStatus {
   MEDIATION
   RESOLVED
   CLOSED
+}
+
+enum Score {
+  ZERO
+  ONE
+  TWO
+  THREE
+  FOUR
+  FIVE
 }

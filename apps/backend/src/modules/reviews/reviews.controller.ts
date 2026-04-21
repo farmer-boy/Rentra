@@ -32,7 +32,7 @@ export class ReviewsController {
       body.comment,
     );
     return {
-      message: 'Review post ho gaya',
+      message: 'Review posted successfully',
       data: review,
     };
   }
@@ -41,7 +41,7 @@ export class ReviewsController {
   async getAllReviews() {
     const reviews = await this.reviewsService.findAll();
     return {
-      message: 'Tamam reviews',
+      message: 'All reviews',
       data: reviews,
       count: reviews.length,
     };
@@ -61,7 +61,7 @@ export class ReviewsController {
     const reviews = await this.reviewsService.getByListing(listingId);
     const avgRating = await this.reviewsService.getAverageRating(listingId);
     return {
-      message: 'Listing ke reviews',
+      message: 'Listing reviews',
       data: reviews,
       averageRating: avgRating,
       count: reviews.length,
@@ -74,7 +74,7 @@ export class ReviewsController {
   async deleteReview(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     await this.reviewsService.delete(id, user.sub);
     return {
-      message: 'Review delete kar diya',
+      message: 'Review deleted successfully',
     };
   }
 }

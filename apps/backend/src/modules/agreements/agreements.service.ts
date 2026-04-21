@@ -50,13 +50,13 @@ export class AgreementsService {
       },
     });
 
-    if (!agreement) throw new BadRequestException('Agreement nahi mila');
+    if (!agreement) throw new BadRequestException('Agreement not found');
     return agreement;
   }
 
   async approve(id: string) {
     const agreement = await this.prisma.agreement.findUnique({ where: { id } });
-    if (!agreement) throw new BadRequestException('Agreement nahi mila');
+    if (!agreement) throw new BadRequestException('Agreement not found');
 
     return await this.prisma.agreement.update({
       where: { id },
@@ -66,7 +66,7 @@ export class AgreementsService {
 
   async reject(id: string) {
     const agreement = await this.prisma.agreement.findUnique({ where: { id } });
-    if (!agreement) throw new BadRequestException('Agreement nahi mila');
+    if (!agreement) throw new BadRequestException('Agreement not found');
 
     return await this.prisma.agreement.update({
       where: { id },
@@ -76,7 +76,7 @@ export class AgreementsService {
 
   async terminate(id: string) {
     const agreement = await this.prisma.agreement.findUnique({ where: { id } });
-    if (!agreement) throw new BadRequestException('Agreement nahi mila');
+    if (!agreement) throw new BadRequestException('Agreement not found');
 
     return await this.prisma.agreement.update({
       where: { id },

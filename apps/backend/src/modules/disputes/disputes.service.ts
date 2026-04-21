@@ -52,13 +52,13 @@ export class DisputesService {
       },
     });
 
-    if (!dispute) throw new BadRequestException('Dispute nahi mila');
+    if (!dispute) throw new BadRequestException('Dispute not found');
     return dispute;
   }
 
   async resolve(id: string, resolution: string) {
     const dispute = await this.prisma.dispute.findUnique({ where: { id } });
-    if (!dispute) throw new BadRequestException('Dispute nahi mila');
+    if (!dispute) throw new BadRequestException('Dispute not found');
 
     return await this.prisma.dispute.update({
       where: { id },
@@ -68,7 +68,7 @@ export class DisputesService {
 
   async close(id: string) {
     const dispute = await this.prisma.dispute.findUnique({ where: { id } });
-    if (!dispute) throw new BadRequestException('Dispute nahi mila');
+    if (!dispute) throw new BadRequestException('Dispute not found');
 
     return await this.prisma.dispute.update({
       where: { id },

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/ThemeContext';
-import { User, Settings, LogOut, HelpCircle, MoreHorizontal, Moon, Sun } from 'lucide-react';
+import { User, Settings, LogOut, HelpCircle, MoreHorizontal, Moon, Sun, ArrowLeftRight } from 'lucide-react';
 
 interface ProfileDropdownProps {
   isOpen: boolean;
@@ -201,6 +201,20 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       >
         <MoreHorizontal size={14} className="flex-shrink-0" />
         More
+      </button>
+
+      {/* Switch Account */}
+      <button
+        onClick={async () => {
+          await logout();
+          navigate('/login');
+        }}
+        className={`${
+          isDark ? 'hover:bg-[#2a2a2a] text-[#ddd]' : 'hover:bg-gray-50 text-gray-700'
+        } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
+      >
+        <ArrowLeftRight size={14} className="flex-shrink-0" />
+        Switch Account
       </button>
 
       {/* Divider */}

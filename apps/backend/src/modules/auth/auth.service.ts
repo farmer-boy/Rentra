@@ -23,21 +23,21 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (existingEmail) {
-      throw new ConflictException('Yeh email pehle se registered hai');
+      throw new ConflictException('This email is already registered');
     }
 
     const existingPhone = await this.prisma.user.findUnique({
       where: { phone: dto.phone },
     });
     if (existingPhone) {
-      throw new ConflictException('Yeh phone number pehle se registered hai');
+      throw new ConflictException('This phone number is already registered');
     }
 
     const existingCnic = await this.prisma.user.findUnique({
       where: { cnic: dto.cnic },
     });
     if (existingCnic) {
-      throw new ConflictException('Yeh CNIC pehle se registered hai');
+      throw new ConflictException('This CNIC is already registered');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
@@ -56,7 +56,7 @@ export class AuthService {
     const accessToken = this.generateToken(user.id, user.email, user.role);
 
     return {
-      message: 'Registration successful! Rentra mein khush amdeed 🎉',
+      message: 'Registration successful! Welcome to Rentra 🎉',
       user: this.sanitizeUser(user),
       accessToken,
     };
@@ -68,18 +68,18 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Email ya password galat hai');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     if (user.isSuspended) {
       throw new UnauthorizedException(
-        'Aapka account suspend kar diya gaya hai',
+        'Your account has been suspended',
       );
     }
 
     const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Email ya password galat hai');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     const accessToken = this.generateToken(user.id, user.email, user.role);
@@ -108,7 +108,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     return user;

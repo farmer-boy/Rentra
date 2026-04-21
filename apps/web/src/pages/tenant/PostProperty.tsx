@@ -61,35 +61,35 @@ export default function TenantPostProperty() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#0a0a0a]' : 'bg-gradient-to-br from-gray-50 via-white to-gray-50'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className={`text-4xl font-black tracking-tight mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Post Your Property
-          </h1>
-          <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Enter property details and let AI verify everything
-          </p>
-        </div>
+    <>
+      <div className="mb-6">
+        <h1 className={`text-lg font-bold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          Post Your Property
+        </h1>
+        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          Enter property details and let AI verify everything
+        </p>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Card>
-              <h2 className={`text-2xl font-bold mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Property Details
-              </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2">
+          <Card>
+            <h2 className={`text-base font-bold mb-5 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Property Details
+            </h2>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Property Type
                     </label>
                     <select
+                      aria-label="Property Type"
                       name="propertyType"
                       value={formData.propertyType}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
                           : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
@@ -104,14 +104,15 @@ export default function TenantPostProperty() {
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       City
                     </label>
                     <select
+                      aria-label="City"
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
                           : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
@@ -126,14 +127,15 @@ export default function TenantPostProperty() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     Area / Mohalla
                   </label>
                   <select
+                    aria-label="Area / Mohalla"
                     name="area"
                     value={formData.area}
                     onChange={handleInputChange}
-                    className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                    className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                       isDark
                         ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
                         : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
@@ -147,7 +149,7 @@ export default function TenantPostProperty() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     Complete Address
                   </label>
                   <input
@@ -156,7 +158,7 @@ export default function TenantPostProperty() {
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="Street number, house number..."
-                    className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                    className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                       isDark
                         ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
                         : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
@@ -164,9 +166,9 @@ export default function TenantPostProperty() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Monthly Rent (Rs)
                     </label>
                     <input
@@ -175,7 +177,7 @@ export default function TenantPostProperty() {
                       value={formData.monthlyRent}
                       onChange={handleInputChange}
                       placeholder="e.g. 25000"
-                      className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
                           : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
@@ -184,7 +186,7 @@ export default function TenantPostProperty() {
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Security Deposit (Rs)
                     </label>
                     <input
@@ -193,7 +195,7 @@ export default function TenantPostProperty() {
                       value={formData.securityDeposit}
                       onChange={handleInputChange}
                       placeholder="e.g. 50000"
-                      className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
                           : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
@@ -202,16 +204,17 @@ export default function TenantPostProperty() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Bedrooms
                     </label>
                     <select
+                      aria-label="Number of Bedrooms"
                       name="bedrooms"
                       value={formData.bedrooms}
                       onChange={handleInputChange}
-                      className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
                           : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
@@ -226,7 +229,7 @@ export default function TenantPostProperty() {
                   </div>
 
                   <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Area (SQFT)
                     </label>
                     <input
@@ -235,7 +238,7 @@ export default function TenantPostProperty() {
                       value={formData.areaSize}
                       onChange={handleInputChange}
                       placeholder="e.g. 800"
-                      className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm transition-all duration-300 ${
+                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
                           : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
@@ -245,7 +248,7 @@ export default function TenantPostProperty() {
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     Description
                   </label>
                   <textarea
@@ -253,8 +256,8 @@ export default function TenantPostProperty() {
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Detailed description about property..."
-                    rows={4}
-                    className={`w-full px-4 py-3 rounded-xl border-2 backdrop-blur-sm resize-none transition-all duration-300 ${
+                    rows={3}
+                    className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm resize-none transition-all duration-300 ${
                       isDark
                         ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
                         : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
@@ -264,7 +267,7 @@ export default function TenantPostProperty() {
 
                 <button
                   disabled={!canProceed()}
-                  className={`w-full py-3 rounded-xl text-sm font-bold tracking-wide transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
+                  className={`w-full py-2 text-sm rounded-lg font-semibold tracking-wide transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                     canProceed()
                       ? isDark
                         ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/30'
@@ -282,84 +285,84 @@ export default function TenantPostProperty() {
 
           <div>
             <Card>
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-3xl">🤖</span>
-                <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-2xl">🤖</span>
+                <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   AI Pre-Check
                 </h3>
               </div>
 
-              <p className={`text-sm mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-xs mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Our AI will automatically verify:
               </p>
 
-              <div className="space-y-4">
-                <div className={`p-4 rounded-lg border-2 backdrop-blur-sm ${
+              <div className="space-y-3">
+                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
                     : 'bg-white/30 border-gray-200/50'
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">📸</span>
+                  <div className="flex items-start gap-2">
+                    <span className="text-xl">📸</span>
                     <div>
-                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Photos are authentic (not stolen)
                       </p>
-                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         AI will check if photos match property description
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-lg border-2 backdrop-blur-sm ${
+                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
                     : 'bg-white/30 border-gray-200/50'
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">💰</span>
+                  <div className="flex items-start gap-2">
+                    <span className="text-xl">💰</span>
                     <div>
-                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Price is competitive for the area
                       </p>
-                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         AI will compare with market rates in your area
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-lg border-2 backdrop-blur-sm ${
+                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
                     : 'bg-white/30 border-gray-200/50'
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">👤</span>
+                  <div className="flex items-start gap-2">
+                    <span className="text-xl">👤</span>
                     <div>
-                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Account posting frequency is normal
                       </p>
-                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         AI will verify your posting patterns are legitimate
                       </p>
                     </div>
                   </div>
                 </div>
 
-                <div className={`p-4 rounded-lg border-2 backdrop-blur-sm ${
+                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
                     : 'bg-white/30 border-gray-200/50'
                 }`}>
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl">✍️</span>
+                  <div className="flex items-start gap-2">
+                    <span className="text-xl">✍️</span>
                     <div>
-                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                         Description is genuine
                       </p>
-                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                         AI will check if description matches the property details
                       </p>
                     </div>
@@ -367,12 +370,12 @@ export default function TenantPostProperty() {
                 </div>
               </div>
 
-              <div className={`mt-6 p-4 rounded-lg border-2 ${
+              <div className={`mt-4 p-3 rounded-lg border ${
                 isDark
                   ? 'bg-green-500/10 border-green-500/40 text-green-300'
                   : 'bg-green-50/80 border-green-200/60 text-green-800'
               }`}>
-                <p className="text-sm font-semibold flex items-start gap-2">
+                <p className="text-xs font-semibold flex items-start gap-2">
                   <span>✅</span>
                   <span>Your listing will go live after AI verification is complete</span>
                 </p>
@@ -380,7 +383,6 @@ export default function TenantPostProperty() {
             </Card>
           </div>
         </div>
-      </div>
-    </div>
+    </>
   );
 }

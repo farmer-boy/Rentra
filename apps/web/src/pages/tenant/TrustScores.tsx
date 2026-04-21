@@ -8,10 +8,10 @@ export default function TrustScores() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Trust Scores ⭐</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Tenant aur landlord dono ke AI-generated trust scores</p>
+        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>AI-generated trust scores for tenants and landlords</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Tenant Scores */}
         <Card>
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Tenant Scores</div>

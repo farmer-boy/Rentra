@@ -73,6 +73,7 @@ var __setFunctionName = (this && this.__setFunctionName) || function (f, name, p
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
+const register_dto_1 = require("./dto/register.dto");
 const bcrypt = __importStar(require("bcryptjs"));
 let AuthService = (() => {
     let _classDecorators = [(0, common_1.Injectable)()];
@@ -111,14 +112,14 @@ let AuthService = (() => {
                     phone: dto.phone,
                     cnic: dto.cnic,
                     password: hashedPassword,
-                    role: dto.role || 'TENANT',
+                    role: dto.role ?? register_dto_1.Role.TENANT,
                 },
             });
-            const token = this.generateToken(user.id, user.email, user.role);
+            const accessToken = this.generateToken(user.id, user.email, user.role);
             return {
                 message: 'Registration successful! Rentra mein khush amdeed 🎉',
                 user: this.sanitizeUser(user),
-                token,
+                accessToken,
             };
         }
         async login(dto) {
@@ -135,11 +136,11 @@ let AuthService = (() => {
             if (!isPasswordValid) {
                 throw new common_1.UnauthorizedException('Email ya password galat hai');
             }
-            const token = this.generateToken(user.id, user.email, user.role);
+            const accessToken = this.generateToken(user.id, user.email, user.role);
             return {
                 message: 'Login successful! Welcome back 👋',
                 user: this.sanitizeUser(user),
-                token,
+                accessToken,
             };
         }
         async getMe(userId) {
@@ -170,6 +171,7 @@ let AuthService = (() => {
             });
         }
         sanitizeUser(user) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { password, ...safeUser } = user;
             return safeUser;
         }

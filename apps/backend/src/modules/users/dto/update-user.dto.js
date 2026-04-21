@@ -45,12 +45,9 @@ var Role;
 })(Role || (Role = {}));
 let UpdateUserDto = (() => {
     var _a;
-    let _firstName_decorators;
-    let _firstName_initializers = [];
-    let _firstName_extraInitializers = [];
-    let _lastName_decorators;
-    let _lastName_initializers = [];
-    let _lastName_extraInitializers = [];
+    let _fullName_decorators;
+    let _fullName_initializers = [];
+    let _fullName_extraInitializers = [];
     let _email_decorators;
     let _email_initializers = [];
     let _email_extraInitializers = [];
@@ -74,9 +71,8 @@ let UpdateUserDto = (() => {
     let _isSuspended_extraInitializers = [];
     return _a = class UpdateUserDto {
             constructor() {
-                this.firstName = __runInitializers(this, _firstName_initializers, void 0);
-                this.lastName = (__runInitializers(this, _firstName_extraInitializers), __runInitializers(this, _lastName_initializers, void 0));
-                this.email = (__runInitializers(this, _lastName_extraInitializers), __runInitializers(this, _email_initializers, void 0));
+                this.fullName = __runInitializers(this, _fullName_initializers, void 0);
+                this.email = (__runInitializers(this, _fullName_extraInitializers), __runInitializers(this, _email_initializers, void 0));
                 this.phone = (__runInitializers(this, _email_extraInitializers), __runInitializers(this, _phone_initializers, void 0));
                 this.cnic = (__runInitializers(this, _phone_extraInitializers), __runInitializers(this, _cnic_initializers, void 0));
                 this.role = (__runInitializers(this, _cnic_extraInitializers), __runInitializers(this, _role_initializers, void 0));
@@ -88,8 +84,7 @@ let UpdateUserDto = (() => {
         },
         (() => {
             const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-            _firstName_decorators = [(0, swagger_1.ApiProperty)({ example: 'Ali', required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsString)()];
-            _lastName_decorators = [(0, swagger_1.ApiProperty)({ example: 'Raza', required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsString)()];
+            _fullName_decorators = [(0, swagger_1.ApiProperty)({ example: 'Ali Raza', required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsString)()];
             _email_decorators = [(0, swagger_1.ApiProperty)({ example: 'ali@example.com', required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsEmail)()];
             _phone_decorators = [(0, swagger_1.ApiProperty)({ example: '+923001234567', required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsString)()];
             _cnic_decorators = [(0, swagger_1.ApiProperty)({ example: '35202-1234567-1', required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsString)()];
@@ -97,8 +92,7 @@ let UpdateUserDto = (() => {
             _trustScore_decorators = [(0, swagger_1.ApiProperty)({ example: 75, minimum: 0, maximum: 100, required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsNumber)(), (0, class_validator_1.Min)(0), (0, class_validator_1.Max)(100)];
             _isVerified_decorators = [(0, swagger_1.ApiProperty)({ example: true, required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsBoolean)()];
             _isSuspended_decorators = [(0, swagger_1.ApiProperty)({ example: false, required: false }), (0, class_validator_1.IsOptional)(), (0, class_validator_1.IsBoolean)()];
-            __esDecorate(null, null, _firstName_decorators, { kind: "field", name: "firstName", static: false, private: false, access: { has: obj => "firstName" in obj, get: obj => obj.firstName, set: (obj, value) => { obj.firstName = value; } }, metadata: _metadata }, _firstName_initializers, _firstName_extraInitializers);
-            __esDecorate(null, null, _lastName_decorators, { kind: "field", name: "lastName", static: false, private: false, access: { has: obj => "lastName" in obj, get: obj => obj.lastName, set: (obj, value) => { obj.lastName = value; } }, metadata: _metadata }, _lastName_initializers, _lastName_extraInitializers);
+            __esDecorate(null, null, _fullName_decorators, { kind: "field", name: "fullName", static: false, private: false, access: { has: obj => "fullName" in obj, get: obj => obj.fullName, set: (obj, value) => { obj.fullName = value; } }, metadata: _metadata }, _fullName_initializers, _fullName_extraInitializers);
             __esDecorate(null, null, _email_decorators, { kind: "field", name: "email", static: false, private: false, access: { has: obj => "email" in obj, get: obj => obj.email, set: (obj, value) => { obj.email = value; } }, metadata: _metadata }, _email_initializers, _email_extraInitializers);
             __esDecorate(null, null, _phone_decorators, { kind: "field", name: "phone", static: false, private: false, access: { has: obj => "phone" in obj, get: obj => obj.phone, set: (obj, value) => { obj.phone = value; } }, metadata: _metadata }, _phone_initializers, _phone_extraInitializers);
             __esDecorate(null, null, _cnic_decorators, { kind: "field", name: "cnic", static: false, private: false, access: { has: obj => "cnic" in obj, get: obj => obj.cnic, set: (obj, value) => { obj.cnic = value; } }, metadata: _metadata }, _cnic_initializers, _cnic_extraInitializers);

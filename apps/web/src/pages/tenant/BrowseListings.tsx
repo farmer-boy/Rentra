@@ -38,26 +38,26 @@ export default function BrowseListings() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Browse Listings 🏠</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Lahore mein available kiraye ke ghar</p>
+        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Available rental properties in Lahore</p>
       </div>
 
       {/* Search Bar */}
-      <div className="flex gap-3 mb-6 flex-wrap">
+      <div className="flex gap-2 md:gap-3 mb-6 flex-wrap">
         <input
           type="text"
-          placeholder="🔍 Area ya property search karo..."
+          placeholder="🔍 Search area or property..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className={`flex-1 min-w-64 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]' : 'bg-white border-gray-300 text-black placeholder-gray-400'} border rounded-lg px-4 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`}
+          className={`flex-1 min-w-0 md:min-w-64 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]' : 'bg-white border-gray-300 text-black placeholder-gray-400'} border rounded-lg px-4 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`}
         />
-        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Sab</button>
+        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>All</button>
         <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Flat</button>
         <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Room</button>
         <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>House</button>
       </div>
 
       {/* Listings Grid */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
         {listings.map((listing) => (
           <Card key={listing.id} className="cursor-pointer transition-all hover:-translate-y-0.5">
             <div className={`h-32 ${isDark ? 'bg-[#1f1f1f]' : 'bg-gray-100'} rounded-lg flex items-center justify-center text-4xl mb-3 relative`}>

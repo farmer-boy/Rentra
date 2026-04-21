@@ -87,7 +87,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     return user;
@@ -112,7 +112,7 @@ export class UsersService {
   async update(id: string, dto: UpdateUserDto) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     // Check for unique constraints if email, phone, or cnic are being updated
@@ -174,7 +174,7 @@ export class UsersService {
   async updateTrustScore(id: string, score: number) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     const newScore = Math.min(100, Math.max(0, user.trustScore + score));
@@ -195,7 +195,7 @@ export class UsersService {
   async suspend(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     return await this.prisma.user.update({
@@ -214,7 +214,7 @@ export class UsersService {
   async unsuspend(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     return await this.prisma.user.update({
@@ -233,7 +233,7 @@ export class UsersService {
   async verify(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     return await this.prisma.user.update({
@@ -252,7 +252,7 @@ export class UsersService {
   async delete(id: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
-      throw new BadRequestException('User nahi mila');
+      throw new BadRequestException('User not found');
     }
 
     return await this.prisma.user.delete({

@@ -1,0 +1,2022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rentra - Pakistan's AI-Powered Rental Marketplace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-dark-secondary: #1a1a1a;
+            --bg-dark-tertiary: #252525;
+            --accent-green: #22c55e;
+            --accent-green-dark: #16a34a;
+            --accent-red: #ef4444;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --border-color: #333333;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ==================== UTILITIES ==================== */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-padding {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 0.8s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-delay-1 { animation-delay: 0.1s; }
+        .fade-in-delay-2 { animation-delay: 0.2s; }
+        .fade-in-delay-3 { animation-delay: 0.3s; }
+        .fade-in-delay-4 { animation-delay: 0.4s; }
+        .fade-in-delay-5 { animation-delay: 0.5s; }
+
+        /* ==================== NAVBAR ==================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background-color: transparent;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(15, 15, 15, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        .navbar-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-green);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--accent-green);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .language-toggle {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .language-toggle:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* ==================== HERO SECTION ==================== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 70px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .hero-content {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, var(--accent-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 500px;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .hero-mockup {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .mockup-phone {
+            width: 300px;
+            height: 600px;
+            background: linear-gradient(135deg, var(--bg-dark-secondary), var(--bg-dark-tertiary));
+            border-radius: 40px;
+            border: 8px solid var(--border-color);
+            padding: 12px;
+            box-shadow: 0 20px 60px rgba(34, 197, 94, 0.2);
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .mockup-phone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 25px;
+            background-color: var(--border-color);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .mockup-content {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border-radius: 32px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 20px;
+        }
+
+        .mockup-content h3 {
+            font-size: 1.2rem;
+            color: var(--accent-green);
+        }
+
+        .mockup-content p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* ==================== STATS SECTION ==================== */
+        .stats {
+            background-color: var(--bg-dark-secondary);
+            padding: 60px 0;
+            margin-top: -1px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* ==================== PROBLEMS SECTION ==================== */
+        .problems {
+            background-color: var(--bg-dark);
+            padding: 80px 0;
+        }
+
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .problem-card {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-red);
+            padding: 30px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-red);
+            box-shadow: 0 20px 40px rgba(239, 68, 68, 0.1);
+        }
+
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .problem-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* ==================== FEATURES SECTION ==================== */
+        .features {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-dark-secondary) 100%);
+            padding: 80px 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, var(--bg-dark-secondary), var(--bg-dark-tertiary));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 40px 30px;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.2), transparent);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 50px rgba(34, 197, 94, 0.15);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--accent-green);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* ==================== HOW IT WORKS SECTION ==================== */
+        .how-it-works {
+            background-color: var(--bg-dark);
+            padding: 80px 0;
+        }
+
+        .how-it-works-tabs {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .tab-btn.active {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            border-color: var(--accent-green);
+        }
+
+        .tab-btn:hover {
+            border-color: var(--accent-green);
+        }
+
+        .timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .timeline-step {
+            position: relative;
+            padding: 30px;
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .timeline-step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .timeline-step h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        .timeline-step p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* ==================== TRUST SCORE SECTION ==================== */
+        .trust-score {
+            background: linear-gradient(180deg, var(--bg-dark-secondary) 0%, var(--bg-dark) 100%);
+            padding: 80px 0;
+        }
+
+        .trust-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            margin-top: 60px;
+        }
+
+        .score-ring {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+        }
+
+        .score-ring svg {
+            filter: drop-shadow(0 20px 40px rgba(34, 197, 94, 0.2));
+        }
+
+        .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-text h3 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-green);
+        }
+
+        .score-text p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .trust-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .breakdown-label {
+            min-width: 150px;
+            font-weight: 600;
+        }
+
+        .breakdown-bar {
+            flex: 1;
+            height: 8px;
+            background-color: var(--bg-dark-tertiary);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .breakdown-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-green), #86efac);
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        .breakdown-value {
+            min-width: 50px;
+            text-align: right;
+            color: var(--accent-green);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ==================== PRICING SECTION ==================== */
+        .pricing {
+            background-color: var(--bg-dark);
+            padding: 80px 0;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .pricing-card {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            padding: 40px 30px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--accent-green);
+            transform: scale(1.05);
+            box-shadow: 0 20px 50px rgba(34, 197, 94, 0.2);
+        }
+
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .pricing-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .pricing-price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .pricing-period {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .pricing-features {
+            list-style: none;
+            flex: 1;
+            margin-bottom: 30px;
+        }
+
+        .pricing-features li {
+            padding: 12px 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pricing-features li::before {
+            content: '✓';
+            color: var(--accent-green);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ==================== TESTIMONIALS SECTION ==================== */
+        .testimonials {
+            background: linear-gradient(180deg, var(--bg-dark-secondary) 0%, var(--bg-dark) 100%);
+            padding: 80px 0;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .testimonial-card {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            padding: 35px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.1);
+        }
+
+        .stars {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .stars span {
+            color: #fbbf24;
+            font-size: 1.1rem;
+        }
+
+        .testimonial-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .author-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-green), #86efac);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--bg-dark);
+            font-size: 1.2rem;
+        }
+
+        .author-info h4 {
+            margin-bottom: 3px;
+        }
+
+        .author-info p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* ==================== BLOG SECTION ==================== */
+        .blog {
+            background-color: var(--bg-dark);
+            padding: 80px 0;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .blog-card {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.1);
+        }
+
+        .blog-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(34, 197, 94, 0.3);
+        }
+
+        .blog-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-category {
+            display: inline-block;
+            background-color: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            width: fit-content;
+        }
+
+        .blog-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .blog-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            flex: 1;
+        }
+
+        .blog-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .blog-read-more {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .blog-read-more:hover {
+            gap: 5px;
+        }
+
+        /* ==================== FAQ SECTION ==================== */
+        .faq {
+            background: linear-gradient(180deg, var(--bg-dark-secondary) 0%, var(--bg-dark) 100%);
+            padding: 80px 0;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 60px auto 0;
+        }
+
+        .faq-item {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item.open {
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.1);
+        }
+
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item.open .faq-question {
+            color: var(--accent-green);
+        }
+
+        .faq-toggle {
+            font-size: 1.5rem;
+            transition: transform 0.3s ease;
+            min-width: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .faq-item.open .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .faq-item.open .faq-answer {
+            padding: 0 20px 20px 20px;
+            max-height: 500px;
+        }
+
+        /* ==================== CTA BANNER SECTION ==================== */
+        .cta-banner {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 80px 20px;
+            text-align: center;
+            border-radius: 16px;
+            margin: 80px 0;
+        }
+
+        .cta-banner h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .cta-banner p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-banner-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .footer {
+            background-color: var(--bg-dark-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 60px 0 30px 0;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .footer-links h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-green);
+            padding-left: 5px;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-dark-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .social-icon:hover {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            border-color: var(--accent-green);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .footer-legal a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: var(--accent-green);
+        }
+
+        /* ==================== SCROLL ANIMATIONS ==================== */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.8s ease-out;
+        }
+
+        /* ==================== RESPONSIVE DESIGN ==================== */
+        @media (max-width: 1200px) {
+            .trust-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                min-height: 80vh;
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .hero-mockup {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero {
+                min-height: 70vh;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .features-grid,
+            .problems-grid,
+            .pricing-grid,
+            .testimonials-grid,
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .section-padding {
+                padding: 50px 0;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-legal {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .timeline {
+                grid-template-columns: 1fr;
+            }
+
+            .trust-breakdown {
+                margin-top: 40px;
+            }
+
+            .cta-banner h2 {
+                font-size: 1.8rem;
+            }
+
+            .cta-banner-buttons {
+                flex-direction: column;
+            }
+
+            .cta-banner-buttons .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-title {
+                font-size: 1.6rem;
+            }
+
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .navbar {
+                padding: 0 15px;
+                height: 60px;
+            }
+
+            .navbar-logo {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .stat-number {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                gap: 25px;
+            }
+
+            .pricing-card {
+                padding: 25px 15px;
+            }
+
+            .section-padding {
+                padding: 40px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">Rentra</a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="features.html" class="nav-link">Features</a></li>
+            <li><a href="how-it-works.html" class="nav-link">How It Works</a></li>
+            <li><a href="pricing.html" class="nav-link">Pricing</a></li>
+            <li><a href="blog.html" class="nav-link">Blog</a></li>
+            <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+        </ul>
+        <div class="navbar-right">
+            <button class="language-toggle" onclick="toggleLanguage()">EN / اردو</button>
+            <button class="btn btn-ghost">Login</button>
+            <button class="btn btn-primary">Get Started</button>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="hero" id="hero">
+        <div class="container" style="display: flex; gap: 60px; align-items: center;">
+            <div class="hero-content fade-in">
+                <h1>Pakistan Ka Pehla AI-Powered Rental Platform</h1>
+                <p>Fake listing detection, AI trust scores, and digital agreements for secure, transparent renting. Protecting tenants and landlords across Pakistan's rental market.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary">🏠 Find a Home</button>
+                    <button class="btn btn-ghost">📌 List Your Property</button>
+                </div>
+            </div>
+            <div class="hero-mockup fade-in-delay-2">
+                <div class="mockup-phone">
+                    <div class="mockup-content">
+                        <span style="font-size: 2.5rem;">📱</span>
+                        <h3>Rentra</h3>
+                        <p>AI-Powered Rental Platform</p>
+                        <div style="margin-top: 30px; width: 100%; height: 150px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05)); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                            Explore Listings
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== STATS SECTION ==================== -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card scroll-animate">
+                    <div class="stat-number" data-target="1284">0</div>
+                    <div class="stat-label">Active Listings</div>
+                </div>
+                <div class="stat-card scroll-animate">
+                    <div class="stat-number" data-target="47">0</div>
+                    <div class="stat-label">Fake Listings Blocked Today</div>
+                </div>
+                <div class="stat-card scroll-animate">
+                    <div class="stat-number" data-target="328">0</div>
+                    <div class="stat-label">Agreements Signed</div>
+                </div>
+                <div class="stat-card scroll-animate">
+                    <div class="stat-number" data-target="4821">0</div>
+                    <div class="stat-label">Verified Users</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== PROBLEMS SECTION ==================== -->
+    <section class="problems section-padding" id="problems">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Why Rentra?</h2>
+            <p class="section-subtitle scroll-animate">Pakistan's rental market faces critical challenges. We're here to solve them.</p>
+            <div class="problems-grid">
+                <div class="problem-card scroll-animate">
+                    <span class="problem-icon">🖼️</span>
+                    <h3>Fake Listings</h3>
+                    <p>Unverified properties and photoshopped images waste time and money for renters seeking genuine homes.</p>
+                </div>
+                <div class="problem-card scroll-animate">
+                    <span class="problem-icon">📄</span>
+                    <h3>No Written Agreements</h3>
+                    <p>Most rentals lack formal documentation, leading to disputes with no legal recourse.</p>
+                </div>
+                <div class="problem-card scroll-animate">
+                    <span class="problem-icon">🔍</span>
+                    <h3>No Tenant Verification</h3>
+                    <p>Landlords have no way to verify tenant reliability, payment history, or trustworthiness.</p>
+                </div>
+                <div class="problem-card scroll-animate">
+                    <span class="problem-icon">💰</span>
+                    <h3>No Payment Proof</h3>
+                    <p>Cash payments with no records create conflicts over rent payment disputes.</p>
+                </div>
+                <div class="problem-card scroll-animate">
+                    <span class="problem-icon">⚖️</span>
+                    <h3>No Dispute Resolution</h3>
+                    <p>Disagreements escalate to costly legal battles with slow court systems.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FEATURES SECTION ==================== -->
+    <section class="features section-padding" id="features">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Powerful Features</h2>
+            <p class="section-subtitle scroll-animate">Everything you need for safe, transparent renting.</p>
+            <div class="features-grid">
+                <div class="feature-card scroll-animate">
+                    <span class="feature-icon">🤖</span>
+                    <h3>AI Fake Listing Detector</h3>
+                    <p>Our AI analyzes images, details, and metadata to instantly flag suspicious listings and protect you from scams.</p>
+                </div>
+                <div class="feature-card scroll-animate">
+                    <span class="feature-icon">⭐</span>
+                    <h3>Bidirectional Trust Scores</h3>
+                    <p>Transparent trust ratings for both tenants and landlords based on payment, property care, and communication history.</p>
+                </div>
+                <div class="feature-card scroll-animate">
+                    <span class="feature-icon">📋</span>
+                    <h3>Digital Rent Agreements</h3>
+                    <p>Generate legally compliant, digitally signed rent agreements in seconds. All terms stored securely.</p>
+                </div>
+                <div class="feature-card scroll-animate">
+                    <span class="feature-icon">💵</span>
+                    <h3>AI Fair Rent Estimator</h3>
+                    <p>Machine learning-powered rent suggestions based on location, size, amenities, and market trends in Pakistan.</p>
+                </div>
+                <div class="feature-card scroll-animate">
+                    <span class="feature-icon">📱</span>
+                    <h3>JazzCash & EasyPaisa Payments</h3>
+                    <p>Secure, instant rent payments via Pakistan's leading mobile wallets with automatic receipts.</p>
+                </div>
+                <div class="feature-card scroll-animate">
+                    <span class="feature-icon">🛡️</span>
+                    <h3>In-App Dispute Resolution</h3>
+                    <p>AI-mediated dispute resolution with expert arbitrators. Resolve conflicts in days, not months.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== HOW IT WORKS SECTION ==================== -->
+    <section class="how-it-works section-padding" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title scroll-animate">How It Works</h2>
+            <p class="section-subtitle scroll-animate">Simple, transparent steps for tenants and landlords.</p>
+
+            <div class="how-it-works-tabs">
+                <button class="tab-btn active" onclick="switchTab('tenant')">For Tenants</button>
+                <button class="tab-btn" onclick="switchTab('landlord')">For Landlords</button>
+            </div>
+
+            <div id="tenant-tab" class="tab-content">
+                <div class="timeline">
+                    <div class="timeline-step scroll-animate" data-step="1">
+                        <h3>📲 Search & Apply</h3>
+                        <p>Browse AI-verified listings, check trust scores, and apply to your dream home with just a few clicks.</p>
+                    </div>
+                    <div class="timeline-step scroll-animate" data-step="2">
+                        <h3>📋 Sign Agreement</h3>
+                        <p>Review and digitally sign a legally binding rent agreement. All terms transparent and documented.</p>
+                    </div>
+                    <div class="timeline-step scroll-animate" data-step="3">
+                        <h3>💳 Pay Safely</h3>
+                        <p>Pay rent securely via JazzCash or EasyPaisa. Get automatic receipts and build your trust score.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="landlord-tab" class="tab-content" style="display: none;">
+                <div class="timeline">
+                    <div class="timeline-step scroll-animate" data-step="1">
+                        <h3>📸 Post Property</h3>
+                        <p>List your property with AI-enhanced features. Auto-detection of optimal pricing and high-quality verification.</p>
+                    </div>
+                    <div class="timeline-step scroll-animate" data-step="2">
+                        <h3>✅ Verify Tenant</h3>
+                        <p>Review tenant profiles, trust scores, and payment history. Screen applicants with AI recommendations.</p>
+                    </div>
+                    <div class="timeline-step scroll-animate" data-step="3">
+                        <h3>💰 Collect Rent</h3>
+                        <p>Receive rent instantly via digital payments. Track payment history and maintain perfect records.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TRUST SCORE SECTION ==================== -->
+    <section class="trust-score section-padding" id="trust-score">
+        <div class="container">
+            <h2 class="section-title scroll-animate">AI Trust Score System</h2>
+            <p class="section-subtitle scroll-animate">Transparent ratings that build confidence in every transaction.</p>
+
+            <div class="trust-content">
+                <div class="score-ring scroll-animate">
+                    <svg width="280" height="280" viewBox="0 0 280 280" style="transform: rotate(-90deg);">
+                        <!-- Background circle -->
+                        <circle cx="140" cy="140" r="130" fill="none" stroke="#333333" stroke-width="20" />
+                        <!-- Score circle -->
+                        <circle id="scoreCircle" cx="140" cy="140" r="130" fill="none" stroke="#22c55e" stroke-width="20" stroke-dasharray="819.96" stroke-dashoffset="819.96" style="transition: stroke-dashoffset 2s ease-out;" />
+                    </svg>
+                    <div class="score-text">
+                        <h3 id="scoreValue">0</h3>
+                        <p>/100</p>
+                    </div>
+                </div>
+
+                <div class="trust-breakdown">
+                    <h3 style="margin-bottom: 30px;">What's Included:</h3>
+
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Payment History</span>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-bar-fill" style="width: 95%;"></div>
+                        </div>
+                        <span class="breakdown-value">95%</span>
+                    </div>
+
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Property Care</span>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-bar-fill" style="width: 88%;"></div>
+                        </div>
+                        <span class="breakdown-value">88%</span>
+                    </div>
+
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Communication</span>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-bar-fill" style="width: 92%;"></div>
+                        </div>
+                        <span class="breakdown-value">92%</span>
+                    </div>
+
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Dispute History</span>
+                        <div class="breakdown-bar">
+                            <div class="breakdown-bar-fill" style="width: 100%;"></div>
+                        </div>
+                        <span class="breakdown-value">100%</span>
+                    </div>
+
+                    <p style="margin-top: 30px; color: var(--text-secondary); line-height: 1.8;">
+                        Your trust score is calculated in real-time based on your rental history, payment behavior, property maintenance, and responsiveness. Both tenants and landlords can improve their scores through positive interactions and timely payments.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== PRICING SECTION ==================== -->
+    <section class="pricing section-padding" id="pricing">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Simple, Transparent Pricing</h2>
+            <p class="section-subtitle scroll-animate">Choose the plan that fits your needs.</p>
+
+            <div class="pricing-grid">
+                <div class="pricing-card scroll-animate">
+                    <h3 class="pricing-name">Free</h3>
+                    <p class="pricing-period">For Tenants</p>
+                    <div class="pricing-price">Free</div>
+                    <ul class="pricing-features">
+                        <li>Browse all listings</li>
+                        <li>View trust scores</li>
+                        <li>Apply to properties</li>
+                        <li>View AI recommendations</li>
+                    </ul>
+                    <button class="btn btn-ghost">Get Started</button>
+                </div>
+
+                <div class="pricing-card featured scroll-animate">
+                    <h3 class="pricing-name">Basic</h3>
+                    <p class="pricing-period">For Landlords</p>
+                    <div class="pricing-price">Rs. 500<span style="font-size: 1rem;">/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Post up to 3 listings</li>
+                        <li>AI pricing suggestions</li>
+                        <li>Tenant screening</li>
+                        <li>Digital agreements</li>
+                        <li>Payment tracking</li>
+                    </ul>
+                    <button class="btn btn-primary">Start Free Trial</button>
+                </div>
+
+                <div class="pricing-card scroll-animate">
+                    <h3 class="pricing-name">Pro</h3>
+                    <p class="pricing-period">For Professional Landlords</p>
+                    <div class="pricing-price">Rs. 1,200<span style="font-size: 1rem;">/month</span></div>
+                    <ul class="pricing-features">
+                        <li>Unlimited listings</li>
+                        <li>Priority support</li>
+                        <li>Advanced analytics</li>
+                        <li>Dispute resolution</li>
+                        <li>Marketing boost</li>
+                    </ul>
+                    <button class="btn btn-primary">Start Free Trial</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TESTIMONIALS SECTION ==================== -->
+    <section class="testimonials section-padding" id="testimonials">
+        <div class="container">
+            <h2 class="section-title scroll-animate">What Our Users Say</h2>
+            <p class="section-subtitle scroll-animate">Real stories from Pakistani renters and landlords.</p>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card scroll-animate">
+                    <div class="stars">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="testimonial-text">
+                        "I was terrified of fake listings, but Rentra's AI verified everything. Found my dream apartment in Lahore in just 2 days. The trust score system gave me confidence in my landlord!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AK</div>
+                        <div class="author-info">
+                            <h4>Ayesha Khan</h4>
+                            <p>Tenant, Lahore</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card scroll-animate">
+                    <div class="stars">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="testimonial-text">
+                        "As a landlord, Rentra gave me access to verified tenants and streamlined rent collection. No more chasing payments—everything is automatic and documented. Highly recommended!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MR</div>
+                        <div class="author-info">
+                            <h4>Muhammad Rashid</h4>
+                            <p>Landlord, Karachi</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card scroll-animate">
+                    <div class="stars">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
+                    <p class="testimonial-text">
+                        "Had a dispute with my landlord over maintenance. Rentra's AI resolution was fair and quick—resolved in 3 days instead of months in court. Game changer!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">FH</div>
+                        <div class="author-info">
+                            <h4>Fatima Hassan</h4>
+                            <p>Tenant, Islamabad</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOG SECTION ==================== -->
+    <section class="blog section-padding" id="blog">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Latest from Our Blog</h2>
+            <p class="section-subtitle scroll-animate">Insights and tips for safe, transparent renting in Pakistan.</p>
+
+            <div class="blog-grid">
+                <div class="blog-card scroll-animate">
+                    <div class="blog-thumbnail">📋</div>
+                    <div class="blog-content">
+                        <span class="blog-category">TIPS & TRICKS</span>
+                        <h3 class="blog-title">How to Spot a Fake Listing in Pakistan</h3>
+                        <p class="blog-excerpt">Learn the red flags that indicate a fraudulent property listing and protect yourself from common rental scams.</p>
+                        <div class="blog-meta">
+                            <span>5 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blog-card scroll-animate">
+                    <div class="blog-thumbnail">⚖️</div>
+                    <div class="blog-content">
+                        <span class="blog-category">LEGAL GUIDE</span>
+                        <h3 class="blog-title">Your Rights as a Tenant in Punjab</h3>
+                        <p class="blog-excerpt">Understanding tenant rights and responsibilities in Punjab's rental market. Knowledge is power in negotiations.</p>
+                        <div class="blog-meta">
+                            <span>8 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="blog-card scroll-animate">
+                    <div class="blog-thumbnail">📝</div>
+                    <div class="blog-content">
+                        <span class="blog-category">FEATURE SPOTLIGHT</span>
+                        <h3 class="blog-title">Why Digital Rent Agreements Matter</h3>
+                        <p class="blog-excerpt">Explore how digital agreements transform rental relationships and provide legal protection for both parties.</p>
+                        <div class="blog-meta">
+                            <span>6 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FAQ SECTION ==================== -->
+    <section class="faq section-padding" id="faq">
+        <div class="container">
+            <h2 class="section-title scroll-animate">Frequently Asked Questions</h2>
+            <p class="section-subtitle scroll-animate">Quick answers to common questions about Rentra.</p>
+
+            <div class="faq-container">
+                <div class="faq-item scroll-animate">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Is Rentra free?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Rentra is completely free for tenants to browse listings, check trust scores, and apply to properties. Landlords pay a small monthly fee to list properties and access advanced features like tenant screening and AI pricing suggestions.
+                    </div>
+                </div>
+
+                <div class="faq-item scroll-animate">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>How does AI detect fake listings?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Our AI analyzes images for manipulation, cross-references property details, checks location accuracy, and compares pricing with market trends. It flags suspicious listings instantly, protecting you from scams before you waste time.
+                    </div>
+                </div>
+
+                <div class="faq-item scroll-animate">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Are digital agreements legally valid in Pakistan?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes. Digital rent agreements on Rentra comply with Pakistan's Information Technology Act (2007) and are legally binding. They include all required clauses for Pakistani rental law and are admissible in court disputes.
+                    </div>
+                </div>
+
+                <div class="faq-item scroll-animate">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>Which payment methods are supported?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        We support JazzCash, EasyPaisa, and bank transfers. Both mobile wallet payments are instant and secure, making rent collection effortless for landlords and convenient for tenants without needing a bank account.
+                    </div>
+                </div>
+
+                <div class="faq-item scroll-animate">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>How is my trust score calculated?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Your trust score is based on payment history (on-time rent), property care, communication responsiveness, and dispute resolution record. Build your score through positive behavior and reliable interactions. Both tenants and landlords have scores.
+                    </div>
+                </div>
+
+                <div class="faq-item scroll-animate">
+                    <div class="faq-question" onclick="toggleFaq(this)">
+                        <span>What happens in a dispute?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Disputes are mediated through our AI system with expert arbitrators. We resolve conflicts fairly and quickly—typically within 3-5 days. All digital agreements and payment records serve as evidence, making resolution transparent and binding.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CTA BANNER SECTION ==================== -->
+    <section class="cta-banner scroll-animate">
+        <div class="container">
+            <h2>Ready to Rent Safely?</h2>
+            <p>Join thousands of Pakistani renters and landlords already using Rentra for transparent, AI-powered rentals.</p>
+            <div class="cta-banner-buttons">
+                <button class="btn btn-primary">🚀 Get Started Free</button>
+                <button class="btn btn-ghost">📧 Contact Us</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <h3>Rentra</h3>
+                    <p>Transparent Renting, Powered by AI. Making Pakistan's rental market safe, verifiable, and fair for everyone.</p>
+                    <div class="footer-socials" style="margin-top: 20px;">
+                        <a href="#" class="social-icon" title="Facebook">f</a>
+                        <a href="#" class="social-icon" title="Instagram">📷</a>
+                        <a href="#" class="social-icon" title="LinkedIn">in</a>
+                        <a href="#" class="social-icon" title="Twitter">𝕏</a>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Email Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">Compliance</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Language</h4>
+                    <ul>
+                        <li><a href="#">English</a></li>
+                        <li><a href="#">اردو</a></li>
+                        <li><a href="#">Punjabi</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    © 2026 Rentra. All rights reserved. Made with ❤️ in Pakistan.
+                </div>
+                <ul class="footer-legal">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Sitemap</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // ==================== NAVBAR SCROLL EFFECT ====================
+        const navbar = document.getElementById('navbar');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+
+            // Update active nav link based on scroll position
+            updateActiveNavLink();
+        });
+
+        function updateActiveNavLink() {
+            const sections = document.querySelectorAll('section[id]');
+            let currentSection = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= sectionTop - 200) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // ==================== SMOOTH SCROLL ====================
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // ==================== SCROLL ANIMATIONS ====================
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+
+                    // Animate counters
+                    if (entry.target.classList.contains('stat-number')) {
+                        animateCounter(entry.target);
+                    }
+
+                    // Animate score ring
+                    if (entry.target.id === 'scoreCircle') {
+                        animateScoreRing();
+                    }
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-animate').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ==================== ANIMATE COUNTERS ====================
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000;
+            const start = Date.now();
+
+            function update() {
+                const elapsed = Date.now() - start;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(progress * target);
+                element.textContent = current.toLocaleString();
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    element.textContent = target.toLocaleString() + '+';
+                }
+            }
+
+            update();
+        }
+
+        // ==================== ANIMATE SCORE RING ====================
+        function animateScoreRing() {
+            const circle = document.getElementById('scoreCircle');
+            const scoreValue = document.getElementById('scoreValue');
+            const targetScore = 82;
+            const circumference = 2 * Math.PI * 130;
+
+            let currentScore = 0;
+            const startTime = Date.now();
+            const duration = 2000;
+
+            function updateScore() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                currentScore = Math.floor(progress * targetScore);
+
+                scoreValue.textContent = currentScore;
+                const offset = circumference - (currentScore / 100) * circumference;
+                circle.style.strokeDashoffset = offset;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateScore);
+                } else {
+                    scoreValue.textContent = targetScore;
+                }
+            }
+
+            updateScore();
+        }
+
+        // ==================== TAB SWITCHING ====================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+
+            event.target.classList.add('active');
+            document.getElementById(tab + '-tab').style.display = 'block';
+
+            // Trigger animations for new content
+            document.querySelectorAll('#' + tab + '-tab .scroll-animate').forEach(el => {
+                el.classList.add('visible');
+            });
+        }
+
+        // ==================== FAQ ACCORDION ====================
+        function toggleFaq(element) {
+            const faqItem = element.parentElement;
+            faqItem.classList.toggle('open');
+        }
+
+        // ==================== LANGUAGE TOGGLE ====================
+        function toggleLanguage() {
+            const btn = event.target;
+            const currentLang = btn.textContent;
+            btn.textContent = currentLang === 'EN / اردو' ? 'اردو / EN' : 'EN / اردو';
+            // Language switching logic would go here
+        }
+
+        // ==================== MOBILE MENU ====================
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        // ==================== PAGE LOAD ANIMATIONS ====================
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                setTimeout(() => {
+                    el.classList.add('visible');
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -87,11 +87,7 @@ let UsersService = (() => {
             // Check if user already exists
             const existingUser = await this.prisma.user.findFirst({
                 where: {
-                    OR: [
-                        { email: dto.email },
-                        { phone: dto.phone },
-                        { cnic: dto.cnic },
-                    ],
+                    OR: [{ email: dto.email }, { phone: dto.phone }, { cnic: dto.cnic }],
                 },
             });
             if (existingUser) {
@@ -101,8 +97,7 @@ let UsersService = (() => {
             const hashedPassword = await bcrypt.hash(dto.password, 10);
             return await this.prisma.user.create({
                 data: {
-                    firstName: dto.firstName,
-                    lastName: dto.lastName,
+                    fullName: dto.fullName,
                     email: dto.email,
                     phone: dto.phone,
                     cnic: dto.cnic,
@@ -114,8 +109,7 @@ let UsersService = (() => {
                     id: true,
                     email: true,
                     phone: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     cnic: true,
                     role: true,
                     trustScore: true,
@@ -132,8 +126,7 @@ let UsersService = (() => {
                     id: true,
                     email: true,
                     phone: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     role: true,
                     trustScore: true,
                     isVerified: true,
@@ -150,8 +143,7 @@ let UsersService = (() => {
                     id: true,
                     email: true,
                     phone: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     cnic: true,
                     role: true,
                     trustScore: true,
@@ -173,8 +165,7 @@ let UsersService = (() => {
                     id: true,
                     email: true,
                     phone: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     role: true,
                     trustScore: true,
                     isVerified: true,
@@ -189,19 +180,25 @@ let UsersService = (() => {
             }
             // Check for unique constraints if email, phone, or cnic are being updated
             if (dto.email && dto.email !== user.email) {
-                const existingEmail = await this.prisma.user.findUnique({ where: { email: dto.email } });
+                const existingEmail = await this.prisma.user.findUnique({
+                    where: { email: dto.email },
+                });
                 if (existingEmail) {
                     throw new common_1.BadRequestException('Email already exists');
                 }
             }
             if (dto.phone && dto.phone !== user.phone) {
-                const existingPhone = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+                const existingPhone = await this.prisma.user.findUnique({
+                    where: { phone: dto.phone },
+                });
                 if (existingPhone) {
                     throw new common_1.BadRequestException('Phone number already exists');
                 }
             }
             if (dto.cnic && dto.cnic !== user.cnic) {
-                const existingCnic = await this.prisma.user.findUnique({ where: { cnic: dto.cnic } });
+                const existingCnic = await this.prisma.user.findUnique({
+                    where: { cnic: dto.cnic },
+                });
                 if (existingCnic) {
                     throw new common_1.BadRequestException('CNIC already exists');
                 }
@@ -209,8 +206,7 @@ let UsersService = (() => {
             return await this.prisma.user.update({
                 where: { id },
                 data: {
-                    firstName: dto.firstName ?? user.firstName,
-                    lastName: dto.lastName ?? user.lastName,
+                    fullName: dto.fullName ?? user.fullName,
                     email: dto.email ?? user.email,
                     phone: dto.phone ?? user.phone,
                     cnic: dto.cnic ?? user.cnic,
@@ -223,8 +219,7 @@ let UsersService = (() => {
                     id: true,
                     email: true,
                     phone: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     cnic: true,
                     role: true,
                     trustScore: true,
@@ -247,8 +242,7 @@ let UsersService = (() => {
                 select: {
                     id: true,
                     email: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     trustScore: true,
                     updatedAt: true,
                 },
@@ -265,8 +259,7 @@ let UsersService = (() => {
                 select: {
                     id: true,
                     email: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     isSuspended: true,
                     updatedAt: true,
                 },
@@ -283,8 +276,7 @@ let UsersService = (() => {
                 select: {
                     id: true,
                     email: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     isSuspended: true,
                     updatedAt: true,
                 },
@@ -301,8 +293,7 @@ let UsersService = (() => {
                 select: {
                     id: true,
                     email: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                     isVerified: true,
                     updatedAt: true,
                 },
@@ -318,8 +309,7 @@ let UsersService = (() => {
                 select: {
                     id: true,
                     email: true,
-                    firstName: true,
-                    lastName: true,
+                    fullName: true,
                 },
             });
         }

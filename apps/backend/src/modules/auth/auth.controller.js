@@ -62,13 +62,16 @@ let AuthController = (() => {
             return this.authService.login(dto);
         }
         async getMe(user) {
-            return this.authService.getMe(user.id);
+            return this.authService.getMe(user.sub);
         }
     };
     __setFunctionName(_classThis, "AuthController");
     (() => {
         const _metadata = typeof Symbol === "function" && Symbol.metadata ? Object.create(null) : void 0;
-        _register_decorators = [(0, common_1.Post)('register'), (0, swagger_1.ApiOperation)({ summary: 'Create a new account' }), (0, swagger_1.ApiResponse)({ status: 201, description: 'Account created successfully' }), (0, swagger_1.ApiResponse)({ status: 409, description: 'Email/Phone/CNIC pehle se exist karta hai' })];
+        _register_decorators = [(0, common_1.Post)('register'), (0, swagger_1.ApiOperation)({ summary: 'Create a new account' }), (0, swagger_1.ApiResponse)({ status: 201, description: 'Account created successfully' }), (0, swagger_1.ApiResponse)({
+                status: 409,
+                description: 'Email/Phone/CNIC pehle se exist karta hai',
+            })];
         _login_decorators = [(0, common_1.Post)('login'), (0, common_1.HttpCode)(common_1.HttpStatus.OK), (0, swagger_1.ApiOperation)({ summary: 'Login karo' }), (0, swagger_1.ApiResponse)({ status: 200, description: 'Login successful' }), (0, swagger_1.ApiResponse)({ status: 401, description: 'Wrong credentials' })];
         _getMe_decorators = [(0, common_1.Get)('me'), (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard), (0, swagger_1.ApiBearerAuth)(), (0, swagger_1.ApiOperation)({ summary: 'Apni profile dekho' }), (0, swagger_1.ApiResponse)({ status: 200, description: 'User profile' })];
         __esDecorate(_classThis, null, _register_decorators, { kind: "method", name: "register", static: false, private: false, access: { has: obj => "register" in obj, get: obj => obj.register }, metadata: _metadata }, null, _instanceExtraInitializers);

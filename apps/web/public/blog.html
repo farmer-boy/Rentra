@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - Rentra</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-dark-secondary: #1a1a1a;
+            --bg-dark-tertiary: #252525;
+            --accent-green: #22c55e;
+            --accent-green-dark: #16a34a;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --border-color: #333333;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-padding {
+            padding: 80px 0;
+        }
+
+        /* ==================== NAVBAR ==================== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background-color: rgba(15, 15, 15, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        .navbar-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-green);
+        }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--accent-green);
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1.5px solid var(--border-color);
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+            background-color: rgba(34, 197, 94, 0.1);
+        }
+
+        .language-toggle {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .language-toggle:hover {
+            border-color: var(--accent-green);
+            color: var(--accent-green);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* ==================== PAGE HEADER ==================== */
+        .page-header {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border-bottom: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 100px 0 60px 0;
+            margin-top: 70px;
+            text-align: center;
+        }
+
+        .page-header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ==================== BLOG SECTION ==================== */
+        .blog-section {
+            padding: 80px 0;
+        }
+
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .blog-card {
+            background-color: var(--bg-dark-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent-green);
+            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.1);
+        }
+
+        .blog-thumbnail {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: rgba(34, 197, 94, 0.3);
+        }
+
+        .blog-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-category {
+            display: inline-block;
+            background-color: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            width: fit-content;
+        }
+
+        .blog-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .blog-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            flex: 1;
+        }
+
+        .blog-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .author-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-green), #86efac);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-dark);
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .blog-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .blog-read-more {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .blog-read-more:hover {
+            gap: 5px;
+        }
+
+        /* ==================== CONTACT CTA ==================== */
+        .contact-cta {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 80px 20px;
+            text-align: center;
+            border-radius: 16px;
+            margin: 80px 0;
+        }
+
+        .contact-cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff, var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .contact-cta p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .contact-cta-buttons .btn {
+            width: auto;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .footer {
+            background-color: var(--bg-dark-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 60px 0 30px 0;
+        }
+
+        .footer-top {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent-green);
+            margin-bottom: 10px;
+        }
+
+        .footer-brand p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .footer-links h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-green);
+            padding-left: 5px;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--bg-dark-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+        }
+
+        .social-icon:hover {
+            background-color: var(--accent-green);
+            color: var(--bg-dark);
+            border-color: var(--accent-green);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--border-color);
+            padding-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-copyright {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .footer-legal a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: var(--accent-green);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .page-header {
+                padding: 80px 0 40px 0;
+            }
+
+            .footer-top {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .footer-legal {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-cta-buttons {
+                flex-direction: column;
+            }
+
+            .contact-cta-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .navbar {
+                padding: 0 15px;
+                height: 60px;
+            }
+
+            .navbar-logo {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .blog-card {
+                margin-bottom: 20px;
+            }
+
+            .contact-cta h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== NAVBAR ==================== -->
+    <nav class="navbar">
+        <a href="index.html" class="navbar-logo">Rentra</a>
+        <ul class="nav-links">
+            <li><a href="features.html" class="nav-link">Features</a></li>
+            <li><a href="how-it-works.html" class="nav-link">How It Works</a></li>
+            <li><a href="pricing.html" class="nav-link">Pricing</a></li>
+            <li><a href="blog.html" class="nav-link active">Blog</a></li>
+            <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+        </ul>
+        <div class="navbar-right">
+            <button class="language-toggle">EN / اردو</button>
+            <button class="btn btn-ghost">Login</button>
+            <button class="btn btn-primary">Get Started</button>
+            <button class="mobile-menu-btn">☰</button>
+        </div>
+    </nav>
+
+    <!-- ==================== PAGE HEADER ==================== -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Rentra Blog</h1>
+            <p>Insights, tips, and guides for safe, transparent renting in Pakistan.</p>
+        </div>
+    </section>
+
+    <!-- ==================== BLOG SECTION ==================== -->
+    <section class="blog-section">
+        <div class="container">
+            <div class="blog-grid">
+                <!-- Blog Post 1 -->
+                <div class="blog-card">
+                    <div class="blog-thumbnail">📋</div>
+                    <div class="blog-content">
+                        <span class="blog-category">TIPS & TRICKS</span>
+                        <h3 class="blog-title">How to Spot a Fake Listing in Pakistan</h3>
+                        <p class="blog-excerpt">Learn the red flags that indicate a fraudulent property listing. Protect yourself from common rental scams with our comprehensive guide to identifying fake listings.</p>
+                        <div class="blog-author">
+                            <div class="author-avatar">AH</div>
+                            <div>
+                                <strong>Ahmed Hassan</strong><br>
+                                <small>April 15, 2026</small>
+                            </div>
+                        </div>
+                        <div class="blog-meta">
+                            <span>5 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Post 2 -->
+                <div class="blog-card">
+                    <div class="blog-thumbnail">⚖️</div>
+                    <div class="blog-content">
+                        <span class="blog-category">LEGAL GUIDE</span>
+                        <h3 class="blog-title">Your Rights as a Tenant in Punjab</h3>
+                        <p class="blog-excerpt">Understanding tenant rights and responsibilities in Punjab's rental market. Knowledge is power in negotiations, and we break down the law for you.</p>
+                        <div class="blog-author">
+                            <div class="author-avatar">FY</div>
+                            <div>
+                                <strong>Fatima Yousaf</strong><br>
+                                <small>April 10, 2026</small>
+                            </div>
+                        </div>
+                        <div class="blog-meta">
+                            <span>8 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Post 3 -->
+                <div class="blog-card">
+                    <div class="blog-thumbnail">📝</div>
+                    <div class="blog-content">
+                        <span class="blog-category">FEATURE SPOTLIGHT</span>
+                        <h3 class="blog-title">Why Digital Rent Agreements Matter</h3>
+                        <p class="blog-excerpt">Explore how digital agreements transform rental relationships and provide legal protection for both tenants and landlords in Pakistan.</p>
+                        <div class="blog-author">
+                            <div class="author-avatar">MK</div>
+                            <div>
+                                <strong>Muhammad Khan</strong><br>
+                                <small>April 5, 2026</small>
+                            </div>
+                        </div>
+                        <div class="blog-meta">
+                            <span>6 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Post 4 -->
+                <div class="blog-card">
+                    <div class="blog-thumbnail">💰</div>
+                    <div class="blog-content">
+                        <span class="blog-category">MARKET INSIGHTS</span>
+                        <h3 class="blog-title">Rental Market Trends in Karachi 2026</h3>
+                        <p class="blog-excerpt">Analyze current rental market trends in Karachi. See price movements, demand hotspots, and investment opportunities for both tenants and property owners.</p>
+                        <div class="blog-author">
+                            <div class="author-avatar">SZ</div>
+                            <div>
+                                <strong>Sara Zaman</strong><br>
+                                <small>March 28, 2026</small>
+                            </div>
+                        </div>
+                        <div class="blog-meta">
+                            <span>7 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Post 5 -->
+                <div class="blog-card">
+                    <div class="blog-thumbnail">🏠</div>
+                    <div class="blog-content">
+                        <span class="blog-category">LANDLORD GUIDE</span>
+                        <h3 class="blog-title">Best Practices for Property Management</h3>
+                        <p class="blog-excerpt">Master the art of property management. From tenant screening to maintenance tips, learn how to be a successful landlord with our comprehensive guide.</p>
+                        <div class="blog-author">
+                            <div class="author-avatar">HR</div>
+                            <div>
+                                <strong>Hassan Raza</strong><br>
+                                <small>March 20, 2026</small>
+                            </div>
+                        </div>
+                        <div class="blog-meta">
+                            <span>9 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Post 6 -->
+                <div class="blog-card">
+                    <div class="blog-thumbnail">✨</div>
+                    <div class="blog-content">
+                        <span class="blog-category">TENANT TIPS</span>
+                        <h3 class="blog-title">Building Your Trust Score: A Tenant's Guide</h3>
+                        <p class="blog-excerpt">Learn how Rentra's trust score system works and what you can do to build and maintain an excellent reputation as a renter in Pakistan.</p>
+                        <div class="blog-author">
+                            <div class="author-avatar">NA</div>
+                            <div>
+                                <strong>Nida Ahmed</strong><br>
+                                <small>March 12, 2026</small>
+                            </div>
+                        </div>
+                        <div class="blog-meta">
+                            <span>6 min read</span>
+                            <a href="#" class="blog-read-more">Read More →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== CONTACT CTA ==================== -->
+    <section class="contact-cta">
+        <div class="container">
+            <h2>Have Blog Topic Suggestions?</h2>
+            <p>Share your ideas or questions about renting in Pakistan. We're always looking for new topics to cover.</p>
+            <div class="contact-cta-buttons">
+                <button class="btn btn-primary">Get Started Free</button>
+                <a href="contact.html" class="btn btn-ghost">Suggest a Topic</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <h3>Rentra</h3>
+                    <p>Transparent Renting, Powered by AI. Making Pakistan's rental market safe, verifiable, and fair for everyone.</p>
+                    <div class="footer-socials">
+                        <a href="#" class="social-icon" title="Facebook">f</a>
+                        <a href="#" class="social-icon" title="Instagram">📷</a>
+                        <a href="#" class="social-icon" title="LinkedIn">in</a>
+                        <a href="#" class="social-icon" title="Twitter">𝕏</a>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Platform</h4>
+                    <ul>
+                        <li><a href="features.html">Features</a></li>
+                        <li><a href="pricing.html">Pricing</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="how-it-works.html">How It Works</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="#">FAQ</a></li>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Email Support</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">Compliance</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Language</h4>
+                    <ul>
+                        <li><a href="#">English</a></li>
+                        <li><a href="#">اردو</a></li>
+                        <li><a href="#">Punjabi</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    © 2026 Rentra. All rights reserved. Made with ❤️ in Pakistan.
+                </div>
+                <ul class="footer-legal">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Sitemap</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

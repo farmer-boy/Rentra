@@ -1,0 +1,17 @@
+.progress-bar {
+  height: 0.375rem;
+  background-color: #e5e7eb;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+/* Set width based on data-progress attribute */
+.progress-bar-fill[data-progress="95"] { width: 95%; }
+.progress-bar-fill[data-progress="80"] { width: 80%; }
+.progress-bar-fill[data-progress="70"] { width: 70%; }

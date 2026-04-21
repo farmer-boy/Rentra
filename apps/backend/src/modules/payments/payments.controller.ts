@@ -34,7 +34,7 @@ export class PaymentsController {
       body.agreementId,
     );
     return {
-      message: 'Payment create ho gaya',
+      message: 'Payment created successfully',
       data: payment,
     };
   }
@@ -68,7 +68,7 @@ export class PaymentsController {
   async completePayment(@Param('id') id: string) {
     const payment = await this.paymentsService.complete(id);
     return {
-      message: 'Payment complete ho gaya',
+      message: 'Payment completed successfully',
       data: payment,
     };
   }
@@ -79,7 +79,7 @@ export class PaymentsController {
   async failPayment(@Param('id') id: string) {
     const payment = await this.paymentsService.fail(id);
     return {
-      message: 'Payment fail ho gaya',
+      message: 'Payment failed',
       data: payment,
     };
   }

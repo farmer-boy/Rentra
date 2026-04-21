@@ -40,13 +40,13 @@ export class PaymentsService {
       },
     });
 
-    if (!payment) throw new BadRequestException('Payment nahi mila');
+    if (!payment) throw new BadRequestException('Payment not found');
     return payment;
   }
 
   async complete(id: string) {
     const payment = await this.prisma.payment.findUnique({ where: { id } });
-    if (!payment) throw new BadRequestException('Payment nahi mila');
+    if (!payment) throw new BadRequestException('Payment not found');
 
     return await this.prisma.payment.update({
       where: { id },
@@ -56,7 +56,7 @@ export class PaymentsService {
 
   async fail(id: string) {
     const payment = await this.prisma.payment.findUnique({ where: { id } });
-    if (!payment) throw new BadRequestException('Payment nahi mila');
+    if (!payment) throw new BadRequestException('Payment not found');
 
     return await this.prisma.payment.update({
       where: { id },

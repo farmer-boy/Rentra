@@ -41,7 +41,7 @@ export class AgreementsController {
       body.endDate,
     );
     return {
-      message: 'Agreement create ho gaya',
+      message: 'Agreement created successfully',
       data: agreement,
     };
   }
@@ -52,7 +52,7 @@ export class AgreementsController {
   async getAllAgreements() {
     const agreements = await this.agreementsService.findAll();
     return {
-      message: 'Tamam agreements',
+      message: 'All agreements',
       data: agreements,
       count: agreements.length,
     };
@@ -75,7 +75,7 @@ export class AgreementsController {
   async approveAgreement(@Param('id') id: string) {
     const agreement = await this.agreementsService.approve(id);
     return {
-      message: 'Agreement approve ho gaya',
+      message: 'Agreement approved successfully',
       data: agreement,
     };
   }
@@ -86,7 +86,7 @@ export class AgreementsController {
   async rejectAgreement(@Param('id') id: string) {
     const agreement = await this.agreementsService.reject(id);
     return {
-      message: 'Agreement reject kar diya',
+      message: 'Agreement rejected',
       data: agreement,
     };
   }
@@ -97,7 +97,7 @@ export class AgreementsController {
   async terminateAgreement(@Param('id') id: string) {
     const agreement = await this.agreementsService.terminate(id);
     return {
-      message: 'Agreement terminate kar diya',
+      message: 'Agreement terminated successfully',
       data: agreement,
     };
   }

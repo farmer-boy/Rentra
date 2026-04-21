@@ -83,7 +83,9 @@ let CreateUserDto = (() => {
             _fullName_decorators = [(0, swagger_1.ApiProperty)({ example: 'Ali Raza' }), (0, class_validator_1.IsString)()];
             _email_decorators = [(0, swagger_1.ApiProperty)({ example: 'ali@example.com' }), (0, class_validator_1.IsEmail)()];
             _phone_decorators = [(0, swagger_1.ApiProperty)({ example: '+923001234567' }), (0, class_validator_1.IsPhoneNumber)('PK')];
-            _cnic_decorators = [(0, swagger_1.ApiProperty)({ example: '35202-1234567-1' }), (0, class_validator_1.IsString)(), (0, class_validator_1.Matches)(/^\d{5}-\d{7}-\d{1}$/, { message: 'CNIC must be in format XXXXX-XXXXXXX-X' })];
+            _cnic_decorators = [(0, swagger_1.ApiProperty)({ example: '35202-1234567-1' }), (0, class_validator_1.IsString)(), (0, class_validator_1.Matches)(/^\d{5}-\d{7}-\d{1}$/, {
+                    message: 'CNIC must be in format XXXXX-XXXXXXX-X',
+                })];
             _password_decorators = [(0, swagger_1.ApiProperty)({ example: 'password123', minLength: 6 }), (0, class_validator_1.IsString)(), (0, class_validator_1.MinLength)(6)];
             _role_decorators = [(0, swagger_1.ApiProperty)({ enum: Role, default: Role.TENANT }), (0, class_validator_1.IsEnum)(Role), (0, class_validator_1.IsOptional)()];
             _trustScore_decorators = [(0, swagger_1.ApiProperty)({ example: 50, default: 50 }), (0, class_validator_1.IsOptional)()];

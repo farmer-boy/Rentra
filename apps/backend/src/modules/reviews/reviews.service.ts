@@ -41,7 +41,7 @@ export class ReviewsService {
       },
     });
 
-    if (!review) throw new BadRequestException('Review nahi mila');
+    if (!review) throw new BadRequestException('Review not found');
     return review;
   }
 
@@ -67,7 +67,7 @@ export class ReviewsService {
   async delete(id: string, userId: string) {
     const review = await this.prisma.review.findUnique({ where: { id } });
     if (!review || review.userId !== userId) {
-      throw new BadRequestException('Review delete nahi kar sakte');
+      throw new BadRequestException('Cannot delete this review');
     }
 
     return await this.prisma.review.delete({ where: { id } });

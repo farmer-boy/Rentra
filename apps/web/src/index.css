@@ -3,18 +3,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Professional Light Theme (Default) */
 :root {
-  --bg: #0f0f0f;
-  --surface: #171717;
-  --surface2: #1f1f1f;
-  --surface3: #2a2a2a;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0f0f0;
-  --text2: #888;
-  --text3: #555;
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.12);
+  --bg: #ffffff;
+  --surface: #f9fafb;
+  --surface2: #f3f4f6;
+  --surface3: #e5e7eb;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.15);
+  --text: #111827;
+  --text2: #6b7280;
+  --text3: #9ca3af;
+  --green: #10b981;
+  --green-dim: rgba(16,185,129,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --yellow: #eab308;
+  --yellow-dim: rgba(234,179,8,0.12);
+  --blue: #3b82f6;
+  --blue-dim: rgba(59,130,246,0.12);
+}
+
+/* Professional Dark Theme */
+[data-theme="dark"] {
+  --bg: #050605;
+  --surface: #0f0f0f;
+  --surface2: #161616;
+  --surface3: #212121;
+  --border: rgba(255,255,255,0.05);
+  --border2: rgba(255,255,255,0.08);
+  --text: #f3f4f6;
+  --text2: #9ca3af;
+  --text3: #6b7280;
+  --green: #10b981;
+  --green-dim: rgba(16,185,129,0.12);
   --red: #ef4444;
   --red-dim: rgba(239,68,68,0.12);
   --yellow: #eab308;

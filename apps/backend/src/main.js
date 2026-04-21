@@ -7,10 +7,34 @@ const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     // Global prefix
-    // app.setGlobalPrefix('api');
-    // CORS
+    app.setGlobalPrefix('api');
+    // CORS - Allow localhost on any port for development
     app.enableCors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+        origin: (origin, callback) => {
+            const allowedOrigins = [
+                'http://localhost:5173',
+                'http://localhost:5174',
+                'http://localhost:5175',
+                'http://localhost:5176',
+                'http://localhost:5177',
+                'http://localhost:5178',
+                'http://localhost:5179',
+                'http://localhost:5180',
+                'http://localhost:5181',
+                'http://localhost:5182',
+                'http://localhost:5183',
+                'http://localhost:5184',
+                'http://localhost:5185',
+                'http://localhost:5186',
+            ];
+            const isAllowed = !origin || allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin || '');
+            if (isAllowed) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
     });
     // Global Validation
@@ -36,4 +60,4 @@ async function bootstrap() {
   📖 Swagger Docs: http://localhost:${port}/api/docs
   `);
 }
-bootstrap();
+void bootstrap();

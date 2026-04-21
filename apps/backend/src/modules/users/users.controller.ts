@@ -28,7 +28,7 @@ export class UsersController {
   async createUser(@Body() dto: CreateUserDto) {
     const user = await this.usersService.create(dto);
     return {
-      message: 'User create ho gaya',
+      message: 'User created successfully',
       data: user,
     };
   }
@@ -40,7 +40,7 @@ export class UsersController {
   async getAllUsers() {
     const users = await this.usersService.findAll();
     return {
-      message: 'Tamam users list',
+      message: 'Users list retrieved',
       data: users,
       count: users.length,
     };
@@ -63,7 +63,7 @@ export class UsersController {
   async replaceUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     const user = await this.usersService.update(id, dto);
     return {
-      message: 'User update ho gaya',
+      message: 'User updated successfully',
       data: user,
     };
   }
@@ -73,7 +73,7 @@ export class UsersController {
   async patchUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     const user = await this.usersService.update(id, dto);
     return {
-      message: 'User update ho gaya',
+      message: 'User updated successfully',
       data: user,
     };
   }
@@ -88,7 +88,7 @@ export class UsersController {
   ) {
     const user = await this.usersService.updateTrustScore(id, body.score);
     return {
-      message: 'Trust score update ho gaya',
+      message: 'Trust score updated successfully',
       data: user,
     };
   }
@@ -100,7 +100,7 @@ export class UsersController {
   async suspendUser(@Param('id') id: string) {
     const user = await this.usersService.suspend(id);
     return {
-      message: 'User suspend kar diya gaya',
+      message: 'User suspended successfully',
       data: user,
     };
   }
@@ -112,7 +112,7 @@ export class UsersController {
   async unsuspendUser(@Param('id') id: string) {
     const user = await this.usersService.unsuspend(id);
     return {
-      message: 'User unsuspend kar diya gaya',
+      message: 'User unsuspended successfully',
       data: user,
     };
   }
@@ -124,7 +124,7 @@ export class UsersController {
   async verifyUser(@Param('id') id: string) {
     const user = await this.usersService.verify(id);
     return {
-      message: 'User verify kar diya gaya',
+      message: 'User verified successfully',
       data: user,
     };
   }
@@ -134,7 +134,7 @@ export class UsersController {
   async deleteUser(@Param('id') id: string) {
     const user = await this.usersService.delete(id);
     return {
-      message: 'User delete kar diya gaya',
+      message: 'User deleted successfully',
       data: user,
     };
   }

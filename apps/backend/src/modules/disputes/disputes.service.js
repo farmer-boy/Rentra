@@ -76,10 +76,14 @@ let DisputesService = (() => {
             const dispute = await this.prisma.dispute.findUnique({
                 where: { id },
                 include: {
-                    tenant: { select: { id: true, fullName: true, email: true, phone: true } },
+                    tenant: {
+                        select: { id: true, fullName: true, email: true, phone: true },
+                    },
                     agreement: {
                         include: {
-                            landlord: { select: { id: true, fullName: true, email: true, phone: true } },
+                            landlord: {
+                                select: { id: true, fullName: true, email: true, phone: true },
+                            },
                         },
                     },
                 },

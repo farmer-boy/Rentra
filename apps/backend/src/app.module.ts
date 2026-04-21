@@ -8,6 +8,8 @@ import { AgreementsModule } from './modules/agreements/agreements.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { DisputesModule } from './modules/disputes/disputes.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
+import { ContactModule } from './modules/contact/contact.module';
+import { MessagesModule } from './modules/messages/messages.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ReviewsModule } from './modules/reviews/reviews.module';
     PaymentsModule,
     DisputesModule,
     ReviewsModule,
+    ContactModule,
+    MessagesModule,
   ],
 })
 export class AppModule {}

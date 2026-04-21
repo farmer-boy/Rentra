@@ -54,11 +54,11 @@ let AuthModule = (() => {
                     imports: [config_1.ConfigModule],
                     useFactory: (configService) => {
                         const secret = configService.get('JWT_SECRET');
-                        const expiresIn = configService.get('JWT_EXPIRES_IN') || '7d';
+                        const expiresIn = configService.get('JWT_EXPIRES_IN');
                         return {
                             secret,
                             signOptions: {
-                                expiresIn: expiresIn,
+                                expiresIn: expiresIn ?? '7d',
                             },
                         };
                     },

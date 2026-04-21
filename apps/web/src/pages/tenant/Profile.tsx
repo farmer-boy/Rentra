@@ -8,10 +8,10 @@ export default function Profile() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>My Profile 👤</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>Apni details aur trust score dekho</p>
+        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>View your details and trust score</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {/* Personal Information */}
         <Card>
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Personal Information</div>

@@ -52,8 +52,8 @@ let UsersController = (() => {
     let _createUser_decorators;
     let _getAllUsers_decorators;
     let _getUser_decorators;
-    let _updateUser_decorators;
-    let _updateUser_patch_decorators;
+    let _replaceUser_decorators;
+    let _patchUser_decorators;
     let _updateTrustScore_decorators;
     let _suspendUser_decorators;
     let _unsuspendUser_decorators;
@@ -141,8 +141,8 @@ let UsersController = (() => {
         _createUser_decorators = [(0, common_1.Post)(), (0, swagger_1.ApiResponse)({ status: 201, type: user_response_dto_1.UserResponseDto })];
         _getAllUsers_decorators = [(0, common_1.Get)(), (0, swagger_1.ApiResponse)({ status: 200, type: [user_response_dto_1.UserResponseDto] })];
         _getUser_decorators = [(0, common_1.Get)(':id'), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
-        _updateUser_decorators = [(0, common_1.Put)(':id'), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
-        _updateUser_patch_decorators = [(0, common_1.Patch)(':id'), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
+        _replaceUser_decorators = [(0, common_1.Put)(':id'), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
+        _patchUser_decorators = [(0, common_1.Patch)(':id'), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
         _updateTrustScore_decorators = [(0, common_1.Patch)(':id/trust-score'), (0, swagger_1.ApiBearerAuth)(), (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
         _suspendUser_decorators = [(0, common_1.Post)(':id/suspend'), (0, swagger_1.ApiBearerAuth)(), (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
         _unsuspendUser_decorators = [(0, common_1.Post)(':id/unsuspend'), (0, swagger_1.ApiBearerAuth)(), (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard), (0, swagger_1.ApiResponse)({ status: 200, type: user_response_dto_1.UserResponseDto })];
@@ -151,8 +151,8 @@ let UsersController = (() => {
         __esDecorate(_classThis, null, _createUser_decorators, { kind: "method", name: "createUser", static: false, private: false, access: { has: obj => "createUser" in obj, get: obj => obj.createUser }, metadata: _metadata }, null, _instanceExtraInitializers);
         __esDecorate(_classThis, null, _getAllUsers_decorators, { kind: "method", name: "getAllUsers", static: false, private: false, access: { has: obj => "getAllUsers" in obj, get: obj => obj.getAllUsers }, metadata: _metadata }, null, _instanceExtraInitializers);
         __esDecorate(_classThis, null, _getUser_decorators, { kind: "method", name: "getUser", static: false, private: false, access: { has: obj => "getUser" in obj, get: obj => obj.getUser }, metadata: _metadata }, null, _instanceExtraInitializers);
-        __esDecorate(_classThis, null, _updateUser_decorators, { kind: "method", name: "replaceUser", static: false, private: false, access: { has: obj => "replaceUser" in obj, get: obj => obj.replaceUser }, metadata: _metadata }, null, _instanceExtraInitializers);
-        __esDecorate(_classThis, null, _updateUser_patch_decorators, { kind: "method", name: "patchUser", static: false, private: false, access: { has: obj => "patchUser" in obj, get: obj => obj.patchUser }, metadata: _metadata }, null, _instanceExtraInitializers);
+        __esDecorate(_classThis, null, _replaceUser_decorators, { kind: "method", name: "replaceUser", static: false, private: false, access: { has: obj => "replaceUser" in obj, get: obj => obj.replaceUser }, metadata: _metadata }, null, _instanceExtraInitializers);
+        __esDecorate(_classThis, null, _patchUser_decorators, { kind: "method", name: "patchUser", static: false, private: false, access: { has: obj => "patchUser" in obj, get: obj => obj.patchUser }, metadata: _metadata }, null, _instanceExtraInitializers);
         __esDecorate(_classThis, null, _updateTrustScore_decorators, { kind: "method", name: "updateTrustScore", static: false, private: false, access: { has: obj => "updateTrustScore" in obj, get: obj => obj.updateTrustScore }, metadata: _metadata }, null, _instanceExtraInitializers);
         __esDecorate(_classThis, null, _suspendUser_decorators, { kind: "method", name: "suspendUser", static: false, private: false, access: { has: obj => "suspendUser" in obj, get: obj => obj.suspendUser }, metadata: _metadata }, null, _instanceExtraInitializers);
         __esDecorate(_classThis, null, _unsuspendUser_decorators, { kind: "method", name: "unsuspendUser", static: false, private: false, access: { has: obj => "unsuspendUser" in obj, get: obj => obj.unsuspendUser }, metadata: _metadata }, null, _instanceExtraInitializers);
