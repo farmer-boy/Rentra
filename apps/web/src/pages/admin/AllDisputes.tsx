@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Card from '../../components/ui/Card';
-import { Scale, CheckCircle, Clock } from 'lucide-react';
+import { Scale, Clock } from 'lucide-react';
 
 interface Dispute {
   id: string;

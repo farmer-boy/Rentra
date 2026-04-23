@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Home, Plus, Lightbulb, Star, FileText, CreditCard, Scale, User, Heart, Wrench, MessageCircle, CheckCircle, AlertTriangle, Eye } from 'lucide-react';
+import { LayoutDashboard, Home, Plus, Lightbulb, Star, FileText, CreditCard, Scale, User, Heart, Wrench, MessageCircle, CheckCircle, AlertTriangle, Eye, Users, TrendingUp } from 'lucide-react';
 
 // Context
 import { ThemeProvider, useTheme } from './context/ThemeContext';
