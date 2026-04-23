@@ -88,7 +88,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = async () => {git
     try {
       await logout();
       navigate('/login');

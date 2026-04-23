@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Home, Plus, Bot, Lightbulb, Star, FileText, CreditCard, Scale, Shield, User, Heart, Wrench, MessageCircle, Users, TrendingUp, CheckCircle, AlertTriangle, Eye, Clock } from 'lucide-react';
+import { LayoutDashboard, Home, Plus, Lightbulb, Star, FileText, CreditCard, Scale, User, Heart, Wrench, MessageCircle, CheckCircle, AlertTriangle, Eye } from 'lucide-react';
 
 // Context
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -14,7 +14,6 @@ import Contact from './pages/contact/Contact';
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
 import AdminLayout from './components/layout/AdminLayout';
-import AdminSidebar from './components/layout/AdminSidebar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
 // Shared

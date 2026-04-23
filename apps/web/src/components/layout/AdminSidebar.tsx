@@ -31,7 +31,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ onNavigate, isMobileOpen = 
   const { user } = useAuthStore();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [collapseTimer, setCollapseTimer] = useState<NodeJS.Timeout | null>(null);
+  const [collapseTimer, setCollapseTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
   const { unreadCount } = useContactMessages();
 
   // On mobile only: keep expanded while overlay is open

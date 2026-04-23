@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Card from '../../components/ui/Card';
-import { FileText, Eye, Trash2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { FileText, Eye, Trash2, AlertTriangle } from 'lucide-react';
 
 interface Listing {
   id: string;

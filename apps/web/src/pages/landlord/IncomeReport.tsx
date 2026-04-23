@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Home, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Home } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 const IncomeReport = () => {

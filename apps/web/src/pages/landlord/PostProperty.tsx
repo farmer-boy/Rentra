@@ -171,7 +171,7 @@ export default function LandlordPostProperty() {
   };
 
   const canProceed = (): boolean => {
-    return (
+    const isValid: boolean = !!(
       formData.propertyType &&
       formData.city &&
       formData.area &&
@@ -182,6 +182,7 @@ export default function LandlordPostProperty() {
       formData.areaSize &&
       formData.description.length >= 20
     );
+    return isValid;
   };
 
   // Simulate AI checks

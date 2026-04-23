@@ -6,16 +6,8 @@ import { useChat } from '../../hooks/useChat';
 export default function ChatPage() {
   const token = useAuthStore((state) => state.token) || '';
 
-  const {
-    conversations,
-    currentConversation,
-    messages,
-    fetchConversations,
-    fetchMessages,
-    sendMessage,
-    markAsRead,
-    setCurrentConversation,
-  } = useChat(token);
+  const { conversations, currentConversation, messages, fetchConversations, fetchMessages, sendMessage, markAsRead, setCurrentConversation } = useChat(token);
+  const { user: authUser } = useAuthStore();
 
   const [messageInput, setMessageInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');

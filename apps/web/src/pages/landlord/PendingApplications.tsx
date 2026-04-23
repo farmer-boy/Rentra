@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle, XCircle, User, Briefcase, CreditCard, MapPin } from 'lucide-react';
+import { CheckCircle, XCircle, User, CreditCard, MapPin } from 'lucide-react';
 import Card from '../../components/ui/Card';
 
 interface Application {

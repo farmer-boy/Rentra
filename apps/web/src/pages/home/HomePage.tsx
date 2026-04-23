@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Shield, Zap, Users, TrendingUp, MapPin, Home, ChevronDown, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 

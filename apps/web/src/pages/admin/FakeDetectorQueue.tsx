@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Card from '../../components/ui/Card';
-import { Bot, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 interface FakeListingReport {
   id: string;
