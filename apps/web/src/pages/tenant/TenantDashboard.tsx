@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
-import { Bot, Lightbulb, Star, FileText, CreditCard, Scale, Home } from 'lucide-react';
+import { Bot, Lightbulb, Star, FileText, CreditCard, Home } from 'lucide-react';
 
 export default function TenantDashboard() {
   const { user } = useAuthStore();

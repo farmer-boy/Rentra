@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
-import Pill from '../../components/ui/Pill';
 
 interface Review {
   id: string;

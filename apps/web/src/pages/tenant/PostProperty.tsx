@@ -47,7 +47,7 @@ export default function TenantPostProperty() {
   };
 
   const canProceed = (): boolean => {
-    return (
+    const isValid: boolean = !!(
       formData.propertyType &&
       formData.city &&
       formData.area &&
@@ -58,6 +58,7 @@ export default function TenantPostProperty() {
       formData.areaSize &&
       formData.description.length >= 20
     );
+    return isValid;
   };
 
   return (
