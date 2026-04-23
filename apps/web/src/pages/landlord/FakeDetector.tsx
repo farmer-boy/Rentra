@@ -143,7 +143,7 @@ const LandlordFakeDetector = () => {
                 <div className="text-right">
                   <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2">Fraud Score</p>
                   <div className="text-center">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 border-4 border-gray-300 dark:border-gray-600">
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 border-4 border-gray-400 dark:border-gray-600">
                       <span className="text-2xl font-bold text-gray-900 dark:text-white">{result.fraudScore}</span>
                     </div>
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">out of 100</p>

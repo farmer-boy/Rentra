@@ -48,12 +48,12 @@ export default function Contact() {
   return (
     <div className={`min-h-screen ${isDark ? 'bg-[#0f0f0f] text-white' : 'bg-white text-black'}`}>
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition ${isDark ? 'bg-[#0f0f0f]/40 border-white/5' : 'bg-white/40 border-gray-300/20'} border-b`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition ${isDark ? 'bg-[#0f0f0f]/40 border-white/5' : 'bg-white/40 border-gray-400/30'} border-b`}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition group">
-            <img src="/logo.jpeg" alt="Rentra Logo" className="w-10 h-10 rounded-lg object-cover shadow-lg group-hover:shadow-green-500/50 transition" />
+            <img src="/logo.jpg" alt="Renova Logo" className="w-10 h-10 rounded-lg object-cover shadow-lg group-hover:shadow-green-500/50 transition" style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}} />
             <div>
-              <div className="text-xl font-bold text-green-500">Rentra</div>
+              <div className="text-xl font-bold text-green-500">Renova</div>
               <div className="text-[10px] text-green-400/70 font-semibold tracking-wider">AI RENTAL</div>
             </div>
           </Link>
@@ -74,7 +74,7 @@ export default function Contact() {
       {/* Hero */}
       <section className="pt-32 pb-16 px-4 text-center max-w-4xl mx-auto">
         <h1 className="text-5xl font-extrabold mb-4">Get in Touch</h1>
-        <p className={`text-lg ${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>
+        <p className={`text-lg ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
           Have questions? We're here to help! Reach out anytime.
         </p>
       </section>
@@ -83,7 +83,7 @@ export default function Contact() {
       <section className="max-w-6xl mx-auto px-4 pb-20">
         <div className="grid md:grid-cols-2 gap-12">
           {/* Contact Form */}
-          <div className={`p-8 rounded-xl border ${isDark ? 'border-white/10 bg-[#1a1a1a]' : 'border-gray-300 bg-gray-50'}`}>
+          <div className={`p-8 rounded-xl border ${isDark ? 'border-white/10 bg-[#1a1a1a]' : 'border-gray-400 bg-gray-50'}`}>
             <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -96,7 +96,7 @@ export default function Contact() {
                   className={`w-full px-4 py-2 rounded-lg border transition outline-none ${
                     isDark
                       ? 'bg-[#0f0f0f] border-white/10 text-white focus:border-green-500'
-                      : 'bg-white border-gray-300 text-black focus:border-green-500'
+                      : 'bg-white border-gray-400 text-black focus:border-green-500'
                   }`}
                   placeholder="Your name"
                 />
@@ -111,7 +111,7 @@ export default function Contact() {
                   className={`w-full px-4 py-2 rounded-lg border transition outline-none ${
                     isDark
                       ? 'bg-[#0f0f0f] border-white/10 text-white focus:border-green-500'
-                      : 'bg-white border-gray-300 text-black focus:border-green-500'
+                      : 'bg-white border-gray-400 text-black focus:border-green-500'
                   }`}
                   placeholder="your@email.com"
                 />
@@ -126,7 +126,7 @@ export default function Contact() {
                   className={`w-full px-4 py-2 rounded-lg border transition outline-none ${
                     isDark
                       ? 'bg-[#0f0f0f] border-white/10 text-white focus:border-green-500'
-                      : 'bg-white border-gray-300 text-black focus:border-green-500'
+                      : 'bg-white border-gray-400 text-black focus:border-green-500'
                   }`}
                   placeholder="+92-XXX-XXXXXXX"
                 />
@@ -141,7 +141,7 @@ export default function Contact() {
                   className={`w-full px-4 py-2 rounded-lg border transition outline-none resize-none ${
                     isDark
                       ? 'bg-[#0f0f0f] border-white/10 text-white focus:border-green-500'
-                      : 'bg-white border-gray-300 text-black focus:border-green-500'
+                      : 'bg-white border-gray-400 text-black focus:border-green-500'
                   }`}
                   placeholder="Your message..."
                 />
@@ -171,51 +171,51 @@ export default function Contact() {
             <h2 className="text-2xl font-bold mb-8">Contact Information</h2>
 
             {/* Email */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-300 hover:bg-gray-50'} transition cursor-pointer`}>
+            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
               <div className="flex items-start gap-4">
                 <Mail className="text-green-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <h3 className="font-bold mb-1">Email</h3>
-                  <p className={`${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>subssems336@gmail.com</p>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>subssems336@gmail.com</p>
                 </div>
               </div>
             </div>
 
             {/* Phone */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-300 hover:bg-gray-50'} transition cursor-pointer`}>
+            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
               <div className="flex items-start gap-4">
                 <Phone className="text-green-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <h3 className="font-bold mb-1">Phone</h3>
-                  <p className={`${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>+92-306-4141188</p>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>+92-306-4141188</p>
                 </div>
               </div>
             </div>
 
             {/* Address */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-300 hover:bg-gray-50'} transition cursor-pointer`}>
+            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
               <div className="flex items-start gap-4">
                 <MapPin className="text-green-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <h3 className="font-bold mb-1">Address</h3>
-                  <p className={`${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>p/o khot mehtab khan khot rada kishan, Pakistan</p>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>p/o khot mehtab khan khot rada kishan, Pakistan</p>
                 </div>
               </div>
             </div>
 
             {/* Hours */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-300 hover:bg-gray-50'} transition cursor-pointer`}>
+            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
               <div className="flex items-start gap-4">
                 <Clock className="text-green-500 mt-1 flex-shrink-0" size={24} />
                 <div>
                   <h3 className="font-bold mb-1">Business Hours</h3>
-                  <p className={`${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>24/7 Available</p>
+                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>24/7 Available</p>
                 </div>
               </div>
             </div>
 
             {/* Social Media */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 bg-[#1a1a1a]' : 'border-gray-300 bg-gray-50'}`}>
+            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 bg-[#1a1a1a]' : 'border-gray-400 bg-gray-50'}`}>
               <h3 className="font-bold mb-4">Follow Us</h3>
               <div className="flex gap-4">
                 <a
@@ -260,15 +260,15 @@ export default function Contact() {
       </section>
 
       {/* Footer */}
-      <footer className={`border-t py-12 px-4 ${isDark ? 'border-white/10 bg-[#0a0a0a]' : 'border-gray-300 bg-gray-50'}`}>
+      <footer className={`border-t py-12 px-4 ${isDark ? 'border-white/10 bg-[#0a0a0a]' : 'border-gray-400 bg-gray-50'}`}>
         <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-8 mb-8 text-sm">
           <div>
-            <h4 className="font-bold mb-4">Rentra</h4>
-            <p className={`${isDark ? 'text-[#666]' : 'text-gray-600'}`}>Transparent Renting, Powered by AI</p>
+            <h4 className="font-bold mb-4">Renova</h4>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Transparent Renting, Powered by AI</p>
           </div>
           <div>
             <h4 className="font-bold mb-4">Platform</h4>
-            <ul className={`space-y-2 ${isDark ? 'text-[#666]' : 'text-gray-600'}`}>
+            <ul className={`space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><a href="/#features" className="hover:text-green-500">Features</a></li>
               <li><a href="/#pricing" className="hover:text-green-500">Pricing</a></li>
               <li><a href="/#how-it-works" className="hover:text-green-500">How It Works</a></li>
@@ -276,7 +276,7 @@ export default function Contact() {
           </div>
           <div>
             <h4 className="font-bold mb-4">Support</h4>
-            <ul className={`space-y-2 ${isDark ? 'text-[#666]' : 'text-gray-600'}`}>
+            <ul className={`space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><Link to="/contact" className="hover:text-green-500">Contact</Link></li>
               <li><a href="/#faq" className="hover:text-green-500">FAQ</a></li>
               <li><a href="#" className="hover:text-green-500">Help Center</a></li>
@@ -284,7 +284,7 @@ export default function Contact() {
           </div>
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
-            <ul className={`space-y-2 ${isDark ? 'text-[#666]' : 'text-gray-600'}`}>
+            <ul className={`space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><a href="#" className="hover:text-green-500">Privacy</a></li>
               <li><a href="#" className="hover:text-green-500">Terms</a></li>
             </ul>
@@ -298,10 +298,13 @@ export default function Contact() {
             </div>
           </div>
         </div>
-        <div className={`border-t pt-8 text-center text-sm ${isDark ? 'border-white/10 text-[#666]' : 'border-gray-300 text-gray-600'}`}>
-          <p>© 2026 Rentra. All rights reserved. Made with ❤️ in Pakistan.</p>
+        <div className={`border-t pt-8 text-center text-sm ${isDark ? 'border-white/10 text-gray-400' : 'border-gray-400 text-gray-600'}`}>
+          <p>© 2026 Renova. All rights reserved. Made with ❤️ in Pakistan.</p>
         </div>
       </footer>
     </div>
   );
 }
+
+
+

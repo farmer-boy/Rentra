@@ -96,9 +96,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
       >
         <div className="w-6 h-6 rounded overflow-hidden flex items-center justify-center" style={{ backgroundColor: 'var(--surface2)' }}>
           <img 
-            src="/logo.jpeg" 
-            alt="Rentra Logo" 
+            src="/logo.jpg" 
+            alt="Renova Logo" 
             className="w-full h-full object-contain" 
+            style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}}
           />
         </div>
         <div className="text-[7px] md:text-[8px] font-mono uppercase tracking-wider" style={{ color: 'var(--text2)' }}>

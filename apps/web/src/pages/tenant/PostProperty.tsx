@@ -92,7 +92,7 @@ export default function TenantPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
+                          : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
                       }`}
                     >
                       <option value="">Select</option>
@@ -115,7 +115,7 @@ export default function TenantPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
+                          : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
                       }`}
                     >
                       <option value="">Select</option>
@@ -138,7 +138,7 @@ export default function TenantPostProperty() {
                     className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                       isDark
                         ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                        : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
+                        : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
                     }`}
                   >
                     <option value="">Select Area</option>
@@ -161,7 +161,7 @@ export default function TenantPostProperty() {
                     className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                       isDark
                         ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                        : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
+                        : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
                     }`}
                   />
                 </div>
@@ -180,7 +180,7 @@ export default function TenantPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
+                          : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
                       }`}
                     />
                   </div>
@@ -198,7 +198,7 @@ export default function TenantPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
+                          : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
                       }`}
                     />
                   </div>
@@ -217,7 +217,7 @@ export default function TenantPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-200 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
+                          : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
                       }`}
                     >
                       <option value="">Select</option>
@@ -241,7 +241,7 @@ export default function TenantPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
+                          : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
                       }`}
                     />
                   </div>
@@ -260,7 +260,7 @@ export default function TenantPostProperty() {
                     className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm resize-none transition-all duration-300 ${
                       isDark
                         ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                        : 'bg-white/50 border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
+                        : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
                     }`}
                   />
                 </div>
@@ -300,7 +300,7 @@ export default function TenantPostProperty() {
                 <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-200/50'
+                    : 'bg-white/30 border-gray-400/50'
                 }`}>
                   <div className="flex items-start gap-2">
                     <span className="text-xl">📸</span>
@@ -318,7 +318,7 @@ export default function TenantPostProperty() {
                 <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-200/50'
+                    : 'bg-white/30 border-gray-400/50'
                 }`}>
                   <div className="flex items-start gap-2">
                     <span className="text-xl">💰</span>
@@ -336,7 +336,7 @@ export default function TenantPostProperty() {
                 <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-200/50'
+                    : 'bg-white/30 border-gray-400/50'
                 }`}>
                   <div className="flex items-start gap-2">
                     <span className="text-xl">👤</span>
@@ -354,7 +354,7 @@ export default function TenantPostProperty() {
                 <div className={`p-3 rounded-lg border backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-200/50'
+                    : 'bg-white/30 border-gray-400/50'
                 }`}>
                   <div className="flex items-start gap-2">
                     <span className="text-xl">✍️</span>
@@ -386,3 +386,4 @@ export default function TenantPostProperty() {
     </>
   );
 }
+

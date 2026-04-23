@@ -95,7 +95,7 @@ export default function MaintenanceRequests() {
           <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
             Maintenance Requests 🛠️
           </h1>
-          <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'} mt-1`}>Ghar ki repair requests yahan bhejen</p>
+          <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mt-1`}>Ghar ki repair requests yahan bhejen</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -123,8 +123,8 @@ export default function MaintenanceRequests() {
                 placeholder="e.g., AC repair needed"
                 className={`w-full px-3 py-2 text-sm rounded border ${
                   isDark
-                    ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]'
-                    : 'bg-gray-50 border-gray-300 text-black placeholder-gray-500'
+                    ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500'
+                    : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'
                 } focus:outline-none focus:border-green-500`}
                 required
               />
@@ -141,8 +141,8 @@ export default function MaintenanceRequests() {
                 rows={3}
                 className={`w-full px-3 py-2 text-sm rounded border resize-none ${
                   isDark
-                    ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]'
-                    : 'bg-gray-50 border-gray-300 text-black placeholder-gray-500'
+                    ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500'
+                    : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'
                 } focus:outline-none focus:border-green-500`}
                 required
               />
@@ -159,7 +159,7 @@ export default function MaintenanceRequests() {
                 className={`w-full px-3 py-2 text-sm rounded border ${
                   isDark
                     ? 'bg-[#1f1f1f] border-white/10 text-white'
-                    : 'bg-gray-50 border-gray-300 text-black'
+                    : 'bg-gray-50 border-gray-400 text-black'
                 } focus:outline-none focus:border-green-500`}
               >
                 <option value="low">Low</option>
@@ -190,7 +190,7 @@ export default function MaintenanceRequests() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className={`font-bold ${isDark ? 'text-white' : 'text-black'}`}>{req.title}</h3>
-                    <p className={`text-[12px] ${isDark ? 'text-[#555]' : 'text-gray-600'} mt-0.5`}>
+                    <p className={`text-[12px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mt-0.5`}>
                       {req.property}
                     </p>
                   </div>
@@ -204,12 +204,12 @@ export default function MaintenanceRequests() {
                   </div>
                 </div>
 
-                <p className={`text-[12px] ${isDark ? 'text-[#aaa]' : 'text-gray-600'} mb-3`}>
+                <p className={`text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-3`}>
                   {req.description}
                 </p>
 
                 <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
                     Submitted: {req.createdDate} • Est. {req.estimatedDays} days
                   </span>
                   {req.status !== 'completed' && (
@@ -231,7 +231,7 @@ export default function MaintenanceRequests() {
       {maintenanceRequests.length === 0 && (
         <Card>
           <div className="text-center py-8">
-            <p className={`text-sm ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+            <p className={`text-sm ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
               Sab kuch theek hai! 🎉
             </p>
           </div>
@@ -240,3 +240,5 @@ export default function MaintenanceRequests() {
     </div>
   );
 }
+
+

@@ -8,7 +8,7 @@ export default function Profile() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>My Profile 👤</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>View your details and trust score</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>View your details and trust score</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -21,23 +21,23 @@ export default function Profile() {
             </div>
             <div className="flex-1">
               <div className={`font-bold text-[13px] ${isDark ? 'text-white' : 'text-black'}`}>Ali Raza</div>
-              <div className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>subssems336@gmail.com</div>
-              <div className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>+92 306 41411 · Lahore</div>
+              <div className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>subssems336@gmail.com</div>
+              <div className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>+92 306 41411 · Lahore</div>
               <div className="mt-1"><Pill variant="green">Verified</Pill></div>
             </div>
           </div>
           <div className="space-y-3">
             <div>
-              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>FULL NAME</label>
-              <input defaultValue="Ali Raza" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Full name" />
+              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>FULL NAME</label>
+              <input defaultValue="Ali Raza" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Full name" />
             </div>
             <div>
-              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>PHONE</label>
-              <input defaultValue="+92 306 41411" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Phone number" />
+              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>PHONE</label>
+              <input defaultValue="+92 306 41411" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Phone number" />
             </div>
             <div>
-              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>CNIC</label>
-              <input defaultValue="35202-XXXXXXX-X" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="CNIC" />
+              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>CNIC</label>
+              <input defaultValue="35202-XXXXXXX-X" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="CNIC" />
             </div>
           </div>
           <button className="w-full bg-green-500 text-black px-4 py-2.5 rounded-lg font-semibold text-[12px] hover:bg-green-400 transition-colors mt-4" title="Save Profile Changes">
@@ -92,3 +92,4 @@ export default function Profile() {
     </div>
   );
 }
+

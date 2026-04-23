@@ -105,7 +105,7 @@ export default function AdminMessagesPage() {
           <h2 className={`text-base lg:text-lg font-extrabold tracking-tight flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
             <Mail size={18} className="lg:size-5" /> <span className="hidden sm:inline">Messages</span>
           </h2>
-          <p className={`text-[10px] lg:text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-400'}`}>
+          <p className={`text-[10px] lg:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-400'}`}>
             {unreadCount} unread • {localMessages.length} total
           </p>
         </div>
@@ -284,3 +284,4 @@ export default function AdminMessagesPage() {
     </div>
   );
 }
+

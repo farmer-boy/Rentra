@@ -78,7 +78,7 @@ export default function ReviewsAndRatings() {
         <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
           My Reviews & Ratings ⭐
         </h1>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'} mt-1`}>Apni reviews aur overall rating dekho</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mt-1`}>Apni reviews aur overall rating dekho</p>
       </div>
 
       {/* Overall Rating Card */}
@@ -88,7 +88,7 @@ export default function ReviewsAndRatings() {
           <div className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-black'}`}>
             {(myRatings.reduce((a, b) => a + b.value, 0) / myRatings.length).toFixed(1)}
           </div>
-          <p className={`text-sm ${isDark ? 'text-[#555]' : 'text-gray-600'} mt-2`}>
+          <p className={`text-sm ${isDark ? 'text-gray-700' : 'text-gray-600'} mt-2`}>
             {myRatings.length} categories rated
           </p>
         </div>
@@ -110,7 +110,7 @@ export default function ReviewsAndRatings() {
                 style={{ width: `${rating.value}%` }}
               />
             </div>
-            <p className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+            <p className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
               {rating.description}
             </p>
           </Card>
@@ -147,7 +147,7 @@ export default function ReviewsAndRatings() {
                   className={`w-full px-3 py-2 text-sm rounded border ${
                     isDark
                       ? 'bg-[#1f1f1f] border-white/10 text-white'
-                      : 'bg-gray-50 border-gray-300 text-black'
+                      : 'bg-gray-50 border-gray-400 text-black'
                   } focus:outline-none focus:border-green-500`}
                 >
                   <option>Ahmed Khan (Gulberg III)</option>
@@ -182,7 +182,7 @@ export default function ReviewsAndRatings() {
                   className={`w-full px-3 py-2 text-sm rounded border resize-none ${
                     isDark
                       ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]'
-                      : 'bg-gray-50 border-gray-300 text-black placeholder-gray-500'
+                      : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'
                   } focus:outline-none focus:border-green-500`}
                 />
               </div>
@@ -212,7 +212,7 @@ export default function ReviewsAndRatings() {
                       <h3 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-black'}`}>
                         {review.landlordName}
                       </h3>
-                      <p className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>
+                      <p className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>
                         {review.property}
                       </p>
                     </div>
@@ -220,12 +220,12 @@ export default function ReviewsAndRatings() {
                       <div className="text-yellow-500">
                         {'⭐'.repeat(review.rating)}
                       </div>
-                      <p className={`text-[10px] font-mono ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+                      <p className={`text-[10px] font-mono ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
                         {review.date}
                       </p>
                     </div>
                   </div>
-                  <p className={`text-[12px] ${isDark ? 'text-[#aaa]' : 'text-gray-700'} mt-2`}>
+                  <p className={`text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-700'} mt-2`}>
                     {review.comment}
                   </p>
                 </div>
@@ -237,3 +237,5 @@ export default function ReviewsAndRatings() {
     </div>
   );
 }
+
+

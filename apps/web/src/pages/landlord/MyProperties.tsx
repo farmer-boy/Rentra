@@ -115,7 +115,7 @@ const MyProperties = () => {
               </div>
 
               {/* Price & Tenants */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between items-center">
+              <div className="border-t border-gray-400 dark:border-gray-700 pt-3 flex justify-between items-center">
                 <div>
                   <p className="text-xs text-gray-600 dark:text-gray-400">Monthly Rent</p>
                   <p className="text-lg font-semibold text-gray-900 dark:text-white">${property.price.toLocaleString()}</p>
@@ -152,3 +152,4 @@ const MyProperties = () => {
 };
 
 export default MyProperties;
+

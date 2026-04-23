@@ -100,7 +100,7 @@ const PendingApplications = () => {
                 </div>
 
                 {/* Application Details */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 text-sm mb-3 pb-3 border-b border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 text-sm mb-3 pb-3 border-b border-gray-400 dark:border-gray-700">
                   <div>
                     <p className="text-gray-600 dark:text-gray-400">Annual Income</p>
                     <div className="flex items-center text-gray-900 dark:text-white mt-1 font-semibold">
@@ -174,3 +174,4 @@ const PendingApplications = () => {
 };
 
 export default PendingApplications;
+

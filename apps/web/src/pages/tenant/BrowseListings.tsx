@@ -38,7 +38,7 @@ export default function BrowseListings() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Browse Listings 🏠</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Available rental properties in Lahore</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>Available rental properties in Lahore</p>
       </div>
 
       {/* Search Bar */}
@@ -48,12 +48,12 @@ export default function BrowseListings() {
           placeholder="🔍 Search area or property..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className={`flex-1 min-w-0 md:min-w-64 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]' : 'bg-white border-gray-300 text-black placeholder-gray-400'} border rounded-lg px-4 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`}
+          className={`flex-1 min-w-0 md:min-w-64 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-[#666]' : 'bg-white border-gray-400 text-black placeholder-gray-400'} border rounded-lg px-4 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`}
         />
-        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>All</button>
-        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Flat</button>
-        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Room</button>
-        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-300 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>House</button>
+        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-gray-300 hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-400 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>All</button>
+        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-gray-300 hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-400 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Flat</button>
+        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-gray-300 hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-400 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>Room</button>
+        <button className={`px-4 py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-gray-300 hover:text-white hover:bg-[#2a2a2a]' : 'bg-white border-gray-400 text-black hover:bg-gray-100'} border rounded-lg text-[13px] font-semibold transition-colors`}>House</button>
       </div>
 
       {/* Listings Grid */}
@@ -67,11 +67,11 @@ export default function BrowseListings() {
               </div>
             </div>
             <h3 className={`font-bold text-[14px] mb-1 ${isDark ? 'text-white' : 'text-black'}`}>{listing.title}</h3>
-            <p className={`text-[12px] mb-2 ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>📍 {listing.location}</p>
+            <p className={`text-[12px] mb-2 ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>📍 {listing.location}</p>
             <p className="text-[15px] font-extrabold text-green-500 mb-2">
-              Rs {listing.price.toLocaleString()} <span className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>/ month</span>
+              Rs {listing.price.toLocaleString()} <span className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>/ month</span>
             </p>
-            <div className={`flex gap-3 text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+            <div className={`flex gap-3 text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
               <span>🛏 {listing.beds} Bed{listing.beds !== 1 ? 's' : ''}</span>
               <span>🚿 {listing.baths} Bath</span>
               <span>📐 {listing.sqft} sqft</span>
@@ -82,3 +82,5 @@ export default function BrowseListings() {
     </div>
   );
 }
+
+

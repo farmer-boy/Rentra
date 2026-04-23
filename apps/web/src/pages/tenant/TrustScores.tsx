@@ -8,7 +8,7 @@ export default function TrustScores() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Trust Scores ⭐</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>AI-generated trust scores for tenants and landlords</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>AI-generated trust scores for tenants and landlords</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -31,7 +31,7 @@ export default function TrustScores() {
                 </div>
                 <div className="flex-1">
                   <div className={`font-bold text-[13px] ${isDark ? 'text-white' : 'text-black'}`}>{tenant.name}</div>
-                  <div className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>{tenant.details}</div>
+                  <div className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>{tenant.details}</div>
                   <div className="mt-1"><Pill variant={tenant.pill}>{tenant.status}</Pill></div>
                 </div>
               </div>
@@ -58,7 +58,7 @@ export default function TrustScores() {
                 </div>
                 <div className="flex-1">
                   <div className={`font-bold text-[13px] ${isDark ? 'text-white' : 'text-black'}`}>{landlord.name}</div>
-                  <div className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>{landlord.details}</div>
+                  <div className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>{landlord.details}</div>
                   <div className="mt-1"><Pill variant={landlord.pill}>{landlord.status}</Pill></div>
                 </div>
               </div>
@@ -69,3 +69,4 @@ export default function TrustScores() {
     </div>
   );
 }
+

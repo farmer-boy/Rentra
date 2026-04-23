@@ -11,7 +11,7 @@ export default function LandlordDashboard() {
         <h2 className={`text-lg font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
           Landlord Dashboard 🏢
         </h2>
-        <p className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-500'} mt-0.5`}>Manage your properties and tenants</p>
+        <p className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'} mt-0.5`}>Manage your properties and tenants</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4">
@@ -54,7 +54,7 @@ export default function LandlordDashboard() {
             { tenant: 'Sara Khan', month: 'Feb 2025', amount: 'Rs 9,500', status: 'Received', pill: 'green' as const },
             { tenant: 'Hamza Ali', month: 'Feb 2025', amount: 'Rs 31,000', status: 'Pending', pill: 'yellow' as const },
           ].map((p, i) => (
-            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
+            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-400 last:border-0">
               <div>
                 <div className="text-[11px] font-semibold">{p.tenant}</div>
                 <div className="text-[10px] text-gray-500">{p.month}</div>
@@ -70,3 +70,5 @@ export default function LandlordDashboard() {
     </div>
   );
 }
+
+

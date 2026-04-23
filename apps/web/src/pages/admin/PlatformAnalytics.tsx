@@ -135,7 +135,7 @@ const AdminPlatformAnalytics = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-400 dark:border-gray-700">
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">City</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Listings</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Users</th>
@@ -165,3 +165,4 @@ const AdminPlatformAnalytics = () => {
 };
 
 export default AdminPlatformAnalytics;
+

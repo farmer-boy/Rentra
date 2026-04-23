@@ -7,7 +7,7 @@ export default function LandlordProfile() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>My Profile 👤</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>Apni details aur properties dekho</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>Apni details aur properties dekho</p>
       </div>
 
       <Card>
@@ -18,10 +18,12 @@ export default function LandlordProfile() {
           </div>
           <div>
             <div className={`text-[12px] font-bold ${isDark ? 'text-[#ddd]' : 'text-gray-800'}`}>Landlord Profile</div>
-            <div className={`text-[11px] ${isDark ? 'text-[#888]' : 'text-gray-600'}`}>Manage your properties and details</div>
+            <div className={`text-[11px] ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Manage your properties and details</div>
           </div>
         </div>
       </Card>
     </div>
   );
 }
+
+

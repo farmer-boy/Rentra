@@ -150,7 +150,7 @@ const AdminAllDisputes = () => {
               </div>
 
               {/* Details & Actions */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between pt-3 border-t border-gray-400 dark:border-gray-700">
                 <p className="text-xs text-gray-500 dark:text-gray-500">
                   Filed on {new Date(dispute.filledDate).toLocaleDateString()}
                 </p>
@@ -180,3 +180,4 @@ const AdminAllDisputes = () => {
 };
 
 export default AdminAllDisputes;
+

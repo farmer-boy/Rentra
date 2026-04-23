@@ -8,7 +8,7 @@ export default function Disputes() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Dispute Resolution ⚠\ufe0f</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Resolve disputes within the app — no need to go to court</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>Resolve disputes within the app — no need to go to court</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -21,10 +21,10 @@ export default function Disputes() {
                 <span className={`text-[12px] font-bold ${isDark ? 'text-red-400' : 'text-red-700'}`}>Security Deposit Not Returned</span>
                 <Pill variant="red">Open</Pill>
               </div>
-              <div className={`text-[11px] mb-1 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>Ali Raza vs Tariq Hussain · DHA Studio</div>
-              <div className={`text-[11px] mb-3 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>Filed: 15 Jan 2025 · Amount: Rs 56,000</div>
+              <div className={`text-[11px] mb-1 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>Ali Raza vs Tariq Hussain · DHA Studio</div>
+              <div className={`text-[11px] mb-3 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>Filed: 15 Jan 2025 · Amount: Rs 56,000</div>
               <div className="flex gap-2">
-                <button className={`px-3 py-1.5 border rounded-lg text-[10px] font-semibold transition-colors ${isDark ? 'bg-[#1f1f1f] border-white/10 text-[#aaa] hover:bg-[#2a2a2a]' : 'bg-gray-200 border-gray-300 hover:bg-gray-300'}`}>Evidence Add</button>
+                <button className={`px-3 py-1.5 border rounded-lg text-[10px] font-semibold transition-colors ${isDark ? 'bg-[#1f1f1f] border-white/10 text-gray-300 hover:bg-[#2a2a2a]' : 'bg-gray-200 border-gray-400 hover:bg-gray-300'}`}>Evidence Add</button>
                 <button className="px-3 py-1.5 bg-green-500 text-black rounded-lg text-[10px] font-semibold hover:bg-green-400">Message →</button>
               </div>
             </div>
@@ -73,3 +73,5 @@ export default function Disputes() {
     </div>
   );
 }
+
+

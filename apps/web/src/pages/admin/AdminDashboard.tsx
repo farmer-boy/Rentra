@@ -9,7 +9,7 @@ export default function AdminDashboard() {
     <div>
       <div className="mb-3">
         <h2 className={`text-lg font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>Admin Dashboard 🛡️</h2>
-        <p className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-400'}`}>Platform moderation, users, and analytics</p>
+        <p className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-400'}`}>Platform moderation, users, and analytics</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4">
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
             <thead>
               <tr>
                 {['Listing', 'AI Score', 'Action'].map(h => (
-                  <th key={h} className={`text-left text-[9px] font-mono ${isDark ? 'text-[#555] border-white/10' : 'text-gray-500 border-gray-300'} tracking-widest pb-2 border-b`}>{h}</th>
+                  <th key={h} className={`text-left text-[9px] font-mono ${isDark ? 'text-gray-700 border-white/10' : 'text-gray-500 border-gray-400'} tracking-widest pb-2 border-b`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
             <thead>
               <tr>
                 {['User', 'Role', 'Trust', 'Status'].map(h => (
-                  <th key={h} className="text-left text-[10px] font-mono text-gray-500 tracking-widest pb-2 border-b border-gray-300">{h}</th>
+                  <th key={h} className="text-left text-[10px] font-mono text-gray-500 tracking-widest pb-2 border-b border-gray-400">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -82,3 +82,5 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+

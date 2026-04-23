@@ -8,7 +8,7 @@ export default function RentEstimator() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>AI Fair Rent Estimator 💡</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Area aur amenities ke hisaab se fair rent pata karo</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>Area aur amenities ke hisaab se fair rent pata karo</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -17,8 +17,8 @@ export default function RentEstimator() {
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Property Details Dalo</div>
           <div className="space-y-4">
             <div>
-              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>AREA / LOCATION</label>
-              <select defaultValue="gulberg" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Area/Location">
+              <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>AREA / LOCATION</label>
+              <select defaultValue="gulberg" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Area/Location">
                 <option value="gulberg">Gulberg III</option>
                 <option value="johar">Johar Town</option>
                 <option value="dha">DHA Phase 5</option>
@@ -27,30 +27,30 @@ export default function RentEstimator() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>PROPERTY TYPE</label>
-                <select defaultValue="flat" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Property type">
+                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>PROPERTY TYPE</label>
+                <select defaultValue="flat" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Property type">
                   <option value="flat">Flat</option>
                   <option value="room">Room</option>
                   <option value="house">House</option>
                 </select>
               </div>
               <div>
-                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>SIZE (SQFT)</label>
-                <input defaultValue="800" placeholder="Enter size in SQFT" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666]' : 'bg-gray-50 border-gray-300 text-black placeholder-gray-400'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500`} aria-label="Size in SQFT" />
+                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>SIZE (SQFT)</label>
+                <input defaultValue="800" placeholder="Enter size in SQFT" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-black placeholder-gray-400'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500`} aria-label="Size in SQFT" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>BEDROOMS</label>
-                <select defaultValue="2" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500`} aria-label="Number of bedrooms">
+                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>BEDROOMS</label>
+                <select defaultValue="2" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500`} aria-label="Number of bedrooms">
                   <option value="1">1</option>
                   <option value="2">2</option>
                   <option value="3">3</option>
                 </select>
               </div>
               <div>
-                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>FLOOR</label>
-                <select className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-300 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500`} aria-label="Floor level">
+                <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>FLOOR</label>
+                <select className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500`} aria-label="Floor level">
                   <option>Ground</option>
                   <option>1st</option>
                   <option>2nd</option>
@@ -61,7 +61,7 @@ export default function RentEstimator() {
               <span className="px-3 py-1.5 bg-green-100 border border-green-300 rounded-lg text-[11px] font-semibold text-green-700">Gas ✓</span>
               <span className="px-3 py-1.5 bg-green-100 border border-green-300 rounded-lg text-[11px] font-semibold text-green-700">Electricity ✓</span>
               <span className="px-3 py-1.5 bg-green-100 border border-green-300 rounded-lg text-[11px] font-semibold text-green-700">Water ✓</span>
-              <span className="px-3 py-1.5 bg-gray-100 border border-gray-300 rounded-lg text-[11px] font-semibold text-gray-700 cursor-pointer hover:bg-gray-200">Parking</span>
+              <span className="px-3 py-1.5 bg-gray-100 border border-gray-400 rounded-lg text-[11px] font-semibold text-gray-700 cursor-pointer hover:bg-gray-200">Parking</span>
             </div>
             <button className="w-full bg-green-500 text-black px-4 py-2.5 rounded-lg font-semibold text-[13px] hover:bg-green-400 transition-colors">
               🤖 Estimate Karo
@@ -84,19 +84,19 @@ export default function RentEstimator() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-max text-[12px]">
             <thead>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-gray-400">
                 <th className="text-left text-[10px] font-mono text-gray-500 pb-2">LISTING</th>
                 <th className="text-left text-[10px] font-mono text-gray-500 pb-2">RENT</th>
                 <th className="text-left text-[10px] font-mono text-gray-500 pb-2">VS FAIR</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-gray-400">
                 <td className="py-2">Flat A, Gulberg</td>
                 <td>Rs 20,000</td>
                 <td><Pill variant="green">Fair</Pill></td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-gray-400">
                 <td className="py-2">Flat B, Gulberg</td>
                 <td>Rs 28,000</td>
                 <td><Pill variant="red">+44% Over</Pill></td>
@@ -114,3 +114,4 @@ export default function RentEstimator() {
     </div>
   );
 }
+

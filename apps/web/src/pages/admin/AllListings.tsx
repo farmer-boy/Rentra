@@ -92,7 +92,7 @@ const AdminListings = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-400 dark:border-gray-700">
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Title</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Landlord</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">City</th>
@@ -160,3 +160,4 @@ const AdminListings = () => {
 };
 
 export default AdminListings;
+

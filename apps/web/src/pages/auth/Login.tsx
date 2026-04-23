@@ -72,7 +72,7 @@ export default function Login() {
             title="Go to home"
           >
             <div className={`w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
-              <img src="/logo.jpeg" alt="Rentra" className="w-full h-full object-contain" />
+              <img src="/logo.jpg" alt="Renova" className="w-full h-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
             </div>
           </button>
           <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
@@ -99,8 +99,8 @@ export default function Login() {
               title="Enter your email or username"
               className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm font-normal ${
                 isDark
-                  ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                  ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                  : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
               } outline-none`}
               required
             />
@@ -130,7 +130,7 @@ export default function Login() {
                 className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm font-normal ${
                   isDark
                     ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                    : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                    : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                 } outline-none`}
                 required
               />
@@ -165,3 +165,4 @@ export default function Login() {
     </div>
   );
 }
+

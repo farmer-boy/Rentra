@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <filter id="softFeath">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.8" />
+      <feDropShadow dx="0.5" dy="0.5" stdDeviation="1" flood-opacity="0.4" />
+      <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-opacity="0.2" />
+    </filter>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700&display=swap');
+    </style>
+  </defs>
+  <!-- Background -->
+  <rect width="64" height="64" fill="#ffffff" rx="8" />
+  <!-- Soft feathered circle with gradient -->
+  <circle cx="32" cy="32" r="28" fill="#22c55e" filter="url(#softFeath)" opacity="0.95" />
+  <!-- Inner accent -->
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.4" filter="url(#softFeath)" />
+  <!-- Text "R" as brand mark -->
+  <text x="32" y="42" font-family="'Outfit', sans-serif" font-size="32" font-weight="700" fill="#ffffff" text-anchor="middle" filter="url(#softFeath)" letter-spacing="-2">R</text>
+</svg>

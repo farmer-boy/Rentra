@@ -56,10 +56,11 @@ const registerStyles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('/logo1.jpeg');
+    background-image: url('/logo.jpg');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
+    filter: brightness(0.9) drop-shadow(0 0 10px rgba(0, 0, 0, 0.2));
   }
   
   .left-section::after {
@@ -284,8 +285,8 @@ export default function Register() {
           }}
           className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm ${
             isDark
-              ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-              : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+              ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+              : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
           } outline-none`}
           required
         />
@@ -304,7 +305,7 @@ export default function Register() {
           <div className="left-content">
             <h1>Create your account to explore premium rental properties</h1>
             <p>
-              Find, list, and manage properties with ease using Rentra's transparent rental platform. 
+              Find, list, and manage properties with ease using Renova's transparent rental platform. 
               Your journey to seamless property management starts here.
             </p>
           </div>
@@ -331,9 +332,9 @@ export default function Register() {
                 title="Go to home"
               >
                 <div className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
-                  <img src="/logo.jpeg" alt="Rentra" className="object-contain w-full h-full" />
+                  <img src="/logo.jpg" alt="Renova" className="object-contain w-full h-full" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
                 </div>
-                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Rentra</h2>
+                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Renova</h2>
               </button>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Join Pakistan's transparent rental platform
@@ -376,7 +377,7 @@ export default function Register() {
                     className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm ${
                       isDark
                         ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                        : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     } outline-none`}
                     required
                   />
@@ -412,7 +413,7 @@ export default function Register() {
                     className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm ${
                       isDark
                         ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                        : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     } outline-none`}
                     required
                   />
@@ -463,7 +464,7 @@ export default function Register() {
                     className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm ${
                       isDark
                         ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                        : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     } outline-none`}
                     required
                   />
@@ -493,7 +494,7 @@ export default function Register() {
                           ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500'
                           : isDark
                             ? 'bg-[#0f0f0f] text-gray-400 border-white/10 hover:text-gray-300 hover:border-white/20'
-                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:text-gray-900 hover:border-gray-300'
+                            : 'bg-gray-50 text-gray-600 border-gray-400 hover:text-gray-900 hover:border-gray-400'
                       }`}
                     >
                       {role === 'TENANT' ? 'Tenant' : 'Landlord'}
@@ -517,3 +518,5 @@ export default function Register() {
     </div>
   );
 }
+
+

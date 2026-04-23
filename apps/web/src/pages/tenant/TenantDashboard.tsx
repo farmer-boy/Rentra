@@ -26,12 +26,12 @@ export default function TenantDashboard() {
         <h1 className={`text-lg font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
           Welcome back, {user?.fullName?.split(' ')[0]} 👋
         </h1>
-        <p className={`text-xs ${isDark ? 'text-[#666]' : 'text-gray-600'} mt-0.5`}>Pakistan's AI-powered transparent rental platform</p>
+        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mt-0.5`}>Pakistan's AI-powered transparent rental platform</p>
       </div>
 
       {/* Quick Actions */}
       <div className="mb-4">
-        <div className={`text-xs font-bold mb-2 ${isDark ? 'text-[#666]' : 'text-gray-500'} uppercase tracking-widest`}>Quick Access</div>
+        <div className={`text-xs font-bold mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-widest`}>Quick Access</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1.5 md:gap-2">
           {quickActions.map((action) => (
             <button
@@ -59,14 +59,14 @@ export default function TenantDashboard() {
         <Card>
           <div className="flex items-center justify-between mb-2">
             <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-black'}`}>Recent Listings</span>
-            <span className={`text-xs font-mono ${isDark ? 'text-[#555] hover:text-green-500' : 'text-gray-500 hover:text-green-600'} cursor-pointer`}>View All →</span>
+            <span className={`text-xs font-mono ${isDark ? 'text-gray-700 hover:text-green-500' : 'text-gray-500 hover:text-green-600'} cursor-pointer`}>View All →</span>
           </div>
           <div className="overflow-x-auto">
           <table className="w-full min-w-max">
             <thead>
               <tr className="text-left">
                 {['Property', 'Area', 'Rent', 'Status'].map(h => (
-                  <th key={h} className={`text-xs font-mono ${isDark ? 'text-[#555] border-white/10' : 'text-gray-500 border-gray-200'} tracking-widest pb-2 border-b`}>{h}</th>
+                  <th key={h} className={`text-xs font-mono ${isDark ? 'text-gray-700 border-white/10' : 'text-gray-500 border-gray-400'} tracking-widest pb-2 border-b`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -78,8 +78,8 @@ export default function TenantDashboard() {
                 { name: '3 Bed House', area: 'Model Town', rent: 'Rs 35,000', status: 'Flagged 🤖', pill: 'red' as const },
               ].map((row, i) => (
                 <tr key={i} className={`${isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-50'} transition-colors`}>
-                  <td className={`py-2 text-xs ${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>{row.name}</td>
-                  <td className={`py-2 text-xs ${isDark ? 'text-[#aaa]' : 'text-gray-600'}`}>{row.area}</td>
+                  <td className={`py-2 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{row.name}</td>
+                  <td className={`py-2 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{row.area}</td>
                   <td className="py-2 text-xs text-green-600">{row.rent}</td>
                   <td className="py-2"><Pill variant={row.pill}>{row.status}</Pill></td>
                 </tr>
@@ -141,9 +141,9 @@ export default function TenantDashboard() {
               <div className="flex-1">
                 <span className={isDark ? 'text-white' : 'text-black'}>{item.text} </span>
                 <span className={item.color}>{item.highlight} </span>
-                <span className={isDark ? 'text-[#555]' : 'text-gray-500'}>{item.suffix}</span>
+                <span className={isDark ? 'text-gray-700' : 'text-gray-500'}>{item.suffix}</span>
               </div>
-              <span className={`text-xs font-mono whitespace-nowrap ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>{item.time}</span>
+              <span className={`text-xs font-mono whitespace-nowrap ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>{item.time}</span>
             </div>
           ))}
         </div>
@@ -151,3 +151,7 @@ export default function TenantDashboard() {
     </div>
   );
 }
+
+
+
+

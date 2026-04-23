@@ -8,7 +8,7 @@ export default function AIDetector() {
     <div>
       <div className="mb-6">
         <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>AI Fake Listing Detector 🤖</h2>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>Machine learning detects fraudulent listings</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>Machine learning detects fraudulent listings</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -20,27 +20,27 @@ export default function AIDetector() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-max text-[12px]">
             <thead>
-              <tr className={`border-b ${isDark ? 'border-white/10' : 'border-gray-300'}`}>
-                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>LISTING</th>
-                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>FRAUD %</th>
-                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>REASON</th>
-                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>ACTION</th>
+              <tr className={`border-b ${isDark ? 'border-white/10' : 'border-gray-400'}`}>
+                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>LISTING</th>
+                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>FRAUD %</th>
+                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>REASON</th>
+                <th className={`text-left text-[10px] font-mono pb-2 ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>ACTION</th>
               </tr>
             </thead>
             <tbody>
-              <tr className={`border-b ${isDark ? 'border-white/10' : 'border-gray-300'}`}>
-                <td className={`py-3 ${isDark ? 'text-[#aaa]' : 'text-black'}`}>3 Bed, Model Town</td>
+              <tr className={`border-b ${isDark ? 'border-white/10' : 'border-gray-400'}`}>
+                <td className={`py-3 ${isDark ? 'text-gray-300' : 'text-black'}`}>3 Bed, Model Town</td>
                 <td className="text-red-600 font-bold">87%</td>
-                <td className={`text-[11px] ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>Stolen photos</td>
+                <td className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>Stolen photos</td>
                 <td><Pill variant="red">Remove</Pill></td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-gray-400">
                 <td className="py-3">Luxury Villa, DHA</td>
                 <td className="text-red-600 font-bold">91%</td>
                 <td className="text-gray-600 text-[11px]">Price anomaly</td>
                 <td><Pill variant="red">Remove</Pill></td>
               </tr>
-              <tr className="border-b border-gray-300">
+              <tr className="border-b border-gray-400">
                 <td className="py-3">Room, Samanabad</td>
                 <td className="text-yellow-600 font-bold">54%</td>
                 <td className="text-gray-600 text-[11px]">Low photo count</td>
@@ -62,7 +62,7 @@ export default function AIDetector() {
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>AI Detection Signals</div>
           <div className="space-y-4">
             <div>
-              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>
+              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>
                 <span>📸 Photo Authenticity</span>
                 <span className="text-red-600 font-bold">HIGH RISK</span>
               </div>
@@ -72,7 +72,7 @@ export default function AIDetector() {
               </div>
             </div>
             <div>
-              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>
+              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>
                 <span>💰 Price vs Area Ratio</span>
                 <span className="text-yellow-600 font-bold">SUSPICIOUS</span>
               </div>
@@ -82,7 +82,7 @@ export default function AIDetector() {
               </div>
             </div>
             <div>
-              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>
+              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 <span>📝 Description Pattern</span>
                 <span className="text-green-600 font-bold">NORMAL</span>
               </div>
@@ -92,7 +92,7 @@ export default function AIDetector() {
               </div>
             </div>
             <div>
-              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>
+              <div className={`flex justify-between text-[12px] mb-2 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>
                 <span>👤 Account Posting Freq</span>
                 <span className="text-red-600 font-bold">HIGH RISK</span>
               </div>
@@ -110,3 +110,6 @@ export default function AIDetector() {
     </div>
   );
 }
+
+
+

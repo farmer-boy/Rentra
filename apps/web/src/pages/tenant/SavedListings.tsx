@@ -30,7 +30,7 @@ export default function SavedListings() {
         <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
           Saved Listings ⭐
         </h1>
-        <p className={`text-[13px] ${isDark ? 'text-[#555]' : 'text-gray-600'} mt-1`}>Apni pasand ke listings dekho</p>
+        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mt-1`}>Apni pasand ke listings dekho</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -42,7 +42,7 @@ export default function SavedListings() {
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <h3 className={`font-bold ${isDark ? 'text-white' : 'text-black'}`}>{listing.title}</h3>
-                    <p className={`text-sm ${isDark ? 'text-[#555]' : 'text-gray-600'}`}>{listing.location}</p>
+                    <p className={`text-sm ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>{listing.location}</p>
                   </div>
                   <Pill variant="green">
                     Rs {listing.price.toLocaleString()}
@@ -51,13 +51,13 @@ export default function SavedListings() {
                 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mb-3 text-[12px]">
                   <div>
-                    <span className={`${isDark ? 'text-[#555]' : 'text-gray-500'}`}>{listing.beds} Beds</span>
+                    <span className={`${isDark ? 'text-gray-700' : 'text-gray-500'}`}>{listing.beds} Beds</span>
                   </div>
                   <div>
-                    <span className={`${isDark ? 'text-[#555]' : 'text-gray-500'}`}>{listing.baths} Baths</span>
+                    <span className={`${isDark ? 'text-gray-700' : 'text-gray-500'}`}>{listing.baths} Baths</span>
                   </div>
                   <div>
-                    <span className={`${isDark ? 'text-[#555]' : 'text-gray-500'}`}>{listing.sqft} SQFT</span>
+                    <span className={`${isDark ? 'text-gray-700' : 'text-gray-500'}`}>{listing.sqft} SQFT</span>
                   </div>
                   <div>
                     <span className="text-yellow-500">⭐ {listing.landlordTrust}% Trust</span>
@@ -65,7 +65,7 @@ export default function SavedListings() {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className={`text-[11px] font-mono ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+                  <span className={`text-[11px] font-mono ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
                     Saved {listing.savedDate}
                   </span>
                   <div className="flex gap-2">
@@ -94,7 +94,7 @@ export default function SavedListings() {
       {savedListings.length === 0 && (
         <Card>
           <div className="text-center py-8">
-            <p className={`text-sm ${isDark ? 'text-[#555]' : 'text-gray-500'}`}>
+            <p className={`text-sm ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>
               Koi listings save nahi kiye ho abhi. 🔍
             </p>
           </div>
@@ -103,3 +103,4 @@ export default function SavedListings() {
     </div>
   );
 }
+
