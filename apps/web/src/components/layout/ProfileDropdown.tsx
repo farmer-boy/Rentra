@@ -78,9 +78,24 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
     onClose();
   };
 
+  const handleSwitchAccount = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Switch account failed:', error);
+      navigate('/login');
+    }
+  };
+
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      navigate('/login');
+    }
   };
 
   const getProfilePath = () => {
@@ -205,10 +220,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
 
       {/* Switch Account */}
       <button
-        onClick={async () => {
-          await logout();
-          navigate('/login');
-        }}
+        onClick={handleSwitchAccount}
         className={`${
           isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
         } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
