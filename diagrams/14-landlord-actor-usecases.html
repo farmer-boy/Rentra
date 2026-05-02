@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14-landlord-actor-usecases.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>14. Landlord Actor - Complete Use Cases & Workflows</h1>
+        <div class="mermaid">
+graph TD
+    Landlord["LANDLORD USER<br/>Property Owner<br/>Listing Creator<br/>Agreement Approver<br/>Payment Receiver"]
+    
+    System["System<br/>Database<br/>Services"]
+    
+    Tenant["Tenant<br/>Property Seeker"]
+    
+    Admin["Admin<br/>Moderator"]
+    
+    subgraph LandlordLifecycle["LANDLORD LIFECYCLE"]
+        Registration["Account Registration<br/>UC-001: Register<br/>UC-002: Email Verify<br/>UC-003: Phone Verify<br/>UC-004: Login<br/>UC-005: Reset Password<br/>UC-006: Profile Update"]
+        
+        PropertyManagement["Property Management<br/>UC-101: Create Listing<br/>UC-102: Upload Photos<br/>UC-104: Update Listing<br/>UC-105: Delete Listing<br/>UC-106: Publish Listing<br/>UC-113: View Favorites<br/>UC-114: View Reviews"]
+        
+        AgreementHandling["Agreement Handling<br/>UC-202: View Requests<br/>UC-203: Approve Agreement<br/>UC-204: Reject Agreement<br/>UC-209: View Agreements<br/>UC-210: Terminate Lease<br/>UC-211: Track Status<br/>UC-205: Review PDF"]
+        
+        PaymentReceiving["Payment Receiving<br/>UC-308: Receive Confirm<br/>UC-310: View History<br/>UC-313: Track Pending<br/>UC-309: Monitor Status"]
+        
+        ReputationManagement["Reputation Management<br/>UC-509: View Reviews<br/>UC-114: Read Feedback<br/>UC-507: See Approved Reviews<br/>UC-006: Update Profile"]
+        
+        Tenancy["Active Tenancy<br/>UC-209: View Agreements<br/>UC-604: Message Tenant<br/>UC-608: Receive Messages<br/>UC-615: Online Status<br/>UC-612: Archive Chats"]
+    end
+    
+    subgraph DisputeHandling["DISPUTE HANDLING"]
+        ReceiveDispute["Receive Dispute<br/>UC-405: Get Notification<br/>UC-406: View Details<br/>UC-403: See Evidence<br/>UC-407: Provide Defense<br/>UC-410: Submit Counter-evidence"]
+        
+        TrackDispute["Track Dispute Progress<br/>UC-414: View Status<br/>UC-405: Notifications<br/>UC-411: Attend Mediation<br/>UC-412: Accept Judgment<br/>UC-415: File Appeal"]
+        
+        ResolutionFollowup["Resolution Followup<br/>UC-413: Execute Resolution<br/>UC-312: Receive Refund Details<br/>UC-414: Confirm Closure<br/>UC-416: Case Closed"]
+    end
+    
+    subgraph Communication["COMMUNICATION & MESSAGING"]
+        TenantMessaging["Tenant Messaging<br/>UC-601: Start Chat<br/>UC-602: View Conversations<br/>UC-603: Open Chat<br/>UC-604: Send Message<br/>UC-605: Send Attachments<br/>UC-608: Receive Messages<br/>UC-609: Send Read Receipt<br/>UC-610: View History<br/>UC-611: Search Messages<br/>UC-612: Archive Chats<br/>UC-614: Notifications<br/>UC-615: Online Status"]
+        
+        Support["Support & Inquiries<br/>UC-801: Submit Inquiries<br/>UC-802: Track Status<br/>UC-803: Receive Response"]
+    end
+    
+    subgraph SystemNotifications["SYSTEM NOTIFICATIONS"]
+        EmailNotif["Email Notifications<br/>Registration confirm<br/>Email verification<br/>Listing approved<br/>New tenant request<br/>Agreement signed<br/>Payment received<br/>Payment failed<br/>Dispute filed<br/>Review published<br/>Monthly earnings<br/>Property expiring"]
+        
+        SMSNotif["SMS Alerts<br/>OTP codes<br/>Payment received<br/>New inquiry<br/>Dispute filed<br/>Urgent alerts"]
+        
+        PushNotif["Push Notifications<br/>Tenant applied<br/>Payment received<br/>Message received<br/>Typing indicator<br/>Dispute update<br/>Review published"]
+    end
+    
+    subgraph DataViews["LANDLORD VIEWS & DASHBOARDS"]
+        ProfileView["Profile View<br/>Personal info<br/>Trust score<br/>Badges earned<br/>Verification status<br/>Payment methods"]
+        
+        PropertiesView["Properties View<br/>All listings<br/>Active listings<br/>Drafts<br/>Archived<br/>Performance stats"]
+        
+        TenanciesView["Tenancies View<br/>Current tenants<br/>Lease terms<br/>Payment status<br/>Upcoming renewals<br/>Maintenance notes"]
+        
+        EarningsView["Earnings View<br/>Monthly income<br/>Payment history<br/>Commission info<br/>Withdrawals<br/>Analytics<br/>Trends"]
+        
+        DisputesView["Disputes View<br/>Active cases<br/>Case history<br/>Outcomes<br/>Evidence files<br/>Appeal status"]
+        
+        ReviewsView["Reviews View<br/>All reviews<br/>Ratings<br/>Average score<br/>Trends over time<br/>Response options"]
+        
+        ConversationsView["Conversations View<br/>Active chats<br/>Unread messages<br/>Tenant contacts<br/>Search history<br/>Archived chats"]
+    end
+    
+    Landlord -->|Account Setup| Registration
+    Registration -->|Completes| System
+    
+    Landlord -->|Uploads Property| PropertyManagement
+    PropertyManagement -->|Awaits Approval| Admin
+    PropertyManagement -->|Stored| System
+    
+    Landlord -->|Receives Requests| AgreementHandling
+    AgreementHandling -->|From Tenants| Tenant
+    AgreementHandling -->|Signs| System
+    
+    Landlord -->|Receives Payments| PaymentReceiving
+    PaymentReceiving -->|From Tenants| Tenant
+    PaymentReceiving -->|Via System| System
+    
+    Landlord -->|Manages Reputation| ReputationManagement
+    ReputationManagement -->|From Tenants| Tenant
+    
+    Landlord -->|Manages Active Lease| Tenancy
+    Tenancy -->|Communicates| Tenant
+    Tenancy -->|Real-time Chat| System
+    
+    Landlord -->|Receives Dispute| ReceiveDispute
+    ReceiveDispute -->|Filed by Tenant| Tenant
+    ReceiveDispute -->|Managed by Admin| Admin
+    
+    Landlord -->|Tracks Case| TrackDispute
+    TrackDispute -->|Get Updates| Admin
+    
+    Landlord -->|Follows Resolution| ResolutionFollowup
+    ResolutionFollowup -->|Implements| Admin
+    
+    Landlord -->|Chat with Tenant| TenantMessaging
+    TenantMessaging -->|Reaches| Tenant
+    TenantMessaging -->|Real-time| System
+    
+    Landlord -->|Contact Support| Support
+    Support -->|Reaches| Admin
+    
+    System -->|Sends| EmailNotif
+    System -->|Sends| SMSNotif
+    System -->|Sends| PushNotif
+    
+    Landlord -->|Manages| ProfileView
+    Landlord -->|Views| PropertiesView
+    Landlord -->|Tracks| TenanciesView
+    Landlord -->|Monitors| EarningsView
+    Landlord -->|Follows| DisputesView
+    Landlord -->|Checks| ReviewsView
+    Landlord -->|Accesses| ConversationsView
+    
+    style LandlordLifecycle fill:#f3e5f5
+    style DisputeHandling fill:#ffebee
+    style Communication fill:#e3f2fd
+    style SystemNotifications fill:#fff3e0
+    style DataViews fill:#e8f5e9
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9-review-rating-system.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>9. Review & Rating System - Trust Building</h1>
+        <div class="mermaid">
+graph TD
+    Tenant["Tenant User<br/>Complete Agreement<br/>Share Experience"]
+    Landlord["Landlord User<br/>View Reviews<br/>See Feedback"]
+    
+    ReviewFE["Review Interface<br/>Rating Scale 1-5<br/>Comment Box<br/>Submit Button"]
+    
+    ReviewAPI["Review Controller<br/>POST /reviews<br/>GET /reviews<br/>DELETE /reviews"]
+    
+    ReviewService["Review Service<br/>Validation<br/>Storage<br/>Aggregation"]
+    
+    subgraph ReviewTypes["REVIEW TYPES"]
+        ListingReview["Property Review<br/>Condition<br/>Amenities<br/>Maintenance<br/>Cleanliness"]
+        
+        LandlordReview["Landlord Review<br/>Professionalism<br/>Responsiveness<br/>Fairness<br/>Communication"]
+        
+        TenantReview["Tenant Review<br/>Reliability<br/>Respect<br/>Payment Behavior<br/>Property Care"]
+    end
+    
+    subgraph RatingScale["RATING SCALE"]
+        OneStar["1 Star<br/>Very Poor<br/>Serious Issues<br/>Not Recommended"]
+        
+        TwoStar["2 Stars<br/>Poor<br/>Multiple Issues<br/>Caution Advised"]
+        
+        ThreeStar["3 Stars<br/>Average<br/>Some Issues<br/>Acceptable"]
+        
+        FourStar["4 Stars<br/>Good<br/>Minor Issues<br/>Recommended"]
+        
+        FiveStar["5 Stars<br/>Excellent<br/>No Issues<br/>Highly Recommended"]
+    end
+    
+    subgraph ReviewProcess["REVIEW PROCESS"]
+        SUBMITTED["Review Submitted<br/>Data Captured<br/>Timestamp<br/>User Info<br/>Content"]
+        
+        MODERATION["Content Moderation<br/>Spam Check<br/>Profanity Filter<br/>Relevance Check<br/>Approve/Reject"]
+        
+        PUBLISHED["Review Published<br/>Visible to All<br/>Counted in Rating<br/>Searchable<br/>Public"]
+        
+        ARCHIVED["Review Archived<br/>Historical Record<br/>Not Displayed<br/>Still Counted<br/>Admin Access"]
+    end
+    
+    subgraph TrustMetrics["TRUST METRICS"]
+        AverageRating["Average Rating<br/>Weighted Score<br/>Recent Priority<br/>Minimum Reviews<br/>Display Format"]
+        
+        ReviewCount["Review Count<br/>Total Reviews<br/>Verified Buyers<br/>Recent Reviews<br/>Threshold"]
+        
+        TrustScore["Trust Score<br/>Algorithm<br/>Rating Impact<br/>Completion Rate<br/>Payment History"]
+    end
+    
+    subgraph AggregationEngine["AGGREGATION ENGINE"]
+        Calculation["Calculate Average<br/>Sum All Ratings<br/>Count Reviews<br/>Apply Weights<br/>Round Score"]
+        
+        Trending["Trending Analysis<br/>Recent vs Old<br/>Pattern Detection<br/>Anomalies<br/>Quality Check"]
+        
+        Badging["Badge Assignment<br/>Gold Badge<br/>Verified Host<br/>Top Rated<br/>Trusted User"]
+    end
+    
+    Database["Review Database<br/>Store Reviews<br/>Ratings<br/>Comments<br/>Timestamps<br/>Status"]
+    
+    SearchIndex["Search Index<br/>Elasticsearch<br/>Filter by Rating<br/>Sort by Stars<br/>Relevance"]
+    
+    AdminDashboard["Admin Dashboard<br/>Moderation Queue<br/>Approve Reviews<br/>Flag Spam<br/>Remove Fake"]
+    
+    Notifications["Notification Service<br/>New Review Alert<br/>Rating Change<br/>Badge Earned<br/>Email Notify"]
+    
+    Tenant -->|Complete Lease| ReviewFE
+    ReviewFE -->|Enter Rating| OneStar
+    ReviewFE -->|Enter Rating| TwoStar
+    ReviewFE -->|Enter Rating| ThreeStar
+    ReviewFE -->|Enter Rating| FourStar
+    ReviewFE -->|Enter Rating| FiveStar
+    
+    ReviewFE -->|Write Comment| ReviewAPI
+    ReviewAPI -->|Process| ReviewService
+    
+    ReviewService -->|New Review| SUBMITTED
+    SUBMITTED -->|Send for Review| MODERATION
+    
+    MODERATION -->|Approved| PUBLISHED
+    MODERATION -->|Rejected| ARCHIVED
+    
+    ReviewService -->|Store Review| Database
+    
+    PUBLISHED -->|Add to Index| SearchIndex
+    SearchIndex -->|Searchable| Landlord
+    
+    PUBLISHED -->|Calculate New Average| Calculation
+    Calculation -->|Update Rating| Database
+    
+    Trending -->|Analyze Pattern| Badging
+    Badging -->|Assign Badge| PUBLISHED
+    
+    PUBLISHED -->|Notify User| Notifications
+    Notifications -->|Email Landlord| Landlord
+    Notifications -->|Show on Profile| Landlord
+    
+    Calculation -->|Contribute to| TrustScore
+    ReviewCount -->|Contribute to| TrustScore
+    
+    AverageRating -->|Display on Listing| Landlord
+    ReviewCount -->|Show Count| Landlord
+    TrustScore -->|Impact Ranking| SearchIndex
+    
+    MODERATION -->|Queue| AdminDashboard
+    AdminDashboard -->|Approve/Reject| MODERATION
+    
+    TrustScore -->|Update User Profile| Database
+    
+    style ReviewTypes fill:#f3e5f5
+    style RatingScale fill:#fff3e0
+    style ReviewProcess fill:#e8f5e9
+    style TrustMetrics fill:#e3f2fd
+    style AggregationEngine fill:#ede7f6
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

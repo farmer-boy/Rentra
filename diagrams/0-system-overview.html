@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0-system-overview.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>0. RENTRA System Overview - Complete Architecture</h1>
+        <div class="mermaid">
+graph TB
+    Users["👥 USERS<br/>Tenants<br/>Landlords<br/>Admins"]
+    
+    WebApp["🖥️ WEB APPLICATION<br/>React 19.2.4<br/>TypeScript<br/>Zustand State<br/>React Router"]
+    
+    MobileApp["📱 MOBILE APP<br/>React Native<br/>Native Modules"]
+    
+    APIGateway["⚙️ API GATEWAY<br/>NestJS<br/>Express<br/>JWT Authentication<br/>Rate Limiting"]
+    
+    subgraph CoreModules["CORE SERVICES - 11 Modules"]
+        AuthModule["🔐 Authentication Module<br/>Register/Login<br/>JWT Tokens<br/>Password Hashing"]
+        
+        UserModule["👤 User Module<br/>Profile Management<br/>Trust Score<br/>Verification<br/>Suspension"]
+        
+        ListingModule["🏠 Listing Module<br/>Property CRUD<br/>Photo Upload<br/>Fraud Detection<br/>Search & Filter"]
+        
+        AgreementModule["📋 Agreement Module<br/>Contract Management<br/>PDF Generation<br/>Digital Signing<br/>Lifecycle Tracking"]
+        
+        PaymentModule["💳 Payment Module<br/>Rent Processing<br/>Payment Gateway<br/>Receipt Generation<br/>History Tracking"]
+        
+        DisputeModule["⚖️ Dispute Module<br/>Conflict Filing<br/>Mediation<br/>Resolution<br/>Admin Review"]
+        
+        ReviewModule["⭐ Review Module<br/>Rating System<br/>Comments<br/>Reputation<br/>Averaging"]
+        
+        MessageModule["💬 Message Module<br/>Real-time Chat<br/>Conversations<br/>Notifications<br/>File Sharing"]
+        
+        AdminModule["👮 Admin Module<br/>User Management<br/>Content Moderation<br/>Analytics<br/>Dispute Resolution"]
+        
+        ContactModule["📧 Contact Module<br/>Support Forms<br/>Inquiry Management<br/>Status Tracking"]
+        
+        AIModule["🤖 AI Module<br/>Fraud Detection<br/>ML Scoring<br/>Pattern Detection<br/>Recommendations"]
+    end
+    
+    subgraph DataLayer["DATABASE LAYER"]
+        PostgreSQL["🗄️ PostgreSQL<br/>Primary Database<br/>8 Core Tables<br/>Relationships<br/>Indexing"]
+        
+        Redis["⚡ Redis Cache<br/>Session Storage<br/>Token Blacklist<br/>Rate Limiting<br/>Temp Data"]
+    end
+    
+    subgraph ExternalServices["EXTERNAL SERVICES"]
+        PaymentGW["💰 Payment Gateway<br/>Stripe<br/>Razorpay<br/>JazzCash<br/>EasyPaisa"]
+        
+        Storage["☁️ AWS S3<br/>Photo Storage<br/>Document Storage<br/>CDN Distribution"]
+        
+        EmailSvc["📧 Email Service<br/>SendGrid<br/>Notifications<br/>Verification<br/>Alerts"]
+        
+        SMSSvc["📞 SMS Service<br/>Notifications<br/>OTP<br/>Alerts<br/>Updates"]
+    end
+    
+    subgraph Infrastructure["INFRASTRUCTURE"]
+        LoadBalancer["⚖️ Load Balancer<br/>Nginx<br/>Round Robin<br/>SSL/TLS"]
+        
+        Servers["🖥️ App Servers<br/>3x NestJS Instances<br/>Node.js 18<br/>Horizontal Scaling"]
+        
+        Monitoring["📊 Monitoring<br/>Prometheus<br/>Grafana<br/>ELK Stack<br/>Error Tracking"]
+    end
+    
+    Users -->|Access via| WebApp
+    Users -->|Access via| MobileApp
+    
+    WebApp -->|HTTP/REST| APIGateway
+    MobileApp -->|HTTP/REST| APIGateway
+    
+    APIGateway -->|Route to| AuthModule
+    APIGateway -->|Route to| UserModule
+    APIGateway -->|Route to| ListingModule
+    APIGateway -->|Route to| AgreementModule
+    APIGateway -->|Route to| PaymentModule
+    APIGateway -->|Route to| DisputeModule
+    APIGateway -->|Route to| ReviewModule
+    APIGateway -->|Route to| MessageModule
+    APIGateway -->|Route to| AdminModule
+    APIGateway -->|Route to| ContactModule
+    APIGateway -->|Route to| AIModule
+    
+    AuthModule -->|Query/Update| PostgreSQL
+    UserModule -->|Query/Update| PostgreSQL
+    ListingModule -->|Query/Update| PostgreSQL
+    AgreementModule -->|Query/Update| PostgreSQL
+    PaymentModule -->|Query/Update| PostgreSQL
+    DisputeModule -->|Query/Update| PostgreSQL
+    ReviewModule -->|Query/Update| PostgreSQL
+    MessageModule -->|Query/Update| PostgreSQL
+    AdminModule -->|Query/Update| PostgreSQL
+    ContactModule -->|Query/Update| PostgreSQL
+    
+    AuthModule -->|Store Session| Redis
+    PaymentModule -->|Cache Transactions| Redis
+    MessageModule -->|Real-time Updates| Redis
+    
+    ListingModule -->|Upload Photos| Storage
+    AgreementModule -->|Store PDFs| Storage
+    
+    ListingModule -->|Fraud Check| AIModule
+    
+    PaymentModule -->|Process Payment| PaymentGW
+    
+    UserModule -->|Send Verification| EmailSvc
+    AgreementModule -->|Agreement Notification| EmailSvc
+    PaymentModule -->|Payment Confirmation| EmailSvc
+    DisputeModule -->|Dispute Update| EmailSvc
+    
+    UserModule -->|Send OTP| SMSSvc
+    PaymentModule -->|Payment Alert| SMSSvc
+    
+    APIGateway -->|Forward to| LoadBalancer
+    LoadBalancer -->|Distribute| Servers
+    Servers -->|Monitor| Monitoring
+    
+    style CoreModules fill:#e3f2fd
+    style DataLayer fill:#f3e5f5
+    style ExternalServices fill:#e8f5e9
+    style Infrastructure fill:#fff3e0
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

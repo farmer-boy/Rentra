@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9-activity-listing.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>9. Activity Diagram - Listing Management Workflow</h1>
+        <div class="mermaid">
+graph TD
+    Start["Landlord Starts"] --> Auth{Authenticated?}
+    Auth -->|No| LoginMsg["Redirect to Login"]
+    LoginMsg --> End1["Login Required"]
+    
+    Auth -->|Yes| OpenForm["Open Listing Form"]
+    OpenForm --> FillForm["Fill Details:<br/>Title, Description<br/>Address, Type"]
+    FillForm --> ValidateForm{Form Valid?}
+    ValidateForm -->|No| FormError["Show Errors"]
+    FormError --> FillForm
+    
+    ValidateForm -->|Yes| PhotoUpload["Upload Photos"]
+    PhotoUpload --> ValidatePhoto{Photos OK?}
+    ValidatePhoto -->|No| PhotoError["Photo Error"]
+    PhotoError --> PhotoUpload
+    
+    ValidatePhoto -->|Yes| Submit["POST /listings"]
+    Submit --> S3Upload["S3: Upload photos"]
+    S3Upload --> FraudDetect["ML Fraud Check"]
+    
+    FraudDetect --> CheckScore{Fraud Score<br/>Low?}
+    CheckScore -->|No| AdminFlag["Flag for Admin<br/>status PENDING"]
+    CheckScore -->|Yes| Publish["status PUBLISHED"]
+    
+    AdminFlag --> AdminReview["Admin Reviews"]
+    AdminReview --> AdminDecision{Approved?}
+    AdminDecision -->|No| Reject["Reject & Notify"]
+    Reject --> End2["Rejected"]
+    AdminDecision -->|Yes| Publish
+    
+    Publish --> Success["Success Message"]
+    Success --> Dashboard["Go to Dashboard"]
+    Dashboard --> End3["Listing Active"]
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+﻿classDiagram
+    direction TB
+
+    %% ============ CORE ENTITIES ============
+    class User {
+        -String id
+        -String email
+        -String phone
+        -String password
+        -String fullName
+        -String cnic
+        -Role role
+        -int trustScore
+        -boolean isVerified
+        -boolean isSuspended
+        +register()
+        +login()
+        +updateProfile()
+        +getProfile()
+        +suspendAccount()
+        +verifyIdentity()
+    }
+
+    class Listing {
+        -String id
+        -String title
+        -String description
+        -String address
+        -String city
+        -String area
+        -PropertyType type
+        -int bedrooms
+        -int bathrooms
+        -int sqft
+        -int rent
+        -int deposit
+        -ListingStatus status
+        -float fraudScore
+        -String[] photos
+        -String landlordId
+        +createListing()
+        +updateListing()
+        +verifyListing()
+        +flagFraud()
+        +getListingDetails()
+    }
+
+    class Agreement {
+        -String id
+        -String listingId
+        -String tenantId
+        -String landlordId
+        -int rent
+        -int deposit
+        -Date startDate
+        -Date endDate
+        -String pdfUrl
+        -AgreementStatus status
+        +createAgreement()
+        +approveAgreement()
+        +rejectAgreement()
+        +generatePDF()
+        +signAgreement()
+        +terminateAgreement()
+    }
+
+    class Payment {
+        -String id
+        -String agreementId
+        -String tenantId
+        -int amount
+        -PaymentMethod method
+        -PaymentStatus status
+        -String transactionId
+        -String receiptUrl
+        -Date month
+        +processPayment()
+        +completePayment()
+        +failPayment()
+        +generateReceipt()
+        +getPaymentHistory()
+    }
+
+    class Dispute {
+        -String id
+        -String agreementId
+        -String tenantId
+        -String title
+        -String description
+        -int amount
+        -DisputeStatus status
+        -String resolution
+        +fileDispute()
+        +mediateDispute()
+        +resolveDispute()
+        +escalateDispute()
+    }
+
+    class Review {
+        -String id
+        -String listingId
+        -String userId
+        -int rating
+        -String comment
+        +submitReview()
+        +updateReview()
+        +deleteReview()
+    }
+
+    class Conversation {
+        -String id
+        -String participant1Id
+        -String participant2Id
+        -String listingId
+        -String agreementId
+        -Date lastMessageAt
+        +createConversation()
+        +getMessages()
+        +markAsRead()
+    }
+
+    class Message {
+        -String id
+        -String conversationId
+        -String senderId
+        -String content
+        -String attachmentUrl
+        -boolean isRead
+        -Date readAt
+        +sendMessage()
+        +editMessage()
+        +deleteMessage()
+    }
+
+    %% ============ SERVICE LAYER ============
+    class AuthService {
+        -JwtService jwt
+        -PrismaService prisma
+        -ConfigService config
+        +register(dto)
+        +login(dto)
+        +validateToken(token)
+        +refreshToken(token)
+        +hashPassword(password)
+        +comparePasswords(plain, hash)
+    }
+
+    class UserService {
+        -PrismaService prisma
+        +getUserProfile(userId)
+        +updateUserProfile(userId, data)
+        +updateTrustScore(userId, score)
+        +verifyUser(userId)
+        +suspendUser(userId)
+        +getAllUsers(filters)
+    }
+
+    class ListingService {
+        -PrismaService prisma
+        -FraudService fraud
+        -StorageService storage
+        +createListing(dto, userId)
+        +updateListing(id, dto, userId)
+        +deleteListing(id, userId)
+        +getListing(id)
+        +getAllListings(filters, page)
+        +getUserListings(userId)
+        +searchListings(query)
+        +verifyListing(id)
+        +flagListing(id, reason)
+    }
+
+    class AgreementService {
+        -PrismaService prisma
+        -PdfService pdf
+        -NotificationService notify
+        +createAgreement(dto)
+        +getAgreement(id)
+        +getAllAgreements()
+        +approveAgreement(id)
+        +rejectAgreement(id)
+        +generatePDF(id)
+        +signAgreement(id, signature)
+        +terminateAgreement(id)
+        +getAgreementByUser(userId)
+    }
+
+    class PaymentService {
+        -PrismaService prisma
+        -PaymentGateway gateway
+        -NotificationService notify
+        +createPayment(dto)
+        +getPayment(id)
+        +getAllPayments()
+        +processPayment(id)
+        +completePayment(id, transactionId)
+        +failPayment(id)
+        +getPaymentHistory(agreementId)
+        +getUserPayments(userId)
+        +generateReceipt(id)
+    }
+
+    class DisputeService {
+        -PrismaService prisma
+        -NotificationService notify
+        +createDispute(dto)
+        +getDispute(id)
+        +getAllDisputes()
+        +getAllDisputes(filters)
+        +mediateDispute(id)
+        +resolveDispute(id, resolution)
+        +escalateDispute(id)
+        +getDisputesByUser(userId)
+    }
+
+    class ReviewService {
+        -PrismaService prisma
+        +createReview(dto)
+        +getReview(id)
+        +getReviewsByListing(listingId)
+        +getReviewsByUser(userId)
+        +updateReview(id, dto)
+        +deleteReview(id)
+        +calculateAverageRating(listingId)
+    }
+
+    class ConversationService {
+        -PrismaService prisma
+        -WebSocketService ws
+        +createConversation(user1Id, user2Id)
+        +getConversation(id)
+        +getUserConversations(userId)
+        +getMessages(conversationId)
+        +sendMessage(dto)
+        +markAsRead(messageId)
+        +getUnreadCount(userId)
+    }
+
+    %% ============ CONTROLLER LAYER ============
+    class AuthController {
+        -AuthService authService
+        +register(dto)
+        +login(dto)
+        +getMe()
+    }
+
+    class UserController {
+        -UserService userService
+        +getProfile()
+        +updateProfile(dto)
+        +verifyEmail()
+        +suspendUser(userId)
+        +getAllUsers()
+    }
+
+    class ListingController {
+        -ListingService listingService
+        +createListing(dto)
+        +getListing(id)
+        +getAllListings(filters)
+        +updateListing(id, dto)
+        +deleteListing(id)
+        +getUserListings()
+        +searchListings(query)
+        +verifyListing(id)
+        +flagListing(id, reason)
+    }
+
+    class AgreementController {
+        -AgreementService agreeService
+        +createAgreement(dto)
+        +getAgreement(id)
+        +getAllAgreements()
+        +approveAgreement(id)
+        +rejectAgreement(id)
+        +getPDF(id)
+        +signAgreement(id)
+        +terminateAgreement(id)
+    }
+
+    class PaymentController {
+        -PaymentService payService
+        +createPayment(dto)
+        +getPayment(id)
+        +getAllPayments()
+        +processPayment(id)
+        +getPaymentHistory(agreementId)
+        +getUserPayments()
+    }
+
+    class DisputeController {
+        -DisputeService disputeService
+        +createDispute(dto)
+        +getDispute(id)
+        +getAllDisputes()
+        +mediateDispute(id)
+        +resolveDispute(id, resolution)
+    }
+
+    class ReviewController {
+        -ReviewService reviewService
+        +createReview(dto)
+        +getReview(id)
+        +updateReview(id, dto)
+        +deleteReview(id)
+        +getListingReviews(listingId)
+        +getUserReviews(userId)
+    }
+
+    class ConversationController {
+        -ConversationService convService
+        +createConversation(userId)
+        +getConversations()
+        +getMessages(conversationId)
+        +sendMessage(conversationId, dto)
+        +markAsRead(messageId)
+    }
+
+    %% ============ UTILITY & INFRASTRUCTURE ============
+    class PrismaService {
+        -PrismaClient client
+        +onModuleInit()
+        +onModuleDestroy()
+    }
+
+    class FraudService {
+        -PrismaService prisma
+        +detectFraud(listing)
+        +calculateFraudScore(listing)
+        +flagSuspiciousListing(listing)
+        +getMachineLearningScore(data)
+    }
+
+    class StorageService {
+        -S3Client s3
+        +uploadPhoto(file, listingId)
+        +uploadDocument(file, agreementId)
+        +deleteFile(fileKey)
+        +getFileUrl(fileKey)
+    }
+
+    class PdfService {
+        -PdfGenerator pdfkit
+        +generateAgreement(agreement)
+        +generateReceipt(payment)
+        +generateReport(data)
+    }
+
+    class PaymentGateway {
+        -StripeClient stripe
+        -RazorpayClient razorpay
+        +processPayment(amount, method)
+        +verifyTransaction(transactionId)
+        +refundPayment(transactionId, amount)
+    }
+
+    class NotificationService {
+        -EmailService email
+        -SmsService sms
+        +sendEmail(recipient, subject, body)
+        +sendSms(phone, message)
+        +notifyAgreementApproval(users)
+        +notifyPaymentReceived(users)
+    }
+
+    class AuthGuard {
+        +canActivate(context)
+        +validateToken(token)
+    }
+
+    class RolesGuard {
+        +canActivate(context)
+        +validateRoles(userRole, requiredRoles)
+    }
+
+    %% ============ RELATIONSHIPS ============
+    %% Controllers to Services
+    AuthController --> AuthService
+    UserController --> UserService
+    ListingController --> ListingService
+    AgreementController --> AgreementService
+    PaymentController --> PaymentService
+    DisputeController --> DisputeService
+    ReviewController --> ReviewService
+    ConversationController --> ConversationService
+
+    %% Services to Entities
+    AuthService --> User
+    UserService --> User
+    ListingService --> Listing
+    AgreementService --> Agreement
+    PaymentService --> Payment
+    DisputeService --> Dispute
+    ReviewService --> Review
+    ConversationService --> Conversation
+    ConversationService --> Message
+
+    %% Services to Infrastructure
+    AuthService --> PrismaService
+    UserService --> PrismaService
+    ListingService --> PrismaService
+    ListingService --> FraudService
+    ListingService --> StorageService
+    AgreementService --> PrismaService
+    AgreementService --> PdfService
+    AgreementService --> NotificationService
+    PaymentService --> PrismaService
+    PaymentService --> PaymentGateway
+    PaymentService --> NotificationService
+    DisputeService --> PrismaService
+    DisputeService --> NotificationService
+    ReviewService --> PrismaService
+    ConversationService --> PrismaService
+    ConversationService --> NotificationService
+
+    %% Fraud Detection
+    FraudService --> Listing
+
+    %% Security
+    AuthController --> AuthGuard
+    ListingController --> RolesGuard
+    AgreementController --> AuthGuard
+    PaymentController --> AuthGuard
+    DisputeController --> AuthGuard
+    ReviewController --> AuthGuard
+    ConversationController --> AuthGuard
+
+    %% Domain Relationships
+    User --> Listing
+    User --> Agreement
+    User --> Payment
+    User --> Dispute
+    User --> Review
+    User --> Conversation
+    User --> Message
+
+    Listing --> Agreement
+    Agreement --> Payment
+    Agreement --> Dispute

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-sequence-listing.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>5. Sequence Diagram - Listing Creation Process</h1>
+        <div class="mermaid">
+sequenceDiagram
+    actor Landlord
+    participant Web as Web App<br/>React
+    participant API as API Server<br/>NestJS
+    participant ListingService as ListingService
+    participant S3 as AWS S3<br/>Storage
+    participant FraudService as FraudService<br/>ML
+    participant DB as Database<br/>Prisma
+    
+    Landlord->>Web: Fill listing form<br/>(title, rent, etc)
+    Landlord->>Web: Upload photos
+    Web->>Web: Validate form data
+    Web->>API: POST /listings<br/>with images
+    API->>ListingService: create(dto, userId)
+    ListingService->>S3: Upload photos to S3
+    S3-->>ListingService: Photo URLs[]
+    ListingService->>FraudService: checkFraud(listing)
+    FraudService-->>ListingService: fraudScore: 0.25
+    ListingService->>DB: Create listing record<br/>status=PENDING
+    DB-->>ListingService: Listing created
+    ListingService-->>API: Listing data
+    API-->>Web: 201 Created
+    Web-->>Landlord: Show confirmation<br/>& listing ID
+    Landlord->>Web: View my listings<br/>(GET /listings/landlord/my-listings)
+    Web->>API: Fetch listings
+    API->>DB: Query listings by landlordId
+    DB-->>API: Return listings[]
+    API-->>Web: Listings data
+    Web-->>Landlord: Display listings
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

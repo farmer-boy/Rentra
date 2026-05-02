@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-dfd-listing.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>15. DFD Level 1 - Listing Creation Process</h1>
+        <div class="mermaid">
+graph TD
+    LANDLORD["Landlord<br/>User"]
+    
+    P1["1. Create<br/>Listing<br/>Validation<br/>Form processing"]
+    
+    DS1["Listings<br/>Table<br/>Store listing<br/>records"]
+    
+    P2["2. Upload<br/>Photos<br/>S3 upload<br/>Get URLs"]
+    
+    DS2["S3<br/>Bucket<br/>Image files<br/>CDN links"]
+    
+    P3["3. Fraud<br/>Check<br/>ML scoring<br/>Risk analysis"]
+    
+    DS3["Fraud<br/>Scores<br/>Historical<br/>patterns"]
+    
+    P4["4. Admin<br/>Review<br/>Manual check<br/>Approve/Reject"]
+    
+    P5["5. Notify<br/>Landlord<br/>Email<br/>Status update"]
+    
+    LANDLORD -->|Title, rent, deposit<br/>bedrooms, location| P1
+    LANDLORD -->|Photo files| P2
+    P1 -->|Listing ID, details| DS1
+    P2 -->|Photo URLs| DS2
+    DS1 -->|Listing data| P3
+    DS3 -->|Fraud patterns| P3
+    P3 -->|Fraud score| DS1
+    DS1 -->|Listing for review| P4
+    P4 -->|Approve/Reject status| DS1
+    DS1 -->|Status, details| P5
+    P5 -->|Notification| LANDLORD
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

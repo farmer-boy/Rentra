@@ -1,0 +1,112 @@
+﻿graph TD
+    Tenant["TENANT USER<br/>Property Seeker<br/>Renter<br/>Agreement Signatory<br/>Payment Maker"]
+    
+    System["System<br/>Database<br/>Services"]
+    
+    Landlord["Landlord<br/>Property Owner"]
+    
+    Admin["Admin<br/>Moderator"]
+    
+    subgraph TenantLifecycle["TENANT LIFECYCLE"]
+        Registration["Account Registration<br/>UC-001: Register<br/>UC-002: Email Verify<br/>UC-003: Phone Verify<br/>UC-004: Login<br/>UC-005: Reset Password<br/>UC-006: Profile Update"]
+        
+        Discovery["Property Discovery<br/>UC-111: Search Listings<br/>UC-112: View Details<br/>UC-113: Save Favorites<br/>UC-114: View Reviews"]
+        
+        Agreement["Agreement Phase<br/>UC-201: Request Agreement<br/>UC-202: View Status<br/>UC-205: Review PDF<br/>UC-207: Sign Contract<br/>UC-208: Activate Lease<br/>UC-209: View Agreement<br/>UC-211: Track Status"]
+        
+        Occupancy["Occupancy Phase<br/>UC-301: Track Payments<br/>UC-302: View Payment Due<br/>UC-304: Initiate Payment<br/>UC-306: Get Receipt<br/>UC-310: View History<br/>UC-604: Message Landlord<br/>UC-608: Mark Messages Read<br/>UC-615: Online Status"]
+        
+        EndTermination["End/Termination<br/>UC-210: Terminate Agreement<br/>UC-501: Write Review<br/>UC-502: Rate Property<br/>UC-503: Add Comment<br/>UC-505: Submit Review"]
+    end
+    
+    subgraph DisputeResolution["DISPUTE RESOLUTION"]
+        FileDispute["File Dispute<br/>UC-401: File Complaint<br/>UC-402: Select Type<br/>UC-403: Upload Evidence<br/>UC-404: Submit Dispute"]
+        
+        TrackDispute["Track Dispute<br/>UC-414: View Status<br/>UC-405: Get Notification<br/>UC-407: Provide Defense<br/>UC-410: Add Evidence"]
+        
+        ResolutionAction["Resolution Action<br/>UC-411: Attend Mediation<br/>UC-412: Accept Judgment<br/>UC-415: File Appeal<br/>UC-311: Request Refund<br/>UC-312: Receive Refund"]
+    end
+    
+    subgraph Communication["COMMUNICATION"]
+        DirectMessaging["Direct Messaging<br/>UC-601: Initiate Chat<br/>UC-602: View Chats<br/>UC-603: Open Chat<br/>UC-604: Send Message<br/>UC-605: Send File<br/>UC-606: Receive Message<br/>UC-607: See Typing<br/>UC-608: Mark Read<br/>UC-609: Read Receipt<br/>UC-610: View History<br/>UC-611: Search Messages<br/>UC-612: Archive Chat<br/>UC-613: Delete Message<br/>UC-614: Notifications<br/>UC-615: Online Status"]
+        
+        Support["Support<br/>UC-801: Submit Form<br/>UC-802: Track Status<br/>UC-803: Receive Response"]
+    end
+    
+    subgraph SystemNotifications["SYSTEM NOTIFICATIONS"]
+        EmailNotif["Email Notifications<br/>Registration confirm<br/>Email verification<br/>Password reset<br/>Agreement links<br/>Payment reminders<br/>Payment confirm<br/>Receipt<br/>Dispute updates<br/>Review approval<br/>Monthly summary"]
+        
+        SMSNotif["SMS Alerts<br/>OTP codes<br/>Payment due<br/>Payment confirm<br/>Dispute filed<br/>Urgent alerts"]
+        
+        PushNotif["Push Notifications<br/>Message received<br/>Typing indicator<br/>Message read<br/>Payment status<br/>Dispute update<br/>Review published"]
+    end
+    
+    subgraph DataViews["TENANT VIEWS & DATA"]
+        ProfileView["Profile View<br/>Personal info<br/>Trust score<br/>Badges earned<br/>Account status<br/>Documents"]
+        
+        ListingsView["Listings View<br/>Search results<br/>Favorites<br/>Recently viewed<br/>Recommendations"]
+        
+        AgreementsView["Agreements View<br/>Active agreements<br/>Past agreements<br/>Contract PDFs<br/>Dates & terms"]
+        
+        PaymentsView["Payments View<br/>Due payments<br/>Payment history<br/>Receipts<br/>Refund status"]
+        
+        DisputesView["Disputes View<br/>Filed disputes<br/>Dispute status<br/>Evidence uploaded<br/>Outcomes"]
+        
+        ReviewsView["Reviews View<br/>Written reviews<br/>Submitted reviews<br/>Moderation status<br/>Published reviews"]
+        
+        ConversationsView["Conversations View<br/>All chats<br/>Unread count<br/>Message search<br/>Archived chats"]
+    end
+    
+    Tenant -->|Account Setup| Registration
+    Registration -->|Completes| System
+    
+    Tenant -->|Finds Property| Discovery
+    Discovery -->|Browses| Landlord
+    
+    Tenant -->|Interested| Agreement
+    Agreement -->|Signs| Landlord
+    Agreement -->|Stored| System
+    
+    Tenant -->|Living in Property| Occupancy
+    Occupancy -->|Pays Rent| System
+    Occupancy -->|Communicates| Landlord
+    
+    Tenant -->|Moves Out| EndTermination
+    EndTermination -->|Rates| Landlord
+    EndTermination -->|Stores| System
+    
+    Tenant -->|Has Issue| FileDispute
+    FileDispute -->|Submitted| Admin
+    FileDispute -->|Stored| System
+    
+    Tenant -->|Tracks Case| TrackDispute
+    TrackDispute -->|Get Updates| Admin
+    
+    Tenant -->|Takes Action| ResolutionAction
+    ResolutionAction -->|Receives Outcome| Admin
+    ResolutionAction -->|Refund Processed| System
+    
+    Tenant -->|Direct Chat| DirectMessaging
+    DirectMessaging -->|Reaches| Landlord
+    DirectMessaging -->|Real-time| System
+    
+    Tenant -->|Contact Support| Support
+    Support -->|Reaches| Admin
+    
+    System -->|Sends| EmailNotif
+    System -->|Sends| SMSNotif
+    System -->|Sends| PushNotif
+    
+    Tenant -->|Manages| ProfileView
+    Tenant -->|Browses| ListingsView
+    Tenant -->|Tracks| AgreementsView
+    Tenant -->|Monitors| PaymentsView
+    Tenant -->|Follows| DisputesView
+    Tenant -->|Manages| ReviewsView
+    Tenant -->|Accesses| ConversationsView
+    
+    style TenantLifecycle fill:#e3f2fd
+    style DisputeResolution fill:#ffebee
+    style Communication fill:#f3e5f5
+    style SystemNotifications fill:#fff3e0
+    style DataViews fill:#e8f5e9

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-dispute-resolution-overview.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>8. Dispute Resolution Module - Complete Process</h1>
+        <div class="mermaid">
+graph TD
+    Tenant["Tenant User<br/>Experience Issue<br/>File Complaint"]
+    Landlord["Landlord User<br/>Dispute Notification<br/>Response"]
+    Admin["Admin User<br/>Mediation<br/>Investigation"]
+    
+    TenantFE["Frontend<br/>Dispute Form<br/>Evidence Upload<br/>Status Tracking"]
+    
+    DisputeController["Dispute Controller<br/>POST /disputes<br/>PATCH /disputes"]
+    
+    DisputeService["Dispute Service<br/>Business Logic<br/>Status Management"]
+    
+    subgraph DisputeTypes["DISPUTE TYPES"]
+        RentDispute["Rent Dispute<br/>Non-payment<br/>Late payment<br/>Overpayment"]
+        
+        DepositDispute["Deposit Dispute<br/>Deduction<br/>Damage Charges<br/>Refund Denial"]
+        
+        PropertyDispute["Property Dispute<br/>Maintenance<br/>Facility Problem<br/>Safety Issue"]
+        
+        TerminationDispute["Termination Dispute<br/>Illegal Eviction<br/>Early Term<br/>Settlement"]
+    end
+    
+    subgraph DisputeFlow["DISPUTE LIFECYCLE"]
+        FILED["FILED<br/>Complaint Created<br/>Evidence Attached<br/>Timestamp Set"]
+        
+        INVESTIGATION["INVESTIGATION<br/>Admin Reviews<br/>Collects Info<br/>Gathers Evidence"]
+        
+        MEDIATION["MEDIATION<br/>Both Parties<br/>Present Case<br/>Admin Facilitates"]
+        
+        RESOLVED["RESOLVED<br/>Agreement Found<br/>Terms Settled<br/>Action Taken"]
+        
+        CLOSED["CLOSED<br/>Execution Done<br/>Refunds Issued<br/>Case Archived"]
+    end
+    
+    subgraph AdminActions["ADMIN ACTIONS"]
+        Investigation["Investigation<br/>Contact Parties<br/>Verify Evidence<br/>Check History"]
+        
+        Mediation["Mediation<br/>Schedule Meeting<br/>Facilitate Talks<br/>Propose Solutions"]
+        
+        Arbitration["Arbitration<br/>Make Decision<br/>Issue Judgment<br/>Set Terms"]
+        
+        Enforcement["Enforcement<br/>Process Refunds<br/>Update Records<br/>Notify Parties"]
+    end
+    
+    subgraph Evidence["EVIDENCE MANAGEMENT"]
+        Documentation["Documentation<br/>Screenshots<br/>Bank Statements<br/>Contracts"]
+        
+        Witness["Witness Info<br/>Third Party<br/>Testimony<br/>References"]
+        
+        Storage["Evidence Storage<br/>Secure Archive<br/>Timestamped<br/>Encrypted"]
+    end
+    
+    subgraph Outcomes["DISPUTE OUTCOMES"]
+        TenantWins["Tenant Wins<br/>Refund Issued<br/>Damages Paid<br/>Compensation"]
+        
+        LandlordWins["Landlord Wins<br/>Keeps Amount<br/>Issue Dismissed<br/>Reputation Up"]
+        
+        Settlement["Settlement<br/>Compromise<br/>Partial Refund<br/>Payment Plan"]
+    end
+    
+    Database["Dispute Database<br/>Store All Cases<br/>Evidence Links<br/>Archive"]
+    
+    NotificationSvc["Notification Service<br/>Email Updates<br/>SMS Alerts<br/>Status Changes"]
+    
+    Tenant -->|File Complaint| TenantFE
+    TenantFE -->|Upload Evidence| DisputeController
+    DisputeController -->|Create Dispute| DisputeService
+    
+    Tenant -->|Select Type| RentDispute
+    Tenant -->|Select Type| DepositDispute
+    Tenant -->|Select Type| PropertyDispute
+    Tenant -->|Select Type| TerminationDispute
+    
+    DisputeService -->|New Dispute| FILED
+    
+    FILED -->|Notify Landlord| Landlord
+    FILED -->|Notify Admin| Admin
+    FILED -->|Store Evidence| Storage
+    
+    FILED -->|Assign to Admin| INVESTIGATION
+    
+    Admin -->|Review Case| Investigation
+    Investigation -->|Analyze Details| Arbitration
+    
+    INVESTIGATION -->|Contact Both| Mediation
+    Mediation -->|Facilitate| MEDIATION
+    
+    MEDIATION -->|Agreement Found| RESOLVED
+    MEDIATION -->|No Agreement| Arbitration
+    
+    Arbitration -->|Make Judgment| RESOLVED
+    
+    RESOLVED -->|Settlement| Settlement
+    RESOLVED -->|Tenant Wins| TenantWins
+    RESOLVED -->|Landlord Wins| LandlordWins
+    
+    TenantWins -->|Issue Refund| Enforcement
+    LandlordWins -->|Keep Amount| Enforcement
+    Settlement -->|Process Payment| Enforcement
+    
+    Enforcement -->|Execute Resolution| CLOSED
+    
+    FILED -->|Store Record| Database
+    INVESTIGATION -->|Update Record| Database
+    RESOLVED -->|Final Record| Database
+    CLOSED -->|Archive| Database
+    
+    FILED -->|Notify Both| NotificationSvc
+    INVESTIGATION -->|Status Update| NotificationSvc
+    RESOLVED -->|Resolution Notify| NotificationSvc
+    CLOSED -->|Final Notice| NotificationSvc
+    
+    NotificationSvc -->|Email or SMS| Tenant
+    NotificationSvc -->|Email or SMS| Landlord
+    
+    style DisputeTypes fill:#ffebee
+    style DisputeFlow fill:#f3e5f5
+    style AdminActions fill:#e3f2fd
+    style Evidence fill:#fff3e0
+    style Outcomes fill:#f0f4c3
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

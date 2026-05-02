@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-erd.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>3. Entity Relationship Diagram (ERD)</h1>
+        <div class="mermaid">
+erDiagram
+    USER ||--o{ LISTING : creates
+    USER ||--o{ AGREEMENT : signs
+    USER ||--o{ PAYMENT : makes
+    USER ||--o{ REVIEW : writes
+    USER ||--o{ DISPUTE : files
+    LISTING ||--o{ AGREEMENT : has
+    LISTING ||--o{ REVIEW : receives
+    AGREEMENT ||--o{ PAYMENT : includes
+    AGREEMENT ||--o{ DISPUTE : has
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

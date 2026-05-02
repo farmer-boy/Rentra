@@ -1,0 +1,113 @@
+﻿graph TB
+    Users["ðŸ‘¥ USERS<br/>Tenants<br/>Landlords<br/>Admins"]
+    
+    WebApp["ðŸ–¥ï¸ WEB APPLICATION<br/>React 19.2.4<br/>TypeScript<br/>Zustand State<br/>React Router"]
+    
+    MobileApp["ðŸ“± MOBILE APP<br/>React Native<br/>Native Modules"]
+    
+    APIGateway["âš™ï¸ API GATEWAY<br/>NestJS<br/>Express<br/>JWT Authentication<br/>Rate Limiting"]
+    
+    subgraph CoreModules["CORE SERVICES - 11 Modules"]
+        AuthModule["ðŸ” Authentication Module<br/>Register/Login<br/>JWT Tokens<br/>Password Hashing"]
+        
+        UserModule["ðŸ‘¤ User Module<br/>Profile Management<br/>Trust Score<br/>Verification<br/>Suspension"]
+        
+        ListingModule["ðŸ  Listing Module<br/>Property CRUD<br/>Photo Upload<br/>Fraud Detection<br/>Search & Filter"]
+        
+        AgreementModule["ðŸ“‹ Agreement Module<br/>Contract Management<br/>PDF Generation<br/>Digital Signing<br/>Lifecycle Tracking"]
+        
+        PaymentModule["ðŸ’³ Payment Module<br/>Rent Processing<br/>Payment Gateway<br/>Receipt Generation<br/>History Tracking"]
+        
+        DisputeModule["âš–ï¸ Dispute Module<br/>Conflict Filing<br/>Mediation<br/>Resolution<br/>Admin Review"]
+        
+        ReviewModule["â­ Review Module<br/>Rating System<br/>Comments<br/>Reputation<br/>Averaging"]
+        
+        MessageModule["ðŸ’¬ Message Module<br/>Real-time Chat<br/>Conversations<br/>Notifications<br/>File Sharing"]
+        
+        AdminModule["ðŸ‘® Admin Module<br/>User Management<br/>Content Moderation<br/>Analytics<br/>Dispute Resolution"]
+        
+        ContactModule["ðŸ“§ Contact Module<br/>Support Forms<br/>Inquiry Management<br/>Status Tracking"]
+        
+        AIModule["ðŸ¤– AI Module<br/>Fraud Detection<br/>ML Scoring<br/>Pattern Detection<br/>Recommendations"]
+    end
+    
+    subgraph DataLayer["DATABASE LAYER"]
+        PostgreSQL["ðŸ—„ï¸ PostgreSQL<br/>Primary Database<br/>8 Core Tables<br/>Relationships<br/>Indexing"]
+        
+        Redis["âš¡ Redis Cache<br/>Session Storage<br/>Token Blacklist<br/>Rate Limiting<br/>Temp Data"]
+    end
+    
+    subgraph ExternalServices["EXTERNAL SERVICES"]
+        PaymentGW["ðŸ’° Payment Gateway<br/>Stripe<br/>Razorpay<br/>JazzCash<br/>EasyPaisa"]
+        
+        Storage["â˜ï¸ AWS S3<br/>Photo Storage<br/>Document Storage<br/>CDN Distribution"]
+        
+        EmailSvc["ðŸ“§ Email Service<br/>SendGrid<br/>Notifications<br/>Verification<br/>Alerts"]
+        
+        SMSSvc["ðŸ“ž SMS Service<br/>Notifications<br/>OTP<br/>Alerts<br/>Updates"]
+    end
+    
+    subgraph Infrastructure["INFRASTRUCTURE"]
+        LoadBalancer["âš–ï¸ Load Balancer<br/>Nginx<br/>Round Robin<br/>SSL/TLS"]
+        
+        Servers["ðŸ–¥ï¸ App Servers<br/>3x NestJS Instances<br/>Node.js 18<br/>Horizontal Scaling"]
+        
+        Monitoring["ðŸ“Š Monitoring<br/>Prometheus<br/>Grafana<br/>ELK Stack<br/>Error Tracking"]
+    end
+    
+    Users -->|Access via| WebApp
+    Users -->|Access via| MobileApp
+    
+    WebApp -->|HTTP/REST| APIGateway
+    MobileApp -->|HTTP/REST| APIGateway
+    
+    APIGateway -->|Route to| AuthModule
+    APIGateway -->|Route to| UserModule
+    APIGateway -->|Route to| ListingModule
+    APIGateway -->|Route to| AgreementModule
+    APIGateway -->|Route to| PaymentModule
+    APIGateway -->|Route to| DisputeModule
+    APIGateway -->|Route to| ReviewModule
+    APIGateway -->|Route to| MessageModule
+    APIGateway -->|Route to| AdminModule
+    APIGateway -->|Route to| ContactModule
+    APIGateway -->|Route to| AIModule
+    
+    AuthModule -->|Query/Update| PostgreSQL
+    UserModule -->|Query/Update| PostgreSQL
+    ListingModule -->|Query/Update| PostgreSQL
+    AgreementModule -->|Query/Update| PostgreSQL
+    PaymentModule -->|Query/Update| PostgreSQL
+    DisputeModule -->|Query/Update| PostgreSQL
+    ReviewModule -->|Query/Update| PostgreSQL
+    MessageModule -->|Query/Update| PostgreSQL
+    AdminModule -->|Query/Update| PostgreSQL
+    ContactModule -->|Query/Update| PostgreSQL
+    
+    AuthModule -->|Store Session| Redis
+    PaymentModule -->|Cache Transactions| Redis
+    MessageModule -->|Real-time Updates| Redis
+    
+    ListingModule -->|Upload Photos| Storage
+    AgreementModule -->|Store PDFs| Storage
+    
+    ListingModule -->|Fraud Check| AIModule
+    
+    PaymentModule -->|Process Payment| PaymentGW
+    
+    UserModule -->|Send Verification| EmailSvc
+    AgreementModule -->|Agreement Notification| EmailSvc
+    PaymentModule -->|Payment Confirmation| EmailSvc
+    DisputeModule -->|Dispute Update| EmailSvc
+    
+    UserModule -->|Send OTP| SMSSvc
+    PaymentModule -->|Payment Alert| SMSSvc
+    
+    APIGateway -->|Forward to| LoadBalancer
+    LoadBalancer -->|Distribute| Servers
+    Servers -->|Monitor| Monitoring
+    
+    style CoreModules fill:#e3f2fd
+    style DataLayer fill:#f3e5f5
+    style ExternalServices fill:#e8f5e9
+    style Infrastructure fill:#fff3e0

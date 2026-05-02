@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12-component.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>12. Component Diagram - System Architecture</h1>
+        <div class="mermaid">
+graph TB
+    subgraph Frontend["📱 Frontend Layer<br/>React Web & Mobile"]
+        Pages["Pages & Screens<br/>Home, Auth, Listings<br/>Dashboard, Agreements"]
+        Components["UI Components<br/>Buttons, Forms<br/>Cards, Modals<br/>Tailwind CSS"]
+        Store["Zustand Store<br/>Auth State<br/>Listing Cache<br/>User Profile"]
+        Hooks["Custom Hooks<br/>useFetch<br/>useAuth<br/>useForm"]
+        API["API Client<br/>Axios<br/>Interceptors<br/>Error Handling"]
+    end
+    
+    subgraph Backend["⚙️ Backend Layer<br/>NestJS Server"]
+        Controllers["Controllers<br/>Auth, Listings<br/>Agreements, Payments<br/>Disputes, Reviews"]
+        Guards["Auth Guards<br/>JwtAuthGuard<br/>RolesGuard<br/>Ownership Check"]
+        Services["Services<br/>AuthService<br/>ListingService<br/>AgreementService<br/>PaymentService<br/>FraudService"]
+        Prisma["Prisma Client<br/>Type-safe ORM<br/>Query Builder<br/>Migrations"]
+    end
+    
+    subgraph Data["🗄️ Data Layer"]
+        PostgreSQL["PostgreSQL DB<br/>8 Tables<br/>Relationships<br/>Indexes"]
+        Redis["Redis Cache<br/>Sessions<br/>Token Blacklist<br/>Temp Data"]
+        S3["AWS S3<br/>File Storage<br/>Photos<br/>PDFs"]
+    end
+    
+    subgraph External["🔗 External Services"]
+        PaymentGW["Payment Gateway<br/>Stripe/Razorpay<br/>Transaction Mgmt"]
+        AIService["AI Service<br/>Fraud Detection<br/>ML Models<br/>Python"]
+        EmailService["Email Service<br/>Notifications<br/>Verification"]
+    end
+    
+    Pages -->Components
+    Components --> Store
+    Pages --> Hooks
+    Hooks --> API
+    Store --> API
+    
+    API -->|REST API<br/>Axios| Controllers
+    Controllers --> Guards
+    Guards --> Services
+    Services --> Prisma
+    
+    Prisma -->|CRUD| PostgreSQL
+    Services --> Redis
+    Services --> S3
+    
+    Services -->|Payment Request| PaymentGW
+    Services -->|Fraud Check| AIService
+    Services -->|Send Email| EmailService
+    SVC --> RD
+    SVC --> AI
+    SVC --> STOR
+    SVC --> PAY
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-sequence-payment.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>7. Sequence Diagram - Payment Processing Flow</h1>
+        <div class="mermaid">
+sequenceDiagram
+    actor Tenant
+    participant Web as Web App<br/>React
+    participant API as API Server<br/>NestJS
+    participant DB as Database<br/>Prisma
+    participant Gateway as Payment<br/>Gateway
+    
+    Tenant->>Web: Enter payment amount
+    Web->>API: POST /payments
+    API->>DB: Create payment record<br/>status=PENDING
+    API->>Gateway: Initiate payment<br/>(amount, method, token)
+    Gateway-->>API: Payment processing
+    alt Payment Success
+        Gateway-->>API: Success notification
+        API->>DB: Update status=COMPLETED<br/>Add transactionId
+        API-->>Web: Payment confirmed
+        Web-->>Tenant: Show receipt<br/>& confirmation
+    else Payment Failed
+        Gateway-->>API: Failure notification
+        API->>DB: Update status=FAILED
+        API-->>Web: Show error message
+        Web-->>Tenant: Retry option
+    end
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

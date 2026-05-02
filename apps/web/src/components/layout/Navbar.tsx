@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
 
   return (
     <nav
-      className="h-14 border-b flex items-center px-3 md:px-4 gap-2 md:gap-4 flex-shrink-0"
+      className="flex items-center flex-shrink-0 gap-2 px-3 border-b h-14 md:px-4 md:gap-4"
       style={{ 
         backgroundColor: 'var(--surface)',
         borderColor: 'var(--border)'
@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
       {/* Hamburger Menu - Mobile Only */}
       <button
         onClick={onMenuClick}
-        className="md:hidden p-2 rounded-lg transition-colors flex-shrink-0"
+        className="flex-shrink-0 p-2 transition-colors rounded-lg md:hidden"
         style={{ color: 'var(--text2)' }}
         title="Menu"
       >
@@ -91,14 +91,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
             '/tenant';
           navigate(dashboardPath);
         }}
-        className="flex items-center gap-2 flex-shrink-0 hover:opacity-80 transition-opacity"
+        className="flex items-center flex-shrink-0 gap-2 transition-opacity hover:opacity-80"
         title="Go to dashboard"
       >
-        <div className="w-6 h-6 rounded overflow-hidden flex items-center justify-center" style={{ backgroundColor: 'var(--surface2)' }}>
+        <div className="flex items-center justify-center w-6 h-6 overflow-hidden rounded" style={{ backgroundColor: 'var(--surface2)' }}>
           <img 
             src="/logo.jpg" 
             alt="Renova Logo" 
-            className="w-full h-full object-contain" 
+            className="object-contain w-full h-full" 
             style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}}
           />
         </div>
@@ -134,7 +134,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         {/* Notifications - Icon with Tooltip */}
         <div className="relative group">
           <button 
-            className="relative p-2 rounded-lg transition-colors"
+            className="relative p-2 transition-colors rounded-lg"
             style={{ color: 'var(--text2)' }}
             title="Notifications"
           >
@@ -158,7 +158,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         {/* Messages - Icon with Tooltip */}
         <div className="relative group">
           <button 
-            className="relative p-2 rounded-lg transition-colors"
+            className="relative p-2 transition-colors rounded-lg"
             style={{ color: 'var(--text2)' }}
             title="Messages"
             onClick={() => {
@@ -188,14 +188,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         </div>
 
         {/* Divider - Hidden on mobile */}
-        <div className="hidden md:block w-px h-5" style={{ backgroundColor: 'var(--border)' }}></div>
+        <div className="hidden w-px h-5 md:block" style={{ backgroundColor: 'var(--border)' }}></div>
 
         {/* Profile Avatar with Dropdown */}
         <div className="relative">
           <button
             ref={profileButtonRef}
             onClick={() => setProfileOpen(!profileOpen)}
-            className="relative p-1 rounded-lg transition-colors flex-shrink-0"
+            className="relative flex-shrink-0 p-1 transition-colors rounded-lg"
             style={{ color: 'var(--text)' }}
             title={user?.fullName}
           >
@@ -213,7 +213,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
           {profileOpen && (
             <div 
               ref={profileMenuRef}
-              className="absolute top-12 right-0 w-48 md:w-56 rounded-lg shadow-lg py-1 z-50"
+              className="absolute right-0 z-50 w-48 py-1 rounded-lg shadow-lg top-12 md:w-56"
               style={{ 
                 backgroundColor: 'var(--surface2)',
                 borderColor: 'var(--border)',

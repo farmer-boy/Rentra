@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10-state-listing.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>10. State Machine - Listing Lifecycle</h1>
+        <div class="mermaid">
+stateDiagram-v2
+    [*] --> DRAFT: Create
+    
+    DRAFT --> PENDING: Submit form
+    DRAFT --> ARCHIVED: Cancel
+    
+    PENDING --> PUBLISHED: Admin approves<br/>fraudScore OK
+    PENDING --> DRAFT: Edit/Cancel
+    PENDING --> ARCHIVED: Landlord cancels
+    
+    PUBLISHED --> RENTED: Agreement signed<br/>Tenant moves in
+    PUBLISHED --> ARCHIVED: Landlord deletes
+    
+    RENTED --> AVAILABLE: Lease ends<br/>Tenant vacates
+    RENTED --> ARCHIVED: Delete<br/>Lease terminated
+    
+    AVAILABLE --> RENTED: New agreement<br/>New tenant applies
+    AVAILABLE --> ARCHIVED: Landlord removes
+    
+    ARCHIVED --> [*]: End of lifecycle
+    
+    note right of DRAFT
+        Initial state
+        Photos & details
+        Not visible
+    end note
+    
+    note right of PENDING
+        Awaiting admin
+        fraud check
+        Fraud detection
+    end note
+    
+    note right of PUBLISHED
+        Visible in search
+        Tenants can apply
+        Active listing
+    end note
+    
+    note right of RENTED
+        Agreement signed
+        Rent payments made
+        Active lease
+    end note
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

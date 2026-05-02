@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-class-diagram.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>4. Class Diagram - Core Services & Controllers</h1>
+        <div class="mermaid">
+classDiagram
+    direction TB
+
+    class User {
+        -string id
+        -string email
+        -string phone
+        -string password
+        -string fullName
+        -string cnic
+        -Role role
+        -int trustScore
+        -boolean isVerified
+        -boolean isSuspended
+        +register(email, phone, fullName, cnic)
+        +login(email, password)
+        +getProfile(userId)
+        +updateProfile(userId, data)
+        +verifyUser(userId)
+        +suspendUser(userId)
+    }
+
+    class AuthService {
+        -JwtService jwt
+        -PrismaService prisma
+        -ConfigService config
+        +register(dto): AuthResponse
+        +login(dto): AuthResponse
+        +getMe(userId): User
+        +validateToken(token): JwtPayload
+        +refreshToken(token): AuthResponse
+        +hashPassword(password): string
+    }
+
+    class AuthController {
+        -AuthService authService
+        +POST register(dto)
+        +POST login(dto)
+        +GET me() useGuards: JwtAuthGuard
+    }
+
+    class Listing {
+        -string id
+        -string title
+        -string description
+        -string address
+        -string city
+        -int bedrooms
+        -int bathrooms
+        -int sqft
+        -int rent
+        -int deposit
+        -ListingStatus status
+        -float fraudScore
+        -string[] photos
+        -string landlordId
+        +createListing(data)
+        +updateListing(id, data)
+        +publishListing(id)
+        +archiveListing(id)
+        +getByLandlord(landlordId)
+    }
+
+    class ListingsService {
+        -PrismaService prisma
+        -FraudService fraud
+        +create(dto, userId): Listing
+        +findAll(filters): Listing[]
+        +findById(id): Listing
+        +update(id, dto, userId): Listing
+        +delete(id, userId): void
+        +getMyListings(landlordId): Listing[]
+        +checkFraud(listing): float
+    }
+
+    class ListingsController {
+        -ListingsService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findAll(filters)
+        +GET findById(id)
+        +PATCH update(id, dto) useGuards: JwtAuthGuard
+        +DELETE delete(id) useGuards: JwtAuthGuard
+        +GET myListings() useGuards: JwtAuthGuard
+    }
+
+    class Agreement {
+        -string id
+        -string listingId
+        -string tenantId
+        -string landlordId
+        -int rent
+        -int deposit
+        -Date startDate
+        -Date endDate
+        -string pdfUrl
+        -AgreementStatus status
+        +createAgreement(data)
+        +approveAgreement(id)
+        +generatePDF(id)
+        +terminate(id)
+    }
+
+    class AgreementsService {
+        -PrismaService prisma
+        -PdfService pdf
+        +create(dto): Agreement
+        +findAll(): Agreement[]
+        +findById(id): Agreement
+        +approve(id): Agreement
+        +reject(id): Agreement
+        +terminate(id): Agreement
+        +generatePDF(id): string
+    }
+
+    class AgreementsController {
+        -AgreementsService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findAll() useGuards: JwtAuthGuard
+        +GET findById(id) useGuards: JwtAuthGuard
+        +PATCH approve(id) useGuards: JwtAuthGuard
+        +PATCH reject(id) useGuards: JwtAuthGuard
+        +PATCH terminate(id) useGuards: JwtAuthGuard
+    }
+
+    class Payment {
+        -string id
+        -string agreementId
+        -string tenantId
+        -int amount
+        -PaymentMethod method
+        -PaymentStatus status
+        -string transactionId
+        -string receiptUrl
+        -Date month
+        +processPayment()
+        +confirmPayment()
+        +failPayment()
+        +generateReceipt()
+    }
+
+    class PaymentsService {
+        -PrismaService prisma
+        -PaymentGateway gateway
+        +create(dto): Payment
+        +findAll(): Payment[]
+        +findById(id): Payment
+        +complete(id): Payment
+        +fail(id): Payment
+        +getPaymentHistory(agreementId): Payment[]
+        +getMyPayments(userId): Payment[]
+    }
+
+    class PaymentsController {
+        -PaymentsService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findAll() useGuards: JwtAuthGuard
+        +GET findById(id) useGuards: JwtAuthGuard
+        +PATCH complete(id) useGuards: JwtAuthGuard
+        +PATCH fail(id) useGuards: JwtAuthGuard
+    }
+
+    class Dispute {
+        -string id
+        -string agreementId
+        -string tenantId
+        -string title
+        -string description
+        -int amount
+        -DisputeStatus status
+        -string resolution
+        +fileDispute(data)
+        +resolveDispute(id, resolution)
+    }
+
+    class DisputesService {
+        -PrismaService prisma
+        +create(dto): Dispute
+        +findAll(): Dispute[]
+        +resolve(id, resolution): Dispute
+        +escalate(id): Dispute
+    }
+
+    class DisputesController {
+        -DisputesService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findAll() useGuards: JwtAuthGuard
+        +PATCH resolve(id) useGuards: RolesGuard
+    }
+
+    class Review {
+        -string id
+        -string listingId
+        -string userId
+        -int rating
+        -string comment
+        +createReview(data)
+        +updateReview(id, data)
+        +deleteReview(id)
+    }
+
+    class ReviewsService {
+        -PrismaService prisma
+        +create(dto): Review
+        +findAll(): Review[]
+        +findById(id): Review
+        +update(id, dto): Review
+        +delete(id): void
+        +getByListing(listingId): Review[]
+    }
+
+    class ReviewsController {
+        -ReviewsService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findAll()
+        +PATCH update(id, dto) useGuards: JwtAuthGuard
+        +DELETE delete(id) useGuards: JwtAuthGuard
+    }
+
+    class Conversation {
+        -string id
+        -string participant1Id
+        -string participant2Id
+        -string listingId
+        -string agreementId
+        -Date lastMessageAt
+        +createConversation(data)
+        +getMessages(id)
+    }
+
+    class ConversationsService {
+        -PrismaService prisma
+        +create(dto): Conversation
+        +findAll(userId): Conversation[]
+        +findById(id): Conversation
+        +getMessages(conversationId): Message[]
+    }
+
+    class ConversationsController {
+        -ConversationsService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findAll() useGuards: JwtAuthGuard
+        +GET findById(id) useGuards: JwtAuthGuard
+    }
+
+    class Message {
+        -string id
+        -string conversationId
+        -string senderId
+        -string content
+        -boolean isRead
+        -Date readAt
+        -string attachmentUrl
+        +sendMessage(data)
+        +markAsRead(id)
+    }
+
+    class MessagesService {
+        -PrismaService prisma
+        +create(dto): Message
+        +findByConversation(conversationId): Message[]
+        +markAsRead(id): Message
+        +delete(id): void
+    }
+
+    class MessagesController {
+        -MessagesService service
+        +POST create(dto) useGuards: JwtAuthGuard
+        +GET findByConversation(conversationId) useGuards: JwtAuthGuard
+        +PATCH markAsRead(id) useGuards: JwtAuthGuard
+    }
+
+    class PrismaService {
+        -PrismaClient client
+        +onModuleInit()
+        +onModuleDestroy()
+    }
+
+    class FraudService {
+        +detectFraud(listing): float
+        +flagSuspicious(listing): void
+    }
+
+    AuthController --> AuthService
+    AuthService --> User
+    AuthService --> PrismaService
+    
+    ListingsController --> ListingsService
+    ListingsService --> Listing
+    ListingsService --> FraudService
+    ListingsService --> PrismaService
+    
+    AgreementsController --> AgreementsService
+    AgreementsService --> Agreement
+    AgreementsService --> PrismaService
+    
+    PaymentsController --> PaymentsService
+    PaymentsService --> Payment
+    PaymentsService --> PrismaService
+    
+    DisputesController --> DisputesService
+    DisputesService --> Dispute
+    DisputesService --> PrismaService
+    
+    ReviewsController --> ReviewsService
+    ReviewsService --> Review
+    ReviewsService --> PrismaService
+    
+    ConversationsController --> ConversationsService
+    ConversationsService --> Conversation
+    ConversationsService --> PrismaService
+    
+    MessagesController --> MessagesService
+    MessagesService --> Message
+    MessagesService --> PrismaService
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

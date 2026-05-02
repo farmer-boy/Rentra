@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13-deployment.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>13. Deployment Diagram - Production Infrastructure</h1>
+        <div class="mermaid">
+graph TB
+    Users["👥 End Users<br/>Web Browsers<br/>Mobile Apps"]
+    
+    CDN["🚀 CDN<br/>Cloudflare<br/>Edge Caching<br/>DDoS Protection"]
+    
+    LB["⚖️ Load Balancer<br/>Nginx<br/>Round-robin<br/>SSL/TLS"]
+    
+    subgraph AppServers["Application Servers<br/>NestJS Instances"]
+        S1["Server 1<br/>Instance 1<br/>Node.js 18<br/>Port 3000"]
+        S2["Server 2<br/>Instance 2<br/>Node.js 18<br/>Port 3000"]
+        S3["Server 3<br/>Instance 3<br/>Node.js 18<br/>Port 3000"]
+    end
+    
+    subgraph Database["Database Cluster"]
+        PGPRI["PostgreSQL<br/>Primary<br/>Write master<br/>Replication"]
+        PGREP["PostgreSQL<br/>Replica<br/>Read-only<br/>Backup"]
+    end
+    
+    subgraph Cache["Cache Layer"]
+        RMASTER["Redis<br/>Master<br/>Session store<br/>Token blacklist"]
+        RSLAVE["Redis<br/>Slave<br/>Read replica<br/>Backup"]
+    end
+    
+    subgraph Storage["Object Storage"]
+        S3Storage["AWS S3<br/>Photos<br/>PDFs<br/>Documents"]
+    end
+    
+    subgraph Monitoring["Monitoring & Logging"]
+        Prometheus["Prometheus<br/>Metrics<br/>Alerting"]
+        ELK["ELK Stack<br/>Log aggregation<br/>Kibana dashboard"]
+    end
+    
+    Users -->|HTTPS| CDN
+    CDN -->|Route| LB
+    LB -->|Distribute| S1
+    LB -->|Distribute| S2
+    LB -->|Distribute| S3
+    
+    S1 -->|Read/Write| PGPRI
+    S2 -->|Read/Write| PGPRI
+    S3 -->|Read/Write| PGPRI
+    PGPRI -->|Replicate| PGREP
+    
+    S1 -->|Session/Cache| RMASTER
+    S2 -->|Session/Cache| RMASTER
+    S3 -->|Session/Cache| RMASTER
+    RMASTER -->|Backup| RSLAVE
+    
+    S1 -->|Upload/Read| S3Storage
+    S2 -->|Upload/Read| S3Storage
+    S3 -->|Upload/Read| S3Storage
+    
+    S1 -->|Metrics| Prometheus
+    S2 -->|Metrics| Prometheus
+    S3 -->|Metrics| Prometheus
+    
+    S1 -->|Logs| ELK
+    S2 -->|Logs| ELK
+    S3 -->|Logs| ELK
+    RMASTER --> RSLAVE
+    
+    S1 --> MON
+    S2 --> MON
+    S1 --> LOG
+    S2 --> LOG
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

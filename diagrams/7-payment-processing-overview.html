@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7-payment-processing-overview.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>7. Payment Processing Module - Complete System</h1>
+        <div class="mermaid">
+graph TD
+    Tenant["Tenant User<br/>View Due Rent<br/>Pay Monthly"]
+    
+    PaymentFE["Payment Dashboard<br/>Amount Display<br/>Payment Methods<br/>Transaction History"]
+    
+    PaymentAPI["Payment Controller<br/>POST /payments<br/>PATCH /payments/:id<br/>GET /payments"]
+    
+    PaymentService["Payment Service<br/>Business Logic<br/>Status Management<br/>Record Keeping"]
+    
+    subgraph PaymentMethods["PAYMENT METHODS SUPPORTED"]
+        JazzCash["JazzCash<br/>Pakistan Mobile<br/>Operator<br/>Quick Transfer"]
+        
+        EasyPaisa["EasyPaisa<br/>Pakistan Mobile<br/>Operator<br/>Easy Access"]
+        
+        BankTransfer["Bank Transfer<br/>Direct Account<br/>Government Banks<br/>Corporate Accounts"]
+        
+        Stripe["Stripe Integration<br/>Credit/Debit Card<br/>International<br/>Recurring Payments"]
+    end
+    
+    subgraph PaymentFlow["PAYMENT WORKFLOW"]
+        PENDING["PENDING<br/>Payment Created<br/>Awaiting Submission<br/>Not Processed"]
+        
+        PROCESSING["PROCESSING<br/>Sent to Gateway<br/>Verification<br/>Authorization"]
+        
+        COMPLETED["COMPLETED<br/>Transaction Success<br/>Funds Received<br/>Rent Applied"]
+        
+        FAILED["FAILED<br/>Transaction Declined<br/>Insufficient Funds<br/>Invalid Card<br/>Timeout"]
+        
+        REFUNDED["REFUNDED<br/>Refund Issued<br/>Manual Refund<br/>System Refund"]
+    end
+    
+    subgraph GatewayProcessing["GATEWAY PROCESSING"]
+        StripeGW["Stripe API<br/>Payment Processing<br/>Webhook Handling<br/>Charge Creation"]
+        
+        RazorpayGW["Razorpay API<br/>India Integration<br/>Multiple Methods<br/>Settlement"]
+        
+        PakGateway["Pakistan Operators<br/>JazzCash API<br/>EasyPaisa API<br/>Direct Integration"]
+        
+        Verification["Verification<br/>CVV Check<br/>3D Secure<br/>Fraud Detection<br/>OTP Validation"]
+    end
+    
+    subgraph FinancialRecords["FINANCIAL RECORDS"]
+        Database["Payment Database<br/>Store Payments<br/>Amount<br/>Date<br/>Status<br/>Gateway Reference"]
+        
+        ReceiptGeneration["Receipt Generation<br/>PDF Format<br/>Invoice Number<br/>Details<br/>Signature"]
+        
+        Reporting["Financial Reports<br/>Monthly Summaries<br/>Landlord Earnings<br/>Tenant Payments<br/>Refund Tracking"]
+    end
+    
+    NotificationSvc["Notification Service<br/>Email Receipts<br/>SMS Confirmation<br/>Alerts<br/>Reminders"]
+    
+    Landlord["Landlord User<br/>View Receipts<br/>Track Earnings"]
+    
+    DisputeModule["Dispute Module<br/>Link Payments<br/>Refund Disputes<br/>Payment Conflicts"]
+    
+    Tenant -->|Initiate Payment| PaymentFE
+    PaymentFE -->|Select Method| JazzCash
+    PaymentFE -->|Select Method| EasyPaisa
+    PaymentFE -->|Select Method| BankTransfer
+    PaymentFE -->|Select Method| Stripe
+    
+    JazzCash -->|Send Request| PaymentAPI
+    EasyPaisa -->|Send Request| PaymentAPI
+    BankTransfer -->|Send Request| PaymentAPI
+    Stripe -->|Send Request| PaymentAPI
+    
+    PaymentAPI -->|Create Record| PaymentService
+    PaymentService -->|New Payment| PENDING
+    
+    PENDING -->|Submit to Gateway| PROCESSING
+    
+    PROCESSING -->|Route to Gateway| StripeGW
+    PROCESSING -->|Route to Gateway| RazorpayGW
+    PROCESSING -->|Route to Gateway| PakGateway
+    
+    StripeGW -->|Verify Details| Verification
+    RazorpayGW -->|Verify Details| Verification
+    PakGateway -->|Verify Details| Verification
+    
+    Verification -->|Success| COMPLETED
+    Verification -->|Failure| FAILED
+    
+    COMPLETED -->|Store Transaction| Database
+    COMPLETED -->|Generate Receipt| ReceiptGeneration
+    COMPLETED -->|Generate Confirmation| NotificationSvc
+    
+    FAILED -->|Store Failed Record| Database
+    FAILED -->|Notify Tenant| NotificationSvc
+    FAILED -->|Show Retry Option| PaymentFE
+    
+    ReceiptGeneration -->|Email Receipt| NotificationSvc
+    NotificationSvc -->|Send to Tenant| Tenant
+    NotificationSvc -->|Send to Landlord| Landlord
+    
+    Database -->|Generate Reports| Reporting
+    Reporting -->|Monthly Summary| Landlord
+    
+    COMPLETED -->|Link if Dispute| DisputeModule
+    FAILED -->|May Create Dispute| DisputeModule
+    
+    PaymentService -->|Update Record| Database
+    
+    style PaymentMethods fill:#e8f5e9
+    style PaymentFlow fill:#f3e5f5
+    style GatewayProcessing fill:#e3f2fd
+    style FinancialRecords fill:#fff3e0
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

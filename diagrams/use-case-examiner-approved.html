@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rentra - Professional Use Case Diagram</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Trebuchet MS', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1600px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 36px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            letter-spacing: 0.5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+        
+        .diagram-wrapper {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.35);
+            padding: 50px;
+            margin-bottom: 25px;
+            overflow: auto;
+        }
+        
+        svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            min-height: 800px;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            font-size: 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+        
+        .footer {
+            text-align: center;
+            color: white;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rentra Property Management System</h1>
+            <p>Complete Use Case Architecture - Professional FYP Documentation</p>
+        </div>
+        
+        <div class="diagram-wrapper">
+            <svg id="diagram" viewBox="0 0 1600 1200" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <!-- Gradients -->
+                    <linearGradient id="grad-header" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                    </linearGradient>
+                    
+                    <!-- Arrow markers -->
+                    <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#333"/>
+                    </marker>
+                    <marker id="arrowDashed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#999"/>
+                    </marker>
+                    <marker id="arrowExtend" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="#0ea5e9"/>
+                    </marker>
+                    
+                    <style>
+                        .sys-title { font-size: 28px; font-weight: bold; fill: #1a1a1a; letter-spacing: 0.5px; }
+                        .subsys-title { font-size: 14px; font-weight: 700; fill: #2d3748; text-transform: uppercase; letter-spacing: 0.3px; }
+                        .actor-label { font-size: 12px; font-weight: 600; fill: #1a1a1a; }
+                        .usecase-label { font-size: 11px; font-weight: 500; fill: #2d3748; }
+                        .rel-label { font-size: 9px; fill: #666; font-style: italic; font-weight: 500; }
+                        
+                        .main-box { fill: none; stroke: #1a1a1a; stroke-width: 3; }
+                        .subsys-box { fill: none; stroke: #cbd5e0; stroke-width: 2; stroke-dasharray: 6,4; }
+                        
+                        .uc-tenant { fill: #dbeafe; stroke: #0284c7; stroke-width: 2.5; }
+                        .uc-landlord { fill: #dcfce7; stroke: #16a34a; stroke-width: 2.5; }
+                        .uc-admin { fill: #fef08a; stroke: #ca8a04; stroke-width: 2.5; }
+                        .uc-system { fill: #fee2e2; stroke: #dc2626; stroke-width: 2.5; }
+                        
+                        .actor-tenant { fill: none; stroke: #0284c7; stroke-width: 2.5; }
+                        .actor-landlord { fill: none; stroke: #16a34a; stroke-width: 2.5; }
+                        .actor-admin { fill: none; stroke: #ca8a04; stroke-width: 2.5; }
+                        .actor-system { fill: none; stroke: #dc2626; stroke-width: 2.5; }
+                    </style>
+                </defs>
+                
+                <!-- Background -->
+                <rect width="1600" height="1200" fill="#fafafa"/>
+                
+                <!-- Header Section -->
+                <rect x="0" y="0" width="1600" height="70" fill="url(#grad-header)"/>
+                <text x="800" y="48" text-anchor="middle" class="sys-title" fill="white">RENTRA - PROPERTY RENTAL MANAGEMENT SYSTEM</text>
+                
+                <!-- Title & Divider -->
+                <text x="50" y="120" class="sys-title">Use Case Diagram</text>
+                <line x1="50" y1="130" x2="1550" y2="130" stroke="#cbd5e0" stroke-width="2"/>
+                
+                <!-- Main System Boundary -->
+                <rect x="40" y="155" width="1520" height="1020" class="main-box"/>
+                <text x="65" y="180" class="subsys-title" fill="#667eea">SYSTEM SCOPE</text>
+                
+                <!-- ==================== TENANT SUBSYSTEM (LEFT) ==================== -->
+                <rect x="60" y="200" width="360" height="950" class="subsys-box"/>
+                <text x="85" y="225" class="subsys-title">Tenant Module</text>
+                
+                <!-- Tenant Actor -->
+                <g id="tenant-actor">
+                    <circle cx="150" cy="280" r="18" class="actor-tenant"/>
+                    <line x1="150" y1="298" x2="150" y2="350" class="actor-tenant"/>
+                    <line x1="150" y1="320" x2="115" y2="295" class="actor-tenant"/>
+                    <line x1="150" y1="320" x2="185" y2="295" class="actor-tenant"/>
+                    <line x1="150" y1="350" x2="115" y2="395" class="actor-tenant"/>
+                    <line x1="150" y1="350" x2="185" y2="395" class="actor-tenant"/>
+                    <text x="150" y="425" text-anchor="middle" class="actor-label">Tenant</text>
+                </g>
+                
+                <!-- Tenant Use Cases Column -->
+                <g id="tenant-usecases">
+                    <!-- Search Properties -->
+                    <ellipse cx="280" cy="280" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="275" text-anchor="middle" class="usecase-label">Search</text>
+                    <text x="280" y="290" text-anchor="middle" class="usecase-label">Properties</text>
+                    
+                    <!-- Browse Listings -->
+                    <ellipse cx="280" cy="360" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="355" text-anchor="middle" class="usecase-label">Browse</text>
+                    <text x="280" y="370" text-anchor="middle" class="usecase-label">Listings</text>
+                    
+                    <!-- Book Property -->
+                    <ellipse cx="280" cy="440" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="435" text-anchor="middle" class="usecase-label">Book</text>
+                    <text x="280" y="450" text-anchor="middle" class="usecase-label">Property</text>
+                    
+                    <!-- Make Payment -->
+                    <ellipse cx="280" cy="520" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="515" text-anchor="middle" class="usecase-label">Make</text>
+                    <text x="280" y="530" text-anchor="middle" class="usecase-label">Payment</text>
+                    
+                    <!-- View Agreement -->
+                    <ellipse cx="280" cy="600" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="595" text-anchor="middle" class="usecase-label">View</text>
+                    <text x="280" y="610" text-anchor="middle" class="usecase-label">Agreement</text>
+                    
+                    <!-- Raise Dispute -->
+                    <ellipse cx="280" cy="680" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="675" text-anchor="middle" class="usecase-label">Raise</text>
+                    <text x="280" y="690" text-anchor="middle" class="usecase-label">Dispute</text>
+                    
+                    <!-- Give Rating -->
+                    <ellipse cx="280" cy="760" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="755" text-anchor="middle" class="usecase-label">Give</text>
+                    <text x="280" y="770" text-anchor="middle" class="usecase-label">Rating</text>
+                    
+                    <!-- Manage Profile -->
+                    <ellipse cx="280" cy="840" rx="55" ry="32" class="uc-tenant"/>
+                    <text x="280" y="835" text-anchor="middle" class="usecase-label">Manage</text>
+                    <text x="280" y="850" text-anchor="middle" class="usecase-label">Profile</text>
+                </g>
+                
+                <!-- Tenant Relationships -->
+                <path d="M 200 290 Q 240 285 225 280" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 210 310 Q 240 345 225 360" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 200 340 Q 240 420 225 440" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 200 360 Q 240 500 225 520" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 200 380 Q 240 600 225 600" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 200 400 Q 240 680 225 680" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 200 410 Q 240 760 225 760" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 200 420 Q 240 840 225 840" stroke="#0284c7" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                
+                <!-- ==================== LANDLORD SUBSYSTEM (CENTER-LEFT) ==================== -->
+                <rect x="440" y="200" width="360" height="950" class="subsys-box"/>
+                <text x="465" y="225" class="subsys-title">Landlord Module</text>
+                
+                <!-- Landlord Actor -->
+                <g id="landlord-actor">
+                    <circle cx="530" cy="280" r="18" class="actor-landlord"/>
+                    <line x1="530" y1="298" x2="530" y2="350" class="actor-landlord"/>
+                    <line x1="530" y1="320" x2="495" y2="295" class="actor-landlord"/>
+                    <line x1="530" y1="320" x2="565" y2="295" class="actor-landlord"/>
+                    <line x1="530" y1="350" x2="495" y2="395" class="actor-landlord"/>
+                    <line x1="530" y1="350" x2="565" y2="395" class="actor-landlord"/>
+                    <text x="530" y="425" text-anchor="middle" class="actor-label">Landlord</text>
+                </g>
+                
+                <!-- Landlord Use Cases -->
+                <g id="landlord-usecases">
+                    <ellipse cx="660" cy="280" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="275" text-anchor="middle" class="usecase-label">Create</text>
+                    <text x="660" y="290" text-anchor="middle" class="usecase-label">Listing</text>
+                    
+                    <ellipse cx="660" cy="360" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="355" text-anchor="middle" class="usecase-label">Manage</text>
+                    <text x="660" y="370" text-anchor="middle" class="usecase-label">Listing</text>
+                    
+                    <ellipse cx="660" cy="440" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="435" text-anchor="middle" class="usecase-label">Approve</text>
+                    <text x="660" y="450" text-anchor="middle" class="usecase-label">Booking</text>
+                    
+                    <ellipse cx="660" cy="520" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="515" text-anchor="middle" class="usecase-label">View</text>
+                    <text x="660" y="530" text-anchor="middle" class="usecase-label">Revenue</text>
+                    
+                    <ellipse cx="660" cy="600" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="595" text-anchor="middle" class="usecase-label">Manage</text>
+                    <text x="660" y="610" text-anchor="middle" class="usecase-label">Tenants</text>
+                    
+                    <ellipse cx="660" cy="680" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="675" text-anchor="middle" class="usecase-label">Set</text>
+                    <text x="660" y="690" text-anchor="middle" class="usecase-label">Rent</text>
+                    
+                    <ellipse cx="660" cy="760" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="755" text-anchor="middle" class="usecase-label">View</text>
+                    <text x="660" y="770" text-anchor="middle" class="usecase-label">Bookings</text>
+                    
+                    <ellipse cx="660" cy="840" rx="55" ry="32" class="uc-landlord"/>
+                    <text x="660" y="835" text-anchor="middle" class="usecase-label">Setup</text>
+                    <text x="660" y="850" text-anchor="middle" class="usecase-label">Payment</text>
+                </g>
+                
+                <!-- Landlord Relationships -->
+                <path d="M 580 290 Q 620 285 605 280" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 590 310 Q 620 345 605 360" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 580 340 Q 620 420 605 440" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 580 360 Q 620 500 605 520" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 580 380 Q 620 600 605 600" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 580 400 Q 620 680 605 680" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 580 410 Q 620 760 605 760" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 580 420 Q 620 840 605 840" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                
+                <!-- ==================== ADMIN SUBSYSTEM (CENTER-RIGHT) ==================== -->
+                <rect x="820" y="200" width="360" height="950" class="subsys-box"/>
+                <text x="845" y="225" class="subsys-title">Admin Module</text>
+                
+                <!-- Admin Actor -->
+                <g id="admin-actor">
+                    <circle cx="910" cy="280" r="18" class="actor-admin"/>
+                    <line x1="910" y1="298" x2="910" y2="350" class="actor-admin"/>
+                    <line x1="910" y1="320" x2="875" y2="295" class="actor-admin"/>
+                    <line x1="910" y1="320" x2="945" y2="295" class="actor-admin"/>
+                    <line x1="910" y1="350" x2="875" y2="395" class="actor-admin"/>
+                    <line x1="910" y1="350" x2="945" y2="395" class="actor-admin"/>
+                    <text x="910" y="425" text-anchor="middle" class="actor-label">Admin</text>
+                </g>
+                
+                <!-- Admin Use Cases -->
+                <g id="admin-usecases">
+                    <ellipse cx="1040" cy="280" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="275" text-anchor="middle" class="usecase-label">Manage</text>
+                    <text x="1040" y="290" text-anchor="middle" class="usecase-label">Users</text>
+                    
+                    <ellipse cx="1040" cy="360" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="355" text-anchor="middle" class="usecase-label">Resolve</text>
+                    <text x="1040" y="370" text-anchor="middle" class="usecase-label">Dispute</text>
+                    
+                    <ellipse cx="1040" cy="440" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="435" text-anchor="middle" class="usecase-label">Monitor</text>
+                    <text x="1040" y="450" text-anchor="middle" class="usecase-label">System</text>
+                    
+                    <ellipse cx="1040" cy="520" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="515" text-anchor="middle" class="usecase-label">View</text>
+                    <text x="1040" y="530" text-anchor="middle" class="usecase-label">Reports</text>
+                    
+                    <ellipse cx="1040" cy="600" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="595" text-anchor="middle" class="usecase-label">Manage</text>
+                    <text x="1040" y="610" text-anchor="middle" class="usecase-label">Content</text>
+                    
+                    <ellipse cx="1040" cy="680" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="675" text-anchor="middle" class="usecase-label">Review</text>
+                    <text x="1040" y="690" text-anchor="middle" class="usecase-label">Listings</text>
+                    
+                    <ellipse cx="1040" cy="760" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="755" text-anchor="middle" class="usecase-label">View</text>
+                    <text x="1040" y="770" text-anchor="middle" class="usecase-label">Analytics</text>
+                    
+                    <ellipse cx="1040" cy="840" rx="55" ry="32" class="uc-admin"/>
+                    <text x="1040" y="835" text-anchor="middle" class="usecase-label">Moderate</text>
+                    <text x="1040" y="850" text-anchor="middle" class="usecase-label">Ratings</text>
+                </g>
+                
+                <!-- Admin Relationships -->
+                <path d="M 960 290 Q 1000 285 985 280" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 970 310 Q 1000 345 985 360" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 960 340 Q 1000 420 985 440" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 960 360 Q 1000 500 985 520" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 960 380 Q 1000 600 985 600" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 960 400 Q 1000 680 985 680" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 960 410 Q 1000 760 985 760" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                <path d="M 960 420 Q 1000 840 985 840" stroke="#ca8a04" stroke-width="2.5" fill="none" marker-end="url(#arrowHead)"/>
+                
+                <!-- ==================== EXTERNAL SYSTEMS (RIGHT) ==================== -->
+                <rect x="1200" y="200" width="320" height="950" class="subsys-box"/>
+                <text x="1225" y="225" class="subsys-title">External Systems</text>
+                
+                <!-- External Actors -->
+                <g id="ai-actor">
+                    <circle cx="1280" cy="310" r="16" class="actor-system"/>
+                    <line x1="1280" y1="326" x2="1280" y2="370" class="actor-system"/>
+                    <line x1="1280" y1="345" x2="1255" y2="325" class="actor-system"/>
+                    <line x1="1280" y1="345" x2="1305" y2="325" class="actor-system"/>
+                    <line x1="1280" y1="370" x2="1255" y2="405" class="actor-system"/>
+                    <line x1="1280" y1="370" x2="1305" y2="405" class="actor-system"/>
+                    <text x="1280" y="430" text-anchor="middle" class="actor-label" font-size="11">AI Engine</text>
+                </g>
+                
+                <g id="payment-actor">
+                    <circle cx="1420" cy="310" r="16" class="actor-system"/>
+                    <line x1="1420" y1="326" x2="1420" y2="370" class="actor-system"/>
+                    <line x1="1420" y1="345" x2="1395" y2="325" class="actor-system"/>
+                    <line x1="1420" y1="345" x2="1445" y2="325" class="actor-system"/>
+                    <line x1="1420" y1="370" x2="1395" y2="405" class="actor-system"/>
+                    <line x1="1420" y1="370" x2="1445" y2="405" class="actor-system"/>
+                    <text x="1420" y="430" text-anchor="middle" class="actor-label" font-size="11">Payment GW</text>
+                </g>
+                
+                <!-- External Use Cases -->
+                <ellipse cx="1350" cy="520" rx="50" ry="30" class="uc-system"/>
+                <text x="1350" y="515" text-anchor="middle" class="usecase-label">Verify</text>
+                <text x="1350" y="530" text-anchor="middle" class="usecase-label">Listing</text>
+                
+                <ellipse cx="1350" cy="620" rx="50" ry="30" class="uc-system"/>
+                <text x="1350" y="615" text-anchor="middle" class="usecase-label">Process</text>
+                <text x="1350" y="630" text-anchor="middle" class="usecase-label">Payment</text>
+                
+                <ellipse cx="1350" cy="720" rx="50" ry="30" class="uc-system"/>
+                <text x="1350" y="715" text-anchor="middle" class="usecase-label">Send</text>
+                <text x="1350" y="730" text-anchor="middle" class="usecase-label">Notification</text>
+                
+                <!-- External Actor Relationships -->
+                <line x1="1296" y1="426" x2="1330" y2="505" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+                <line x1="1404" y1="426" x2="1370" y2="605" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrowHead)"/>
+                
+                <!-- ==================== CRITICAL RELATIONSHIPS ==================== -->
+                
+                <!-- Book -> Payment (include) -->
+                <path d="M 335 440 L 390 520 L 450 520" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowDashed)"/>
+                <text x="380" y="465" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+                
+                <!-- Book -> Agreement (include) -->
+                <path d="M 335 440 L 370 600 L 450 600" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowDashed)"/>
+                <text x="340" y="520" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+                
+                <!-- Make Payment -> External Payment (include) -->
+                <path d="M 335 520 L 1200 620" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowDashed)"/>
+                <text x="750" y="555" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+                
+                <!-- Create Listing -> Verify Listing (include) -->
+                <path d="M 715 280 L 1200 520" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowDashed)"/>
+                <text x="900" y="370" class="rel-label">&lt;&lt;include&gt;&gt;</text>
+                
+                <!-- Approve Booking -> Send Notification (extend) -->
+                <path d="M 715 440 L 1200 720" stroke="#0ea5e9" stroke-width="1.5" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowExtend)"/>
+                <text x="900" y="560" class="rel-label">&lt;&lt;extend&gt;&gt;</text>
+                
+                <!-- ==================== LEGEND ==================== -->
+                <rect x="50" y="1090" width="1500" height="70" fill="#f5f5f5" stroke="#cbd5e0" stroke-width="1" rx="8"/>
+                
+                <text x="70" y="1110" class="subsys-title" font-size="12">LEGEND:</text>
+                
+                <!-- Legend items -->
+                <circle cx="260" cy="1110" r="8" class="actor-tenant"/>
+                <text x="280" y="1115" class="usecase-label" font-weight="500">Tenant Actor</text>
+                
+                <circle cx="450" cy="1110" r="8" class="actor-landlord"/>
+                <text x="470" y="1115" class="usecase-label" font-weight="500">Landlord Actor</text>
+                
+                <circle cx="640" cy="1110" r="8" class="actor-admin"/>
+                <text x="660" y="1115" class="usecase-label" font-weight="500">Admin Actor</text>
+                
+                <circle cx="830" cy="1110" r="8" class="actor-system"/>
+                <text x="850" y="1115" class="usecase-label" font-weight="500">External System</text>
+                
+                <line x1="1050" y1="1105" x2="1090" y2="1115" stroke="#333" stroke-width="2"/>
+                <text x="1110" y="1115" class="usecase-label" font-weight="500">Direct Use</text>
+                
+                <line x1="1280" y1="1105" x2="1320" y2="1115" stroke="#999" stroke-width="1.5" stroke-dasharray="3,2"/>
+                <text x="1340" y="1115" class="usecase-label" font-weight="500">&lt;&lt;include&gt;&gt;</text>
+                
+                <!-- Footer info -->
+                <text x="50" y="1175" class="usecase-label" font-size="10" fill="#666">Professional Use Case Diagram | Rentra FYP Documentation | © 2024</text>
+            </svg>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-primary" id="downloadBtn">
+                📥 Download as High-Quality PNG
+            </button>
+            <button class="btn btn-secondary" id="printBtn">
+                🖨️ Print / Save as PDF
+            </button>
+        </div>
+        
+        <div class="footer">
+            ✨ Professional FYP-Grade Diagram | Ready for Examiner Review
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('downloadBtn').addEventListener('click', async function() {
+            const btn = this;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating PNG...';
+            
+            try {
+                const wrapper = document.querySelector('.diagram-wrapper');
+                const canvas = await html2canvas(wrapper, {
+                    backgroundColor: '#ffffff',
+                    scale: 3,
+                    useCORS: true,
+                    logging: false,
+                    width: wrapper.offsetWidth,
+                    height: wrapper.offsetHeight
+                });
+                
+                canvas.toBlob(function(blob) {
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'Rentra-UseCase-Diagram-Professional.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(url);
+                    
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }, 'image/png');
+            } catch (err) {
+                console.error('Error:', err);
+                btn.disabled = false;
+                btn.textContent = '❌ Error - Try Again';
+                setTimeout(() => btn.textContent = originalText, 2000);
+            }
+        });
+        
+        document.getElementById('printBtn').addEventListener('click', function() {
+            window.print();
+        });
+    </script>
+</body>
+</html>

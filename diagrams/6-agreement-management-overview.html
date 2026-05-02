@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6-agreement-management-overview.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>6. Agreement Management Module - Complete Workflow</h1>
+        <div class="mermaid">
+graph TD
+    Tenant["Tenant User<br/>Browse Listings<br/>Apply for Lease"]
+    
+    TenantFE["Frontend<br/>Listing Details<br/>Apply Button<br/>Agreement Form"]
+    
+    AgreementAPI["Agreement Controller<br/>POST /agreements<br/>PATCH /agreements/:id<br/>GET /agreements"]
+    
+    AgreementService["Agreement Service<br/>Business Logic<br/>Status Management<br/>Workflow Handling"]
+    
+    subgraph AgreementFlow["AGREEMENT WORKFLOW"]
+        DRAFT["DRAFT<br/>Initial Creation<br/>Blank Agreement<br/>Tenant View Only"]
+        
+        PENDING["PENDING<br/>Sent to Landlord<br/>Awaiting Decision<br/>14 Day Window"]
+        
+        APPROVED["APPROVED<br/>Landlord Accepted<br/>Both Parties Notified<br/>Ready to Sign"]
+        
+        ACTIVE["ACTIVE<br/>Lease Started<br/>Rent Due<br/>Payments Active"]
+        
+        EXPIRED["EXPIRED<br/>Lease Ended<br/>Tenant Vacated<br/>Settlement Done"]
+        
+        CANCELLED["CANCELLED<br/>Rejected/Withdrawn<br/>Never Activated<br/>Archived"]
+    end
+    
+    subgraph DataServices["DATA SERVICES"]
+        PDFGeneration["PDF Generation<br/>Contract Template<br/>Data Insertion<br/>Professional Format<br/>Digital Signature"]
+        
+        Database["Agreement Database<br/>Store Agreements<br/>Status History<br/>Timeline Tracking"]
+        
+        Storage["Document Storage<br/>AWS S3<br/>PDF URLs<br/>Encryption<br/>Archival"]
+    end
+    
+    subgraph PaymentLink["PAYMENT INTEGRATION"]
+        PaymentModule["Payment Module<br/>Monthly Rent<br/>Deposit Tracking<br/>Receipt Generation"]
+        
+        PaymentGateway["Payment Gateway<br/>Process Transactions<br/>Verify Payments<br/>Update Status"]
+    end
+    
+    subgraph NotificationSystem["NOTIFICATION SYSTEM"]
+        EmailNotify["Email Notifications<br/>Agreement Created<br/>Awaiting Approval<br/>Approved/Rejected<br/>Lease Started"]
+        
+        SMSNotify["SMS Alerts<br/>Quick Updates<br/>Critical Events<br/>Important Dates"]
+    end
+    
+    Landlord["Landlord User<br/>Review Agreement<br/>Approve/Reject"]
+    
+    DisputeModule["Dispute Module<br/>Link Agreements<br/>Track Disputes<br/>Handle Conflicts"]
+    
+    Tenant -->|Select Listing| TenantFE
+    TenantFE -->|Submit Application| AgreementAPI
+    AgreementAPI -->|Create Agreement| AgreementService
+    
+    AgreementService -->|New Agreement| DRAFT
+    DRAFT -->|Submit for Review| PENDING
+    
+    AgreementService -->|Generate PDF| PDFGeneration
+    PDFGeneration -->|Store Document| Storage
+    PDFGeneration -->|Get URL| AgreementService
+    
+    PENDING -->|Notify Landlord| EmailNotify
+    EmailNotify -->|Send Email| Landlord
+    
+    Landlord -->|Review Agreement| TenantFE
+    Landlord -->|Approve| APPROVED
+    Landlord -->|Reject| CANCELLED
+    
+    APPROVED -->|Generate PDF| PDFGeneration
+    APPROVED -->|Create Payment Record| PaymentModule
+    
+    APPROVED -->|Start Date Reached| ACTIVE
+    
+    ACTIVE -->|Link to Payments| PaymentModule
+    ACTIVE -->|Process Rent| PaymentGateway
+    
+    ACTIVE -->|End Date Reached| EXPIRED
+    ACTIVE -->|Early Termination| CANCELLED
+    ACTIVE -->|Conflict Arises| DisputeModule
+    
+    EXPIRED -->|Generate Report| Database
+    EXPIRED -->|Archive| Storage
+    
+    CANCELLED -->|Send Notification| EmailNotify
+    APPROVED -->|Send Notification| EmailNotify
+    ACTIVE -->|Send Alerts| SMSNotify
+    
+    AgreementService -->|Store/Update| Database
+    
+    DisputeModule -->|Link to Agreement| AgreementService
+    
+    style AgreementFlow fill:#f3e5f5
+    style DataServices fill:#e3f2fd
+    style PaymentLink fill:#e8f5e9
+    style NotificationSystem fill:#fff3e0
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

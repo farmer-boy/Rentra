@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-admin-actor-usecases.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>15. Admin Actor - Complete Use Cases & Control Panel</h1>
+        <div class="mermaid">
+graph TD
+    Admin["ADMIN USER<br/>System Moderator<br/>Content Reviewer<br/>Dispute Resolver<br/>Platform Controller"]
+    
+    System["System<br/>Database<br/>ML Models<br/>Services"]
+    
+    Tenant["Tenant Users"]
+    Landlord["Landlord Users"]
+    
+    subgraph AdminAccess["ADMIN ACCESS & AUTHENTICATION"]
+        AdminLogin["Admin Login<br/>UC-004: Login<br/>UC-006: Profile Update<br/>Special Admin privileges<br/>Role-based access<br/>Activity logging"]
+    end
+    
+    subgraph UserManagement["USER MANAGEMENT"]
+        ViewAllUsers["View All Users<br/>UC-703: User List<br/>Search/Filter<br/>Sort by metric<br/>View profiles<br/>Account status"]
+        
+        VerifyUsers["User Verification<br/>UC-002: Email Verify<br/>UC-003: Phone Verify<br/>CNIC validation<br/>Document review<br/>Verification badge"]
+        
+        UserActions["User Actions<br/>UC-008: Suspend Account<br/>Reset password<br/>Force logout<br/>Reactivate account<br/>Ban user"]
+        
+        TrustScoring["Trust Scoring<br/>UC-007: Calculate Score<br/>UC-513: Update Score<br/>Manual adjustments<br/>Appeal process<br/>Score history<br/>Badge management"]
+    end
+    
+    subgraph ListingModeration["LISTING MODERATION"]
+        ReviewFlagged["Review Flagged<br/>UC-108: Review Queue<br/>View properties<br/>See fraud score<br/>Analyze details<br/>Compare similar"]
+        
+        PhotoVerification["Photo Verification<br/>UC-103: Verify Photos<br/>AI analysis results<br/>Manual review<br/>Authenticity check<br/>Quality assessment"]
+        
+        ListingDecisions["Listing Decisions<br/>UC-109: Approve Listing<br/>UC-110: Reject Listing<br/>Provide feedback<br/>Request changes<br/>Publish or remove"]
+        
+        FraudAnalysis["Fraud Detection<br/>UC-107: Fraud Detection<br/>UC-704: Review Results<br/>ML scores<br/>Pattern analysis<br/>Duplicate checking<br/>Risk assessment"]
+    end
+    
+    subgraph ReviewModeration["REVIEW MODERATION"]
+        ReviewQueue["Moderation Queue<br/>UC-506: Pending Reviews<br/>View submissions<br/>Read content<br/>Check reviewer<br/>See property/landlord"]
+        
+        ReviewDecisions["Moderation Decisions<br/>UC-507: Approve Review<br/>UC-508: Reject Review<br/>Provide reason<br/>Request edits<br/>Block reviewer"]
+        
+        ReviewManagement["Review Management<br/>UC-512: Award Badges<br/>Remove inappropriate<br/>Verify authenticity<br/>Prevent fraud"]
+    end
+    
+    subgraph DisputeManagement["DISPUTE MANAGEMENT & RESOLUTION"]
+        DisputeQueue["Dispute Queue<br/>UC-408: Assignment<br/>View open cases<br/>Filter by type<br/>Sort by priority<br/>Track assigned cases"]
+        
+        CaseInvestigation["Case Investigation<br/>UC-409: Investigate<br/>UC-410: Request Evidence<br/>Review submissions<br/>Verify facts<br/>Check history<br/>Analyze patterns"]
+        
+        Mediation["Mediation Process<br/>UC-411: Facilitate Mediation<br/>Schedule session<br/>Facilitate talks<br/>Propose solutions<br/>Draft agreement<br/>Document outcome"]
+        
+        Arbitration["Arbitration Decision<br/>UC-412: Make Judgment<br/>Analyze evidence<br/>Apply policies<br/>Determine liability<br/>Set remedies<br/>Document reasoning"]
+        
+        Enforcement["Resolution Execution<br/>UC-413: Execute Resolution<br/>Process refunds<br/>Update records<br/>Send notifications<br/>Verify completion"]
+        
+        Appeals["Appeal Handling<br/>UC-415: Review Appeals<br/>Reassess case<br/>Make final decision<br/>Close case<br/>Archive records"]
+    end
+    
+    subgraph DashboardAnalytics["DASHBOARD & ANALYTICS"]
+        Dashboard["Admin Dashboard<br/>UC-701: Access Dashboard<br/>Overview cards<br/>Quick stats<br/>Alerts<br/>Action queue"]
+        
+        Statistics["Platform Statistics<br/>UC-702: View Statistics<br/>User metrics<br/>Property metrics<br/>Payment metrics<br/>Dispute metrics<br/>Growth trends"]
+        
+        ActivityMonitoring["Activity Monitoring<br/>UC-710: Activity Logs<br/>User actions<br/>Transaction logs<br/>Login history<br/>Anomalies<br/>Search logs"]
+        
+        SystemHealth["System Health<br/>UC-709: Monitor Health<br/>API response time<br/>Database performance<br/>Error rates<br/>User load<br/>Uptime tracking"]
+    end
+    
+    subgraph PaymentOversight["PAYMENT OVERSIGHT"]
+        PaymentMonitoring["Payment Monitoring<br/>UC-307: View Receipts<br/>UC-313: Track Pending<br/>Transaction history<br/>Failed payments<br/>Refund tracking<br/>Commission tracking"]
+        
+        PaymentDisputes["Payment Disputes<br/>UC-305: Payment Info<br/>UC-309: Handle Failures<br/>UC-312: Process Refunds<br/>Investigate disputes<br/>Execute refunds<br/>Update records"]
+    end
+    
+    subgraph ContactSupport["CONTACT & SUPPORT"]
+        ContactReview["Review Submissions<br/>UC-804: Review Form<br/>Incoming inquiries<br/>Priority sorting<br/>Status tracking<br/>Assignable tickets"]
+        
+        ContactResponse["Respond to Users<br/>UC-805: Send Response<br/>Reply to inquiry<br/>Provide assistance<br/>Transfer to team<br/>Document issue"]
+        
+        TicketClosure["Ticket Management<br/>UC-806: Close Ticket<br/>Mark resolved<br/>Archive case<br/>Send survey<br/>Track resolution time"]
+    end
+    
+    subgraph Notifications["NOTIFICATION MANAGEMENT"]
+        SendBroadcast["Send Notifications<br/>UC-711: Send Broadcast<br/>Message all users<br/>Targeted messaging<br/>Scheduled sends<br/>Track delivery"]
+    end
+    
+    subgraph Reporting["REPORTING & EXPORT"]
+        ReportGeneration["Generate Reports<br/>UC-708: Generate Reports<br/>User activity<br/>Financial summary<br/>Dispute analytics<br/>Fraud statistics<br/>Custom reports"]
+        
+        DataExport["Export Data<br/>UC-712: Export Data<br/>CSV download<br/>Excel format<br/>PDF report<br/>Schedule exports<br/>Archive reports"]
+    end
+    
+    subgraph SystemConfiguration["SYSTEM CONFIGURATION"]
+        Settings["Configure Settings<br/>UC-713: Configure<br/>Platform parameters<br/>Payment terms<br/>Dispute rules<br/>Commission rates<br/>Fee structure"]
+    end
+    
+    Admin -->|Authenticate| AdminLogin
+    AdminLogin -->|Access| System
+    
+    Admin -->|Manage Users| UserManagement
+    UserManagement -->|Affects| Tenant
+    UserManagement -->|Affects| Landlord
+    
+    Admin -->|Moderate Listings| ListingModeration
+    ListingModeration -->|Reviews| Landlord
+    ListingModeration -->|Results from| System
+    
+    Admin -->|Moderate Reviews| ReviewModeration
+    ReviewModeration -->|From| Tenant
+    ReviewModeration -->|About| Landlord
+    
+    Admin -->|Resolve Disputes| DisputeManagement
+    DisputeManagement -->|Between| Tenant
+    DisputeManagement -->|Between| Landlord
+    DisputeManagement -->|Involving| System
+    
+    Admin -->|Monitor Platform| DashboardAnalytics
+    DashboardAnalytics -->|Data from| System
+    
+    Admin -->|Oversee Payments| PaymentOversight
+    PaymentOversight -->|From| System
+    
+    Admin -->|Handle Support| ContactSupport
+    ContactSupport -->|From| Tenant
+    ContactSupport -->|From| Landlord
+    
+    Admin -->|Send Messages| Notifications
+    Notifications -->|To| Tenant
+    Notifications -->|To| Landlord
+    
+    Admin -->|Create Reports| Reporting
+    Reporting -->|From| System
+    
+    Admin -->|Configure| SystemConfiguration
+    SystemConfiguration -->|Controls| System
+    
+    style AdminAccess fill:#e3f2fd
+    style UserManagement fill:#f3e5f5
+    style ListingModeration fill:#e8f5e9
+    style ReviewModeration fill:#fff3e0
+    style DisputeManagement fill:#ffebee
+    style DashboardAnalytics fill:#f1f5fe
+    style PaymentOversight fill:#fce4ec
+    style ContactSupport fill:#e0f2f1
+    style Notifications fill:#ede7f6
+    style Reporting fill:#f8bbd0
+    style SystemConfiguration fill:#c8e6c9
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

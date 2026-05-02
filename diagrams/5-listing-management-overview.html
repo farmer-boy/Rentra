@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-listing-management-overview.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>5. Listing Management Module - Complete Flow</h1>
+        <div class="mermaid">
+graph TB
+    Landlord["Landlord User<br/>Create/Manage<br/>Properties"]
+    
+    Frontend["Web Application<br/>Property Form<br/>Photo Upload<br/>Validation"]
+    
+    ListingAPI["Listing Controller<br/>POST /listings<br/>PATCH /listings/:id<br/>DELETE /listings/:id<br/>GET /listings"]
+    
+    ListingService["Listing Service<br/>Business Logic<br/>Validation<br/>Data Processing"]
+    
+    subgraph DataProcessing["DATA PROCESSING LAYER"]
+        Validation["Form Validation<br/>Required fields check<br/>Data type validation<br/>Constraint checking"]
+        
+        FraudDetection["Fraud Detection<br/>ML Model Scoring<br/>Pattern Analysis<br/>Risk Assessment<br/>Fake Detection"]
+        
+        PhotoProcessing["Photo Processing<br/>Image Upload<br/>Compression<br/>S3 Storage<br/>URL Generation"]
+    end
+    
+    subgraph StatusWorkflow["LISTING STATUS WORKFLOW"]
+        DRAFT["DRAFT<br/>Initial State<br/>Not Published<br/>Only Landlord Views"]
+        
+        PENDING["PENDING<br/>Awaiting Admin<br/>Fraud Check<br/>Document Review"]
+        
+        VERIFIED["VERIFIED<br/>Admin Approved<br/>Published Live<br/>Searchable"]
+        
+        FLAGGED["FLAGGED<br/>High Fraud Risk<br/>Admin Review<br/>May Remove"]
+        
+        REMOVED["REMOVED<br/>Admin Removed<br/>Policy Violation<br/>Not Searchable"]
+    end
+    
+    Database["Database<br/>Listing Table<br/>Store All Data<br/>Update Records"]
+    
+    Storage["AWS S3<br/>Photo Storage<br/>CDN Links<br/>Public Access"]
+    
+    SearchIndex["Search Index<br/>Elasticsearch<br/>Fast Filtering<br/>City/Type/Price"]
+    
+    AdminDashboard["Admin Dashboard<br/>Fraud Queue<br/>Manual Review<br/>Approve/Reject"]
+    
+    Tenant["Tenant Users<br/>View Listings<br/>Search Properties<br/>Apply for Lease"]
+    
+    Notifications["Notification Service<br/>Email Alerts<br/>Status Updates<br/>Approval/Rejection"]
+    
+    Landlord -->|Submit Form| Frontend
+    Frontend -->|Validate & Send| ListingAPI
+    ListingAPI -->|Process| ListingService
+    
+    ListingService -->|Check Form| Validation
+    ListingService -->|Analyze Fraud| FraudDetection
+    ListingService -->|Handle Photos| PhotoProcessing
+    
+    Validation -->|Valid| DRAFT
+    DRAFT -->|Submit for Review| PENDING
+    
+    FraudDetection -->|Score < 0.7| VERIFIED
+    FraudDetection -->|Score > 0.7| FLAGGED
+    
+    PhotoProcessing -->|Upload| Storage
+    Storage -->|Get URLs| ListingService
+    
+    PENDING -->|Admin Approves| VERIFIED
+    PENDING -->|Admin Rejects| DRAFT
+    
+    FLAGGED -->|Admin Approves| VERIFIED
+    FLAGGED -->|Admin Removes| REMOVED
+    
+    VERIFIED -->|Live on Platform| SearchIndex
+    SearchIndex -->|Search Results| Frontend
+    Frontend -->|Display| Tenant
+    
+    ListingService -->|Store/Update| Database
+    Database -->|Update Status| AdminDashboard
+    AdminDashboard -->|Review| FraudDetection
+    
+    DRAFT -->|Notify Landlord| Notifications
+    VERIFIED -->|Notify Landlord| Notifications
+    REMOVED -->|Notify Landlord| Notifications
+    
+    Notifications -->|Email| Landlord
+    
+    style DataProcessing fill:#e3f2fd
+    style StatusWorkflow fill:#f3e5f5
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

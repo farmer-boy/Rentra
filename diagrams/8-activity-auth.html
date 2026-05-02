@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-activity-auth.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>8. Activity Diagram - Authentication Flow</h1>
+        <div class="mermaid">
+graph TD
+    Start([User Visits App]) --> Check{Logged In?}
+    
+    Check -->|Yes<br/>Token valid| Home["Access Home<br/>Protected Routes"]
+    Check -->|No| AuthPage["Show Auth Page<br/>Login/Register Tabs"]
+    
+    AuthPage --> Choice{User Action}
+    
+    Choice -->|Login| LoginForm["Fill Login Form<br/>Email, Password"]
+    LoginForm --> ValidateLogin{Valid Form?}
+    ValidateLogin -->|No| LoginError["Show Error<br/>Re-enter credentials"]
+    LoginError --> LoginForm
+    
+    ValidateLogin -->|Yes| SendLogin["POST /auth/login<br/>Email, Password"]
+    SendLogin --> CheckCreds{Credentials<br/>Match?}
+    CheckCreds -->|No| LoginFail["401 Unauthorized<br/>Show error"]
+    LoginFail --> LoginForm
+    CheckCreds -->|Yes| GenJWT["Generate JWT Token<br/>Algorithm: HS256<br/>Exp: 7d"]
+    
+    Choice -->|Register| RegForm["Fill Register Form<br/>Email, Phone, CNIC<br/>Password, Full Name"]
+    RegForm --> ValidateReg{Form Valid?}
+    ValidateReg -->|No| RegError["Show validation error"]
+    RegError --> RegForm
+    ValidateReg -->|Yes| CheckExists{Email/Phone/<br/>CNIC exists?}
+    CheckExists -->|Yes| ConflictError["409 Conflict<br/>Already registered"]
+    ConflictError --> RegForm
+    CheckExists -->|No| HashPwd["Hash Password<br/>bcryptjs 12 rounds"]
+    HashPwd --> CreateUser["POST /auth/register<br/>Create User record"]
+    CreateUser --> GenJWT
+    
+    GenJWT --> StoreToken["localStorage.accessToken<br/>= JWT"]
+    StoreToken --> SetAuth["Update Auth Store<br/>Zustand state"]
+    SetAuth --> Redirect["Redirect to Home"]
+    Redirect --> Home
+    Home --> End([Authenticated])
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>

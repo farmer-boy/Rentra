@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11-admin-dashboard-system.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 30px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, sans-serif; }
+        .container { max-width: 2000px; margin: 0 auto; }
+        h1 { color: #0f172a; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 700; }
+        .mermaid { background: #f9fafb; padding: 40px; border-radius: 12px; border: 2px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>11. Admin Dashboard - Platform Control & Governance</h1>
+        <div class="mermaid">
+graph TD
+    Admin["Admin User<br/>Role: ADMIN<br/>Full Permissions<br/>Platform Control"]
+    
+    AdminDashboard["Admin Dashboard<br/>Overview<br/>Quick Stats<br/>Action Queue<br/>Notifications"]
+    
+    AdminAPI["Admin Controller<br/>GET /admin/stats<br/>PATCH /admin/actions<br/>POST /admin/reports<br/>DELETE /admin/content"]
+    
+    AdminService["Admin Service<br/>User Management<br/>Content Moderation<br/>Dispute Mediation<br/>Analytics"]
+    
+    subgraph UserManagement["USER MANAGEMENT"]
+        UserList["User List<br/>All Users<br/>Filter<br/>Search<br/>Sort<br/>Bulk Actions"]
+        
+        UserActions["User Actions<br/>View Profile<br/>Suspend Account<br/>Verify User<br/>Reset Password<br/>Assign Role"]
+        
+        RoleControl["Role Control<br/>TENANT Role<br/>LANDLORD Role<br/>ADMIN Role<br/>Permission Matrix"]
+        
+        TrustScoring["Trust Score<br/>View Scores<br/>Manual Adjust<br/>Reset<br/>History Log<br/>Appeal Process"]
+    end
+    
+    subgraph ContentModeration["CONTENT MODERATION"]
+        ListingQueue["Listing Moderation<br/>Pending Listings<br/>Flagged Content<br/>Fraud Detection<br/>Photo Verification<br/>Review Queue"]
+        
+        ListingActions["Listing Actions<br/>Approve<br/>Reject<br/>Remove<br/>Flag as Fraud<br/>Quarantine"]
+        
+        PhotoVerification["Photo Verification<br/>AI Image Analysis<br/>Actual Property Check<br/>Quality Review<br/>Manual Inspect"]
+        
+        ReviewModeration["Review Moderation<br/>Pending Reviews<br/>Spam Detection<br/>Profanity Filter<br/>Relevance Check<br/>Approve/Reject"]
+    end
+    
+    subgraph DisputeResolution["DISPUTE RESOLUTION"]
+        DisputeQueue["Dispute Queue<br/>Open Disputes<br/>Priority<br/>Assigned To<br/>Status<br/>Escalation Level"]
+        
+        DisputeActions["Dispute Actions<br/>View Details<br/>Request Evidence<br/>Mediate<br/>Resolve<br/>Appeal Review"]
+        
+        MediationTools["Mediation Tools<br/>Contact Party<br/>Schedule Call<br/>Track Response<br/>Send Agreement<br/>Document Storage"]
+        
+        Outcomes["Outcomes<br/>Full Refund<br/>Partial Refund<br/>No Action<br/>Terms Violation<br/>Both at Fault"]
+    end
+    
+    subgraph Analytics["PLATFORM ANALYTICS"]
+        Dashboard["Analytics Dashboard<br/>Real-time Data<br/>Charts<br/>Graphs<br/>KPI Tracking<br/>Custom Reports"]
+        
+        UserMetrics["User Metrics<br/>Total Users<br/>Active Users<br/>New Signups<br/>Churn Rate<br/>User Growth"]
+        
+        PropertyMetrics["Property Metrics<br/>Total Listings<br/>Verified Listings<br/>Fraud Rate<br/>Popular Cities<br/>Price Trends"]
+        
+        PaymentMetrics["Payment Metrics<br/>Total Revenue<br/>Payment Methods<br/>Transaction Count<br/>Success Rate<br/>Failed Payments"]
+        
+        EngagementMetrics["Engagement Metrics<br/>Messages Count<br/>Reviews Count<br/>Agreements Count<br/>Disputes Count<br/>User Retention"]
+    end
+    
+    subgraph SecurityMonitoring["SECURITY & MONITORING"]
+        Logs["System Logs<br/>API Calls<br/>User Actions<br/>Errors<br/>Warnings<br/>Audit Trail"]
+        
+        FraudDetection["Fraud Detection<br/>Suspicious Activity<br/>Pattern Analysis<br/>Bot Detection<br/>Account Hacking<br/>Money Laundering"]
+        
+        Alerts["Alert System<br/>High Fraud Score<br/>Dispute Spike<br/>Failed Payments<br/>Account Lockouts<br/>System Issues"]
+        
+        SecurityActions["Security Actions<br/>Ban User<br/>Freeze Account<br/>Flag IP<br/>Investigate<br/>Report to Authority"]
+    end
+    
+    subgraph Reports["REPORTS & EXPORT"]
+        ReportTypes["Report Types<br/>User Report<br/>Listing Report<br/>Payment Report<br/>Dispute Report<br/>Custom Report"]
+        
+        DataExport["Data Export<br/>CSV Download<br/>Excel Format<br/>PDF Report<br/>Custom Date Range<br/>Scheduled Reports"]
+        
+        Compliance["Compliance<br/>Tax Reports<br/>Regulatory Filings<br/>Data Protection<br/>Privacy Audit<br/>Financial Reports"]
+    end
+    
+    Database["Admin Database<br/>User Records<br/>Action Logs<br/>Decisions<br/>Reports<br/>Audit Trail"]
+    
+    Notifications["Alert System<br/>Email Alerts<br/>SMS Alerts<br/>Dashboard Alerts<br/>Real-time Updates"]
+    
+    Analytics["Analytics Engine<br/>Prometheus<br/>Grafana<br/>Custom Queries<br/>Data Pipeline"]
+    
+    Admin -->|Access Dashboard| AdminDashboard
+    AdminDashboard -->|View Stats| Analytics
+    AdminDashboard -->|Action Queue| AdminAPI
+    AdminDashboard -->|Notifications| Notifications
+    
+    AdminAPI -->|Execute Commands| AdminService
+    AdminService -->|Query Data| Database
+    
+    AdminService -->|Manage Users| UserManagement
+    AdminService -->|Moderate Content| ContentModeration
+    AdminService -->|Resolve Disputes| DisputeResolution
+    AdminService -->|Generate Reports| Reports
+    
+    UserList -->|View User| UserActions
+    UserActions -->|Update Status| Database
+    UserActions -->|Update Role| RoleControl
+    UserActions -->|Adjust Score| TrustScoring
+    
+    ListingQueue -->|Review Listing| ListingActions
+    ListingQueue -->|AI Analysis| PhotoVerification
+    ListingActions -->|Approve| Database
+    ListingActions -->|Reject| Notifications
+    
+    ReviewQueue["Review Queue"] -->|Moderate Review| ReviewModeration
+    ReviewModeration -->|Spam/Profanity| ReviewModeration
+    ReviewModeration -->|Approve| Database
+    
+    DisputeQueue -->|Assign Case| DisputeActions
+    DisputeActions -->|Get Tools| MediationTools
+    MediationTools -->|Track Progress| DisputeQueue
+    DisputeActions -->|Record Outcome| Outcomes
+    Outcomes -->|Save Resolution| Database
+    
+    Dashboard -->|Pull Data| Analytics
+    UserMetrics -->|Calculate| Dashboard
+    PropertyMetrics -->|Calculate| Dashboard
+    PaymentMetrics -->|Calculate| Dashboard
+    EngagementMetrics -->|Calculate| Dashboard
+    
+    Logs -->|Monitor| FraudDetection
+    FraudDetection -->|Detect Anomalies| Alerts
+    Alerts -->|Notify Admin| Notifications
+    Alerts -->|Trigger| SecurityActions
+    
+    SecurityActions -->|Ban User| Database
+    SecurityActions -->|Log Action| Logs
+    
+    ReportTypes -->|Generate| DataExport
+    DataExport -->|Export Data| Database
+    DataExport -->|Deliver Report| Admin
+    
+    Compliance -->|Generate Report| DataExport
+    Compliance -->|Store| Database
+    
+    Database -->|Archive| Logs
+    
+    style UserManagement fill:#f3e5f5
+    style ContentModeration fill:#e8f5e9
+    style DisputeResolution fill:#fff3e0
+    style Analytics fill:#e3f2fd
+    style SecurityMonitoring fill:#ffebee
+    style Reports fill:#f1f5fe
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default', maxWidth: 2000});</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+﻿graph TD
+    Tenant["Tenant User<br/>Initiate Chat<br/>Send Messages<br/>View Status"]
+    Landlord["Landlord User<br/>Receive Messages<br/>Respond<br/>Track Conversations"]
+    
+    ChatUI["Chat Interface<br/>Conversation List<br/>Message Input<br/>Message Display<br/>Typing Indicator"]
+    
+    MessageAPI["Message Controller<br/>POST /messages<br/>GET /messages<br/>PATCH /messages<br/>DELETE /messages"]
+    
+    ConversationAPI["Conversation Controller<br/>POST /conversations<br/>GET /conversations<br/>PATCH /conversations"]
+    
+    MessageService["Message Service<br/>Message Logic<br/>Delivery<br/>Status Tracking<br/>Storage"]
+    
+    ConversationService["Conversation Service<br/>Thread Management<br/>Participant Sync<br/>History<br/>Metadata"]
+    
+    subgraph ConversationContext["CONVERSATION CONTEXT"]
+        ListingContext["Listing Context<br/>Linked Property<br/>Reference<br/>Details<br/>Location"]
+        
+        AgreementContext["Agreement Context<br/>Active Lease<br/>Reference<br/>Payment Link<br/>Dispute Link"]
+        
+        Participants["Participants<br/>Tenant ID<br/>Landlord ID<br/>Unique Pair<br/>Both Users"]
+    end
+    
+    subgraph MessageTypes["MESSAGE TYPES"]
+        TextMessage["Text Message<br/>Plain text<br/>Formatted<br/>Mentions<br/>Links"]
+        
+        FileMessage["File Message<br/>Document<br/>Photo<br/>PDF<br/>Attachment"]
+        
+        SystemMessage["System Message<br/>Agreement Created<br/>Payment Received<br/>Dispute Filed<br/>Auto-generated"]
+    end
+    
+    subgraph MessageLifecycle["MESSAGE LIFECYCLE"]
+        SENT["SENT<br/>Message Created<br/>Timestamp<br/>Sender ID<br/>Content"]
+        
+        DELIVERED["DELIVERED<br/>Received by Server<br/>Stored in DB<br/>WebSocket Event<br/>To Recipient"]
+        
+        READ["READ<br/>Message Viewed<br/>Recipient Opened<br/>Timestamp<br/>ReadAt Set"]
+        
+        ARCHIVED["ARCHIVED<br/>Hidden from View<br/>Still in History<br/>Searchable<br/>Deletion Protected"]
+        
+        DELETED["DELETED<br/>Marked Deleted<br/>Content Removed<br/>Not Displayed<br/>Audit Trail"]
+    end
+    
+    subgraph RealTimeFeatures["REAL-TIME FEATURES"]
+        WebSocket["WebSocket Connection<br/>Persistent Link<br/>Two-way<br/>Low Latency<br/>Bi-directional"]
+        
+        TypingIndicator["Typing Indicator<br/>Show when typing<br/>Real-time Update<br/>Auto Disappear<br/>User Experience"]
+        
+        OnlineStatus["Online Status<br/>User Active<br/>Last Seen<br/>Presence<br/>Availability"]
+        
+        ReadReceipt["Read Receipt<br/>Message Seen<br/>Read At Timestamp<br/>Visual Indicator<br/>Double Tick"]
+    end
+    
+    subgraph NotificationSystem["NOTIFICATION SYSTEM"]
+        PushNotif["Push Notification<br/>Browser Alert<br/>Mobile Notification<br/>Sound<br/>Badge Count"]
+        
+        EmailNotif["Email Notification<br/>Digest<br/>Important Messages<br/>Summary<br/>Frequency Control"]
+        
+        InAppNotif["In-App Notification<br/>Real-time Alert<br/>New Message<br/>Pop-up<br/>Toast"]
+    end
+    
+    Database["Message Database<br/>Store Messages<br/>Conversations<br/>Status<br/>Metadata<br/>Timestamps<br/>Read Status"]
+    
+    RedisCache["Redis Cache<br/>Active Conversations<br/>Online Users<br/>Unread Count<br/>Session Data"]
+    
+    SearchEngine["Search Engine<br/>Full-text Search<br/>Message Content<br/>Conversation Search<br/>Filter & Sort"]
+    
+    Tenant -->|Open Chat| ChatUI
+    ChatUI -->|List Conversations| ConversationAPI
+    ConversationAPI -->|Get Conversations| ConversationService
+    ConversationService -->|Fetch Data| Database
+    
+    Tenant -->|Select Conversation| ListingContext
+    Tenant -->|Select Conversation| AgreementContext
+    
+    ChatUI -->|Connect Real-time| WebSocket
+    Landlord -->|Connect Real-time| WebSocket
+    
+    Tenant -->|Type Message| TypingIndicator
+    TypingIndicator -->|Show Indicator| Landlord
+    
+    Tenant -->|Send Message| MessageAPI
+    MessageAPI -->|Create Message| MessageService
+    MessageService -->|New Message| SENT
+    
+    SENT -->|Store in DB| Database
+    SENT -->|Add to Index| SearchEngine
+    
+    SENT -->|Cache in Redis| RedisCache
+    SENT -->|WebSocket Event| DELIVERED
+    
+    DELIVERED -->|Receive| Landlord
+    DELIVERED -->|Show in Chat| ChatUI
+    
+    Landlord -->|Open Message| READ
+    READ -->|Update Status| Database
+    READ -->|Show Read Receipt| Tenant
+    
+    WebSocket -->|Typing| TypingIndicator
+    WebSocket -->|Online Status| OnlineStatus
+    WebSocket -->|Read Receipt| ReadReceipt
+    
+    SENT -->|Send Notification| PushNotif
+    SENT -->|Send Notification| InAppNotif
+    SENT -->|Digest Email| EmailNotif
+    
+    PushNotif -->|Alert Landlord| Landlord
+    InAppNotif -->|Show in App| ChatUI
+    EmailNotif -->|Daily/Weekly| Landlord
+    
+    RedisCache -->|Unread Count| ChatUI
+    RedisCache -->|Active List| ChatUI
+    
+    SearchEngine -->|Global Search| ChatUI
+    ChatUI -->|Search Conversations| SearchEngine
+    
+    Tenant -->|Archive Chat| ARCHIVED
+    ARCHIVED -->|Hide from List| ChatUI
+    ARCHIVED -->|Keep History| Database
+    
+    Tenant -->|Delete Message| DELETED
+    DELETED -->|Hide Content| ChatUI
+    DELETED -->|Audit Trail| Database
+    
+    ConversationService -->|Update Metadata| Database
+    ConversationService -->|Last Message| RedisCache
+    
+    Database -->|Backup| SearchEngine
+    
+    style ConversationContext fill:#f3e5f5
+    style MessageTypes fill:#e8f5e9
+    style MessageLifecycle fill:#fff3e0
+    style RealTimeFeatures fill:#e3f2fd
+    style NotificationSystem fill:#ffebee

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-architecture.png</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body { margin: 0; padding: 20px; background: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { color: #1a202c; margin-bottom: 20px; text-align: center; font-size: 28px; }
+        .mermaid { background: #f8f9fa; padding: 30px; border-radius: 10px; border: 2px solid #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>1. System Architecture - RENTRA Platform</h1>
+        <div class="mermaid">
+graph TB
+    subgraph Client["🖥️ Client Layer"]
+        WEB["Web Application<br/>React 19.2.4 + TypeScript<br/>Zustand + React Router<br/>Tailwind CSS + Axios"]
+        MOBILE["Mobile App<br/>React Native<br/>React Navigation"]
+    end
+    
+    subgraph API["⚙️ API Gateway & Services"]
+        GATEWAY["API Gateway<br/>NestJS + Express<br/>JWT Auth + Swagger"]
+        AUTH["Auth Module<br/>JWT + Passport<br/>register/login/getMe"]
+        USERS["Users Module<br/>User CRUD<br/>Trust Score Management"]
+        LISTINGS["Listings Module<br/>Property CRUD<br/>Fraud Detection<br/>POST /listings"]
+        AGREEMENTS["Agreements Module<br/>Agreement Lifecycle<br/>PDF Generation<br/>POST /agreements"]
+        PAYMENTS["Payments Module<br/>Payment Processing<br/>Status Tracking<br/>POST /payments"]
+        DISPUTES["Disputes Module<br/>Dispute Management<br/>Resolution Workflow"]
+        REVIEWS["Reviews Module<br/>Rating System<br/>Trust Impact"]
+        MESSAGES["Messages Module<br/>Chat System<br/>Conversations"]
+        CONTACT["Contact Module<br/>Inquiry Form"]
+        ADMIN["Admin Module<br/>User Management<br/>Dispute Resolution"]
+    end
+    
+    subgraph AIService["🤖 AI Service"]
+        FRAUD["Fraud Detection<br/>Python + ML<br/>sklearn/tensorflow"]
+        VERIFY["Document Verification<br/>OCR + CV<br/>Document Validation"]
+    end
+    
+    subgraph Data["📊 Data Layer"]
+        POSTGRES["PostgreSQL 14<br/>Primary DB<br/>Prisma ORM<br/>8 Entity Models"]
+        REDIS["Redis Cache<br/>Session Storage<br/>Token Blacklist"]
+        S3["AWS S3<br/>File Storage<br/>Photos & PDFs<br/>Bucket: rentra-files"]
+    end
+    
+    Client -->|REST API<br/>Axios| GATEWAY
+    GATEWAY --> AUTH
+    GATEWAY --> USERS
+    GATEWAY --> LISTINGS
+    GATEWAY --> AGREEMENTS
+    GATEWAY --> PAYMENTS
+    GATEWAY --> DISPUTES
+    GATEWAY --> REVIEWS
+    GATEWAY --> MESSAGES
+    GATEWAY --> CONTACT
+    GATEWAY --> ADMIN
+    
+    LISTINGS -->|Fraud Check| FRAUD
+    AGREEMENTS -->|PDF Gen| VERIFY
+    
+    AUTH -->|JWT Tokens| REDIS
+    USERS -->|CRUD| POSTGRES
+    LISTINGS -->|CRUD| POSTGRES
+    AGREEMENTS -->|CRUD| POSTGRES
+    PAYMENTS -->|CRUD| POSTGRES
+    DISPUTES -->|CRUD| POSTGRES
+    REVIEWS -->|CRUD| POSTGRES
+    MESSAGES -->|CRUD| POSTGRES
+    
+    LISTINGS -->|Upload Photos| S3
+    AGREEMENTS -->|Upload PDFs| S3
+    PAY --> FRAUD
+    
+    AUTH --> DB
+    LIST --> DB
+    AGR --> DB
+    PAY --> DB
+    DIS --> DB
+    
+    AUTH --> CACHE
+    
+    LIST --> STORAGE
+    AGR --> STORAGE
+        </div>
+    </div>
+    <script>mermaid.initialize({startOnLoad: true, theme: 'default'});</script>
+</body>
+</html>
