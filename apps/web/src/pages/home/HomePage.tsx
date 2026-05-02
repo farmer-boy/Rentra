@@ -11,15 +11,15 @@ export default function HomePage() {
     <div className={`min-h-screen ${isDark ? 'bg-[#0f0f0f] text-white' : 'bg-white text-black'}`}>
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition ${isDark ? 'bg-[#0f0f0f]/40 border-white/5' : 'bg-white/40 border-gray-400/30'} border-b`}>
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition group">
-            <img src="/logo.jpg" alt="Renova Logo" className="w-10 h-10 rounded-lg object-cover shadow-lg group-hover:shadow-green-500/50 transition" style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}} />
+        <div className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl">
+          <Link to="/" className="flex items-center gap-3 transition hover:opacity-80 group">
+            <img src="/logo.jpg" alt="Renova Logo" className="object-cover w-10 h-10 transition rounded-lg shadow-lg group-hover:shadow-green-500/50" style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}} />
             <div>
               <div className="text-xl font-bold text-green-500">Renova</div>
               <div className="text-[10px] text-green-400/70 font-semibold tracking-wider">AI RENTAL</div>
             </div>
           </Link>
-          <div className="hidden md:flex gap-8 items-center">
+          <div className="items-center hidden gap-8 md:flex">
             <a href="#features" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Features</a>
             <a href="#how-it-works" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>How It Works</a>
             <a href="#pricing" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Pricing</a>
@@ -28,26 +28,26 @@ export default function HomePage() {
           </div>
           <div className="flex gap-3">
             <Link to="/login" className={`px-4 py-2 text-sm font-medium rounded-lg transition backdrop-blur ${isDark ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10' : 'bg-black/10 hover:bg-black/20 text-black border border-black/10'}`}>Login</Link>
-            <Link to="/register" className="px-4 py-2 text-sm font-semibold bg-green-500 text-black rounded-lg hover:bg-green-400 transition shadow-lg hover:shadow-green-500/50">Get Started</Link>
+            <Link to="/register" className="px-4 py-2 text-sm font-semibold text-black transition bg-green-500 rounded-lg shadow-lg hover:bg-green-400 hover:shadow-green-500/50">Get Started</Link>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-12 px-4 text-center max-w-3xl mx-auto relative overflow-hidden">
+      <section className="relative max-w-3xl px-4 pt-20 pb-12 mx-auto overflow-hidden text-center">
         {/* Gradient Background */}
         <div className="absolute inset-0 -z-10">
           <div className={`absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-3xl opacity-30 ${isDark ? 'bg-green-500' : 'bg-green-400'} animate-pulse`}></div>
         </div>
 
-        <h1 className="text-3xl md:text-5xl font-extrabold mb-4 leading-tight bg-gradient-to-r from-green-400 via-green-500 to-green-400 bg-clip-text text-transparent">
+        <h1 className="mb-4 text-3xl font-extrabold leading-tight text-transparent md:text-5xl bg-gradient-to-r from-green-400 via-green-500 to-green-400 bg-clip-text">
           Pakistan's First <br /> AI-Powered Rental Platform
         </h1>
         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-5 max-w-2xl mx-auto leading-relaxed`}>
           Fake listing detection, AI trust scores, and digital agreements for secure, transparent renting. Protecting tenants and landlords across Pakistan's rental market.
         </p>
-        <div className="flex gap-3 justify-center flex-wrap">
-          <Link to="/register" className="px-6 py-2 bg-gradient-to-r from-green-500 to-green-600 text-black rounded-lg hover:shadow-xl hover:shadow-green-500/50 font-semibold flex items-center gap-2 text-sm transition duration-300 transform hover:scale-105">
+        <div className="flex flex-wrap justify-center gap-3">
+          <Link to="/register" className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-black transition duration-300 transform rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl hover:shadow-green-500/50 hover:scale-105">
             Find a Home <ArrowRight size={16} />
           </Link>
           <button className={`px-6 py-2 backdrop-blur-xl rounded-lg font-semibold text-sm transition duration-300 transform hover:scale-105 ${isDark ? 'bg-white/10 border border-white/20 hover:bg-white/20 text-white' : 'bg-black/10 border border-black/20 hover:bg-black/20 text-black'}`}>
@@ -63,7 +63,7 @@ export default function HomePage() {
           <div className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${isDark ? 'bg-green-500' : 'bg-green-400'}`}></div>
         </div>
 
-        <div className="max-w-5xl mx-auto grid md:grid-cols-4 gap-6 text-center relative">
+        <div className="relative grid max-w-5xl gap-6 mx-auto text-center md:grid-cols-4">
           {[
             { num: '1,284+', label: 'Active Listings' },
             { num: '47', label: 'Fake Listings Blocked' },
@@ -71,7 +71,7 @@ export default function HomePage() {
             { num: '4,821', label: 'Verified Users' },
           ].map((stat, i) => (
             <div key={i} className={`p-4 rounded-2xl backdrop-blur-md transition transform hover:scale-110 hover:shadow-2xl ${isDark ? 'bg-white/5 border border-white/10 hover:bg-white/10' : 'bg-black/5 border border-black/10 hover:bg-black/10'}`}>
-              <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent mb-1">{stat.num}</div>
+              <div className="mb-1 text-2xl font-bold text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">{stat.num}</div>
               <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{stat.label}</p>
             </div>
           ))}
@@ -79,12 +79,12 @@ export default function HomePage() {
       </section>
 
       {/* Problems Section */}
-      <section id="problems" className="py-12 px-4 max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-3">Why Renova?</h2>
+      <section id="problems" className="max-w-5xl px-4 py-12 mx-auto">
+        <h2 className="mb-3 text-2xl font-bold text-center">Why Renova?</h2>
         <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
           Pakistan's rental market faces critical challenges. We're here to solve them.
         </p>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {[
             { icon: '🖼️', title: 'Fake Listings', desc: 'Unverified properties and photoshopped images waste time and money' },
             { icon: '📄', title: 'No Written Agreements', desc: 'Most rentals lack formal documentation, leading to disputes' },
@@ -94,8 +94,8 @@ export default function HomePage() {
             { icon: '🚫', title: 'Market Opacity', desc: 'No standardized pricing or transparent market data' },
           ].map((item, i) => (
             <div key={i} className={`p-4 border-l-4 border-red-500 rounded ${isDark ? 'bg-[#1a2332]' : 'bg-gray-50'}`}>
-              <div className="text-2xl mb-1">{item.icon}</div>
-              <h3 className="font-bold mb-1 text-sm">{item.title}</h3>
+              <div className="mb-1 text-2xl">{item.icon}</div>
+              <h3 className="mb-1 text-sm font-bold">{item.title}</h3>
               <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.desc}</p>
             </div>
           ))}
@@ -103,12 +103,12 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-12 px-4 max-w-5xl mx-auto relative">
-        <h2 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">Powerful Features</h2>
+      <section id="features" className="relative max-w-5xl px-4 py-12 mx-auto">
+        <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">Powerful Features</h2>
         <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
           Everything you need for safe, transparent renting.
         </p>
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid gap-4 md:grid-cols-3">
           {[
             { icon: '🤖', title: 'AI Fake Listing Detector', desc: 'Our AI analyzes images and details to instantly flag suspicious listings' },
             { icon: '⭐', title: 'Bidirectional Trust Scores', desc: 'Transparent trust ratings for both tenants and landlords' },
@@ -118,8 +118,8 @@ export default function HomePage() {
             { icon: '🛡️', title: 'In-App Dispute Resolution', desc: 'AI-mediated disputes resolved in days, not months' },
           ].map((item, i) => (
             <div key={i} className={`p-5 rounded-2xl backdrop-blur-xl border transition duration-300 transform hover:scale-105 hover:shadow-2xl group ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-green-500/50' : 'bg-black/5 border-black/10 hover:bg-black/10 hover:border-green-500/50'}`}>
-              <div className="text-3xl mb-2 group-hover:scale-110 transition duration-300">{item.icon}</div>
-              <h3 className="font-bold mb-1 text-green-400 group-hover:text-green-300 text-sm">{item.title}</h3>
+              <div className="mb-2 text-3xl transition duration-300 group-hover:scale-110">{item.icon}</div>
+              <h3 className="mb-1 text-sm font-bold text-green-400 group-hover:text-green-300">{item.title}</h3>
               <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.desc}</p>
             </div>
           ))}
@@ -129,21 +129,21 @@ export default function HomePage() {
       {/* How It Works */}
       <section id="how-it-works" className={`py-12 px-4 ${isDark ? 'bg-[#1a2332]' : 'bg-gray-50'}`}>
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-3">How It Works</h2>
+          <h2 className="mb-3 text-2xl font-bold text-center">How It Works</h2>
           <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
             Simple, transparent steps for tenants and landlords.
           </p>
           
-          <div className="grid md:grid-cols-2 gap-10">
+          <div className="grid gap-10 md:grid-cols-2">
             <div>
-              <h3 className="text-lg font-bold mb-6 text-green-500">For Tenants</h3>
+              <h3 className="mb-6 text-lg font-bold text-green-500">For Tenants</h3>
               {[
                 { num: '1', title: 'Search & Apply', desc: 'Browse AI-verified listings and apply' },
                 { num: '2', title: 'Sign Agreement', desc: 'Review and digitally sign rent agreement' },
                 { num: '3', title: 'Pay Safely', desc: 'Pay rent via JazzCash/EasyPaisa' },
               ].map((step, i) => (
-                <div key={i} className="mb-5 flex gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-black rounded-full flex items-center justify-center font-bold text-sm">{step.num}</div>
+                <div key={i} className="flex gap-3 mb-5">
+                  <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 text-sm font-bold text-black bg-green-500 rounded-full">{step.num}</div>
                   <div>
                     <h4 className="font-bold mb-0.5 text-sm">{step.title}</h4>
                     <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{step.desc}</p>
@@ -153,14 +153,14 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h3 className="text-lg font-bold mb-6 text-green-500">For Landlords</h3>
+              <h3 className="mb-6 text-lg font-bold text-green-500">For Landlords</h3>
               {[
                 { num: '1', title: 'Post Property', desc: 'List your property with AI pricing' },
                 { num: '2', title: 'Verify Tenant', desc: 'Screen applicants with trust scores' },
                 { num: '3', title: 'Collect Rent', desc: 'Receive instant digital payments' },
               ].map((step, i) => (
-                <div key={i} className="mb-5 flex gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-green-500 text-black rounded-full flex items-center justify-center font-bold text-sm">{step.num}</div>
+                <div key={i} className="flex gap-3 mb-5">
+                  <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 text-sm font-bold text-black bg-green-500 rounded-full">{step.num}</div>
                   <div>
                     <h4 className="font-bold mb-0.5 text-sm">{step.title}</h4>
                     <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{step.desc}</p>
@@ -173,12 +173,12 @@ export default function HomePage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-12 px-4 max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-3">Simple, Transparent Pricing</h2>
+      <section id="pricing" className="max-w-5xl px-4 py-12 mx-auto">
+        <h2 className="mb-3 text-2xl font-bold text-center">Simple, Transparent Pricing</h2>
         <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
           Choose the plan that fits your needs.
         </p>
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid gap-5 md:grid-cols-3">
           {[
             { name: 'Free', period: 'For Tenants', price: 'Free', features: ['Browse all listings', 'View trust scores', 'Apply to properties', 'View AI recommendations'] },
             { name: 'Basic', period: 'For Landlords', price: 'Rs. 500', subprice: '/month', featured: true, features: ['Post up to 3 listings', 'AI pricing suggestions', 'Tenant screening', 'Digital agreements'] },
@@ -192,7 +192,7 @@ export default function HomePage() {
                 <span className="text-2xl font-bold text-green-500">{plan.price}</span>
                 {plan.subprice && <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{plan.subprice}</span>}
               </div>
-              <ul className="space-y-2 mb-4">
+              <ul className="mb-4 space-y-2">
                 {plan.features.map((feat, j) => (
                   <li key={j} className="flex items-center gap-2 text-xs">
                     <CheckCircle2 size={14} className="text-green-500" />
@@ -215,21 +215,21 @@ export default function HomePage() {
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">What Our Users Say</h2>
+          <h2 className="mb-4 text-4xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">What Our Users Say</h2>
           <p className={`text-center mb-16 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Real stories from satisfied users</p>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid gap-6 md:grid-cols-3">
             {[
-              { name: 'Ayesha Khan', role: 'Tenant, Lahore', text: 'Found my dream apartment in 2 days. The trust score system gave me confidence in my landlord!' },
-              { name: 'Muhammad Rashid', role: 'Landlord, Karachi', text: 'Verified tenants and automated rent collection. No more chasing payments!' },
-              { name: 'Fatima Hassan', role: 'Tenant, Islamabad', text: 'Had a dispute with landlord. Renova resolved it in 3 days instead of months in court!' },
+              { name: 'Farhan Khan', role: 'Tenant, Lahore', text: 'Found my dream apartment in 2 days. The trust score system gave me confidence in my landlord!' },
+              { name: 'Bella Donna', role: 'Landlord, Karachi', text: 'Verified tenants and automated rent collection. No more chasing payments!' },
+              { name: 'Chaudhry Samavia', role: 'Tenant, Islamabad', text: 'Had a dispute with landlord. Renova resolved it in 3 days instead of months in court!' },
             ].map((testimonial, i) => (
               <div key={i} className={`p-6 rounded-2xl backdrop-blur-md border transition duration-300 transform hover:scale-105 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/10 hover:bg-black/10'}`}>
                 <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, j) => <span key={j} className="text-yellow-400 text-lg">★</span>)}
+                  {[...Array(5)].map((_, j) => <span key={j} className="text-lg text-yellow-400">★</span>)}
                 </div>
                 <p className={`mb-4 text-sm italic ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>"{testimonial.text}"</p>
-                <div className="border-t border-white/5 pt-3">
-                  <h4 className="font-bold text-sm text-green-400">{testimonial.name}</h4>
+                <div className="pt-3 border-t border-white/5">
+                  <h4 className="text-sm font-bold text-green-400">{testimonial.name}</h4>
                   <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{testimonial.role}</p>
                 </div>
               </div>
@@ -239,8 +239,8 @@ export default function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-12 px-4 max-w-2xl mx-auto relative">
-        <h2 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">FAQ</h2>
+      <section id="faq" className="relative max-w-2xl px-4 py-12 mx-auto">
+        <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">FAQ</h2>
         <p className={`text-center mb-8 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
           Answers to common questions about Renova.
         </p>
@@ -277,48 +277,48 @@ export default function HomePage() {
           <div className={`absolute -bottom-20 -left-20 w-96 h-96 rounded-full blur-3xl opacity-30 ${isDark ? 'bg-green-500' : 'bg-green-400'}`}></div>
         </div>
 
-        <h2 className="text-2xl font-bold text-center mb-3 bg-gradient-to-r from-green-400 to-green-500 bg-clip-text text-transparent">Ready to Rent Safely?</h2>
+        <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">Ready to Rent Safely?</h2>
         <p className={`text-center mb-8 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
           Join thousands of Pakistani renters and landlords using Renova for transparent rentals.
         </p>
         
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid gap-6 mb-8 md:grid-cols-2">
           {/* Quick Contact */}
           <div className="space-y-3">
-            <h3 className="font-bold text-sm mb-4">Quick Contact Info</h3>
+            <h3 className="mb-4 text-sm font-bold">Quick Contact Info</h3>
             <div className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">📧</span>
+              <span className="text-lg text-green-500">📧</span>
               <div>
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Email</p>
-                <a href="mailto:subssems336@gmail.com" className="font-semibold text-sm hover:text-green-500 transition">subssems336@gmail.com</a>
+                <a href="mailto:subssems336@gmail.com" className="text-sm font-semibold transition hover:text-green-500">subssems336@gmail.com</a>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">📱</span>
+              <span className="text-lg text-green-500">📱</span>
               <div>
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Phone</p>
-                <a href="tel:+923064141188" className="font-semibold text-sm hover:text-green-500 transition">+92-306-4141188</a>
+                <a href="tel:+923064141188" className="text-sm font-semibold transition hover:text-green-500">+92-306-4141188</a>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">📍</span>
+              <span className="text-lg text-green-500">📍</span>
               <div>
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Address</p>
-                <p className="font-semibold text-sm">p/o khot mehtab khan khot rada kishan</p>
+                <p className="text-sm font-semibold">p/o khot mehtab khan khot rada kishan</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-green-500 text-lg">⏰</span>
+              <span className="text-lg text-green-500">⏰</span>
               <div>
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Hours</p>
-                <p className="font-semibold text-sm">24/7 Available</p>
+                <p className="text-sm font-semibold">24/7 Available</p>
               </div>
             </div>
           </div>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col gap-3 justify-center">
-            <Link to="/register" className="px-6 py-2 bg-green-500 text-black rounded-lg hover:bg-green-600 font-bold text-sm transition text-center">
+          <div className="flex flex-col justify-center gap-3">
+            <Link to="/register" className="px-6 py-2 text-sm font-bold text-center text-black transition bg-green-500 rounded-lg hover:bg-green-600">
               Get Started Free
             </Link>
             <Link to="/contact" className={`px-6 py-2 rounded-lg font-semibold text-sm transition border text-center ${isDark ? 'border-white/20 hover:bg-white/5' : 'border-gray-400 hover:bg-gray-100'}`}>
@@ -336,13 +336,13 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className={`border-t py-8 px-4 ${isDark ? 'border-white/10 bg-[#0a0a0a]' : 'border-gray-400 bg-gray-50'}`}>
-        <div className="max-w-5xl mx-auto grid md:grid-cols-5 gap-6 mb-6 text-xs">
+        <div className="grid max-w-5xl gap-6 mx-auto mb-6 text-xs md:grid-cols-5">
           <div>
-            <h4 className="font-bold mb-2 text-sm">Renova</h4>
+            <h4 className="mb-2 text-sm font-bold">Renova</h4>
             <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Transparent Renting, Powered by AI</p>
           </div>
           <div>
-            <h4 className="font-bold mb-2 text-sm">Platform</h4>
+            <h4 className="mb-2 text-sm font-bold">Platform</h4>
             <ul className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><a href="#features" className="hover:text-green-500">Features</a></li>
               <li><a href="#pricing" className="hover:text-green-500">Pricing</a></li>
@@ -350,7 +350,7 @@ export default function HomePage() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-2 text-sm">Support</h4>
+            <h4 className="mb-2 text-sm font-bold">Support</h4>
             <ul className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><a href="#contact" className="hover:text-green-500">Contact</a></li>
               <li><a href="#faq" className="hover:text-green-500">FAQ</a></li>
@@ -358,14 +358,14 @@ export default function HomePage() {
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-2 text-sm">Legal</h4>
+            <h4 className="mb-2 text-sm font-bold">Legal</h4>
             <ul className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><a href="#" className="hover:text-green-500">Privacy</a></li>
               <li><a href="#" className="hover:text-green-500">Terms</a></li>
             </ul>
           </div>
           <div>
-            <h4 className="font-bold mb-2 text-sm">Follow Us</h4>
+            <h4 className="mb-2 text-sm font-bold">Follow Us</h4>
             <div className="flex gap-3 text-sm">
               <a href="#" className="hover:text-green-500">f</a>
               <a href="#" className="hover:text-green-500">📷</a>
