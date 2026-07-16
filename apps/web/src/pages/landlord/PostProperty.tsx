@@ -80,7 +80,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder = 'Search...',
         className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 text-left flex items-center justify-between ${
           isDark
             ? 'bg-[#1a2332] border-[#2d3e52] text-white hover:bg-[#1f2938] hover:border-[#3a4a63]'
-            : 'bg-white/70 border-gray-400 text-gray-900 hover:bg-white/90 hover:border-gray-400'
+            : 'bg-white border-gray-200 text-gray-900 hover:bg-gray-50 hover:border-gray-300'
         } ${value ? 'font-medium' : 'text-gray-500'}`}
       >
         <span>{value || placeholder}</span>
@@ -91,7 +91,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder = 'Search...',
         <div className={`absolute top-full left-0 right-0 mt-1 border-2 rounded-lg shadow-lg z-50 backdrop-blur-sm ${
           isDark
             ? 'bg-[#1a2332] border-[#2d3e52]'
-            : 'bg-white/95 border-gray-400'
+            : 'bg-white border-gray-200'
         }`}>
           <input
             type="text"
@@ -101,7 +101,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder = 'Search...',
             className={`w-full px-3 py-2 border-b-2 text-sm transition-all ${
               isDark
                 ? 'bg-[#1a2332] border-[#2d3e52] text-white placeholder-gray-500 focus:outline-none focus:ring-0'
-                : 'bg-white/90 border-gray-400 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0'
+                : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0'
             }`}
           />
           <div className="max-h-48 overflow-y-auto">
@@ -255,7 +255,7 @@ export default function LandlordPostProperty() {
                     className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
                       isDark
                         ? 'bg-[#1a2332] border-[#2d3e52] text-white focus:border-green-400'
-                        : 'bg-white/70 border-gray-400 text-gray-900 focus:border-green-500'
+                        : 'bg-white border-gray-200 text-gray-900 focus:border-green-500'
                     }`}
                   >
                     <option value="">Select Area</option>
@@ -278,7 +278,7 @@ export default function LandlordPostProperty() {
                     className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
                       isDark
                         ? 'bg-[#1a2332] border-[#2d3e52] text-white placeholder-gray-400 focus:border-green-400'
-                        : 'bg-white/70 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-green-500'
+                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500'
                     }`}
                   />
                 </div>
@@ -297,7 +297,7 @@ export default function LandlordPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-[#1a2332] border-[#2d3e52] text-white placeholder-gray-400 focus:border-green-400'
-                          : 'bg-white/70 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-green-500'
+                          : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500'
                       }`}
                     />
                   </div>
@@ -315,7 +315,7 @@ export default function LandlordPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-[#1a2332] border-[#2d3e52] text-white placeholder-gray-400 focus:border-green-400'
-                          : 'bg-white/70 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-green-500'
+                          : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500'
                       }`}
                     />
                   </div>
@@ -333,7 +333,7 @@ export default function LandlordPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-[#1a2332] border-[#2d3e52] text-white focus:border-green-400'
-                          : 'bg-white/70 border-gray-400 text-gray-900 focus:border-green-500'
+                          : 'bg-white border-gray-200 text-gray-900 focus:border-green-500'
                       }`}
                     >
                       <option value="">Select</option>
@@ -357,7 +357,7 @@ export default function LandlordPostProperty() {
                       className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
                         isDark
                           ? 'bg-[#1a2332] border-[#2d3e52] text-white placeholder-gray-400 focus:border-green-400'
-                          : 'bg-white/70 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-green-500'
+                          : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500'
                       }`}
                     />
                   </div>
@@ -376,7 +376,7 @@ export default function LandlordPostProperty() {
                     className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm resize-none transition-all duration-300 ${
                       isDark
                         ? 'bg-[#1a2332] border-[#2d3e52] text-white placeholder-gray-400 focus:border-green-400'
-                        : 'bg-white/70 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-green-500'
+                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-green-500'
                     }`}
                   />
                 </div>
@@ -419,7 +419,7 @@ export default function LandlordPostProperty() {
                 <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
+                    : 'bg-gray-50 border-gray-200'
                 }`}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-start gap-2 flex-1">
@@ -441,7 +441,7 @@ export default function LandlordPostProperty() {
                 <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
+                    : 'bg-gray-50 border-gray-200'
                 }`}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-start gap-2 flex-1">
@@ -463,7 +463,7 @@ export default function LandlordPostProperty() {
                 <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
+                    : 'bg-gray-50 border-gray-200'
                 }`}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-start gap-2 flex-1">
@@ -485,7 +485,7 @@ export default function LandlordPostProperty() {
                 <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
                   isDark
                     ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
+                    : 'bg-gray-50 border-gray-200'
                 }`}>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-start gap-2 flex-1">

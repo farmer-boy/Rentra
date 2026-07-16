@@ -52,7 +52,7 @@ export default function Agreements() {
         {/* Agreement Preview */}
         <Card>
           <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Agreement Preview — Johar Town</div>
-          <div className={`border rounded-lg p-4 text-[11px] space-y-2 mb-4 ${isDark ? 'bg-[#0f0f0f] border-white/10' : 'bg-gray-50 border-gray-400'}`}>
+          <div className={`border rounded-lg p-4 text-[11px] space-y-2 mb-4 ${isDark ? 'bg-[#0f0f0f] border-white/10' : 'bg-white border-gray-200'}`}>
             <h4 className={`text-center text-[12px] font-bold mb-3 ${isDark ? 'text-white' : 'text-black'}`}>🏠 KIRAYANAMA (RENT AGREEMENT)</h4>
             <div className={isDark ? 'text-gray-300' : 'text-black'}><strong>Tenant:</strong> Ali Raza (CNIC: 35202-XXXXX)</div>
             <div className={isDark ? 'text-gray-300' : 'text-black'}><strong>Landlord:</strong> Ahmed Malik (CNIC: 35201-XXXXX)</div>

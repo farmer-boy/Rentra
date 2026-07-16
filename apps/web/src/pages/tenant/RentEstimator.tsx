@@ -18,7 +18,7 @@ export default function RentEstimator() {
           <div className="space-y-4">
             <div>
               <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>AREA / LOCATION</label>
-              <select defaultValue="gulberg" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Area/Location">
+              <select defaultValue="gulberg" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Area/Location">
                 <option value="gulberg">Gulberg III</option>
                 <option value="johar">Johar Town</option>
                 <option value="dha">DHA Phase 5</option>
@@ -28,7 +28,7 @@ export default function RentEstimator() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>PROPERTY TYPE</label>
-                <select defaultValue="flat" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Property type">
+                <select defaultValue="flat" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} aria-label="Property type">
                   <option value="flat">Flat</option>
                   <option value="room">Room</option>
                   <option value="house">House</option>

@@ -54,7 +54,7 @@ export default function LandlordDashboard() {
             { tenant: 'Sara Khan', month: 'Feb 2025', amount: 'Rs 9,500', status: 'Received', pill: 'green' as const },
             { tenant: 'Hamza Ali', month: 'Feb 2025', amount: 'Rs 31,000', status: 'Pending', pill: 'yellow' as const },
           ].map((p, i) => (
-            <div key={i} className="flex items-center justify-between py-2 border-b border-gray-400 last:border-0">
+            <div key={i} className={`flex items-center justify-between py-2 border-b last:border-0 ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
               <div>
                 <div className="text-[11px] font-semibold">{p.tenant}</div>
                 <div className="text-[10px] text-gray-500">{p.month}</div>

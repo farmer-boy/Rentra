@@ -17,12 +17,28 @@ const loginStyles = `
     transition: background-color 5000s ease-in-out 0s !important;
   }
   
+  /* Light mode autofill */
+  :root:not([data-theme="dark"]) input:-webkit-autofill,
+  :root:not([data-theme="dark"]) input:-webkit-autofill:hover,
+  :root:not([data-theme="dark"]) input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: #0d0d0d !important;
+    caret-color: #0d0d0d !important;
+  }
+  
   /* Additional autofill blocking */
   input[type="email"]:-webkit-autofill,
   input[type="password"]:-webkit-autofill {
     -webkit-text-fill-color: white !important;
     -webkit-box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
     caret-color: white !important;
+  }
+  
+  :root:not([data-theme="dark"]) input[type="email"]:-webkit-autofill,
+  :root:not([data-theme="dark"]) input[type="password"]:-webkit-autofill {
+    -webkit-text-fill-color: #0d0d0d !important;
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    caret-color: #0d0d0d !important;
   }
   
   /* Hide autofill dropdown */
@@ -71,7 +87,7 @@ export default function Login() {
             className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
             title="Go to home"
           >
-            <div className={`w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
+            <div className={`w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50 border border-gray-200'}`}>
               <img src="/logo.jpg" alt="Renova" className="w-full h-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
             </div>
           </button>
@@ -100,7 +116,7 @@ export default function Login() {
               className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm font-normal ${
                 isDark
                   ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                  : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
               } outline-none`}
               required
             />
@@ -130,7 +146,7 @@ export default function Login() {
                 className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm font-normal ${
                   isDark
                     ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                    : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                    : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                 } outline-none`}
                 required
               />

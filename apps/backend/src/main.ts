@@ -43,8 +43,11 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      forbidNonWhitelisted: false,
       transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
@@ -65,9 +68,9 @@ async function bootstrap() {
   await app.listen(port);
 
   console.log(`
-  🚀 Rentra Backend is running!
-  📡 API: http://localhost:${port}/api
-  📖 Swagger Docs: http://localhost:${port}/api/docs
+    Rentra Backend is running!
+    API: http://localhost:${port}/api
+    Swagger Docs: http://localhost:${port}/api/docs
   `);
 }
 

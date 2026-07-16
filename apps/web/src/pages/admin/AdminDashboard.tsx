@@ -27,7 +27,7 @@ export default function AdminDashboard() {
             <thead>
               <tr>
                 {['Listing', 'AI Score', 'Action'].map(h => (
-                  <th key={h} className={`text-left text-[9px] font-mono ${isDark ? 'text-gray-700 border-white/10' : 'text-gray-500 border-gray-400'} tracking-widest pb-2 border-b`}>{h}</th>
+                  <th key={h} className={`text-left text-[9px] font-mono ${isDark ? 'text-gray-700 border-white/10' : 'text-gray-500 border-gray-200'} tracking-widest pb-2 border-b`}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -56,7 +56,7 @@ export default function AdminDashboard() {
             <thead>
               <tr>
                 {['User', 'Role', 'Trust', 'Status'].map(h => (
-                  <th key={h} className="text-left text-[10px] font-mono text-gray-500 tracking-widest pb-2 border-b border-gray-400">{h}</th>
+                  <th key={h} className="text-left text-[10px] font-mono text-gray-500 tracking-widest pb-2 border-b border-gray-200">{h}</th>
                 ))}
               </tr>
             </thead>

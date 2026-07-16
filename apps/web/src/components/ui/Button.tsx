@@ -11,9 +11,9 @@ interface ButtonProps {
 }
 
 const lightStyles = {
-  primary: 'bg-green-500 text-black hover:bg-green-400',
-  ghost: 'bg-gray-100 text-gray-800 border border-gray-400 hover:text-gray-900 hover:bg-gray-200',
-  danger: 'bg-red-100 text-red-700 border border-red-400 hover:bg-red-200',
+  primary: 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 shadow-sm hover:shadow-md',
+  ghost: 'bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-200 hover:border-gray-400 active:bg-gray-300',
+  danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm hover:shadow-md',
 };
 
 const darkStyles = {

@@ -29,15 +29,15 @@ export default function Profile() {
           <div className="space-y-3">
             <div>
               <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>FULL NAME</label>
-              <input defaultValue="Ali Raza" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Full name" />
+              <input defaultValue="Ali Raza" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Full name" />
             </div>
             <div>
               <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>PHONE</label>
-              <input defaultValue="+92 306 41411" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Phone number" />
+              <input defaultValue="+92 306 41411" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="Phone number" />
             </div>
             <div>
               <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>CNIC</label>
-              <input defaultValue="35202-XXXXXXX-X" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="CNIC" />
+              <input defaultValue="35202-XXXXXXX-X" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'} border rounded-lg px-3 py-2 text-[12px] outline-none focus:border-green-500 transition-colors`} aria-label="CNIC" />
             </div>
           </div>
           <button className="w-full bg-green-500 text-black px-4 py-2.5 rounded-lg font-semibold text-[12px] hover:bg-green-400 transition-colors mt-4" title="Save Profile Changes">

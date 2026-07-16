@@ -222,7 +222,7 @@ export default function Contact() {
                   href="https://www.facebook.com/profile.php?id=100093254713246"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-100'}`}
+                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-50 border border-gray-200'}`}
                   title="Facebook"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#1877F2' }}>
@@ -233,7 +233,7 @@ export default function Contact() {
                   href="https://www.instagram.com/farhan.dev0/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-100'}`}
+                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-50 border border-gray-200'}`}
                   title="Instagram"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#E4405F' }}>
@@ -246,7 +246,7 @@ export default function Contact() {
                   href="https://www.linkedin.com/in/f%E1%B4%80%CA%80%CA%9C%E1%B4%80%C9%B4-%E1%B5%88%E1%B5%89%E1%B5%9B-5224b0277/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-100'}`}
+                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-50 border border-gray-200'}`}
                   title="LinkedIn"
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#0A66C2' }}>

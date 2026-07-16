@@ -23,7 +23,7 @@ export default function Payments() {
           <div className="space-y-3 mb-4">
             <div>
               <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>PAYMENT METHOD</label>
-              <select className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-gray-50 border-gray-400 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} title="Payment method">
+              <select className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} title="Payment method">
                 <option>📱 JazzCash</option>
                 <option>📱 EasyPaisa</option>
                 <option>🏦 Bank Transfer</option>
@@ -31,7 +31,7 @@ export default function Payments() {
             </div>
             <div>
               <label className={`block text-[10px] font-mono tracking-widest mb-1.5 ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>MOBILE NUMBER</label>
-              <input defaultValue="+92 306 41411" placeholder="Mobile number" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-300 text-black placeholder-gray-400'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} />
+              <input defaultValue="+92 306 41411" placeholder="Mobile number" className={`w-full ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-gray-500' : 'bg-white border-gray-200 text-black placeholder-gray-400'} border rounded-lg px-3 py-2 text-[13px] outline-none focus:border-green-500 transition-colors`} />
             </div>
           </div>
           <button className="w-full bg-green-500 text-black px-4 py-2.5 rounded-lg font-semibold text-[13px] hover:bg-green-400 transition-colors mb-2" title="Pay rent">

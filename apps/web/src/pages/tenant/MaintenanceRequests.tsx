@@ -124,7 +124,7 @@ export default function MaintenanceRequests() {
                 className={`w-full px-3 py-2 text-sm rounded border ${
                   isDark
                     ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500'
-                    : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'
+                    : 'bg-white border-gray-200 text-black placeholder-gray-400'
                 } focus:outline-none focus:border-green-500`}
                 required
               />
@@ -142,7 +142,7 @@ export default function MaintenanceRequests() {
                 className={`w-full px-3 py-2 text-sm rounded border resize-none ${
                   isDark
                     ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500'
-                    : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'
+                    : 'bg-white border-gray-200 text-black placeholder-gray-400'
                 } focus:outline-none focus:border-green-500`}
                 required
               />
@@ -159,7 +159,7 @@ export default function MaintenanceRequests() {
                 className={`w-full px-3 py-2 text-sm rounded border ${
                   isDark
                     ? 'bg-[#1f1f1f] border-white/10 text-white'
-                    : 'bg-gray-50 border-gray-400 text-black'
+                    : 'bg-white border-gray-200 text-black'
                 } focus:outline-none focus:border-green-500`}
               >
                 <option value="low">Low</option>

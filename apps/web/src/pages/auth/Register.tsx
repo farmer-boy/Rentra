@@ -17,6 +17,15 @@ const registerStyles = `
     transition: background-color 5000s ease-in-out 0s !important;
   }
   
+  /* Light mode autofill */
+  :root:not([data-theme="dark"]) input:-webkit-autofill,
+  :root:not([data-theme="dark"]) input:-webkit-autofill:hover,
+  :root:not([data-theme="dark"]) input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: #0d0d0d !important;
+    caret-color: #0d0d0d !important;
+  }
+  
   /* Prevent autofill background change */
   input:-webkit-autofill::first-line {
     font-family: inherit;
@@ -28,6 +37,13 @@ const registerStyles = `
     -webkit-text-fill-color: white !important;
     -webkit-box-shadow: 0 0 0px 1000px #0f0f0f inset !important;
     caret-color: white !important;
+  }
+  
+  :root:not([data-theme="dark"]) input[type="email"]:-webkit-autofill,
+  :root:not([data-theme="dark"]) input[type="password"]:-webkit-autofill {
+    -webkit-text-fill-color: #0d0d0d !important;
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    caret-color: #0d0d0d !important;
   }
   
   /* Hide autofill dropdown */
@@ -286,7 +302,7 @@ export default function Register() {
           className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm ${
             isDark
               ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-              : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+              : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
           } outline-none`}
           required
         />
@@ -331,7 +347,7 @@ export default function Register() {
                 className="flex items-center gap-3 mb-4 transition-opacity hover:opacity-80"
                 title="Go to home"
               >
-                <div className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-100'}`}>
+                <div className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50 border border-gray-200'}`}>
                   <img src="/logo.jpg" alt="Renova" className="object-contain w-full h-full" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
                 </div>
                 <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Renova</h2>
@@ -377,7 +393,7 @@ export default function Register() {
                     className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm ${
                       isDark
                         ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     } outline-none`}
                     required
                   />
@@ -413,7 +429,7 @@ export default function Register() {
                     className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm ${
                       isDark
                         ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     } outline-none`}
                     required
                   />
@@ -464,7 +480,7 @@ export default function Register() {
                     className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm ${
                       isDark
                         ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-gray-50 border-gray-400 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
+                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
                     } outline-none`}
                     required
                   />
@@ -494,7 +510,7 @@ export default function Register() {
                           ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500'
                           : isDark
                             ? 'bg-[#0f0f0f] text-gray-400 border-white/10 hover:text-gray-300 hover:border-white/20'
-                            : 'bg-gray-50 text-gray-600 border-gray-400 hover:text-gray-900 hover:border-gray-400'
+                            : 'bg-white text-gray-600 border-gray-200 hover:text-gray-900 hover:border-gray-300'
                       }`}
                     >
                       {role === 'TENANT' ? 'Tenant' : 'Landlord'}

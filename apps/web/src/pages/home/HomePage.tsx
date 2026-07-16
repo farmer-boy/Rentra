@@ -200,7 +200,7 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
-              <button className={`w-full py-2 rounded-lg font-semibold transition ${plan.featured ? 'bg-green-500 text-black hover:bg-green-600' : `${isDark ? 'border border-[#2d3e52] hover:bg-[#1a2332]' : 'border border-gray-400 hover:bg-gray-100'}`}`}>
+              <button className={`w-full py-2 rounded-lg font-semibold transition ${plan.featured ? 'bg-green-500 text-black hover:bg-green-600' : `${isDark ? 'border border-[#2d3e52] hover:bg-[#1a2332]' : 'border border-gray-200 hover:bg-gray-50'}`}`}>
                 {plan.featured ? 'Start Free Trial' : 'Get Started'}
               </button>
             </div>
@@ -321,7 +321,7 @@ export default function HomePage() {
             <Link to="/register" className="px-6 py-2 text-sm font-bold text-center text-black transition bg-green-500 rounded-lg hover:bg-green-600">
               Get Started Free
             </Link>
-            <Link to="/contact" className={`px-6 py-2 rounded-lg font-semibold text-sm transition border text-center ${isDark ? 'border-white/20 hover:bg-white/5' : 'border-gray-400 hover:bg-gray-100'}`}>
+            <Link to="/contact" className={`px-6 py-2 rounded-lg font-semibold text-sm transition border text-center ${isDark ? 'border-white/20 hover:bg-white/5' : 'border-gray-200 hover:bg-gray-50 text-gray-800'}`}>
               📧 Send a Message
             </Link>
           </div>

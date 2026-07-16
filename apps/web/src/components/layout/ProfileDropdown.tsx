@@ -124,7 +124,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       <div
         ref={dropdownRef}
         className={`${
-          isDark ? 'bg-[#1f1f1f] border-white/5' : 'bg-white border-gray-400'
+          isDark ? 'bg-[#1f1f1f] border-white/5' : 'bg-white border-gray-200'
         } fixed border rounded-lg shadow-lg py-1 z-[9999]`}
         style={{
           top: position.top ? `${position.top}px` : 'auto',
@@ -140,7 +140,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
         }}
       >
       {/* User Info Section */}
-      <div className={`${isDark ? 'border-white/5' : 'border-gray-400'} px-4 py-3 border-b`}>
+      <div className={`${isDark ? 'border-white/5' : 'border-gray-200'} px-4 py-3 border-b`}>
         <div className={`text-[12px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
           {user?.fullName}
         </div>
@@ -183,7 +183,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       </button>
 
       {/* Divider */}
-      <div className={`${isDark ? 'border-white/5' : 'border-gray-400'}`} style={{ borderTop: '1px solid currentColor', margin: '4px 0' }} />
+      <div className={`${isDark ? 'border-white/5' : 'border-gray-200'}`} style={{ borderTop: '1px solid currentColor', margin: '4px 0' }} />
 
       {/* Theme Toggle */}
       <button
@@ -230,7 +230,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       </button>
 
       {/* Divider */}
-      <div className={`${isDark ? 'border-white/5' : 'border-gray-400'}`} style={{ borderTop: '1px solid currentColor', margin: '4px 0' }} />
+      <div className={`${isDark ? 'border-white/5' : 'border-gray-200'}`} style={{ borderTop: '1px solid currentColor', margin: '4px 0' }} />
 
       {/* Sign Out */}
       <button

@@ -6,10 +6,10 @@ interface PillProps {
 }
 
 const lightStyles = {
-  green: 'bg-green-100 text-green-700 border border-green-300',
-  red: 'bg-red-100 text-red-700 border border-red-300',
-  yellow: 'bg-yellow-100 text-yellow-700 border border-yellow-300',
-  blue: 'bg-blue-100 text-blue-700 border border-blue-300',
+  green: 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 hover:border-green-300',
+  red: 'bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 hover:border-red-300',
+  yellow: 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:border-amber-300',
+  blue: 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 hover:border-blue-300',
 };
 
 const darkStyles = {

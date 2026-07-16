@@ -263,16 +263,16 @@ export default function SettingsPage() {
           <div className="flex flex-col md:flex-row gap-3 md:gap-6">
             {/* Left Sidebar */}
             <div className="hidden md:block md:w-64 flex-shrink-0">
-              <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-gray-50 border-gray-400'} rounded-lg border overflow-hidden sticky top-[100px] text-[11px] md:text-[12px]`}>
+              <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden sticky top-[100px] text-[11px] md:text-[12px]`}>
                 <button
                   onClick={() => { setActiveSection('account-preferences'); setActiveSubMenu('profile-info'); }}
-                  className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'account-preferences' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-100 border-gray-400'}`}
+                  className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'account-preferences' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}
                 >
                   ACCOUNT PREFERENCES
                 </button>
 
                 {activeSection === 'account-preferences' && (
-                  <div className={isDark ? 'bg-[#0f0f0f] border-white/7' : 'bg-white border-gray-400'}>
+                  <div className={isDark ? 'bg-[#0f0f0f] border-white/7' : 'bg-white border-gray-200'}>
                     {[{ id: 'profile-info', label: 'Profile Information' }, { id: 'display', label: 'Display' }, { id: 'general', label: 'General Preferences' }, { id: 'syncing', label: 'Syncing Options' }, { id: 'account-management', label: 'Account Management' }].map((item) => (
                       <button key={item.id} onClick={() => setActiveSubMenu(item.id as AccountSubMenu)} className={`w-full text-left px-3 md:px-6 py-2 md:py-2.5 text-[9px] md:text-[11px] flex items-center justify-between transition-colors ${activeSubMenu === item.id ? isDark ? 'bg-green-500/10 text-green-400 font-medium' : 'bg-green-50 text-green-700 font-medium' : isDark ? 'text-gray-300 hover:bg-[#1f1f1f]' : 'text-gray-700 hover:bg-gray-50'}`}>
                         {item.label}
@@ -282,11 +282,11 @@ export default function SettingsPage() {
                   </div>
                 )}
 
-                <button onClick={() => setActiveSection('sign-in-security')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'sign-in-security' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-100 border-gray-400'}`}>
+                <button onClick={() => setActiveSection('sign-in-security')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'sign-in-security' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}>
                   SIGN IN & SECURITY
                 </button>
 
-                <button onClick={() => setActiveSection('data-privacy')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'data-privacy' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-100 border-gray-400'}`}>
+                <button onClick={() => setActiveSection('data-privacy')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'data-privacy' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}>
                   DATA PRIVACY
                 </button>
 
