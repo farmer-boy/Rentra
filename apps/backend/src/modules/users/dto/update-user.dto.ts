@@ -7,10 +7,12 @@ import {
   IsNumber,
   Min,
   Max,
+  IsArray,
+  ArrayUnique,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-enum Role {
+export enum Role {
   TENANT = 'TENANT',
   LANDLORD = 'LANDLORD',
   ADMIN = 'ADMIN',
@@ -37,7 +39,22 @@ export class UpdateUserDto {
   @IsString()
   cnic?: string;
 
-  @ApiProperty({ enum: Role, required: false })
+  @ApiProperty({
+    type: [String],
+    enum: Role,
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsEnum(Role, { each: true })
+  roles?: Role[];
+
+  @ApiProperty({
+    enum: Role,
+    required: false,
+    description: 'Legacy alias kept for compatibility while the app uses roles[].',
+  })
   @IsOptional()
   @IsEnum(Role)
   role?: Role;

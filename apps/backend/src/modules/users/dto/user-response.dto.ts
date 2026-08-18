@@ -22,8 +22,15 @@ export class UserResponseDto {
   @ApiProperty({ example: '35202-1234567-1' })
   cnic: string;
 
-  @ApiProperty({ enum: Role, example: Role.TENANT })
-  role: Role;
+  @ApiProperty({
+    type: [String],
+    enum: Role,
+    example: [Role.TENANT, Role.LANDLORD],
+  })
+  roles: Role[];
+
+  @ApiProperty({ enum: Role, example: Role.TENANT, required: false })
+  role?: Role;
 
   @ApiProperty({ example: 75, minimum: 0, maximum: 100 })
   trustScore: number;

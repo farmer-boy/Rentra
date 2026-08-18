@@ -4,6 +4,8 @@ import {
   MinLength,
   IsEnum,
   IsOptional,
+  IsArray,
+  ArrayUnique,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -34,8 +36,24 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  @ApiProperty({ enum: Role, default: Role.TENANT })
-  @IsEnum(Role)
+  @ApiProperty({
+    type: [String],
+    enum: Role,
+    default: [Role.TENANT, Role.LANDLORD],
+    required: false,
+  })
   @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsEnum(Role, { each: true })
+  roles?: Role[];
+
+  @ApiProperty({
+    enum: Role,
+    required: false,
+    description: 'Legacy alias kept for compatibility while the app uses roles[].',
+  })
+  @IsOptional()
+  @IsEnum(Role)
   role?: Role;
 }

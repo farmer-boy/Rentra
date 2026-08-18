@@ -42,6 +42,8 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
+    const roles = dto.roles && dto.roles.length > 0 ? dto.roles : [Role.TENANT, Role.LANDLORD];
+
     const user = await this.prisma.user.create({
       data: {
         fullName: dto.fullName,
@@ -49,11 +51,11 @@ export class AuthService {
         phone: dto.phone,
         cnic: dto.cnic,
         password: hashedPassword,
-        role: dto.role ?? Role.TENANT,
+        roles,
       },
     });
 
-    const accessToken = this.generateToken(user.id, user.email, user.role);
+    const accessToken = this.generateToken(user.id, user.email, user.roles);
 
     return {
       message: 'Registration successful! Welcome to Rentra 🎉',
@@ -82,7 +84,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const accessToken = this.generateToken(user.id, user.email, user.role);
+    const accessToken = this.generateToken(user.id, user.email, user.roles);
 
     return {
       message: 'Login successful! Welcome back 👋',
@@ -100,7 +102,7 @@ export class AuthService {
         email: true,
         phone: true,
         cnic: true,
-        role: true,
+        roles: true,
         trustScore: true,
         isVerified: true,
         createdAt: true,
@@ -114,11 +116,12 @@ export class AuthService {
     return user;
   }
 
-  private generateToken(userId: string, email: string, role: string) {
+  private generateToken(userId: string, email: string, roles: readonly string[]) {
     return this.jwtService.sign({
       sub: userId,
       email,
-      role,
+      roles: [...roles],
+      role: roles[0],
     });
   }
 

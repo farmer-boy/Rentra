@@ -6,7 +6,8 @@ export interface User {
   phone: string;
   cnic: string;
   password?: string;
-  role: 'TENANT' | 'LANDLORD' | 'ADMIN';
+  role?: 'TENANT' | 'LANDLORD' | 'ADMIN';
+  roles?: Array<'TENANT' | 'LANDLORD' | 'ADMIN'>;
   trustScore: number;
   isVerified: boolean;
   isSuspended?: boolean;
@@ -25,7 +26,8 @@ export interface RegisterRequest {
   fullName: string;
   phone: string;
   cnic: string;
-  role: 'TENANT' | 'LANDLORD' | 'ADMIN';
+  role?: 'TENANT' | 'LANDLORD' | 'ADMIN';
+  roles?: Array<'TENANT' | 'LANDLORD' | 'ADMIN'>;
 }
 
 export interface AuthResponse {

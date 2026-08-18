@@ -159,15 +159,13 @@ export default function Register() {
     cnic: string;
     password: string;
     confirmPassword: string;
-    role: 'TENANT' | 'LANDLORD';
   }>({
     username: '',
     email: '',
     phone: '',
     cnic: '',
     password: '',
-    confirmPassword: '',
-    role: 'TENANT'
+    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -245,11 +243,18 @@ export default function Register() {
         phone: form.phone,
         cnic: form.cnic,
         password: form.password,
-        role: form.role
       });
       login(data.user, data.accessToken);
       toast.success('Registration successful! 🎉');
-      if (data.user.role === 'LANDLORD') navigate('/landlord');
+
+      const roles = data.user.roles && data.user.roles.length > 0
+        ? data.user.roles
+        : data.user.role
+          ? [data.user.role]
+          : ['TENANT'];
+
+      if (roles.includes('ADMIN')) navigate('/admin');
+      else if (roles.includes('LANDLORD')) navigate('/landlord');
       else navigate('/tenant');
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
@@ -491,31 +496,6 @@ export default function Register() {
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                </div>
-              </div>
-
-              {/* Account Type Selection */}
-              <div>
-                <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-                  Account Type
-                </label>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
-                  {(['TENANT', 'LANDLORD'] as const).map(role => (
-                    <button
-                      key={role}
-                      type="button"
-                      onClick={() => setForm({ ...form, role })}
-                      className={`py-2.5 px-4 rounded-lg font-medium text-sm border-2 transition-all ${
-                        form.role === role
-                          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500'
-                          : isDark
-                            ? 'bg-[#0f0f0f] text-gray-400 border-white/10 hover:text-gray-300 hover:border-white/20'
-                            : 'bg-white text-gray-600 border-gray-200 hover:text-gray-900 hover:border-gray-300'
-                      }`}
-                    >
-                      {role === 'TENANT' ? 'Tenant' : 'Landlord'}
-                    </button>
-                  ))}
                 </div>
               </div>
 

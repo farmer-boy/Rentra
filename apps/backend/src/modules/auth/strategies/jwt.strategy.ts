@@ -21,7 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string; role: string }) {
+  async validate(payload: {
+    sub: string;
+    email: string;
+    roles?: string[];
+    role?: string;
+  }) {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
     });
@@ -30,10 +35,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Access denied');
     }
 
+    const roles = user.roles && user.roles.length > 0 ? user.roles : payload.role ? [payload.role] : [];
+
     return {
       sub: user.id,
       email: user.email,
-      role: user.role,
+      roles,
+      role: roles[0],
       iat: Math.floor(Date.now() / 1000),
     };
   }

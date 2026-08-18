@@ -32,7 +32,6 @@ interface AdminSidebarProps {
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ 
   onNavigate, 
-  isMobileOpen = false,
   isDesktopView = false
 }) => {
   const location = useLocation();

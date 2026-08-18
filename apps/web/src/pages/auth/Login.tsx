@@ -63,8 +63,15 @@ export default function Login() {
       const data = await authAPI.login(form);
       login(data.user, data.accessToken);
       toast.success('Login successful! 👋');
-      if (data.user.role === 'ADMIN') navigate('/admin');
-      else if (data.user.role === 'LANDLORD') navigate('/landlord');
+
+      const roles = data.user.roles && data.user.roles.length > 0
+        ? data.user.roles
+        : data.user.role
+          ? [data.user.role]
+          : ['TENANT'];
+
+      if (roles.includes('ADMIN')) navigate('/admin');
+      else if (roles.includes('LANDLORD')) navigate('/landlord');
       else navigate('/tenant');
     } catch (err: any) {
       const errorMsg = err.response?.data?.message || err.message || 'Login failed. Please try again.';

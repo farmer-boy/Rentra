@@ -14,7 +14,7 @@ model User {
   password           String
   fullName           String
   cnic               String         @unique
-  role               Role           @default(TENANT)
+  roles              Role[]         @default([TENANT, LANDLORD])
   trustScore         Int            @default(50)
   isVerified         Boolean        @default(false)
   isSuspended        Boolean        @default(false)

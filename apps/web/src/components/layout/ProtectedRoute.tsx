@@ -11,10 +11,15 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    // Role ke hisaab se redirect karo
-    if (user.role === 'ADMIN') return <Navigate to="/admin" replace />;
-    if (user.role === 'LANDLORD') return <Navigate to="/landlord" replace />;
+  const userRoles = Array.isArray(user?.roles)
+    ? user.roles
+    : user?.role
+      ? [user.role]
+      : [];
+
+  if (allowedRoles && user && !allowedRoles.some((role) => userRoles.includes(role as any))) {
+    if (userRoles.includes('ADMIN')) return <Navigate to="/admin" replace />;
+    if (userRoles.includes('LANDLORD')) return <Navigate to="/landlord" replace />;
     return <Navigate to="/tenant" replace />;
   }
 

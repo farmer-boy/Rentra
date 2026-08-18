@@ -27,9 +27,25 @@ async function bootstrap() {
         'http://localhost:5184',
         'http://localhost:5185',
         'http://localhost:5186',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174',
+        'http://127.0.0.1:5175',
+        'http://127.0.0.1:5176',
+        'http://127.0.0.1:5177',
+        'http://127.0.0.1:5178',
+        'http://127.0.0.1:5179',
+        'http://127.0.0.1:5180',
+        'http://127.0.0.1:5181',
+        'http://127.0.0.1:5182',
+        'http://127.0.0.1:5183',
+        'http://127.0.0.1:5184',
+        'http://127.0.0.1:5185',
+        'http://127.0.0.1:5186',
       ];
-      
-      const isAllowed = !origin || allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin || '');
+
+      const localOriginPattern = /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?$/i;
+      const isAllowed = !origin || allowedOrigins.includes(origin) || localOriginPattern.test(origin || '');
+
       if (isAllowed) {
         callback(null, true);
       } else {

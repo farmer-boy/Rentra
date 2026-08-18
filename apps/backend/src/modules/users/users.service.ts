@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, Role } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcryptjs';
 
@@ -25,6 +25,8 @@ export class UsersService {
     // Hash password
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
+    const roles = dto.roles && dto.roles.length > 0 ? dto.roles : dto.role ? [dto.role] : [Role.TENANT, Role.LANDLORD];
+
     return await this.prisma.user.create({
       data: {
         fullName: dto.fullName,
@@ -32,7 +34,7 @@ export class UsersService {
         phone: dto.phone,
         cnic: dto.cnic,
         password: hashedPassword,
-        role: dto.role || 'TENANT',
+        roles,
         trustScore: dto.trustScore || 50,
       },
       select: {
@@ -41,7 +43,7 @@ export class UsersService {
         phone: true,
         fullName: true,
         cnic: true,
-        role: true,
+        roles: true,
         trustScore: true,
         isVerified: true,
         isSuspended: true,
@@ -58,7 +60,7 @@ export class UsersService {
         email: true,
         phone: true,
         fullName: true,
-        role: true,
+        roles: true,
         trustScore: true,
         isVerified: true,
         isSuspended: true,
@@ -77,7 +79,7 @@ export class UsersService {
         phone: true,
         fullName: true,
         cnic: true,
-        role: true,
+        roles: true,
         trustScore: true,
         isVerified: true,
         isSuspended: true,
@@ -101,7 +103,7 @@ export class UsersService {
         email: true,
         phone: true,
         fullName: true,
-        role: true,
+        roles: true,
         trustScore: true,
         isVerified: true,
         isSuspended: true,
@@ -143,6 +145,8 @@ export class UsersService {
       }
     }
 
+    const roles = dto.roles && dto.roles.length > 0 ? dto.roles : dto.role ? [dto.role] : user.roles;
+
     return await this.prisma.user.update({
       where: { id },
       data: {
@@ -150,7 +154,7 @@ export class UsersService {
         email: dto.email ?? user.email,
         phone: dto.phone ?? user.phone,
         cnic: dto.cnic ?? user.cnic,
-        role: dto.role ?? user.role,
+        roles,
         trustScore: dto.trustScore ?? user.trustScore,
         isVerified: dto.isVerified ?? user.isVerified,
         isSuspended: dto.isSuspended ?? user.isSuspended,
@@ -161,7 +165,7 @@ export class UsersService {
         phone: true,
         fullName: true,
         cnic: true,
-        role: true,
+        roles: true,
         trustScore: true,
         isVerified: true,
         isSuspended: true,

@@ -6,7 +6,8 @@ export interface User {
   email: string;
   phone: string;
   cnic: string;
-  role: Role;
+  role?: Role;
+  roles?: Role[];
   trustScore: number;
   isVerified: boolean;
   createdAt: string;
