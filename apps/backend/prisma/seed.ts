@@ -79,6 +79,8 @@ async function main() {
         type: 'FLAT',
         landlordId: user1.id,
         photos: ['https://example.com/image1.jpg'],
+        latitude: 31.4697,
+        longitude: 74.2728,
       },
     });
 

@@ -28,7 +28,10 @@ interface Conversation {
   participant2: { id: string; fullName: string; email: string };
   otherParticipant: { id: string; fullName: string; email: string };
   lastMessage?: Message;
+  listing?: { id: string; title: string; city: string; area: string } | null;
 }
+
+interface Notification { id: string; title: string; message: string; isRead: boolean; createdAt: string; data?: { conversationId?: string; listingId?: string } }
 
 export const useChat = (token?: string) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -36,6 +39,7 @@ export const useChat = (token?: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const axiosInstance = axios.create({
     baseURL: API_BASE,
@@ -122,6 +126,11 @@ export const useChat = (token?: string) => {
     }
   }, [axiosInstance]);
 
+  const fetchNotifications = useCallback(async () => {
+    try { const response = await axiosInstance.get('/messages/notifications'); setNotifications(response.data); }
+    catch (error) { console.error('Failed to fetch notifications:', error); }
+  }, [axiosInstance]);
+
   // Mark conversation as read
   const markAsRead = useCallback(
     async (conversationId: string) => {
@@ -146,6 +155,8 @@ export const useChat = (token?: string) => {
     fetchMessages,
     sendMessage,
     fetchUnreadCount,
+    notifications,
+    fetchNotifications,
     markAsRead,
     setCurrentConversation,
   };

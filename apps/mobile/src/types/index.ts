@@ -1,6 +1,23 @@
 // User and Auth Types
 export type Role = 'ADMIN' | 'LANDLORD' | 'TENANT';
-export type PropertyType = 'APARTMENT' | 'HOUSE' | 'STUDIO' | 'CONDO' | 'TOWNHOUSE';
+export type PropertyType =
+  | 'HOUSE'
+  | 'APARTMENT'
+  | 'FLAT'
+  | 'PORTION'
+  | 'ROOM'
+  | 'HOSTEL'
+  | 'HOTEL'
+  | 'GUEST_HOUSE'
+  | 'STUDIO'
+  | 'FARMHOUSE'
+  | 'PG'
+  | 'SHARED_ROOM';
+export type FurnishedStatus = 'FURNISHED' | 'SEMI_FURNISHED' | 'UNFURNISHED';
+export type ListingAvailability = 'AVAILABLE' | 'RENTED';
+export type RentalDuration = 'DAILY' | 'NIGHTLY' | 'WEEKLY' | 'MONTHLY' | 'LONG_TERM';
+export type HostelGenderPolicy = 'MALE' | 'FEMALE' | 'MIXED';
+export type LocationLevel = 'COUNTRY' | 'PROVINCE' | 'CITY' | 'AREA' | 'BLOCK_SECTOR';
 export type ListingStatus = 'PENDING' | 'APPROVED' | 'ACTIVE' | 'INACTIVE';
 export type AgreementStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'TERMINATED';
 export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
@@ -19,6 +36,14 @@ export interface User {
   isSuspended: boolean;
   createdAt: string;
   updatedAt: string;
+  locationId?: string;
+  location?: {
+    id: string;
+    name: string;
+    slug: string;
+    level: LocationLevel;
+    parentId?: string;
+  };
 }
 
 export interface AuthState {
@@ -58,15 +83,37 @@ export interface Listing {
   type: PropertyType;
   bedrooms: number;
   bathrooms: number;
+  unitCount: number;
+  roomCount: number;
   sqft: number;
   rent: number;
   deposit: number;
   status: ListingStatus;
+  furnishedStatus: FurnishedStatus;
+  availability: ListingAvailability;
+  rentalDuration: RentalDuration;
+  availableFrom?: string;
   fraudScore: number;
   photos: string[];
   landlordId: string;
   createdAt: string;
   updatedAt: string;
+  hostelDetails?: {
+    buildingName: string;
+    genderPolicy: HostelGenderPolicy;
+    bedCapacity: number;
+    availableBeds: number;
+    messIncluded: boolean;
+    wifiIncluded: boolean;
+    laundryIncluded: boolean;
+    electricityIncluded: boolean;
+    securityIncluded: boolean;
+  };
+  hostelRooms?: Array<{
+    roomNumber: string;
+    capacity: number;
+    availableBeds: number;
+  }>;
 }
 
 export interface Agreement {

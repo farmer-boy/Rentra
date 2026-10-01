@@ -28,7 +28,25 @@ export interface Listing {
   area: string;
   city: string;
   address: string;
-  type: 'FLAT' | 'ROOM' | 'HOUSE' | 'STUDIO';
+  type:
+    | 'HOUSE'
+    | 'APARTMENT'
+    | 'FLAT'
+    | 'PORTION'
+    | 'ROOM'
+    | 'HOSTEL'
+    | 'HOTEL'
+    | 'GUEST_HOUSE'
+    | 'STUDIO'
+    | 'FARMHOUSE'
+    | 'PG'
+    | 'SHARED_ROOM';
+  furnishedStatus: 'FURNISHED' | 'SEMI_FURNISHED' | 'UNFURNISHED';
+  availability: 'AVAILABLE' | 'RENTED';
+  rentalDuration: 'DAILY' | 'NIGHTLY' | 'WEEKLY' | 'MONTHLY' | 'LONG_TERM';
+  availableFrom?: string;
+  unitCount: number;
+  roomCount: number;
   bedrooms: number;
   bathrooms: number;
   sqft: number;
@@ -39,7 +57,38 @@ export interface Listing {
   photos: string[];
   landlordId: string;
   landlord?: User;
+  locationId?: string;
+  location?: Location;
+  hostelDetails?: HostelDetails;
+  hostelRooms?: HostelRoom[];
   createdAt: string;
+}
+
+export interface Location {
+  id: string;
+  name: string;
+  slug: string;
+  level: 'COUNTRY' | 'PROVINCE' | 'CITY' | 'AREA' | 'BLOCK_SECTOR';
+  parentId?: string;
+  parent?: Location;
+}
+
+export interface HostelDetails {
+  buildingName: string;
+  genderPolicy: 'MALE' | 'FEMALE' | 'MIXED';
+  bedCapacity: number;
+  availableBeds: number;
+  messIncluded: boolean;
+  wifiIncluded: boolean;
+  laundryIncluded: boolean;
+  electricityIncluded: boolean;
+  securityIncluded: boolean;
+}
+
+export interface HostelRoom {
+  roomNumber: string;
+  capacity: number;
+  availableBeds: number;
 }
 
 export interface Agreement {

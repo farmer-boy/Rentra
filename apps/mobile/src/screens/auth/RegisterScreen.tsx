@@ -246,7 +246,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 

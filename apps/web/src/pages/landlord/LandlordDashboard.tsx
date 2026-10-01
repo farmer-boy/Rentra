@@ -1,74 +1,44 @@
-import { useTheme } from '../../context/ThemeContext';
+import { useEffect, useState } from 'react';
+import { BarChart3, CheckCircle, Clock3, Home, MessageCircle, Plus, Star, Wallet } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../../api/client';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
-import Pill from '../../components/ui/Pill';
+
+type Listing = { id: string; title: string; rent: number; status: string; availability: string; area: string; city: string };
+type Analytics = { viewsThisMonth: number; favorites: number; requests: number };
 
 export default function LandlordDashboard() {
-  const { isDark } = useTheme();
+  const navigate = useNavigate();
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [analytics, setAnalytics] = useState<Analytics>({ viewsThisMonth: 0, favorites: 0, requests: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([api.get('/listings/landlord/my-listings'), api.get('/listings/landlord/analytics')])
+      .then(([listingResponse, analyticsResponse]) => {
+        setListings(listingResponse.data.data ?? []);
+        setAnalytics(analyticsResponse.data);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const active = listings.filter((item) => item.status === 'VERIFIED' && item.availability === 'AVAILABLE');
+  const pending = listings.filter((item) => item.status === 'PENDING' || item.status === 'DRAFT');
+  const rented = listings.filter((item) => item.availability === 'RENTED');
+
   return (
-    <div>
-      <div className="mb-3">
-        <h2 className={`text-lg font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
-          Landlord Dashboard 🏢
-        </h2>
-        <p className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'} mt-0.5`}>Manage your properties and tenants</p>
+    <div className="space-y-5">
+      <header className="flex items-start justify-between gap-4">
+        <div><h1 className="text-xl font-extrabold">Landlord Dashboard</h1><p className="text-sm text-gray-500">Manage properties and understand tenant interest.</p></div>
+        <button onClick={() => navigate('/landlord/post')} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white"><Plus size={16} /> Create property</button>
+      </header>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3"><StatCard label="ACTIVE" value={active.length} color="text-emerald-600" /><StatCard label="PENDING REVIEW" value={pending.length} color="text-amber-600" /><StatCard label="RENTED" value={rented.length} color="text-blue-600" /><StatCard label="VIEWS THIS MONTH" value={analytics.viewsThisMonth} color="text-indigo-600" /></div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+        <Card><div className="flex items-center justify-between mb-3"><h2 className="font-bold">Properties</h2><button onClick={() => navigate('/landlord/properties')} className="text-xs font-semibold text-emerald-600">View all</button></div>{loading ? <p className="text-sm text-gray-500">Loading properties...</p> : listings.length === 0 ? <p className="text-sm text-gray-500">No properties yet. Create your first listing.</p> : <div className="space-y-2">{listings.slice(0, 6).map((listing) => <div key={listing.id} className="flex items-center justify-between border-b py-3 last:border-0"><div><p className="font-semibold text-sm">{listing.title}</p><p className="text-xs text-gray-500">{listing.area}, {listing.city}</p></div><div className="text-right"><p className="font-bold text-emerald-600">Rs {listing.rent.toLocaleString()}</p><span className={`text-[10px] font-semibold ${listing.status === 'PENDING' ? 'text-amber-600' : listing.availability === 'RENTED' ? 'text-blue-600' : 'text-emerald-600'}`}>{listing.availability === 'RENTED' ? 'Rented' : listing.status === 'PENDING' ? 'Pending verification' : 'Active'}</span></div></div>)}</div>}</Card>
+        <div className="grid grid-cols-2 gap-3"><button onClick={() => navigate('/landlord/applications')} className="rounded-xl border p-4 text-left hover:border-emerald-500"><Clock3 className="text-amber-600" size={20} /><p className="mt-2 text-sm font-bold">Rental requests</p></button><button onClick={() => navigate('/landlord/messages')} className="rounded-xl border p-4 text-left hover:border-emerald-500"><MessageCircle className="text-blue-600" size={20} /><p className="mt-2 text-sm font-bold">Messages</p></button><button onClick={() => navigate('/landlord/income')} className="rounded-xl border p-4 text-left hover:border-emerald-500"><Wallet className="text-emerald-600" size={20} /><p className="mt-2 text-sm font-bold">Earnings</p></button><button onClick={() => navigate('/landlord/reviews')} className="rounded-xl border p-4 text-left hover:border-emerald-500"><Star className="text-amber-500" size={20} /><p className="mt-2 text-sm font-bold">Reviews</p></button></div>
       </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4">
-        <StatCard label="MY PROPERTIES" value="4" change="1 new this month" changeType="up" />
-        <StatCard label="ACTIVE TENANTS" value="3" change="All on-time" changeType="up" color="text-green-400" />
-        <StatCard label="MONTHLY INCOME" value="Rs 68k" change="12% increase" changeType="up" color="text-green-400" />
-        <StatCard label="OPEN DISPUTES" value="1" change="Needs attention" changeType="down" color="text-red-400" />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-3">
-        <Card>
-          <div className="flex items-center justify-between mb-2">
-            <span className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-black'}`}>My Properties</span>
-            <button className="text-[10px] bg-green-500 text-black px-2 py-0.5 rounded-lg font-bold hover:bg-green-400 transition-colors">
-              + Post New
-            </button>
-          </div>
-          {[
-            { name: '2 Bed Flat, Gulberg', rent: 'Rs 22,000', status: 'Verified', pill: 'green' as const, tenant: 'Ali Raza' },
-            { name: 'Room, Johar Town', rent: 'Rs 9,500', status: 'Verified', pill: 'green' as const, tenant: 'Sara Khan' },
-            { name: 'Studio, DHA Ph 5', rent: 'Rs 31,000', status: 'Pending', pill: 'yellow' as const, tenant: 'Vacant' },
-          ].map((p, i) => (
-            <div key={i} className="flex items-center justify-between py-2 border-b border-white/7 last:border-0">
-              <div>
-                <div className="text-[11px] font-semibold">{p.name}</div>
-                <div className="text-[10px] text-gray-500">Tenant: {p.tenant}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-green-600 text-[11px] font-bold">{p.rent}</div>
-                <Pill variant={p.pill}>{p.status}</Pill>
-              </div>
-            </div>
-          ))}
-        </Card>
-
-        <Card>
-          <div className="text-[11px] font-bold mb-2">Payment Collection</div>
-          {[
-            { tenant: 'Ali Raza', month: 'Feb 2025', amount: 'Rs 22,000', status: 'Received', pill: 'green' as const },
-            { tenant: 'Sara Khan', month: 'Feb 2025', amount: 'Rs 9,500', status: 'Received', pill: 'green' as const },
-            { tenant: 'Hamza Ali', month: 'Feb 2025', amount: 'Rs 31,000', status: 'Pending', pill: 'yellow' as const },
-          ].map((p, i) => (
-            <div key={i} className={`flex items-center justify-between py-2 border-b last:border-0 ${isDark ? 'border-white/10' : 'border-gray-200'}`}>
-              <div>
-                <div className="text-[11px] font-semibold">{p.tenant}</div>
-                <div className="text-[10px] text-gray-500">{p.month}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-[11px] font-bold text-green-600">{p.amount}</div>
-                <Pill variant={p.pill}>{p.status}</Pill>
-              </div>
-            </div>
-          ))}
-        </Card>
-      </div>
+      <Card><div className="flex items-center gap-2 mb-3"><BarChart3 size={18} className="text-emerald-600" /><h2 className="font-bold">Property analytics</h2></div><p className="mb-3 text-sm text-gray-500">Your properties have received {analytics.viewsThisMonth} views this month.</p><div className="mb-4 grid grid-cols-2 gap-3"><div className="rounded-lg bg-indigo-50 p-3"><strong>{analytics.favorites}</strong><p className="text-xs text-gray-500">Favorites</p></div><div className="rounded-lg bg-amber-50 p-3"><strong>{analytics.requests}</strong><p className="text-xs text-gray-500">Rental requests</p></div></div><div className="flex items-center gap-2"><Home size={17} className="text-gray-500" /><span className="text-sm">Create, submit, verify, and publish your properties.</span><CheckCircle size={17} className="ml-auto text-emerald-600" /></div></Card>
     </div>
   );
 }
-
-

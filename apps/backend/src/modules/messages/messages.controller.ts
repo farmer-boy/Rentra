@@ -64,6 +64,16 @@ export class MessagesController {
     return this.messagesService.getUnreadCount(req.user.id);
   }
 
+  @Get('notifications')
+  async getNotifications(@Request() req: any) {
+    return this.messagesService.getNotifications(req.user.id);
+  }
+
+  @Post('notifications/:notificationId/read')
+  async markNotificationRead(@Param('notificationId') notificationId: string, @Request() req: any) {
+    return this.messagesService.markNotificationRead(notificationId, req.user.id);
+  }
+
   // Mark conversation as read
   @Post('conversation/:conversationId/read')
   async markAsRead(

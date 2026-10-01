@@ -1,7 +1,14 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateUserDto, Role } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateLandlordProfileDto } from './dto/create-landlord-profile.dto';
+import { UpdateLandlordProfileDto } from './dto/update-landlord-profile.dto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -32,7 +39,7 @@ export class UsersService {
         fullName: dto.fullName,
         email: dto.email,
         phone: dto.phone,
-        cnic: dto.cnic,
+        cnic: dto.cnic ?? null,
         password: hashedPassword,
         roles,
         trustScore: dto.trustScore || 50,
@@ -136,7 +143,7 @@ export class UsersService {
       }
     }
 
-    if (dto.cnic && dto.cnic !== user.cnic) {
+    if (dto.cnic !== undefined && dto.cnic !== user.cnic) {
       const existingCnic = await this.prisma.user.findUnique({
         where: { cnic: dto.cnic },
       });
@@ -266,6 +273,78 @@ export class UsersService {
         email: true,
         fullName: true,
       },
+    });
+  }
+
+  async createLandlordProfile(
+    userId: string,
+    dto: CreateLandlordProfileDto,
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, roles: true },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existingProfile = await this.prisma.landlordProfile.findUnique({
+      where: { userId },
+    });
+
+    if (existingProfile) {
+      throw new ConflictException('Landlord profile already exists');
+    }
+
+    const roles = user.roles.includes(Role.LANDLORD)
+      ? user.roles
+      : [...user.roles, Role.LANDLORD];
+
+    const [profile] = await this.prisma.$transaction([
+      this.prisma.landlordProfile.create({
+        data: {
+          userId,
+          displayName: dto.displayName,
+          bio: dto.bio,
+          avatarUrl: dto.avatarUrl,
+        },
+      }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { roles },
+      }),
+    ]);
+
+    return profile;
+  }
+
+  async getLandlordProfile(userId: string) {
+    const profile = await this.prisma.landlordProfile.findUnique({
+      where: { userId },
+      include: {
+        user: {
+          select: { id: true, fullName: true, email: true, phone: true },
+        },
+      },
+    });
+
+    if (!profile) {
+      throw new NotFoundException('Landlord profile not found');
+    }
+
+    return profile;
+  }
+
+  async updateLandlordProfile(
+    userId: string,
+    dto: UpdateLandlordProfileDto,
+  ) {
+    await this.getLandlordProfile(userId);
+
+    return this.prisma.landlordProfile.update({
+      where: { userId },
+      data: dto,
     });
   }
 }

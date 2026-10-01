@@ -27,9 +27,14 @@ export class RegisterDto {
   @IsString()
   phone: string;
 
-  @ApiProperty({ example: '35202-1234567-1' })
+  @ApiProperty({
+    example: '35202-1234567-1',
+    required: false,
+    description: 'Optional at signup; can be added later during verification.',
+  })
+  @IsOptional()
   @IsString()
-  cnic: string;
+  cnic?: string;
 
   @ApiProperty({ example: 'password123', minLength: 6 })
   @IsString()
@@ -39,8 +44,9 @@ export class RegisterDto {
   @ApiProperty({
     type: [String],
     enum: Role,
-    default: [Role.TENANT, Role.LANDLORD],
+    default: [Role.TENANT],
     required: false,
+    description: 'A single user account can start as a tenant and later gain landlord access.',
   })
   @IsOptional()
   @IsArray()

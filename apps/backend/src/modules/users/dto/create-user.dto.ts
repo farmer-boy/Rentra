@@ -30,12 +30,17 @@ export class CreateUserDto {
   @IsPhoneNumber('PK')
   phone: string;
 
-  @ApiProperty({ example: '35202-1234567-1' })
+  @ApiProperty({
+    example: '35202-1234567-1',
+    required: false,
+    description: 'Optional at signup; can be added later during verification.',
+  })
+  @IsOptional()
   @IsString()
   @Matches(/^\d{5}-\d{7}-\d{1}$/, {
     message: 'CNIC must be in format XXXXX-XXXXXXX-X',
   })
-  cnic: string;
+  cnic?: string;
 
   @ApiProperty({ example: 'password123', minLength: 6 })
   @IsString()
@@ -45,8 +50,9 @@ export class CreateUserDto {
   @ApiProperty({
     type: [String],
     enum: Role,
-    default: [Role.TENANT, Role.LANDLORD],
+    default: [Role.TENANT],
     required: false,
+    description: 'One user account can start as tenant and gain landlord access later.',
   })
   @IsOptional()
   @IsArray()

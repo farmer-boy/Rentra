@@ -22,6 +22,7 @@ import SettingsPage from './pages/settings/SettingsPage';
 // Tenant Pages
 import TenantDashboard from './pages/tenant/TenantDashboard';
 import BrowseListings from './pages/tenant/BrowseListings';
+import ListingDetails from './pages/tenant/ListingDetails';
 import SavedListings from './pages/tenant/SavedListings';
 import AIDetector from './pages/tenant/AIDetector';
 import RentEstimator from './pages/tenant/RentEstimator';
@@ -190,6 +191,7 @@ function AppContent() {
         }>
           <Route index element={<TenantDashboard />} />
           <Route path="listings" element={<BrowseListings />} />
+          <Route path="listings/:id" element={<ListingDetails />} />
           <Route path="saved" element={<SavedListings />} />
           <Route path="messages" element={<ChatPage />} />
           <Route path="post" element={<PostProperty />} />

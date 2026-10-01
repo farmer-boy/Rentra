@@ -1,0 +1,12 @@
+-- Expand residential property categories and add property capacity metadata.
+ALTER TYPE "PropertyType" ADD VALUE IF NOT EXISTS 'APARTMENT';
+ALTER TYPE "PropertyType" ADD VALUE IF NOT EXISTS 'PORTION';
+ALTER TYPE "PropertyType" ADD VALUE IF NOT EXISTS 'HOSTEL';
+ALTER TYPE "PropertyType" ADD VALUE IF NOT EXISTS 'PG';
+ALTER TYPE "PropertyType" ADD VALUE IF NOT EXISTS 'SHARED_ROOM';
+
+ALTER TABLE "Listing"
+  ADD COLUMN IF NOT EXISTS "unitCount" INTEGER NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS "roomCount" INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX IF NOT EXISTS "Listing_roomCount_idx" ON "Listing"("roomCount");

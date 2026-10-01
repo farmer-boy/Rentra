@@ -12,8 +12,11 @@ const AREA_RENT_REFERENCE: Record<string, { min: number; max: number; recommende
 
 interface PostPropertyForm {
   propertyType: string;
+  country: string;
+  province: string;
   city: string;
   area: string;
+  blockSector: string;
   address: string;
   monthlyRent: string;
   securityDeposit: string;
@@ -27,8 +30,11 @@ export default function TenantPostProperty() {
   const { isDark } = useTheme();
   const [formData, setFormData] = useState<PostPropertyForm>({
     propertyType: '',
+    country: 'Pakistan',
+    province: 'Punjab',
     city: '',
     area: '',
+    blockSector: '',
     address: '',
     monthlyRent: '',
     securityDeposit: '',
@@ -49,8 +55,11 @@ export default function TenantPostProperty() {
   const canProceed = (): boolean => {
     const isValid: boolean = !!(
       formData.propertyType &&
+      formData.country &&
+      formData.province &&
       formData.city &&
       formData.area &&
+      formData.blockSector &&
       formData.address &&
       formData.monthlyRent &&
       formData.securityDeposit &&
@@ -82,6 +91,17 @@ export default function TenantPostProperty() {
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Country</label>
+                    <input name="country" value={formData.country} onChange={handleInputChange} className="w-full px-3 py-2 text-sm rounded-lg border" />
+                  </div>
+                  <div>
+                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Province</label>
+                    <input name="province" value={formData.province} onChange={handleInputChange} className="w-full px-3 py-2 text-sm rounded-lg border" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
                     <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Property Type
                     </label>
@@ -97,10 +117,18 @@ export default function TenantPostProperty() {
                       }`}
                     >
                       <option value="">Select</option>
-                      <option value="flat">Flat</option>
-                      <option value="room">Room</option>
-                      <option value="house">House</option>
-                      <option value="studio">Studio</option>
+                      <option value="HOUSE">House</option>
+                      <option value="APARTMENT">Apartment</option>
+                      <option value="FLAT">Flat</option>
+                      <option value="PORTION">Portion</option>
+                      <option value="ROOM">Room</option>
+                      <option value="HOSTEL">Hostel</option>
+                      <option value="HOTEL">Hotel</option>
+                      <option value="GUEST_HOUSE">Guest House</option>
+                      <option value="STUDIO">Studio</option>
+                      <option value="FARMHOUSE">Farmhouse</option>
+                      <option value="PG">PG / Paying Guest</option>
+                      <option value="SHARED_ROOM">Shared Room</option>
                     </select>
                   </div>
 
@@ -147,6 +175,11 @@ export default function TenantPostProperty() {
                       <option key={area} value={area}>{area}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Block / Sector</label>
+                  <input name="blockSector" value={formData.blockSector} onChange={handleInputChange} placeholder="e.g. Block H" className="w-full px-3 py-2 text-sm rounded-lg border" />
                 </div>
 
                 <div>

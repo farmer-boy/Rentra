@@ -17,13 +17,14 @@ export class MessagesService {
       throw new BadRequestException('Cannot create conversation with yourself');
     }
 
-    // Check if conversation already exists (in either direction)
+    const orderedParticipants = userId < otherUserId
+      ? { participant1Id: userId, participant2Id: otherUserId }
+      : { participant1Id: otherUserId, participant2Id: userId };
+
     const existingConversation = await this.prisma.conversation.findFirst({
       where: {
-        OR: [
-          { participant1Id: userId, participant2Id: otherUserId },
-          { participant1Id: otherUserId, participant2Id: userId },
-        ],
+        ...orderedParticipants,
+        listingId: listingId ?? null,
       },
       include: {
         participant1: {
@@ -32,6 +33,7 @@ export class MessagesService {
         participant2: {
           select: { id: true, fullName: true, email: true },
         },
+        listing: { select: { id: true, title: true, city: true, area: true } },
       },
     });
 
@@ -42,8 +44,7 @@ export class MessagesService {
     // Create new conversation
     const conversation = await this.prisma.conversation.create({
       data: {
-        participant1Id: userId,
-        participant2Id: otherUserId,
+        ...orderedParticipants,
         listingId,
       },
       include: {
@@ -53,6 +54,7 @@ export class MessagesService {
         participant2: {
           select: { id: true, fullName: true, email: true },
         },
+        listing: { select: { id: true, title: true, city: true, area: true } },
       },
     });
 
@@ -79,6 +81,7 @@ export class MessagesService {
           take: 1,
           orderBy: { createdAt: 'desc' },
         },
+        listing: { select: { id: true, title: true, city: true, area: true } },
       },
       orderBy: { lastMessageAt: 'desc' },
     });
@@ -126,7 +129,7 @@ export class MessagesService {
       },
       data: {
         isRead: true,
-        readAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 
@@ -165,6 +168,19 @@ export class MessagesService {
         sender: {
           select: { id: true, fullName: true, email: true },
         },
+      },
+    });
+
+    const recipientId = conversation.participant1Id === userId
+      ? conversation.participant2Id
+      : conversation.participant1Id;
+    await this.prisma.notification.create({
+      data: {
+        userId: recipientId,
+        type: 'NEW_MESSAGE',
+        title: 'New message',
+        message: `${message.sender.fullName} sent you a message`,
+        data: { conversationId, listingId: conversation.listingId },
       },
     });
 
@@ -217,10 +233,18 @@ export class MessagesService {
       },
       data: {
         isRead: true,
-        readAt: new Date(),
+        updatedAt: new Date(),
       },
     });
 
     return { success: true };
+  }
+
+  async getNotifications(userId: string) {
+    return this.prisma.notification.findMany({ where: { userId }, orderBy: { createdAt: 'desc' }, take: 50 });
+  }
+
+  async markNotificationRead(notificationId: string, userId: string) {
+    return this.prisma.notification.updateMany({ where: { id: notificationId, userId }, data: { isRead: true } });
   }
 }

@@ -5,10 +5,18 @@ export enum Role {
 }
 
 export enum PropertyType {
-  FLAT = 'FLAT',
-  ROOM = 'ROOM',
   HOUSE = 'HOUSE',
+  APARTMENT = 'APARTMENT',
+  FLAT = 'FLAT',
+  PORTION = 'PORTION',
+  ROOM = 'ROOM',
+  HOSTEL = 'HOSTEL',
+  HOTEL = 'HOTEL',
+  GUEST_HOUSE = 'GUEST_HOUSE',
   STUDIO = 'STUDIO',
+  FARMHOUSE = 'FARMHOUSE',
+  PG = 'PG',
+  SHARED_ROOM = 'SHARED_ROOM',
 }
 
 export enum ListingStatus {
@@ -42,4 +50,26 @@ export enum DisputeStatus {
   MEDIATION = 'MEDIATION',
   RESOLVED = 'RESOLVED',
   CLOSED = 'CLOSED',
+}
+
+export enum HostelGenderPolicy {
+  MALE = 'MALE',
+  FEMALE = 'FEMALE',
+  MIXED = 'MIXED',
+}
+
+export enum LocationLevel {
+  COUNTRY = 'COUNTRY',
+  PROVINCE = 'PROVINCE',
+  CITY = 'CITY',
+  AREA = 'AREA',
+  BLOCK_SECTOR = 'BLOCK_SECTOR',
+}
+
+export enum RentalDuration {
+  DAILY = 'DAILY',
+  NIGHTLY = 'NIGHTLY',
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+  LONG_TERM = 'LONG_TERM',
 }

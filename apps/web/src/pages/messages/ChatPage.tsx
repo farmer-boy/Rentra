@@ -6,10 +6,11 @@ import { useChat } from '../../hooks/useChat';
 export default function ChatPage() {
   const token = useAuthStore((state) => state.token) || '';
 
-  const { conversations, currentConversation, messages, fetchConversations, fetchMessages, sendMessage, markAsRead, setCurrentConversation } = useChat(token);
+  const { conversations, currentConversation, messages, fetchConversations, fetchMessages, sendMessage, markAsRead, setCurrentConversation, notifications, fetchNotifications } = useChat(token);
   const { user: authUser } = useAuthStore();
 
   const [messageInput, setMessageInput] = useState('');
+  const [attachmentUrl, setAttachmentUrl] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -17,13 +18,14 @@ export default function ChatPage() {
   // Fetch conversations on mount
   useEffect(() => {
     fetchConversations();
+    fetchNotifications();
     if (token) {
       const timer = setInterval(() => {
         fetchConversations();
       }, 5000); // Poll every 5 seconds
       return () => clearInterval(timer);
     }
-  }, [token, fetchConversations]);
+  }, [token, fetchConversations, fetchNotifications]);
 
   // Fetch messages when conversation changes
   useEffect(() => {
@@ -44,8 +46,9 @@ export default function ChatPage() {
 
     setIsLoading(true);
     try {
-      await sendMessage(currentConversation.id, messageInput);
+      await sendMessage(currentConversation.id, messageInput, attachmentUrl || undefined);
       setMessageInput('');
+      setAttachmentUrl('');
       await fetchMessages(currentConversation.id);
     } catch (error) {
       console.error('Error sending message:', error);
@@ -68,9 +71,7 @@ export default function ChatPage() {
       <div className="w-80 border-r flex flex-col" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}>
         {/* Header */}
         <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
-          <h1 className="text-lg font-semibold mb-3" style={{ color: 'var(--text)' }}>
-            Messages
-          </h1>
+          <div className="flex items-center justify-between mb-3"><h1 className="text-lg font-semibold" style={{ color: 'var(--text)' }}>Messages</h1>{notifications.some((notification) => !notification.isRead) && <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">New</span>}</div>
           <div className="relative">
             <Search
               size={18}
@@ -117,6 +118,7 @@ export default function ChatPage() {
                     {new Date(conv.lastMessageAt).toLocaleDateString()}
                   </span>
                 </div>
+                  {conv.listing && <p className="text-[10px] text-emerald-600 truncate">{conv.listing.title} · {conv.listing.area}, {conv.listing.city}</p>}
                 {conv.lastMessage && (
                   <p className="text-xs truncate" style={{ color: 'var(--text2)' }}>
                     {conv.lastMessage.content}
@@ -141,6 +143,7 @@ export default function ChatPage() {
                 <p className="text-xs" style={{ color: 'var(--text2)' }}>
                   {currentConversation.otherParticipant?.email}
                 </p>
+                {currentConversation.listing && <p className="text-xs text-emerald-600">{currentConversation.listing.title} · {currentConversation.listing.area}, {currentConversation.listing.city}</p>}
               </div>
               <button
                 onClick={() => setCurrentConversation(null)}
@@ -169,6 +172,7 @@ export default function ChatPage() {
                           color: isOwn ? 'white' : 'var(--text)',
                         }}
                       >
+                        {message.attachmentUrl && <img src={message.attachmentUrl} alt="Message attachment" className="mb-2 max-h-48 rounded object-cover" />}
                         <p className="text-sm break-words">{message.content}</p>
                         <p className="text-xs mt-1 opacity-70">
                           {new Date(message.createdAt).toLocaleTimeString()}
@@ -200,6 +204,7 @@ export default function ChatPage() {
                   color: 'var(--text)',
                 }}
               />
+              <input type="url" value={attachmentUrl} onChange={(e) => setAttachmentUrl(e.target.value)} placeholder="Image URL" className="w-32 px-2 py-2 rounded-lg border text-xs" style={{ backgroundColor: 'var(--surface2)', borderColor: 'var(--border)', color: 'var(--text)' }} />
               <button
                 type="submit"
                 disabled={isLoading || !messageInput.trim()}

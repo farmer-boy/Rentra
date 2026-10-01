@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import api from '../../api/client';
 
 const AREA_RENT_REFERENCE: Record<string, { min: number; max: number; recommended: number }> = {
   'Gulberg III': { min: 20000, max: 50000, recommended: 35000 },
@@ -10,19 +13,27 @@ const AREA_RENT_REFERENCE: Record<string, { min: number; max: number; recommende
   'Ichra': { min: 12000, max: 35000, recommended: 22000 },
 };
 
-const PROPERTY_TYPES = ['Flat', 'Room', 'House', 'Studio'];
+const PROPERTY_TYPES = ['House', 'Apartment', 'Flat', 'Portion', 'Room', 'Hostel', 'Hotel', 'Guest House', 'Studio', 'Farmhouse', 'PG / Paying Guest', 'Shared Room'];
 const CITIES = ['Lahore', 'Karachi', 'Islamabad'];
+const IMAGE_CATEGORIES = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Balcony', 'Building Exterior', 'Parking'];
 
 interface PostPropertyForm {
   propertyType: string;
+  title: string;
+  country: string;
+  province: string;
   city: string;
   area: string;
+  blockSector: string;
   address: string;
   monthlyRent: string;
   securityDeposit: string;
   bedrooms: string;
   areaSize: string;
   description: string;
+  rules: string;
+  imageUrl: string;
+  amenities: string;
   photos: File[];
 }
 
@@ -142,16 +153,24 @@ const SearchableSelect = ({ options, value, onChange, placeholder = 'Search...',
 
 export default function LandlordPostProperty() {
   const { isDark } = useTheme();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<PostPropertyForm>({
     propertyType: '',
+    title: '',
+    country: 'Pakistan',
+    province: 'Punjab',
     city: '',
     area: '',
+    blockSector: '',
     address: '',
     monthlyRent: '',
     securityDeposit: '',
     bedrooms: '',
     areaSize: '',
     description: '',
+    rules: '',
+    imageUrl: '',
+    amenities: '',
     photos: [],
   });
 
@@ -161,6 +180,7 @@ export default function LandlordPostProperty() {
     accountFrequency: 'pending',
     descriptionGenuine: 'pending',
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -173,8 +193,12 @@ export default function LandlordPostProperty() {
   const canProceed = (): boolean => {
     const isValid: boolean = !!(
       formData.propertyType &&
+      formData.title &&
+      formData.country &&
+      formData.province &&
       formData.city &&
       formData.area &&
+      formData.blockSector &&
       formData.address &&
       formData.monthlyRent &&
       formData.securityDeposit &&
@@ -193,6 +217,52 @@ export default function LandlordPostProperty() {
       accountFrequency: 'approved',
       descriptionGenuine: 'approved',
     });
+  };
+
+  const submitProperty = async () => {
+    if (!canProceed()) return;
+    setSubmitting(true);
+    try {
+      const response = await api.post('/listings', {
+        title: formData.title,
+        description: formData.description,
+        rules: formData.rules,
+        propertyType: ({
+          'PG / Paying Guest': 'PG',
+          'Shared Room': 'SHARED_ROOM',
+          'Guest House': 'GUEST_HOUSE',
+          Farmhouse: 'FARMHOUSE',
+          Hotel: 'HOTEL',
+        } as Record<string, string>)[formData.propertyType] ?? formData.propertyType.toUpperCase(),
+        country: formData.country,
+        province: formData.province,
+        city: formData.city,
+        area: formData.area,
+        blockSector: formData.blockSector,
+        address: formData.address,
+        rent: Number(formData.monthlyRent),
+        deposit: Number(formData.securityDeposit),
+        bedrooms: Number(formData.bedrooms),
+        bathrooms: 1,
+        sqft: Number(formData.areaSize),
+        imageUrl: formData.imageUrl || undefined,
+        amenities: formData.amenities.split(',').map((item) => item.trim()).filter(Boolean),
+      });
+      const listingId = response.data.data.id;
+      for (const [index, photo] of formData.photos.entries()) {
+        const upload = new FormData();
+        upload.append('file', photo);
+        upload.append('altText', IMAGE_CATEGORIES[index] ?? `Property image ${index + 1}`);
+        upload.append('sortOrder', String(index));
+        await api.post(`/listings/${listingId}/images/upload`, upload, { headers: { 'Content-Type': 'multipart/form-data' } });
+      }
+      toast.success('Property submitted for admin verification');
+      navigate('/landlord');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Property could not be submitted');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -216,6 +286,32 @@ export default function LandlordPostProperty() {
               </h2>
 
               <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Country
+                    </label>
+                    <input name="country" value={formData.country} onChange={handleInputChange} className="w-full px-3 py-2 text-sm rounded-lg border" />
+                  </div>
+                  <div>
+                    <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Province
+                    </label>
+                    <input name="province" value={formData.province} onChange={handleInputChange} className="w-full px-3 py-2 text-sm rounded-lg border" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Property images</label>
+                  <input type="file" accept="image/*" multiple onChange={(event) => setFormData((current) => ({ ...current, photos: Array.from(event.target.files ?? []).slice(0, 12) }))} className="w-full text-sm" />
+                  {formData.photos.length > 0 && <div className="mt-2 grid grid-cols-4 gap-2">{formData.photos.map((photo, index) => <div key={`${photo.name}-${index}`} className="relative"><img src={URL.createObjectURL(photo)} alt={IMAGE_CATEGORIES[index] ?? photo.name} className="h-16 w-full rounded object-cover" /><span className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 text-[9px] text-white">{IMAGE_CATEGORIES[index] ?? `Image ${index + 1}`}</span></div>)}</div>}
+                </div>
+
+                <div>
+                  <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Property Title</label>
+                  <input name="title" value={formData.title} onChange={handleInputChange} placeholder="e.g. University Boys Hostel" className="w-full px-3 py-2 text-sm rounded-lg border" />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -263,6 +359,20 @@ export default function LandlordPostProperty() {
                       <option key={area} value={area}>{area}</option>
                     ))}
                   </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div><label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Amenities</label><input name="amenities" value={formData.amenities} onChange={handleInputChange} placeholder="WiFi, Parking, Security" className="w-full px-3 py-2 text-sm rounded-lg border" /></div>
+                  <div><label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Image URL</label><input name="imageUrl" value={formData.imageUrl} onChange={handleInputChange} placeholder="https://..." className="w-full px-3 py-2 text-sm rounded-lg border" /></div>
+                </div>
+
+                <div><label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Rules</label><textarea name="rules" value={formData.rules} onChange={handleInputChange} placeholder="No smoking, family preferred..." rows={2} className="w-full px-3 py-2 text-sm rounded-lg border" /></div>
+
+                <div>
+                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Block / Sector
+                  </label>
+                  <input name="blockSector" value={formData.blockSector} onChange={handleInputChange} placeholder="e.g. Block H" className="w-full px-3 py-2 text-sm rounded-lg border" />
                 </div>
 
                 <div>
@@ -395,6 +505,14 @@ export default function LandlordPostProperty() {
                   }`}
                 >
                   Run AI Verification →
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void submitProperty()}
+                  disabled={!canProceed() || submitting}
+                  className={`w-full mt-3 py-2 rounded-lg text-xs font-bold ${canProceed() && !submitting ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                >
+                  {submitting ? 'Submitting...' : 'Submit for admin verification'}
                 </button>
               </div>
             </Card>

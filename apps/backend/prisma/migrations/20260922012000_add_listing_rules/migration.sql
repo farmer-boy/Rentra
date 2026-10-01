@@ -1,0 +1,1 @@
+ALTER TABLE "Listing" ADD COLUMN "rules" TEXT;
