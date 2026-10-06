@@ -35,8 +35,11 @@ api.interceptors.response.use(
           { refreshToken }
         );
 
-        const { accessToken } = response.data;
+        const { accessToken, refreshToken: rotatedRefreshToken } = response.data;
         localStorage.setItem('accessToken', accessToken);
+        if (rotatedRefreshToken) {
+          localStorage.setItem('refreshToken', rotatedRefreshToken);
+        }
 
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);

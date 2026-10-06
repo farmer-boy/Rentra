@@ -2,14 +2,6 @@ import { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 
-const AREA_RENT_REFERENCE: Record<string, { min: number; max: number; recommended: number }> = {
-  'Gulberg III': { min: 20000, max: 50000, recommended: 35000 },
-  'DHA Phase 5': { min: 30000, max: 80000, recommended: 55000 },
-  'Johar Town': { min: 15000, max: 40000, recommended: 27000 },
-  'Model Town': { min: 18000, max: 45000, recommended: 30000 },
-  'Ichra': { min: 12000, max: 35000, recommended: 22000 },
-};
-
 interface PostPropertyForm {
   propertyType: string;
   country: string;
@@ -30,8 +22,8 @@ export default function TenantPostProperty() {
   const { isDark } = useTheme();
   const [formData, setFormData] = useState<PostPropertyForm>({
     propertyType: '',
-    country: 'Pakistan',
-    province: 'Punjab',
+    country: '',
+    province: '',
     city: '',
     area: '',
     blockSector: '',
@@ -59,7 +51,6 @@ export default function TenantPostProperty() {
       formData.province &&
       formData.city &&
       formData.area &&
-      formData.blockSector &&
       formData.address &&
       formData.monthlyRent &&
       formData.securityDeposit &&
@@ -136,22 +127,7 @@ export default function TenantPostProperty() {
                     <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       City
                     </label>
-                    <select
-                      aria-label="City"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
-                      }`}
-                    >
-                      <option value="">Select</option>
-                      <option value="Lahore">Lahore</option>
-                      <option value="Karachi">Karachi</option>
-                      <option value="Islamabad">Islamabad</option>
-                    </select>
+                    <input aria-label="City" name="city" value={formData.city} onChange={handleInputChange} placeholder="Enter city" className="w-full px-3 py-2 text-sm rounded-lg border" />
                   </div>
                 </div>
 
@@ -159,22 +135,7 @@ export default function TenantPostProperty() {
                   <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     Area / Mohalla
                   </label>
-                  <select
-                    aria-label="Area / Mohalla"
-                    name="area"
-                    value={formData.area}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                      isDark
-                        ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                        : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
-                    }`}
-                  >
-                    <option value="">Select Area</option>
-                    {Object.keys(AREA_RENT_REFERENCE).map(area => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
-                  </select>
+                  <input aria-label="Area / Mohalla" name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter area or mohalla" className="w-full px-3 py-2 text-sm rounded-lg border" />
                 </div>
 
                 <div>

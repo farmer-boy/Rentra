@@ -7,6 +7,9 @@ export const authAPI = {
     if (response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
     }
+    if (response.data.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+    }
     return response.data;
   },
 
@@ -14,6 +17,9 @@ export const authAPI = {
     const response = await api.post('/auth/login', data);
     if (response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
+    }
+    if (response.data.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
     }
     return response.data;
   },

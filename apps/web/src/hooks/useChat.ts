@@ -1,7 +1,7 @@
-import { useState, useCallback } from 'react';
-import axios from 'axios';
+import { useState, useCallback, useMemo } from "react";
+import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 interface Message {
   id: string;
@@ -31,31 +31,41 @@ interface Conversation {
   listing?: { id: string; title: string; city: string; area: string } | null;
 }
 
-interface Notification { id: string; title: string; message: string; isRead: boolean; createdAt: string; data?: { conversationId?: string; listingId?: string } }
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+  data?: { conversationId?: string; listingId?: string };
+}
 
 export const useChat = (token?: string) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+  const [currentConversation, setCurrentConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const axiosInstance = axios.create({
-    baseURL: API_BASE,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const axiosInstance = useMemo(
+    () =>
+      axios.create({
+        baseURL: API_BASE,
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    [token],
+  );
 
   // Get all conversations
   const fetchConversations = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/messages/conversations');
+      const response = await axiosInstance.get("/messages/conversations");
       setConversations(response.data);
     } catch (error) {
-      console.error('Failed to fetch conversations:', error);
+      console.error("Failed to fetch conversations:", error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +85,7 @@ export const useChat = (token?: string) => {
         await fetchMessages(response.data.id);
         return response.data;
       } catch (error) {
-        console.error('Failed to start conversation:', error);
+        console.error("Failed to start conversation:", error);
       } finally {
         setLoading(false);
       }
@@ -93,7 +103,7 @@ export const useChat = (token?: string) => {
         );
         setMessages(response.data);
       } catch (error) {
-        console.error('Failed to fetch messages:', error);
+        console.error("Failed to fetch messages:", error);
       }
     },
     [axiosInstance],
@@ -110,7 +120,7 @@ export const useChat = (token?: string) => {
         setMessages((prev) => [...prev, response.data]);
         return response.data;
       } catch (error) {
-        console.error('Failed to send message:', error);
+        console.error("Failed to send message:", error);
       }
     },
     [axiosInstance],
@@ -119,26 +129,32 @@ export const useChat = (token?: string) => {
   // Get unread count
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const response = await axiosInstance.get('/messages/unread-count');
+      const response = await axiosInstance.get("/messages/unread-count");
       setUnreadCount(response.data.unreadCount);
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      console.error("Failed to fetch unread count:", error);
     }
   }, [axiosInstance]);
 
   const fetchNotifications = useCallback(async () => {
-    try { const response = await axiosInstance.get('/messages/notifications'); setNotifications(response.data); }
-    catch (error) { console.error('Failed to fetch notifications:', error); }
+    try {
+      const response = await axiosInstance.get("/messages/notifications");
+      setNotifications(response.data);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
   }, [axiosInstance]);
 
   // Mark conversation as read
   const markAsRead = useCallback(
     async (conversationId: string) => {
       try {
-        await axiosInstance.post(`/messages/conversation/${conversationId}/read`);
+        await axiosInstance.post(
+          `/messages/conversation/${conversationId}/read`,
+        );
         await fetchUnreadCount();
       } catch (error) {
-        console.error('Failed to mark as read:', error);
+        console.error("Failed to mark as read:", error);
       }
     },
     [axiosInstance, fetchUnreadCount],

@@ -43,15 +43,13 @@ export class CreateListingDto {
   @IsString()
   city: string;
 
-  @ApiProperty({ example: 'Pakistan', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Country name in the location hierarchy.' })
   @IsString()
-  country?: string;
+  country: string;
 
-  @ApiProperty({ example: 'Punjab', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Province or state in the location hierarchy.' })
   @IsString()
-  province?: string;
+  province: string;
 
   @ApiProperty()
   @IsNumber()

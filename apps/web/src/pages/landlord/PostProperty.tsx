@@ -5,16 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../api/client';
 
-const AREA_RENT_REFERENCE: Record<string, { min: number; max: number; recommended: number }> = {
-  'Gulberg III': { min: 20000, max: 50000, recommended: 35000 },
-  'DHA Phase 5': { min: 30000, max: 80000, recommended: 55000 },
-  'Johar Town': { min: 15000, max: 40000, recommended: 27000 },
-  'Model Town': { min: 18000, max: 45000, recommended: 30000 },
-  'Ichra': { min: 12000, max: 35000, recommended: 22000 },
-};
-
 const PROPERTY_TYPES = ['House', 'Apartment', 'Flat', 'Portion', 'Room', 'Hostel', 'Hotel', 'Guest House', 'Studio', 'Farmhouse', 'PG / Paying Guest', 'Shared Room'];
-const CITIES = ['Lahore', 'Karachi', 'Islamabad'];
 const IMAGE_CATEGORIES = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Balcony', 'Building Exterior', 'Parking'];
 
 interface PostPropertyForm {
@@ -157,8 +148,8 @@ export default function LandlordPostProperty() {
   const [formData, setFormData] = useState<PostPropertyForm>({
     propertyType: '',
     title: '',
-    country: 'Pakistan',
-    province: 'Punjab',
+    country: '',
+    province: '',
     city: '',
     area: '',
     blockSector: '',
@@ -198,7 +189,6 @@ export default function LandlordPostProperty() {
       formData.province &&
       formData.city &&
       formData.area &&
-      formData.blockSector &&
       formData.address &&
       formData.monthlyRent &&
       formData.securityDeposit &&
@@ -330,13 +320,7 @@ export default function LandlordPostProperty() {
                     <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       City
                     </label>
-                    <SearchableSelect
-                      options={CITIES}
-                      value={formData.city}
-                      onChange={(val) => setFormData(prev => ({ ...prev, city: val }))}
-                      placeholder="Search city..."
-                      isDark={isDark}
-                    />
+                    <input name="city" value={formData.city} onChange={handleInputChange} placeholder="Enter city" className="w-full px-3 py-2 text-sm rounded-lg border" />
                   </div>
                 </div>
 
@@ -344,21 +328,7 @@ export default function LandlordPostProperty() {
                   <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                     Area / Mohalla
                   </label>
-                  <select
-                    name="area"
-                    value={formData.area}
-                    onChange={handleInputChange}
-                    className={`w-full px-3 py-2 text-sm rounded-lg border-2 backdrop-blur-sm transition-all duration-300 ${
-                      isDark
-                        ? 'bg-[#1a2332] border-[#2d3e52] text-white focus:border-green-400'
-                        : 'bg-white border-gray-200 text-gray-900 focus:border-green-500'
-                    }`}
-                  >
-                    <option value="">Select Area</option>
-                    {Object.keys(AREA_RENT_REFERENCE).map(area => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
-                  </select>
+                  <input name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter area or mohalla" className="w-full px-3 py-2 text-sm rounded-lg border" />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">

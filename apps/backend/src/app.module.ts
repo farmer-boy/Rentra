@@ -12,6 +12,12 @@ import { ContactModule } from './modules/contact/contact.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { FavoritesModule } from './modules/favorites/favorites.module';
+import { LocationsModule } from './modules/locations/locations.module';
+import { PropertiesModule } from './modules/properties/properties.module';
+import { SavedSearchesModule } from './modules/saved-searches/saved-searches.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { RentalRequestsModule } from './modules/rental-requests/rental-requests.module';
+import { BookingsModule } from './modules/bookings/bookings.module';
 
 @Module({
   imports: [
@@ -31,6 +37,12 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
     MessagesModule,
     AdminModule,
     FavoritesModule,
+    LocationsModule,
+    PropertiesModule,
+    SavedSearchesModule,
+    NotificationsModule,
+    RentalRequestsModule,
+    BookingsModule,
   ],
 })
 export class AppModule {}

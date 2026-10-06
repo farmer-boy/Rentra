@@ -1,65 +1,41 @@
 import {
   IsEmail,
+  IsNotEmpty,
   IsString,
   MinLength,
-  IsEnum,
-  IsOptional,
-  IsArray,
-  ArrayUnique,
+  MaxLength,
+  Matches,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export enum Role {
-  TENANT = 'TENANT',
-  LANDLORD = 'LANDLORD',
+function normalizeEmail(value: unknown) {
+  return typeof value === 'string' ? value.trim().toLowerCase() : value;
 }
 
 export class RegisterDto {
-  @ApiProperty({ example: 'Ali Raza' })
+  @ApiProperty({ example: 'Ali Raza', minLength: 2, maxLength: 100 })
   @IsString()
-  fullName: string;
+  @IsNotEmpty()
+  @MinLength(2)
+  @MaxLength(100)
+  fullName!: string;
 
   @ApiProperty({ example: 'ali@example.com' })
+  @Transform(({ value }) => normalizeEmail(value))
   @IsEmail()
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: '+923001234567' })
   @IsString()
-  phone: string;
+  @MinLength(7)
+  @MaxLength(20)
+  @Matches(/^\+?[0-9\s()-]+$/)
+  phone!: string;
 
-  @ApiProperty({
-    example: '35202-1234567-1',
-    required: false,
-    description: 'Optional at signup; can be added later during verification.',
-  })
-  @IsOptional()
+  @ApiProperty({ example: 'RentraPass123', minLength: 8 })
   @IsString()
-  cnic?: string;
-
-  @ApiProperty({ example: 'password123', minLength: 6 })
-  @IsString()
-  @MinLength(6)
-  password: string;
-
-  @ApiProperty({
-    type: [String],
-    enum: Role,
-    default: [Role.TENANT],
-    required: false,
-    description: 'A single user account can start as a tenant and later gain landlord access.',
-  })
-  @IsOptional()
-  @IsArray()
-  @ArrayUnique()
-  @IsEnum(Role, { each: true })
-  roles?: Role[];
-
-  @ApiProperty({
-    enum: Role,
-    required: false,
-    description: 'Legacy alias kept for compatibility while the app uses roles[].',
-  })
-  @IsOptional()
-  @IsEnum(Role)
-  role?: Role;
+  @MinLength(8)
+  @MaxLength(72)
+  password!: string;
 }

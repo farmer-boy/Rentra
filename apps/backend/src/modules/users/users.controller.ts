@@ -18,17 +18,39 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { CreateLandlordProfileDto } from './dto/create-landlord-profile.dto';
 import { UpdateLandlordProfileDto } from './dto/update-landlord-profile.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import type { JwtPayload } from '../../common/types/jwt-payload';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get the authenticated user profile' })
+  async getMyProfile(@CurrentUser() user: JwtPayload) {
+    return this.usersService.getMyProfile(user.sub);
+  }
+
+  @Patch('me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update the authenticated user profile' })
+  async updateMyProfile(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateMyProfileDto,
+  ) {
+    return this.usersService.updateMyProfile(user.sub, dto);
+  }
 
   @Post('me/landlord-profile')
   @ApiBearerAuth()
@@ -40,7 +62,10 @@ export class UsersController {
     @CurrentUser() user: JwtPayload,
     @Body() dto: CreateLandlordProfileDto,
   ) {
-    const profile = await this.usersService.createLandlordProfile(user.sub, dto);
+    const profile = await this.usersService.createLandlordProfile(
+      user.sub,
+      dto,
+    );
     return {
       message: 'Landlord profile created successfully',
       data: profile,
@@ -69,7 +94,10 @@ export class UsersController {
     @CurrentUser() user: JwtPayload,
     @Body() dto: UpdateLandlordProfileDto,
   ) {
-    const profile = await this.usersService.updateLandlordProfile(user.sub, dto);
+    const profile = await this.usersService.updateLandlordProfile(
+      user.sub,
+      dto,
+    );
     return {
       message: 'Landlord profile updated successfully',
       data: profile,
@@ -77,8 +105,9 @@ export class UsersController {
   }
 
   @Post()
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 201, type: UserResponseDto })
   async createUser(@Body() dto: CreateUserDto) {
     const user = await this.usersService.create(dto);
@@ -89,8 +118,9 @@ export class UsersController {
   }
 
   @Get()
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: [UserResponseDto] })
   async getAllUsers() {
     const users = await this.usersService.findAll();
@@ -102,18 +132,15 @@ export class UsersController {
   }
 
   @Get(':id')
-  // @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard)
-  @ApiResponse({ status: 200, type: UserResponseDto })
+  @ApiResponse({ status: 200, description: 'Public-safe user profile' })
   async getUser(@Param('id') id: string) {
-    const user = await this.usersService.findById(id);
-    return {
-      message: 'User profile',
-      data: user,
-    };
+    return this.usersService.getPublicProfile(id);
   }
 
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async replaceUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     const user = await this.usersService.update(id, dto);
@@ -124,6 +151,9 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async patchUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     const user = await this.usersService.update(id, dto);
@@ -135,7 +165,8 @@ export class UsersController {
 
   @Patch(':id/trust-score')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async updateTrustScore(
     @Param('id') id: string,
@@ -150,7 +181,8 @@ export class UsersController {
 
   @Post(':id/suspend')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async suspendUser(@Param('id') id: string) {
     const user = await this.usersService.suspend(id);
@@ -162,7 +194,8 @@ export class UsersController {
 
   @Post(':id/unsuspend')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async unsuspendUser(@Param('id') id: string) {
     const user = await this.usersService.unsuspend(id);
@@ -174,7 +207,8 @@ export class UsersController {
 
   @Post(':id/verify')
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async verifyUser(@Param('id') id: string) {
     const user = await this.usersService.verify(id);
@@ -185,6 +219,9 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @ApiResponse({ status: 200, type: UserResponseDto })
   async deleteUser(@Param('id') id: string) {
     const user = await this.usersService.delete(id);

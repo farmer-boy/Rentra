@@ -1,7 +1,17 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload';
 
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
@@ -11,12 +21,12 @@ export class MessagesController {
   // Get or create conversation with another user
   @Post('conversation/:otherUserId')
   async getOrCreateConversation(
+    @CurrentUser() user: JwtPayload,
     @Param('otherUserId') otherUserId: string,
     @Query('listingId') listingId?: string,
-    @Request() req?: any,
   ) {
     return this.messagesService.getOrCreateConversation(
-      req.user.id,
+      user.sub,
       otherUserId,
       listingId,
     );
@@ -24,21 +34,21 @@ export class MessagesController {
 
   // Get all conversations for current user
   @Get('conversations')
-  async getUserConversations(@Request() req: any) {
-    return this.messagesService.getUserConversations(req.user.id);
+  async getUserConversations(@CurrentUser() user: JwtPayload) {
+    return this.messagesService.getUserConversations(user.sub);
   }
 
   // Get messages in a conversation
   @Get('conversation/:conversationId')
   async getConversationMessages(
+    @CurrentUser() user: JwtPayload,
     @Param('conversationId') conversationId: string,
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
-    @Request() req?: any,
   ) {
     return this.messagesService.getConversationMessages(
       conversationId,
-      req.user.id,
+      user.sub,
       limit ? parseInt(limit) : 50,
       offset ? parseInt(offset) : 0,
     );
@@ -49,37 +59,43 @@ export class MessagesController {
   async sendMessage(
     @Param('conversationId') conversationId: string,
     @Body() createMessageDto: CreateMessageDto,
-    @Request() req: any,
+    @CurrentUser() user: JwtPayload,
   ) {
     return this.messagesService.sendMessage(
       conversationId,
-      req.user.id,
+      user.sub,
       createMessageDto,
     );
   }
 
   // Get unread message count
   @Get('unread-count')
-  async getUnreadCount(@Request() req: any) {
-    return this.messagesService.getUnreadCount(req.user.id);
+  async getUnreadCount(@CurrentUser() user: JwtPayload) {
+    return this.messagesService.getUnreadCount(user.sub);
   }
 
   @Get('notifications')
-  async getNotifications(@Request() req: any) {
-    return this.messagesService.getNotifications(req.user.id);
+  async getNotifications(@CurrentUser() user: JwtPayload) {
+    return this.messagesService.getNotifications(user.sub);
   }
 
   @Post('notifications/:notificationId/read')
-  async markNotificationRead(@Param('notificationId') notificationId: string, @Request() req: any) {
-    return this.messagesService.markNotificationRead(notificationId, req.user.id);
+  async markNotificationRead(
+    @Param('notificationId') notificationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.markNotificationRead(notificationId, user.sub);
   }
 
   // Mark conversation as read
   @Post('conversation/:conversationId/read')
   async markAsRead(
     @Param('conversationId') conversationId: string,
-    @Request() req: any,
+    @CurrentUser() user: JwtPayload,
   ) {
-    return this.messagesService.markConversationAsRead(conversationId, req.user.id);
+    return this.messagesService.markConversationAsRead(
+      conversationId,
+      user.sub,
+    );
   }
 }

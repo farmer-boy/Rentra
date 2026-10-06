@@ -6,12 +6,17 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { RegisterDto, Role } from './dto/register.dto';
+import { UsersService } from '../users/users.service';
+import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { EmailService } from './email.service';
-import { randomBytes } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
+
+const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+type AuthTokenUser = Pick<User, 'id' | 'email' | 'roles'>;
 
 @Injectable()
 export class AuthService {
@@ -19,13 +24,11 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private emailService: EmailService,
+    private usersService: UsersService,
   ) {}
 
   async register(dto: RegisterDto) {
-    const existingEmail = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
-    if (existingEmail) {
+    if (await this.usersService.findForAuthentication(dto.email)) {
       throw new ConflictException('This email is already registered');
     }
 
@@ -36,28 +39,26 @@ export class AuthService {
       throw new ConflictException('This phone number is already registered');
     }
 
-    if (dto.cnic) {
-      const existingCnic = await this.prisma.user.findUnique({
-        where: { cnic: dto.cnic },
-      });
-      if (existingCnic) {
-        throw new ConflictException('This CNIC is already registered');
-      }
-    }
-
     const hashedPassword = await bcrypt.hash(dto.password, 12);
-    const roles = dto.roles && dto.roles.length > 0 ? dto.roles : [Role.TENANT];
-
-    const user = await this.prisma.user.create({
-      data: {
+    let user: User;
+    try {
+      user = await this.usersService.createAuthAccount({
         fullName: dto.fullName,
         email: dto.email,
         phone: dto.phone,
-        cnic: dto.cnic ?? null,
         password: hashedPassword,
-        roles,
-      },
-    });
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'An account already exists with this email or phone',
+        );
+      }
+      throw error;
+    }
 
     const token = randomBytes(32).toString('hex');
     await this.prisma.verificationToken.create({
@@ -75,20 +76,18 @@ export class AuthService {
       console.error('Verification email failed:', error);
     }
 
-    const accessToken = this.generateToken(user.id, user.email, user.roles);
+    const tokens = await this.issueTokens(user);
 
     return {
-      message: 'Registration successful! Welcome to Rentra 🎉',
+      message: 'Registration successful',
       user: this.sanitizeUser(user),
-      accessToken,
+      ...tokens,
       emailVerificationRequired: true,
     };
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: dto.email },
-    });
+    const user = await this.usersService.findForAuthentication(dto.email);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
@@ -103,13 +102,73 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const accessToken = this.generateToken(user.id, user.email, user.roles);
+    return {
+      message: 'Login successful',
+      user: this.sanitizeUser(user),
+      ...(await this.issueTokens(user)),
+    };
+  }
+
+  async refresh(refreshToken: string) {
+    const tokenHash = this.hashRefreshToken(refreshToken);
+    const now = new Date();
+    const nextRefreshToken = randomBytes(48).toString('base64url');
+    const nextTokenHash = this.hashRefreshToken(nextRefreshToken);
+    const expiresAt = new Date(now.getTime() + REFRESH_TOKEN_TTL_MS);
+
+    const user = await this.prisma.$transaction(async (transaction) => {
+      const storedToken = await transaction.refreshToken.findUnique({
+        where: { tokenHash },
+        include: { user: true },
+      });
+
+      if (
+        !storedToken ||
+        storedToken.revokedAt ||
+        storedToken.expiresAt <= now
+      ) {
+        throw new UnauthorizedException('Invalid or expired refresh token');
+      }
+      if (storedToken.user.isSuspended) {
+        throw new UnauthorizedException('Your account has been suspended');
+      }
+
+      const revoked = await transaction.refreshToken.updateMany({
+        where: { id: storedToken.id, revokedAt: null, expiresAt: { gt: now } },
+        data: { revokedAt: now },
+      });
+      if (revoked.count !== 1) {
+        throw new UnauthorizedException('Refresh token has already been used');
+      }
+
+      await transaction.refreshToken.create({
+        data: {
+          userId: storedToken.userId,
+          tokenHash: nextTokenHash,
+          expiresAt,
+        },
+      });
+
+      return storedToken.user;
+    });
 
     return {
-      message: 'Login successful! Welcome back 👋',
-      user: this.sanitizeUser(user),
-      accessToken,
+      accessToken: await this.generateAccessToken(user),
+      refreshToken: nextRefreshToken,
+      tokenType: 'Bearer',
     };
+  }
+
+  async logout(refreshToken: string) {
+    await this.prisma.refreshToken.updateMany({
+      where: {
+        tokenHash: this.hashRefreshToken(refreshToken),
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    });
+
+    return { message: 'Logged out successfully' };
   }
 
   async verifyEmail(token: string) {
@@ -185,39 +244,52 @@ export class AuthService {
   }
 
   async getMe(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        fullName: true,
-        email: true,
-        phone: true,
-        cnic: true,
-        roles: true,
-        trustScore: true,
-        isVerified: true,
-        createdAt: true,
+    return this.usersService.getAuthenticatedUser(userId);
+  }
+
+  private async issueTokens(user: User) {
+    const refreshToken = randomBytes(48).toString('base64url');
+    await this.prisma.refreshToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: this.hashRefreshToken(refreshToken),
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
       },
     });
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    return user;
+    return {
+      accessToken: await this.generateAccessToken(user),
+      refreshToken,
+      tokenType: 'Bearer',
+    };
   }
 
-  private generateToken(userId: string, email: string, roles: readonly string[]) {
-    return this.jwtService.sign({
-      sub: userId,
-      email,
-      roles: [...roles],
-      role: roles[0],
+  private generateAccessToken(user: AuthTokenUser) {
+    return this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+      roles: user.roles,
+      role: user.roles[0],
     });
   }
 
+  private hashRefreshToken(token: string) {
+    return createHash('sha256').update(token).digest('hex');
+  }
+
   private sanitizeUser(user: User) {
-    const { password, ...safeUser } = user;
-    return safeUser;
+    return {
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone,
+      cnic: user.cnic,
+      roles: user.roles,
+      trustScore: user.trustScore,
+      isVerified: user.isVerified,
+      isSuspended: user.isSuspended,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }

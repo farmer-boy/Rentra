@@ -1,4 +1,11 @@
-import { Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
@@ -25,7 +32,10 @@ export class FavoritesController {
   }
 
   @Delete(':listingId')
-  remove(@CurrentUser() user: JwtPayload, @Param('listingId') listingId: string) {
+  remove(
+    @CurrentUser() user: JwtPayload,
+    @Param('listingId') listingId: string,
+  ) {
     return this.favoritesService.remove(user.sub, listingId);
   }
 }

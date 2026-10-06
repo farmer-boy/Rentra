@@ -9,7 +9,6 @@ import {
   ListingAvailability,
   ListingStatus,
   ListingPublicationStatus,
-  LocationLevel,
   Prisma,
   RentalDuration,
 } from '@prisma/client';
@@ -20,15 +19,25 @@ import { CreateHostelDto } from './dto/create-hostel.dto';
 import { ListingQueryDto, ListingSortBy, SortOrder } from './dto/listing-query.dto';
 import { PropertyImageDto } from './dto/property-image.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
+import { LocationsService } from '../locations/locations.service';
 
 @Injectable()
 export class ListingsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private locationsService: LocationsService,
+  ) {}
 
   async create(landlordId: string, dto: CreateListingDto) {
     await this.assertLandlord(landlordId);
     this.validateHostelPayload(dto);
-    const locationId = await this.resolveLocationId(dto);
+    const location = await this.locationsService.resolveLocationPath({
+      country: dto.country,
+      province: dto.province,
+      city: dto.city,
+      area: dto.area,
+      blockSector: dto.blockSector,
+    });
 
     const listing = await this.prisma.listing.create({
       data: {
@@ -55,7 +64,7 @@ export class ListingsService {
           status: ListingStatus.PENDING,
           publicationStatus: ListingPublicationStatus.UNPUBLISHED,
         landlordId,
-        locationId,
+        locationId: location.id,
       },
     });
 
@@ -111,8 +120,14 @@ export class ListingsService {
 
     if (query.city) where.city = { contains: query.city, mode: 'insensitive' };
     if (query.area) where.area = { contains: query.area, mode: 'insensitive' };
-    if (query.country || query.province || query.blockSector) {
-      const locationIds = await this.findLocationDescendantIds(query);
+    if (query.country || query.province || query.city || query.area || query.blockSector) {
+      const locationIds = await this.locationsService.findDescendantIds({
+        COUNTRY: query.country,
+        PROVINCE: query.province,
+        CITY: query.city,
+        AREA: query.area,
+        BLOCK_SECTOR: query.blockSector,
+      });
       where.locationId = { in: locationIds };
     }
     if (query.propertyType) where.type = query.propertyType;
@@ -319,55 +334,6 @@ export class ListingsService {
       hostelRooms: { orderBy: { roomNumber: 'asc' as const } },
       _count: { select: { propertyViews: true, favorites: true, rentalRequests: true } },
     };
-  }
-
-  private async resolveLocationId(dto: CreateListingDto) {
-    const country = await this.findOrCreateLocation(dto.country ?? 'Pakistan', LocationLevel.COUNTRY);
-    const province = await this.findOrCreateLocation(dto.province ?? 'Unknown', LocationLevel.PROVINCE, country.id);
-    const city = await this.findOrCreateLocation(dto.city, LocationLevel.CITY, province.id);
-    const area = await this.findOrCreateLocation(dto.area, LocationLevel.AREA, city.id);
-    const block = dto.blockSector
-      ? await this.findOrCreateLocation(dto.blockSector, LocationLevel.BLOCK_SECTOR, area.id)
-      : area;
-    return block.id;
-  }
-
-  private async findLocationDescendantIds(query: ListingQueryDto) {
-    const levelFilters = [
-      { level: LocationLevel.COUNTRY, name: query.country },
-      { level: LocationLevel.PROVINCE, name: query.province },
-      { level: LocationLevel.BLOCK_SECTOR, name: query.blockSector },
-    ].filter((filter) => filter.name);
-
-    if (levelFilters.length === 0) return [];
-
-    const locations = await this.prisma.location.findMany({
-      select: { id: true, parentId: true, level: true, name: true },
-    });
-    const descendantsOf = (rootIds: Set<string>) => {
-      const ids = new Set(rootIds);
-      let frontier = [...rootIds];
-      while (frontier.length > 0) {
-        const children = locations.filter((location) => location.parentId && frontier.includes(location.parentId));
-        frontier = children.map((child) => child.id).filter((id) => !ids.has(id));
-        frontier.forEach((id) => ids.add(id));
-      }
-      return ids;
-    };
-
-    const matchingSets = levelFilters.map((filter) => descendantsOf(new Set(
-      locations
-        .filter((location) => location.level === filter.level && location.name.toLowerCase().includes(filter.name!.toLowerCase()))
-        .map((location) => location.id),
-    )));
-    if (matchingSets.some((ids) => ids.size === 0)) return ['__no_location_match__'];
-    return [...matchingSets.slice(1).reduce((intersection, ids) => new Set([...intersection].filter((id) => ids.has(id))), matchingSets[0])];
-  }
-
-  private async findOrCreateLocation(name: string, level: LocationLevel, parentId?: string) {
-    const slug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const existing = await this.prisma.location.findFirst({ where: { slug, level, parentId } });
-    return existing ?? this.prisma.location.create({ data: { name: name.trim(), slug, level, parentId } });
   }
 
   private validateHostelPayload(dto: CreateListingDto) {
