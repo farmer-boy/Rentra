@@ -57,7 +57,9 @@ export class AvailabilityService {
         id: true,
         status: true,
         listings: { select: { id: true } },
-        hotel: { select: { rooms: { select: { id: true } } } },
+        hotel: {
+          select: { rooms: { select: { id: true, isAvailable: true } } },
+        },
       },
     });
     if (!property) throw new NotFoundException('Property not found');
@@ -72,7 +74,7 @@ export class AvailabilityService {
           where: { listingId: { in: listingIds } },
           select: {
             id: true,
-            beds: { select: { id: true } },
+            beds: { select: { id: true, isAvailable: true } },
           },
         })
       : [];
@@ -80,23 +82,21 @@ export class AvailabilityService {
     const hostelBedIds = hostelRooms.flatMap((room) =>
       room.beds.map((bed) => bed.id),
     );
+    const availableHotelRoomIds =
+      property.hotel?.rooms
+        .filter((room) => room.isAvailable)
+        .map((room) => room.id) ?? [];
+    const availableHostelBedIds = hostelRooms.flatMap((room) =>
+      room.beds.filter((bed) => bed.isAvailable).map((bed) => bed.id),
+    );
 
-    if (
-      range.hotelRoomId &&
-      !hotelRoomIds.includes(range.hotelRoomId)
-    ) {
+    if (range.hotelRoomId && !hotelRoomIds.includes(range.hotelRoomId)) {
       throw new NotFoundException('Hotel room not found for this property');
     }
-    if (
-      range.hostelRoomId &&
-      !hostelRoomIds.includes(range.hostelRoomId)
-    ) {
+    if (range.hostelRoomId && !hostelRoomIds.includes(range.hostelRoomId)) {
       throw new NotFoundException('Hostel room not found for this property');
     }
-    if (
-      range.hostelBedId &&
-      !hostelBedIds.includes(range.hostelBedId)
-    ) {
+    if (range.hostelBedId && !hostelBedIds.includes(range.hostelBedId)) {
       throw new NotFoundException('Hostel bed not found for this property');
     }
 
@@ -109,7 +109,11 @@ export class AvailabilityService {
     const selectedHostelRoomIds = range.hostelRoomId
       ? [range.hostelRoomId]
       : range.hostelBedId
-        ? []
+        ? hostelRooms
+            .filter((room) =>
+              room.beds.some((bed) => bed.id === range.hostelBedId),
+            )
+            .map((room) => room.id)
         : hostelRoomIds;
     const selectedHostelBedIds = range.hostelBedId
       ? [range.hostelBedId]
@@ -191,13 +195,11 @@ export class AvailabilityService {
             !row.hostelBedId,
         );
         const globalRow =
-          globalRows.find((row) =>
-            UNAVAILABLE_STATUSES.includes(row.status),
-          ) ?? globalRows[0];
+          globalRows.find((row) => UNAVAILABLE_STATUSES.includes(row.status)) ??
+          globalRows[0];
         const inRangeBookings = bookings.filter(
           (booking) =>
-            booking.startDate < this.addDays(date, 1) &&
-            booking.endDate > date,
+            booking.startDate < this.addDays(date, 1) && booking.endDate > date,
         );
         const globalBooking = inRangeBookings.some(
           (booking) => !booking.hotelRoomId && !booking.hostelBedId,
@@ -210,8 +212,7 @@ export class AvailabilityService {
           (range.hotelRoomId || range.hostelRoomId || range.hostelBedId)
         ) {
           const unitRows = rows.filter((row) => {
-            if (range.hotelRoomId)
-              return row.hotelRoomId === range.hotelRoomId;
+            if (range.hotelRoomId) return row.hotelRoomId === range.hotelRoomId;
             if (range.hostelBedId)
               return (
                 row.hostelBedId === range.hostelBedId ||
@@ -230,6 +231,14 @@ export class AvailabilityService {
             status = unitRow.status;
             blockedReason = unitRow.blockedReason;
           }
+          const selectedUnitDisabled = range.hotelRoomId
+            ? !availableHotelRoomIds.includes(range.hotelRoomId)
+            : range.hostelBedId
+              ? !availableHostelBedIds.includes(range.hostelBedId)
+              : !hostelRooms
+                  .find((room) => room.id === range.hostelRoomId)
+                  ?.beds.some((bed) => bed.isAvailable);
+          if (selectedUnitDisabled) status = 'UNAVAILABLE';
           const unitBooking = inRangeBookings.some((booking) =>
             range.hotelRoomId
               ? booking.hotelRoomId === range.hotelRoomId
@@ -246,7 +255,7 @@ export class AvailabilityService {
           !range.hostelRoomId &&
           !range.hostelBedId
         ) {
-          const hotelAvailability = hotelRoomIds.map((unitId) => {
+          const hotelAvailability = availableHotelRoomIds.map((unitId) => {
             const unitBooked = inRangeBookings.some(
               (booking) => booking.hotelRoomId === unitId,
             );
@@ -257,7 +266,7 @@ export class AvailabilityService {
             );
             return unitBooked ? 'BOOKED' : (unitBlocked?.status ?? 'AVAILABLE');
           });
-          const hostelAvailability = hostelBedIds.map((unitId) => {
+          const hostelAvailability = availableHostelBedIds.map((unitId) => {
             const unitBooked = inRangeBookings.some(
               (booking) => booking.hostelBedId === unitId,
             );
@@ -270,13 +279,18 @@ export class AvailabilityService {
             return unitBooked ? 'BOOKED' : (bedBlocked?.status ?? 'AVAILABLE');
           });
           const unitStatuses = [...hotelAvailability, ...hostelAvailability];
-          if (
+          const hasUnits = hotelRoomIds.length > 0 || hostelBedIds.length > 0;
+          if (hasUnits && unitStatuses.length === 0) {
+            status = 'UNAVAILABLE';
+          } else if (
             unitStatuses.length > 0 &&
             unitStatuses.every((unitStatus) => unitStatus !== 'AVAILABLE')
           ) {
             status = unitStatuses.every((unitStatus) => unitStatus === 'BOOKED')
               ? 'BOOKED'
-              : (unitStatuses.find((unitStatus) => unitStatus === 'MAINTENANCE') ??
+              : (unitStatuses.find(
+                  (unitStatus) => unitStatus === 'MAINTENANCE',
+                ) ??
                 unitStatuses.find((unitStatus) => unitStatus === 'BLOCKED') ??
                 'BOOKED');
           }
@@ -404,15 +418,26 @@ export class AvailabilityService {
       startDate: this.dateKey(start),
       endDate: this.dateKey(end),
     });
+    const availabilityTargets: Prisma.AvailabilityWhereInput[] = [
+      {
+        propertyId,
+        hotelRoomId: null,
+        hostelRoomId: null,
+        hostelBedId: null,
+      },
+      {
+        listingId,
+        hotelRoomId: null,
+        hostelRoomId: null,
+        hostelBedId: null,
+      },
+      ...(hotelRoomId ? [{ hotelRoomId }] : []),
+      ...(hostelRoomId ? [{ hostelRoomId }] : []),
+      ...(hostelBedId ? [{ hostelBedId }] : []),
+    ];
     const rows = await transaction.availability.findMany({
       where: {
-        OR: [
-          { propertyId },
-          { listingId },
-          ...(hotelRoomId ? [{ hotelRoomId }] : []),
-          ...(hostelRoomId ? [{ hostelRoomId }] : []),
-          ...(hostelBedId ? [{ hostelBedId }] : []),
-        ],
+        OR: availabilityTargets,
         date: { in: dates },
         status: { in: UNAVAILABLE_STATUSES },
       },
