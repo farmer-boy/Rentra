@@ -292,6 +292,15 @@ importers:
         specifier: ^5.4.21
         version: 5.4.21(@types/node@24.12.2)(lightningcss@1.32.0)(terser@5.46.1)
 
+  packages/database:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
+      bcryptjs:
+        specifier: ^2.4.3
+        version: 2.4.3
+
   packages/shared: {}
 
 packages:

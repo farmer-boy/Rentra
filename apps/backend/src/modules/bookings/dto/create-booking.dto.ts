@@ -3,22 +3,26 @@ import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsInt,
+  IsNotEmpty,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 
 export class CreateBookingDto {
   @ApiProperty({ description: 'Property ID being booked.' })
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(128)
   propertyId!: string;
 
-  @ApiProperty({ example: '2026-12-01', format: 'date-time' })
-  @IsDateString()
+  @ApiProperty({ example: '2026-12-01', format: 'date' })
+  @IsDateString({ strict: true })
   checkIn!: string;
 
-  @ApiProperty({ example: '2026-12-05', format: 'date-time' })
-  @IsDateString()
+  @ApiProperty({ example: '2026-12-05', format: 'date' })
+  @IsDateString({ strict: true })
   checkOut!: string;
 
   @ApiProperty({ example: 2, minimum: 1 })
@@ -32,6 +36,8 @@ export class CreateBookingDto {
   })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(128)
   hotelRoomId?: string;
 
   @ApiPropertyOptional({
@@ -40,6 +46,8 @@ export class CreateBookingDto {
   })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(128)
   roomTypeId?: string;
 
   @ApiPropertyOptional({
@@ -47,5 +55,7 @@ export class CreateBookingDto {
   })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
+  @MaxLength(128)
   hostelBedId?: string;
 }

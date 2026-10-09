@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "prisma": {
-    "schema": "../../prisma/schema.prisma"
+    "schema": "../../packages/database/prisma/schema.prisma"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -11,7 +11,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node ../../packages/database/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

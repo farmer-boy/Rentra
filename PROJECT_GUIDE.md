@@ -17,16 +17,14 @@ Rentra is a rental marketplace project. Its repository is a pnpm/Turborepo monor
 ```text
 Rentra/
 ├── apps/
-│   ├── backend/          NestJS API, modules, tests, and seed code
+│   ├── backend/          NestJS API, modules, and tests
 │   ├── web/              React + Vite browser app
 │   └── mobile/           Expo / React Native app
 ├── packages/
+│   ├── database/         Prisma schema, migrations, and seed script
 │   ├── ai-service/       Python AI service
 │   ├── shared/           Shared package
 │   └── ui/               Shared UI package
-├── prisma/
-│   ├── schema.prisma     Database models and enums
-│   └── migrations/       SQL migrations
 ├── docker/
 │   └── docker-compose.yml  Local PostgreSQL service
 ├── .env.example          Environment variable template
@@ -118,24 +116,24 @@ Start your local PostgreSQL service yourself and ensure that the database and cr
 
 ### Prisma schema and migrations
 
-The Prisma schema is at `prisma/schema.prisma`; migration SQL is under `prisma/migrations/`.
+The single Prisma schema is at `packages/database/prisma/schema.prisma`; migration SQL is under `packages/database/prisma/migrations/`. The backend package points to this schema, so keep the schema and its migration history together there.
 
 Check migration status:
 
 ```powershell
-pnpm --filter @rentra/backend exec prisma migrate status --schema ..\..\prisma\schema.prisma
+pnpm --filter @rentra/backend exec prisma migrate status --schema ..\..\packages\database\prisma\schema.prisma
 ```
 
 For a normal development database, Prisma's migration command is:
 
 ```powershell
-pnpm --filter @rentra/backend exec prisma migrate dev --schema ..\..\prisma\schema.prisma
+pnpm --filter @rentra/backend exec prisma migrate dev --schema ..\..\packages\database\prisma\schema.prisma
 ```
 
 For an already-deployed database, migration deployment is usually:
 
 ```powershell
-pnpm --filter @rentra/backend exec prisma migrate deploy --schema ..\..\prisma\schema.prisma
+pnpm --filter @rentra/backend exec prisma migrate deploy --schema ..\..\packages\database\prisma\schema.prisma
 ```
 
 Before applying migrations to a database with real data, review the migration SQL and make a backup. Do not use `migrate reset` on a database containing data you need.
@@ -191,7 +189,7 @@ For a typical feature:
 4. `apps/backend/src/main.ts` routes requests under `/api`.
 5. A Nest controller in `apps/backend/src/modules/<feature>/` validates and routes the request.
 6. A service applies business rules and calls `PrismaService`.
-7. Prisma reads or writes PostgreSQL using `prisma/schema.prisma`.
+7. Prisma reads or writes PostgreSQL using `packages/database/prisma/schema.prisma`.
 8. The controller response is returned to the web page.
 
 DTOs (data transfer objects) describe and validate request bodies. Guards protect routes; role guards limit certain operations to users with specific roles.
@@ -324,8 +322,7 @@ The email or phone number is already registered. Try a fresh email and phone, or
 | User profile or admin user management | `apps/backend/src/modules/users/` |
 | Web registration/login screens | `apps/web/src/pages/auth/` |
 | Frontend API calls and token handling | `apps/web/src/api/` |
-| Database tables and enums | `prisma/schema.prisma` |
-| Database evolution | `prisma/migrations/` |
+| Database tables and enums | `packages/database/prisma/schema.prisma` |
+| Database evolution | `packages/database/prisma/migrations/` |
 | Backend startup and global configuration | `apps/backend/src/main.ts` and `app.module.ts` |
 | PostgreSQL container | `docker/docker-compose.yml` |
-

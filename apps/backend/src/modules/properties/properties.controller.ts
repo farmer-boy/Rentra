@@ -132,7 +132,9 @@ export class PropertiesController {
 
   @Get(':id/availability')
   @ApiOperation({
-    summary: 'Get daily availability, blocked, maintenance, and booked dates',
+    summary: 'Get daily availability for a date range',
+    description:
+      'The start date is inclusive and end date exclusive. Optionally provide exactly one hotelRoomId, hostelRoomId, or hostelBedId to check a specific unit. Without a unit ID, unit inventory is aggregated and a date is BOOKED only when all units are unavailable.',
   })
   getAvailability(
     @Param('id') id: string,

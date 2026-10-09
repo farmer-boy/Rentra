@@ -40,11 +40,13 @@ export class BookingsService {
   ) {}
 
   async create(tenantId: string, propertyId: string, dto: CreateBookingDto) {
-    const checkIn = new Date(dto.checkIn);
-    const checkOut = new Date(dto.checkOut);
+    const checkIn = this.parseDateOnly(dto.checkIn, 'checkIn');
+    const checkOut = this.parseDateOnly(dto.checkOut, 'checkOut');
     if (checkIn >= checkOut)
       throw new BadRequestException('checkOut must be after checkIn');
-    if (checkIn < new Date())
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    if (checkIn < today)
       throw new BadRequestException('checkIn cannot be in the past');
 
     const booking = await this.prisma.$transaction(async (transaction) => {
@@ -76,17 +78,28 @@ export class BookingsService {
         throw new BadRequestException('Property has no linked listing');
 
       const hostelBedId = dto.hostelBedId;
+      let hostelRoomId: string | undefined;
       if (hostelBedId) {
         const bed = await transaction.hostelBed.findFirst({
           where: { id: hostelBedId, room: { listingId: listing.id } },
-          select: { id: true },
+          select: { id: true, isAvailable: true, hostelRoomId: true },
         });
         if (!bed)
           throw new BadRequestException(
             'Hostel bed does not belong to this property',
           );
+        if (!bed.isAvailable)
+          throw new BadRequestException('Hostel bed is not available');
+        hostelRoomId = bed.hostelRoomId;
+        if (dto.guests !== 1)
+          throw new BadRequestException(
+            'A hostel bed booking must be for exactly one guest',
+          );
       }
-      if (dto.hotelRoomId && dto.hostelBedId) {
+      if (
+        (dto.hotelRoomId && dto.hostelBedId) ||
+        (dto.roomTypeId && dto.hostelBedId)
+      ) {
         throw new BadRequestException(
           'Choose either a hotel room or hostel bed, not both',
         );
@@ -108,10 +121,19 @@ export class BookingsService {
           'Hotel room does not belong to this property',
         );
       }
+      if (room && dto.roomTypeId && room.roomTypeId !== dto.roomTypeId) {
+        throw new BadRequestException(
+          'The selected hotel room does not match the requested room type',
+        );
+      }
       if (!hostelBedId && property.hotel && !room) {
         const roomCandidates = property.hotel.rooms.filter(
           (candidate) =>
-            !dto.roomTypeId || candidate.roomTypeId === dto.roomTypeId,
+            candidate.isAvailable &&
+            candidate.capacity >= dto.guests &&
+            (candidate.roomType?.capacity ?? candidate.capacity) >=
+              dto.guests &&
+            (!dto.roomTypeId || candidate.roomTypeId === dto.roomTypeId),
         );
         if (!roomCandidates.length) {
           throw new BadRequestException(
@@ -139,12 +161,25 @@ export class BookingsService {
             'No rooms are available for these dates',
           );
       }
+      if (room) {
+        if (!room.isAvailable)
+          throw new BadRequestException('Hotel room is not available');
+        if (
+          room.capacity < dto.guests ||
+          (room.roomType && room.roomType.capacity < dto.guests)
+        ) {
+          throw new BadRequestException(
+            'Guest count exceeds the selected room capacity',
+          );
+        }
+      }
 
       await this.availabilityService.assertRangeAvailable(
         transaction,
         propertyId,
         listing.id,
         selectedHotelRoomId,
+        hostelRoomId,
         hostelBedId,
         checkIn,
         checkOut,
@@ -157,7 +192,15 @@ export class BookingsService {
               ? [{ hotelRoomId: selectedHotelRoomId }]
               : []),
             ...(hostelBedId ? [{ hostelBedId }] : []),
-            ...(!selectedHotelRoomId && !hostelBedId ? [{ propertyId }] : []),
+            ...(selectedHotelRoomId || hostelBedId
+              ? [
+                  {
+                    propertyId,
+                    hotelRoomId: null,
+                    hostelBedId: null,
+                  },
+                ]
+              : [{ propertyId }]),
           ],
           status: { in: ACTIVE_BOOKING_STATUSES },
           startDate: { lt: checkOut },
@@ -170,10 +213,7 @@ export class BookingsService {
           'Property or selected unit is already booked for these dates',
         );
 
-      const nights = Math.max(
-        1,
-        Math.ceil((checkOut.getTime() - checkIn.getTime()) / 86_400_000),
-      );
+      const nights = (checkOut.getTime() - checkIn.getTime()) / 86_400_000;
       const nightlyPrice =
         room?.roomType?.price ?? room?.basePrice ?? property.price;
       const totalAmount = nightlyPrice * nights;
@@ -356,5 +396,24 @@ export class BookingsService {
         },
       },
     } satisfies Prisma.BookingInclude;
+  }
+
+  private parseDateOnly(value: string, field: string) {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (!match)
+      throw new BadRequestException(`${field} must use YYYY-MM-DD format`);
+
+    const [, year, month, day] = match;
+    const date = new Date(
+      Date.UTC(Number(year), Number(month) - 1, Number(day)),
+    );
+    if (
+      date.getUTCFullYear() !== Number(year) ||
+      date.getUTCMonth() !== Number(month) - 1 ||
+      date.getUTCDate() !== Number(day)
+    ) {
+      throw new BadRequestException(`${field} must be a valid calendar date`);
+    }
+    return date;
   }
 }
