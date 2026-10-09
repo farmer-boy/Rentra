@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { PaymentMethod } from '@prisma/client';
+import { PaymentMethod, PaymentStatus } from '@prisma/client';
 
 @Injectable()
 export class PaymentsService {
@@ -18,8 +18,7 @@ export class PaymentsService {
         amount,
         method,
         agreementId,
-        status: 'PENDING',
-        month: new Date(),
+        status: PaymentStatus.PENDING,
       },
     });
   }
@@ -50,7 +49,7 @@ export class PaymentsService {
 
     return await this.prisma.payment.update({
       where: { id },
-      data: { status: 'COMPLETED' },
+      data: { status: PaymentStatus.PAID },
     });
   }
 
@@ -60,7 +59,7 @@ export class PaymentsService {
 
     return await this.prisma.payment.update({
       where: { id },
-      data: { status: 'FAILED' },
+      data: { status: PaymentStatus.FAILED },
     });
   }
 

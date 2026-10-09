@@ -16,7 +16,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { AvailabilityService } from '../properties/availability.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
-const ACTIVE_BOOKING_STATUSES = [
+const ACTIVE_BOOKING_STATUSES: BookingStatus[] = [
   'PENDING',
   'PAYMENT_PENDING',
   'HELD',
@@ -65,7 +65,7 @@ export class BookingsService {
           RentalDuration.DAILY,
           RentalDuration.NIGHTLY,
           RentalDuration.WEEKLY,
-        ].includes(property.rentalMode)
+        ].some((duration) => duration === property.rentalMode)
       ) {
         throw new BadRequestException(
           'This property is not configured for short-term bookings',
@@ -270,14 +270,7 @@ export class BookingsService {
         'Only the tenant or property owner can cancel this booking',
       );
     }
-    if (
-      ![
-        BookingStatus.PENDING,
-        BookingStatus.PAYMENT_PENDING,
-        BookingStatus.HELD,
-        BookingStatus.CONFIRMED,
-      ].includes(booking.status)
-    ) {
+    if (!ACTIVE_BOOKING_STATUSES.includes(booking.status)) {
       throw new BadRequestException('This booking cannot be cancelled');
     }
     const updated: unknown = await this.prisma.booking.update({

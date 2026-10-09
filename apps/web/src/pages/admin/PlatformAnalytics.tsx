@@ -1,168 +1,55 @@
+import { useEffect, useState } from 'react';
+import { BarChart3, DollarSign, Users } from 'lucide-react';
+import api from '../../api/client';
 import Card from '../../components/ui/Card';
-import { TrendingUp, BarChart3, Users, DollarSign, ArrowUp } from 'lucide-react';
+
+interface PlatformStats {
+  users: { total: number; active: number; suspended: number };
+  listings: { total: number; verified: number };
+  agreements: { total: number; active: number };
+  disputes: { total: number; open: number };
+  revenue: { total: number };
+}
 
 const AdminPlatformAnalytics = () => {
-  // Mock data
-  const metrics = {
-    totalListings: 1304,
-    totalUsers: 4500,
-    activeListings: 1234,
-    totalRevenue: 4850000,
-    monthlyGrowth: 12.5,
-    userGrowth: 8.3,
-    listingGrowth: 15.2,
-  };
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const monthlyData = [
-    { month: 'Jan', users: 3800, listings: 950, revenue: 3200000 },
-    { month: 'Feb', users: 3950, listings: 1050, revenue: 3500000 },
-    { month: 'Mar', users: 4200, listings: 1180, revenue: 4100000 },
-    { month: 'Apr', users: 4500, listings: 1304, revenue: 4850000 },
-  ];
-
-  const topCities = [
-    { city: 'Lahore', listings: 450, users: 1200, revenue: 1800000 },
-    { city: 'Karachi', listings: 380, users: 950, revenue: 1500000 },
-    { city: 'Islamabad', listings: 290, users: 780, revenue: 1100000 },
-    { city: 'Multan', listings: 185, users: 570, revenue: 450000 },
-  ];
+  useEffect(() => {
+    api.get('/admin/dashboard/stats')
+      .then((response) => setStats(response.data))
+      .catch((requestError) => setError(requestError.response?.data?.message || 'Platform analytics could not be loaded.'))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Platform Analytics
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Monitor platform growth and key performance indicators
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Platform Analytics</h1>
+        <p className="text-gray-600 dark:text-gray-400">Current totals reported by the platform.</p>
       </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
-        <Card className="p-5">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                {metrics.totalUsers.toLocaleString()}
-              </p>
-            </div>
-            <Users size={24} className="text-blue-500" />
+      {loading ? <p className="text-sm text-gray-500">Loading platform analytics...</p> : error ? <p role="alert" className="text-sm text-red-600">{error}</p> : stats && (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
+            <Card className="p-5"><div className="flex items-start justify-between"><div><p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p><p className="text-3xl font-bold mt-2">{stats.users.total.toLocaleString()}</p><p className="mt-2 text-xs text-gray-500">{stats.users.active.toLocaleString()} active · {stats.users.suspended.toLocaleString()} suspended</p></div><Users size={24} className="text-blue-500" /></div></Card>
+            <Card className="p-5"><div className="flex items-start justify-between"><div><p className="text-gray-600 dark:text-gray-400 text-sm">Listings</p><p className="text-3xl font-bold mt-2">{stats.listings.total.toLocaleString()}</p><p className="mt-2 text-xs text-gray-500">{stats.listings.verified.toLocaleString()} published</p></div><BarChart3 size={24} className="text-green-500" /></div></Card>
+            <Card className="p-5"><div className="flex items-start justify-between"><div><p className="text-gray-600 dark:text-gray-400 text-sm">Recorded Revenue</p><p className="text-2xl font-bold mt-2">Rs {stats.revenue.total.toLocaleString('en-PK')}</p><p className="mt-2 text-xs text-gray-500">Payments recorded as paid</p></div><DollarSign size={24} className="text-emerald-500" /></div></Card>
+            <Card className="p-5"><p className="text-gray-600 dark:text-gray-400 text-sm">Agreements</p><p className="text-3xl font-bold mt-2">{stats.agreements.total.toLocaleString()}</p><p className="mt-2 text-xs text-gray-500">{stats.agreements.active.toLocaleString()} active</p></Card>
           </div>
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-semibold">
-            <ArrowUp size={14} />
-            +{metrics.userGrowth}% this month
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Active Listings</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
-                {metrics.activeListings.toLocaleString()}
-              </p>
-            </div>
-            <BarChart3 size={24} className="text-green-500" />
-          </div>
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-semibold">
-            <ArrowUp size={14} />
-            +{metrics.listingGrowth}% this month
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                Rs {(metrics.totalRevenue / 1000000).toFixed(1)}M
-              </p>
-            </div>
-            <DollarSign size={24} className="text-emerald-500" />
-          </div>
-          <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs font-semibold">
-            <ArrowUp size={14} />
-            +{metrics.monthlyGrowth}% this month
-          </div>
-        </Card>
-
-        <Card className="p-5">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">Avg Revenue/User</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                Rs {(metrics.totalRevenue / metrics.totalUsers).toLocaleString('en-PK', {
-                  maximumFractionDigits: 0,
-                })}
-              </p>
-            </div>
-            <TrendingUp size={24} className="text-purple-500" />
-          </div>
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">Per user lifetime</p>
-        </Card>
-      </div>
-
-      {/* Monthly Trends */}
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-3">Disputes</h3>
+            <p className="text-2xl font-bold">{stats.disputes.total.toLocaleString()} total</p>
+            <p className="text-sm text-gray-500 mt-1">{stats.disputes.open.toLocaleString()} open</p>
+          </Card>
+        </>
+      )}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Monthly Trends</h3>
-        <div className="space-y-6">
-          {monthlyData.map((data, idx) => (
-            <div key={idx}>
-              <div className="flex items-end justify-between mb-2">
-                <span className="font-medium text-gray-700 dark:text-gray-300">{data.month}</span>
-                <div className="flex gap-4 text-xs text-gray-600 dark:text-gray-400">
-                  <span>Users: {data.users.toLocaleString()}</span>
-                  <span>Listings: {data.listings}</span>
-                  <span>Revenue: Rs {(data.revenue / 1000000).toFixed(1)}M</span>
-                </div>
-              </div>
-              <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-emerald-500"
-                  style={{ width: `${(data.revenue / 5000000) * 100}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* Top Cities */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Performance by City</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-400 dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">City</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Listings</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Users</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Revenue</th>
-              </tr>
-            </thead>
-            <tbody>
-              {topCities.map((data, idx) => (
-                <tr
-                  key={idx}
-                  className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition"
-                >
-                  <td className="py-3 px-4 font-medium text-gray-900 dark:text-white">{data.city}</td>
-                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{data.listings}</td>
-                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{data.users.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-gray-900 dark:text-white font-semibold">
-                    Rs {(data.revenue / 1000000).toFixed(2)}M
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <h3 className="text-lg font-semibold mb-2">Trends and location breakdown</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400">Monthly history, growth rates, per-user revenue, and city-level analytics are not currently provided by the analytics API.</p>
       </Card>
     </div>
   );
 };
 
 export default AdminPlatformAnalytics;
-

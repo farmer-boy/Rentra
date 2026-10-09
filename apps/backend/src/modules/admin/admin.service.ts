@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ListingStatus } from '@prisma/client';
+import {
+  ListingPublicationStatus,
+  ListingStatus,
+  PaymentStatus,
+} from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { ResoluteDisputeDto } from './dto/resolute-dispute.dto';
 
@@ -176,8 +180,8 @@ export class AdminService {
     return this.prisma.listing.update({
       where: { id: listingId },
         data: {
-          status: ListingStatus.VERIFIED,
-          publicationStatus: 'PUBLISHED',
+          status: ListingStatus.PUBLISHED,
+          publicationStatus: ListingPublicationStatus.PUBLISHED,
         },
       include: {
         landlord: {
@@ -199,7 +203,10 @@ export class AdminService {
 
     return this.prisma.listing.update({
       where: { id: listingId },
-      data: { status: ListingStatus.FLAGGED },
+      data: {
+        status: ListingStatus.UNPUBLISHED,
+        publicationStatus: ListingPublicationStatus.UNPUBLISHED,
+      },
       include: {
         landlord: {
           select: {
@@ -302,13 +309,13 @@ export class AdminService {
       this.prisma.user.count({ where: { isSuspended: false } }),
       this.prisma.user.count({ where: { isSuspended: true } }),
       this.prisma.listing.count(),
-      this.prisma.listing.count({ where: { status: ListingStatus.VERIFIED } }),
+      this.prisma.listing.count({ where: { status: ListingStatus.PUBLISHED } }),
       this.prisma.agreement.count(),
       this.prisma.agreement.count({ where: { status: 'ACTIVE' } }),
       this.prisma.dispute.count(),
       this.prisma.dispute.count({ where: { status: 'OPEN' } }),
       this.prisma.payment.aggregate({
-        where: { status: 'COMPLETED' },
+        where: { status: PaymentStatus.PAID },
         _sum: { amount: true },
       }),
     ]);
@@ -332,7 +339,7 @@ export class AdminService {
         open: openDisputes,
       },
       revenue: {
-        total: totalRevenue._sum.amount || 0,
+        total: totalRevenue._sum?.amount ?? 0,
       },
     };
   }

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Home, Plus, Lightbulb, Star, FileText, CreditCard, Scale, User, Heart, Wrench, MessageCircle, CheckCircle, AlertTriangle, Eye, Users, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, CheckCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays } from 'lucide-react';
 
 // Context
 import { ThemeProvider, useTheme } from './context/ThemeContext';
@@ -24,6 +24,9 @@ import TenantDashboard from './pages/tenant/TenantDashboard';
 import BrowseListings from './pages/tenant/BrowseListings';
 import ListingDetails from './pages/tenant/ListingDetails';
 import SavedListings from './pages/tenant/SavedListings';
+import SavedSearches from './pages/tenant/SavedSearches';
+import TenantRentalRequests from './pages/tenant/RentalRequests';
+import TenantBookings from './pages/tenant/Bookings';
 import AIDetector from './pages/tenant/AIDetector';
 import RentEstimator from './pages/tenant/RentEstimator';
 import TrustScores from './pages/tenant/TrustScores';
@@ -55,11 +58,12 @@ import ChatPage from './pages/messages/ChatPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProfile from './pages/admin/Profile';
 import AdminListings from './pages/admin/AllListings';
-import AdminFakeDetectorQueue from './pages/admin/FakeDetectorQueue';
 import AdminAllUsers from './pages/admin/AllUsers';
 import AdminAllDisputes from './pages/admin/AllDisputes';
 import AdminPlatformAnalytics from './pages/admin/PlatformAnalytics';
 import AdminMessages from './pages/admin/Messages';
+import AdminReviews from './pages/admin/Reviews';
+import NotificationsPage from './pages/notifications/NotificationsPage';
 
 // Nav configs
 const tenantNavSections = [
@@ -69,30 +73,28 @@ const tenantNavSections = [
       { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/tenant' },
       { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings' },
       { icon: <Heart size={16} />, label: 'Saved Listings', path: '/tenant/saved' },
+      { icon: <Bookmark size={16} />, label: 'Saved Searches', path: '/tenant/saved-searches' },
       { icon: <MessageCircle size={16} />, label: 'Messages', path: '/tenant/messages' },
+      { icon: <Bell size={16} />, label: 'Notifications', path: '/tenant/notifications' },
     ],
   },
   {
     title: 'MY TENANCY',
     items: [
       { icon: <FileText size={16} />, label: 'My Agreements', path: '/tenant/agreement' },
+      { icon: <ClipboardList size={16} />, label: 'Rental Requests', path: '/tenant/rental-requests' },
+      { icon: <CalendarDays size={16} />, label: 'My Bookings', path: '/tenant/bookings' },
       { icon: <CreditCard size={16} />, label: 'Payments', path: '/tenant/payments' },
-      { icon: <Scale size={16} />, label: 'Active Disputes', path: '/tenant/disputes', badge: 2 },
-      { icon: <Wrench size={16} />, label: 'Maintenance Requests', path: '/tenant/maintenance' },
-    ],
-  },
-  {
-    title: 'AI TOOLS',
-    items: [
-      { icon: <Lightbulb size={16} />, label: 'Rent Estimator', path: '/tenant/estimator' },
-      { icon: <Star size={16} />, label: 'Trust Scores', path: '/tenant/trust' },
+      { icon: <Scale size={16} />, label: 'Disputes', path: '/tenant/disputes' },
     ],
   },
   {
     title: 'ACCOUNT',
     items: [
       { icon: <User size={16} />, label: 'Profile', path: '/tenant/profile' },
-      { icon: <MessageCircle size={16} />, label: 'My Reviews & Ratings', path: '/tenant/reviews' },
+      { icon: <Star size={16} />, label: 'Trust Score', path: '/tenant/trust' },
+      { icon: <Star size={16} />, label: 'My Reviews & Ratings', path: '/tenant/reviews' },
+      { icon: <Settings size={16} />, label: 'Settings', path: '/tenant/settings' },
     ],
   },
 ];
@@ -105,6 +107,7 @@ const landlordNavSections = [
       { icon: <Home size={16} />, label: 'My Properties', path: '/landlord/properties' },
       { icon: <Plus size={16} />, label: 'Post Property', path: '/landlord/post' },
       { icon: <MessageCircle size={16} />, label: 'Messages', path: '/landlord/messages' },
+      { icon: <Bell size={16} />, label: 'Notifications', path: '/landlord/notifications' },
     ],
   },
   {
@@ -120,27 +123,15 @@ const landlordNavSections = [
     items: [
       { icon: <CreditCard size={16} />, label: 'Payments Received', path: '/landlord/payments' },
       { icon: <TrendingUp size={16} />, label: 'Income Report', path: '/landlord/income' },
-      { icon: <Lightbulb size={16} />, label: 'Rent Estimator', path: '/landlord/estimator' },
-    ],
-  },
-  {
-    title: 'AI TOOLS',
-    items: [
-      { icon: <AlertTriangle size={16} />, label: 'Fake Detector', path: '/landlord/detector' },
-      { icon: <Eye size={16} />, label: 'Tenant Trust Scores', path: '/landlord/trust' },
-    ],
-  },
-  {
-    title: 'MAINTENANCE',
-    items: [
-      { icon: <Wrench size={16} />, label: 'Maintenance Requests', path: '/landlord/maintenance', badge: 3 },
     ],
   },
   {
     title: 'ACCOUNT',
     items: [
       { icon: <User size={16} />, label: 'Profile', path: '/landlord/profile' },
-      { icon: <MessageCircle size={16} />, label: 'My Reviews', path: '/landlord/reviews' },
+      { icon: <Eye size={16} />, label: 'Tenant Trust Scores', path: '/landlord/trust' },
+      { icon: <Star size={16} />, label: 'Reviews', path: '/landlord/reviews' },
+      { icon: <Settings size={16} />, label: 'Settings', path: '/landlord/settings' },
     ],
   },
 ];
@@ -193,7 +184,11 @@ function AppContent() {
           <Route path="listings" element={<BrowseListings />} />
           <Route path="listings/:id" element={<ListingDetails />} />
           <Route path="saved" element={<SavedListings />} />
+          <Route path="saved-searches" element={<SavedSearches />} />
+          <Route path="rental-requests" element={<TenantRentalRequests />} />
+          <Route path="bookings" element={<TenantBookings />} />
           <Route path="messages" element={<ChatPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="post" element={<PostProperty />} />
           <Route path="detector" element={<AIDetector />} />
           <Route path="estimator" element={<RentEstimator />} />
@@ -204,6 +199,7 @@ function AppContent() {
           <Route path="maintenance" element={<MaintenanceRequests />} />
           <Route path="profile" element={<Profile />} />
           <Route path="reviews" element={<ReviewsAndRatings />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* Landlord Routes */}
@@ -216,6 +212,7 @@ function AppContent() {
           <Route path="properties" element={<MyProperties />} />
           <Route path="post" element={<LandlordPostProperty />} />
           <Route path="messages" element={<ChatPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="tenants" element={<MyTenants />} />
           <Route path="applications" element={<PendingApplications />} />
           <Route path="agreements" element={<LandlordAgreements />} />
@@ -227,6 +224,7 @@ function AppContent() {
           <Route path="maintenance" element={<LandlordMaintenanceRequests />} />
           <Route path="profile" element={<LandlordProfile />} />
           <Route path="reviews" element={<LandlordReviews />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* Admin Routes */}
@@ -237,7 +235,6 @@ function AppContent() {
         }>
           <Route index element={<AdminDashboard />} />
           <Route path="listings" element={<AdminListings />} />
-          <Route path="detector-queue" element={<AdminFakeDetectorQueue />} />
           <Route path="approvals" element={<AdminListings />} />
           <Route path="reported" element={<AdminListings />} />
           <Route path="users" element={<AdminAllUsers />} />
@@ -246,21 +243,14 @@ function AppContent() {
           <Route path="users/verified" element={<AdminAllUsers />} />
           <Route path="users/banned" element={<AdminAllUsers />} />
           <Route path="messages" element={<AdminMessages />} />
-          <Route path="payments" element={<AdminListings />} />
-          <Route path="revenue" element={<AdminListings />} />
-          <Route path="withdrawals" element={<AdminListings />} />
-          <Route path="transactions" element={<AdminListings />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="reviews" element={<AdminReviews />} />
           <Route path="disputes" element={<AdminAllDisputes />} />
           <Route path="disputes/open" element={<AdminAllDisputes />} />
           <Route path="disputes/resolved" element={<AdminAllDisputes />} />
-          <Route path="ai-models" element={<AdminPlatformAnalytics />} />
-          <Route path="ai-detector" element={<AdminFakeDetectorQueue />} />
           <Route path="analytics" element={<AdminPlatformAnalytics />} />
-          <Route path="training-logs" element={<AdminPlatformAnalytics />} />
-          <Route path="settings" element={<AdminListings />} />
-          <Route path="gateways" element={<AdminListings />} />
-          <Route path="logs" element={<AdminListings />} />
           <Route path="profile" element={<AdminProfile />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

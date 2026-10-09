@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { ContactMessageStatus } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateContactMessageDto } from './dto/create-contact.dto';
 import * as nodemailer from 'nodemailer';
@@ -32,7 +33,7 @@ export class ContactService {
           email: dto.email,
           phone: dto.phone,
           message: dto.message,
-          status: 'new',
+          status: ContactMessageStatus.NEW,
           read: false,
         },
       });
@@ -103,9 +104,20 @@ export class ContactService {
   }
 
   async getAllMessages(filters?: { status?: string; read?: boolean }) {
+    if (
+      filters?.status &&
+      !Object.values(ContactMessageStatus).some(
+        (status) => status === filters.status,
+      )
+    ) {
+      throw new BadRequestException('Invalid contact message status');
+    }
+
     return this.prisma.contactMessage.findMany({
       where: {
-        ...(filters?.status && { status: filters.status }),
+        ...(filters?.status && {
+          status: filters.status as ContactMessageStatus,
+        }),
         ...(filters?.read !== undefined && { read: filters.read }),
       },
       orderBy: {

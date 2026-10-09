@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { AgreementStatus } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 
 @Injectable()
@@ -80,7 +81,7 @@ export class AgreementsService {
 
     return await this.prisma.agreement.update({
       where: { id },
-      data: { status: 'EXPIRED' },
+      data: { status: AgreementStatus.ENDED },
     });
   }
 }

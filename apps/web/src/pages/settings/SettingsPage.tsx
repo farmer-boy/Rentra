@@ -1,15 +1,16 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ChevronRight, Monitor, Moon, Sun } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/ThemeContext';
+import api from '../../api/client';
 
 type MenuSection = 'account-preferences' | 'sign-in-security' | 'data-privacy' | 'notifications';
 type AccountSubMenu = 'profile-info' | 'display' | 'general' | 'syncing' | 'account-management';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, token, login } = useAuthStore();
   const { themeMode, setThemeMode, isDark } = useTheme();
 
   const [activeSection, setActiveSection] = useState<MenuSection>('account-preferences');
@@ -22,6 +23,32 @@ export default function SettingsPage() {
     email: user?.email || '',
     phone: user?.phone || ''
   });
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileError, setProfileError] = useState('');
+  const [profileMessage, setProfileMessage] = useState('');
+
+  useEffect(() => {
+    api.get('/users/me').then(({ data }) => {
+      setProfileData({ fullName: data.fullName ?? '', email: data.email ?? '', phone: data.phone ?? '' });
+    }).catch((requestError) => setProfileError(requestError.response?.data?.message || 'Your account information could not be loaded.'))
+      .finally(() => setProfileLoading(false));
+  }, []);
+
+  const saveProfile = async () => {
+    setProfileSaving(true);
+    setProfileError('');
+    setProfileMessage('');
+    try {
+      const { data } = await api.patch('/users/me', profileData);
+      if (user && token) login({ ...user, ...data }, token);
+      setProfileMessage('Profile updated.');
+    } catch (requestError: any) {
+      setProfileError(requestError.response?.data?.message || 'Your profile could not be saved.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const handleThemeChange = (mode: 'device' | 'dark' | 'light') => {
     setThemeDisplayMode(mode);
@@ -78,9 +105,12 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-            <button className="px-3 md:px-4 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 text-black text-[11px] md:text-[12px] font-semibold rounded-lg transition-colors">
-              Save Changes
+            {profileLoading && <p className="text-xs text-gray-500">Loading account information...</p>}
+            <button onClick={() => void saveProfile()} disabled={profileSaving || profileLoading} className="px-3 md:px-4 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 text-black text-[11px] md:text-[12px] font-semibold rounded-lg transition-colors disabled:opacity-50">
+              {profileSaving ? 'Saving...' : 'Save Changes'}
             </button>
+            {profileError && <p role="alert" className="text-xs text-red-600">{profileError}</p>}
+            {profileMessage && <p role="status" className="text-xs text-green-600">{profileMessage}</p>}
           </div>
         );
 
@@ -155,20 +185,7 @@ export default function SettingsPage() {
           <div className="space-y-4 md:space-y-6">
             <div>
               <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>General Preferences</h3>
-              <div className="space-y-2 md:space-y-4">
-                <label className={`flex items-center justify-between p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors`}>
-                  <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Show online status</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Show online status" />
-                </label>
-                <label className={`flex items-center justify-between p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors`}>
-                  <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Allow search engines to index profile</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Allow search engines to index profile" />
-                </label>
-                <label className={`flex items-center justify-between p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors`}>
-                  <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Make profile discoverable</span>
-                  <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Make profile discoverable" />
-                </label>
-              </div>
+              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>General account preferences are not currently supported by the settings API.</p>
             </div>
           </div>
         );
@@ -178,22 +195,7 @@ export default function SettingsPage() {
           <div className="space-y-4 md:space-y-6">
             <div>
               <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Syncing Options</h3>
-              <div className="space-y-2 md:space-y-4">
-                <div className={`p-2 md:p-4 ${isDark ? 'bg-[#1f1f1f] border-white/10' : 'bg-gray-50 border-gray-400'} border rounded-lg`}>
-                  <div className="flex items-center justify-between mb-1 md:mb-2">
-                    <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Auto-sync listings across devices</span>
-                    <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Auto-sync listings across devices" />
-                  </div>
-                  <p className={`text-[9px] md:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>Keep your listings synchronized in real-time</p>
-                </div>
-                <div className={`p-2 md:p-4 ${isDark ? 'bg-[#1f1f1f] border-white/10' : 'bg-gray-50 border-gray-400'} border rounded-lg`}>
-                  <div className="flex items-center justify-between mb-1 md:mb-2">
-                    <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Backup preferences</span>
-                    <input type="checkbox" className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Backup preferences" />
-                  </div>
-                  <p className={`text-[9px] md:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>Automatically backup your settings and preferences</p>
-                </div>
-              </div>
+              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Cross-device syncing and preference backup are not currently supported by the settings API.</p>
             </div>
           </div>
         );
@@ -203,17 +205,7 @@ export default function SettingsPage() {
           <div className="space-y-4 md:space-y-6">
             <div>
               <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Account Management</h3>
-              <div className="space-y-2 md:space-y-3">
-                <button className={`w-full p-2 md:p-3 text-left text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white bg-[#1f1f1f] border-white/10 hover:bg-[#2a2a2a]' : 'text-black bg-gray-50 border-gray-400 hover:bg-gray-100'} border rounded-lg transition-colors`}>
-                  Download Your Data
-                </button>
-                <button className={`w-full p-2 md:p-3 text-left text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white bg-[#1f1f1f] border-white/10 hover:bg-[#2a2a2a]' : 'text-black bg-gray-50 border-gray-400 hover:bg-gray-100'} border rounded-lg transition-colors`}>
-                  Deactivate Account
-                </button>
-                <button className={`w-full p-2 md:p-3 text-left text-[10px] md:text-[12px] font-medium ${isDark ? 'text-red-400 bg-[#1f1f1f] border-red-500/20 hover:bg-red-500/10' : 'text-red-600 bg-red-50 border-red-300 hover:bg-red-100'} border rounded-lg transition-colors`}>
-                  Delete Account Permanently
-                </button>
-              </div>
+              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Data export and account deactivation/deletion are not currently supported by the available account APIs.</p>
             </div>
           </div>
         );
@@ -307,49 +299,21 @@ export default function SettingsPage() {
               {activeSection === 'sign-in-security' && (
                 <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
                   <h3 className={`text-sm md:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Sign In & Security</h3>
-                  <div className="space-y-2 md:space-y-4">
-                    <div className={`p-2 md:p-4 ${isDark ? 'bg-[#0f0f0f] border-white/10' : 'bg-gray-50 border-gray-400'} border rounded-lg`}>
-                      <h4 className={`text-[10px] md:text-[12px] font-semibold ${isDark ? 'text-white' : 'text-black'} mb-1 md:mb-2`}>Change Password</h4>
-                      <p className={`text-[9px] md:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mb-2 md:mb-3`}>Keep your account secure</p>
-                      <button className="px-3 md:px-4 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 text-black text-[10px] md:text-[12px] font-semibold rounded-lg transition-colors">Update Password</button>
-                    </div>
-                    <div className={`p-2 md:p-4 ${isDark ? 'bg-[#0f0f0f] border-white/10' : 'bg-gray-50 border-gray-400'} border rounded-lg`}>
-                      <h4 className={`text-[10px] md:text-[12px] font-semibold ${isDark ? 'text-white' : 'text-black'} mb-1 md:mb-2`}>Two-Factor Authentication</h4>
-                      <p className={`text-[9px] md:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mb-2 md:mb-3`}>Add extra layer of security</p>
-                      <button className="px-3 md:px-4 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 text-black text-[10px] md:text-[12px] font-semibold rounded-lg transition-colors">Enable 2FA</button>
-                    </div>
-                  </div>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Password changes and two-factor authentication are not available through the current account APIs.</p>
                 </div>
               )}
 
               {activeSection === 'data-privacy' && (
                 <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
                   <h3 className={`text-sm md:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Data Privacy</h3>
-                  <div className="space-y-2 md:space-y-4">
-                    <label className={`flex items-start gap-2 md:gap-3 p-2 md:p-4 ${isDark ? 'bg-[#0f0f0f] border-white/10 hover:bg-[#1f1f1f]' : 'bg-gray-50 border-gray-400 hover:bg-gray-100'} border rounded-lg cursor-pointer transition-colors`}>
-                      <input type="checkbox" defaultChecked className="w-4 h-4 mt-0.5 md:mt-1 cursor-pointer flex-shrink-0" aria-label="Share usage analytics" />
-                      <div>
-                        <p className={`text-[10px] md:text-[12px] font-semibold ${isDark ? 'text-white' : 'text-black'}`}>Share usage analytics</p>
-                        <p className={`text-[9px] md:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'} mt-0.5 md:mt-1`}>Help us improve</p>
-                      </div>
-                    </label>
-                  </div>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Usage analytics and privacy preference controls are not currently supported by the settings API.</p>
                 </div>
               )}
 
               {activeSection === 'notifications' && (
                 <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
                   <h3 className={`text-sm md:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Notifications</h3>
-                  <div className="space-y-2 md:space-y-3">
-                    <label className={`flex items-center justify-between p-2 md:p-3 ${isDark ? 'bg-[#0f0f0f] border-white/10 hover:bg-[#1f1f1f]' : 'bg-gray-50 border-gray-400 hover:bg-gray-100'} border rounded-lg cursor-pointer transition-colors`}>
-                      <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Email notifications</span>
-                      <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Email notifications" />
-                    </label>
-                    <label className={`flex items-center justify-between p-2 md:p-3 ${isDark ? 'bg-[#0f0f0f] border-white/10 hover:bg-[#1f1f1f]' : 'bg-gray-50 border-gray-400 hover:bg-gray-100'} border rounded-lg cursor-pointer transition-colors`}>
-                      <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Push notifications</span>
-                      <input type="checkbox" defaultChecked className="w-4 h-4 cursor-pointer flex-shrink-0" aria-label="Push notifications" />
-                    </label>
-                  </div>
+                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Notification preferences are not currently supported by the settings API.</p>
                 </div>
               )}
             </div>
@@ -359,8 +323,6 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-
 
 
 

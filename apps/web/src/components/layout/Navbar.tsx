@@ -24,8 +24,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
     .join('')
     .toUpperCase() || 'U';
 
-  const notificationCount = 2;
-  const messageCount = user?.role === 'ADMIN' ? unreadCount : 3;
+  const messageCount = user?.role === 'ADMIN' ? unreadCount : 0;
+
+  const getRolePath = (section: 'notifications' | 'messages') => {
+    const role = user?.role === 'ADMIN' ? 'admin' : user?.role === 'LANDLORD' ? 'landlord' : 'tenant';
+    return `/${role}/${section}`;
+  };
 
   const getRoleText = () => {
     return user?.role === 'ADMIN' ? 'ADMIN' : user?.role === 'LANDLORD' ? 'LANDLORD' : 'TENANT';
@@ -134,14 +138,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         {/* Notifications - Icon with Tooltip */}
         <div className="relative group">
           <button 
+            onClick={() => navigate(getRolePath('notifications'))}
             className="relative p-2 transition-colors rounded-lg"
             style={{ color: 'var(--text2)' }}
             title="Notifications"
           >
             <Bell size={16} strokeWidth={1.5} />
-            {notificationCount > 0 && (
-              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--green)' }}></span>
-            )}
           </button>
           {/* Tooltip Below */}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 px-2 py-1 rounded text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-40"
@@ -158,14 +160,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         {/* Messages - Icon with Tooltip */}
         <div className="relative group">
           <button 
+            onClick={() => navigate(getRolePath('messages'))}
             className="relative p-2 transition-colors rounded-lg"
             style={{ color: 'var(--text2)' }}
             title="Messages"
-            onClick={() => {
-              if (user?.role === 'ADMIN') {
-                navigate('/admin/messages');
-              }
-            }}
           >
             <MessageCircle size={16} strokeWidth={1.5} />
             {messageCount > 0 && (

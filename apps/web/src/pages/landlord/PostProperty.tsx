@@ -28,27 +28,6 @@ interface PostPropertyForm {
   photos: File[];
 }
 
-interface AICheckStatus {
-  photosAuthentic: 'pending' | 'approved' | 'rejected';
-  priceCompetitive: 'pending' | 'approved' | 'rejected';
-  accountFrequency: 'pending' | 'approved' | 'rejected';
-  descriptionGenuine: 'pending' | 'approved' | 'rejected';
-}
-
-const StatusBadge = ({ status }: { status: 'pending' | 'approved' | 'rejected' }) => {
-  const statusConfig = {
-    pending: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/40', text: 'text-yellow-600', label: '⏳ Pending' },
-    approved: { bg: 'bg-green-500/20', border: 'border-green-500/40', text: 'text-green-600', label: '✅ Approved' },
-    rejected: { bg: 'bg-red-500/20', border: 'border-red-500/40', text: 'text-red-600', label: '❌ Rejected' },
-  };
-  const config = statusConfig[status];
-  return (
-    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold border ${config.bg} ${config.border} ${config.text}`}>
-      {config.label}
-    </span>
-  );
-};
-
 interface SearchableSelectProps {
   options: string[];
   value: string;
@@ -165,12 +144,6 @@ export default function LandlordPostProperty() {
     photos: [],
   });
 
-  const [aiChecks, setAiChecks] = useState<AICheckStatus>({
-    photosAuthentic: 'pending',
-    priceCompetitive: 'pending',
-    accountFrequency: 'pending',
-    descriptionGenuine: 'pending',
-  });
   const [submitting, setSubmitting] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -197,16 +170,6 @@ export default function LandlordPostProperty() {
       formData.description.length >= 20
     );
     return isValid;
-  };
-
-  // Simulate AI checks
-  const simulateAICheck = () => {
-    setAiChecks({
-      photosAuthentic: 'approved',
-      priceCompetitive: 'approved',
-      accountFrequency: 'approved',
-      descriptionGenuine: 'approved',
-    });
   };
 
   const submitProperty = async () => {
@@ -263,7 +226,7 @@ export default function LandlordPostProperty() {
             📌 Post Your Property
           </h1>
           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Enter details & let AI verify everything
+            Enter your property details and submit them for admin review.
           </p>
         </div>
 
@@ -462,21 +425,6 @@ export default function LandlordPostProperty() {
                 </div>
 
                 <button
-                  onClick={simulateAICheck}
-                  disabled={!canProceed()}
-                  className={`w-full py-2 rounded-lg text-xs font-bold transition-all duration-300 ${
-                    canProceed()
-                      ? isDark
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-green-500 hover:bg-green-600 text-white'
-                      : isDark
-                        ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  Run AI Verification →
-                </button>
-                <button
                   type="button"
                   onClick={() => void submitProperty()}
                   disabled={!canProceed() || submitting}
@@ -488,135 +436,26 @@ export default function LandlordPostProperty() {
             </Card>
           </div>
 
-          {/* Right: AI Pre-Check */}
+          {/* Right: Submission information */}
           <div className="lg:col-span-2">
             <Card>
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🤖</span>
+                <span className="text-2xl">📋</span>
                 <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  AI Verification
+                  Listing review
                 </h3>
               </div>
 
               <p className={`text-xs mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Our AI will verify:
+                Submitted properties are saved as unpublished and pending review.
               </p>
-
-              <div className="space-y-3">
-                {/* Photo Check */}
-                <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-gray-50 border-gray-200'
-                }`}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-start gap-2 flex-1">
-                      <span className="text-lg">📸</span>
-                      <div>
-                        <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          Photos Authentic
-                        </p>
-                      </div>
-                    </div>
-                    <StatusBadge status={aiChecks.photosAuthentic} />
-                  </div>
-                  <p className={`text-xs ml-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Not stolen or copied
-                  </p>
-                </div>
-
-                {/* Price Check */}
-                <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-gray-50 border-gray-200'
-                }`}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-start gap-2 flex-1">
-                      <span className="text-lg">💰</span>
-                      <div>
-                        <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          Price Competitive
-                        </p>
-                      </div>
-                    </div>
-                    <StatusBadge status={aiChecks.priceCompetitive} />
-                  </div>
-                  <p className={`text-xs ml-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Fair market value
-                  </p>
-                </div>
-
-                {/* Account Check */}
-                <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-gray-50 border-gray-200'
-                }`}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-start gap-2 flex-1">
-                      <span className="text-lg">👤</span>
-                      <div>
-                        <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          Account Normal
-                        </p>
-                      </div>
-                    </div>
-                    <StatusBadge status={aiChecks.accountFrequency} />
-                  </div>
-                  <p className={`text-xs ml-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Normal posting patterns
-                  </p>
-                </div>
-
-                {/* Description Check */}
-                <div className={`p-3 rounded-lg border-2 backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-gray-50 border-gray-200'
-                }`}>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-start gap-2 flex-1">
-                      <span className="text-lg">✍️</span>
-                      <div>
-                        <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          Description Real
-                        </p>
-                      </div>
-                    </div>
-                    <StatusBadge status={aiChecks.descriptionGenuine} />
-                  </div>
-                  <p className={`text-xs ml-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Matches property
-                  </p>
-                </div>
-              </div>
-
-              <div className={`mt-4 p-3 rounded-lg border-2 text-xs font-semibold flex items-start gap-2 ${
-                Object.values(aiChecks).every(v => v === 'approved')
-                  ? isDark
-                    ? 'bg-green-500/20 border-green-500/40 text-green-300'
-                    : 'bg-green-50/80 border-green-200/60 text-green-800'
-                  : isDark
-                    ? 'bg-yellow-500/20 border-yellow-500/40 text-yellow-300'
-                    : 'bg-yellow-50/80 border-yellow-200/60 text-yellow-800'
-              }`}>
-                <span>{Object.values(aiChecks).every(v => v === 'approved') ? '✅' : '⏳'}</span>
-                <span>
-                  {Object.values(aiChecks).every(v => v === 'approved')
-                    ? 'All checks passed! Ready to publish'
-                    : 'Complete form & run verification'}
-                </span>
-              </div>
-
-              <div className={`mt-4 p-3 rounded-lg text-xs leading-relaxed ${
+              <div className={`p-3 rounded-lg text-xs leading-relaxed ${
                 isDark
                   ? 'bg-blue-500/10 border border-blue-500/30 text-blue-200'
                   : 'bg-blue-50/80 border border-blue-200/60 text-blue-900'
               }`}>
                 <p>
-                  <span className="font-semibold">💡 Why AI Verification?</span><br />
-                  After AI verification is complete, your listing will be published instantly so that tenants don't waste time waiting for manual review.
+                  Listings are not automatically published. The API does not currently provide AI checks or an estimated review time.
                 </p>
               </div>
             </Card>
@@ -626,5 +465,3 @@ export default function LandlordPostProperty() {
     </div>
   );
 }
-
-

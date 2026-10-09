@@ -148,6 +148,22 @@ const registerStyles = `
   }
 `;
 
+function getPakistanMobileDigits(value: string) {
+  let digits = value.replace(/\D/g, '');
+
+  if (digits.startsWith('0092')) {
+    digits = digits.slice(4);
+  } else if (digits.startsWith('92')) {
+    digits = digits.slice(2);
+  }
+
+  if (digits.startsWith('0')) {
+    digits = digits.slice(1);
+  }
+
+  return digits.slice(0, 10);
+}
+
 export default function Register() {
   const navigate = useNavigate();
   const { isDark } = useTheme();
@@ -235,12 +251,17 @@ export default function Register() {
       return;
     }
 
+    if (!/^3\d{9}$/.test(form.phone)) {
+      toast.error('Enter a valid Pakistani mobile number with 10 digits after +92');
+      return;
+    }
+
     setLoading(true);
     try {
       const data = await authAPI.register({
         fullName: form.username,
         email: form.email,
-        phone: form.phone,
+        phone: `+92${form.phone}`,
         cnic: form.cnic,
         password: form.password,
       });
@@ -375,7 +396,37 @@ export default function Register() {
 
               {/* Phone and CNIC in Grid */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-                {field('phone', 'Phone Number', 'tel', 'Phone')}
+                <div>
+                  <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                    Phone Number
+                  </label>
+                  <div className={`flex w-full overflow-hidden rounded-lg border-2 transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 ${
+                    isDark
+                      ? 'bg-[#0f0f0f] border-white/10 text-white'
+                      : 'bg-white border-gray-200 text-gray-900'
+                  }`}>
+                    <span className={`flex items-center border-r px-3 text-sm ${
+                      isDark ? 'border-white/10 text-gray-400' : 'border-gray-200 text-gray-500'
+                    }`}>
+                      +92
+                    </span>
+                    <input
+                      type="tel"
+                      name="registration-phone"
+                      autoComplete="off"
+                      inputMode="numeric"
+                      value={form.phone}
+                      onChange={e => setForm({ ...form, phone: getPakistanMobileDigits(e.target.value) })}
+                      placeholder="300 1234567"
+                      aria-label="Pakistani mobile number"
+                      className="w-full min-w-0 bg-transparent px-3 py-3 text-sm outline-none placeholder-gray-500"
+                      required
+                    />
+                  </div>
+                  <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                    Enter 0300... or +92 300...; the country code is added automatically.
+                  </p>
+                </div>
                 
                 {/* CNIC with Auto Formatting */}
                 <div>
@@ -514,5 +565,3 @@ export default function Register() {
     </div>
   );
 }
-
-

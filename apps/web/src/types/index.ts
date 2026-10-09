@@ -18,6 +18,7 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   login: (user: User, token: string) => void;
+  updateUser: (user: Partial<User>) => void;
   logout: () => void;
 }
 

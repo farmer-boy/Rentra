@@ -1,17 +1,17 @@
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useContactMessages } from '../../hooks/useContactMessages';
 import { useState, useRef, useEffect } from 'react';
 import {
   LayoutDashboard,
   FileText,
-  Bot,
   Users,
   Scale,
-  DollarSign,
-  TrendingUp,
+  Bell,
+  Star,
   BarChart3,
   Settings,
   Mail,
+  User,
   ChevronRight,
   ChevronLeft,
   Settings2,
@@ -43,7 +43,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => path === '/admin'
+    ? location.pathname === path
+    : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   // Handle hover expand/collapse
   const handleSidebarMouseEnter = () => {
@@ -106,14 +108,14 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const sections: SidebarItem[] = [
     { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
-    { label: 'All Listings', path: '/admin/listings', icon: <FileText size={20} /> },
-    { label: 'Fake Detector', path: '/admin/detector-queue', icon: <Bot size={20} />, badge: 47 },
+    { label: 'Properties & Listings', path: '/admin/listings', icon: <FileText size={20} /> },
     { label: 'All Users', path: '/admin/users', icon: <Users size={20} /> },
-    { label: 'All Disputes', path: '/admin/disputes', icon: <Scale size={20} />, badge: 12 },
+    { label: 'All Disputes', path: '/admin/disputes', icon: <Scale size={20} /> },
     { label: 'Messages', path: '/admin/messages', icon: <Mail size={20} />, badge: unreadCount || undefined },
-    { label: 'Payments', path: '/admin/payments', icon: <DollarSign size={20} /> },
-    { label: 'Revenue', path: '/admin/revenue', icon: <TrendingUp size={20} /> },
+    { label: 'Reviews', path: '/admin/reviews', icon: <Star size={20} /> },
+    { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={20} /> },
     { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={20} /> },
+    { label: 'Profile', path: '/admin/profile', icon: <User size={20} /> },
     { label: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
   ];
 
@@ -136,8 +138,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             const active = isActive(item.path);
             return (
               <div key={item.path} className={`relative group w-full ${isExpanded ? '' : 'flex justify-center'}`}>
-                <a
-                  href={item.path}
+                <Link
+                  to={item.path}
                   onClick={() => handleNavigationClick()}
                   className={`flex items-center rounded-lg transition-all ${isExpanded ? 'px-2 py-2 gap-2 w-full' : 'justify-center h-8 w-8'}`}
                   style={{
@@ -160,7 +162,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   {isExpanded && (
                     <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
                   )}
-                </a>
+                </Link>
 
                 {/* Tooltip on hover - appears instantly when not expanded */}
                 {!isExpanded && (

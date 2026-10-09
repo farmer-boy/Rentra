@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { Mail, Trash2, ArrowLeft } from 'lucide-react';
-import { useContactMessages } from '../../hooks/useContactMessages';
+import api from '../../api/client';
 
 interface ContactMessage {
   id: string;
@@ -16,13 +16,30 @@ interface ContactMessage {
 
 export default function AdminMessagesPage() {
   const { isDark } = useTheme();
-  const { messages, unreadCount, refetchMessages } = useContactMessages();
-  const [localMessages, setLocalMessages] = useState<ContactMessage[]>(messages);
+  const [localMessages, setLocalMessages] = useState<ContactMessage[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const refetchMessages = useCallback(async () => {
+    try {
+      const { data } = await api.get('/contact/messages');
+      const messages = Array.isArray(data.data) ? data.data : [];
+      setLocalMessages(messages);
+      setError('');
+    } catch (requestError: any) {
+      setError(requestError.response?.data?.message || 'Contact messages could not be loaded.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    setLocalMessages(messages);
-  }, [messages]);
+    void refetchMessages();
+    const interval = setInterval(() => void refetchMessages(), 5000);
+    return () => clearInterval(interval);
+  }, [refetchMessages]);
+  const unreadCount = localMessages.filter((message) => !message.read).length;
 
   const handleOpenMessage = async (message: ContactMessage) => {
     setSelectedMessage(message);
@@ -30,25 +47,14 @@ export default function AdminMessagesPage() {
     // If message is unread, mark it as read immediately (auto-seen like WhatsApp)
     if (!message.read) {
       try {
-        await fetch(`http://localhost:3000/api/contact/message/${message.id}/read`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        await api.patch(`/contact/message/${message.id}/read`);
 
         // Update local state
-        setLocalMessages(
-          localMessages.map(msg =>
-            msg.id === message.id ? { ...msg, read: true } : msg
-          )
-        );
+        setLocalMessages((items) => items.map(msg => msg.id === message.id ? { ...msg, read: true } : msg));
         setSelectedMessage({ ...message, read: true });
-
-        // Refresh to update badge count immediately
-        setTimeout(() => refetchMessages(), 100);
-      } catch (error) {
-        console.error('Failed to mark as read:', error);
+        void refetchMessages();
+      } catch (requestError: any) {
+        setError(requestError.response?.data?.message || 'Message could not be marked as read.');
       }
     }
   };
@@ -57,23 +63,14 @@ export default function AdminMessagesPage() {
     if (!confirm('Are you sure you want to delete this message?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/api/contact/message/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        setLocalMessages(localMessages.filter(msg => msg.id !== id));
-        if (selectedMessage?.id === id) {
-          setSelectedMessage(null);
-        }
-        // Refresh messages to update badge count immediately
-        setTimeout(() => refetchMessages(), 100);
+      await api.delete(`/contact/message/${id}`);
+      setLocalMessages((items) => items.filter(msg => msg.id !== id));
+      if (selectedMessage?.id === id) {
+        setSelectedMessage(null);
       }
-    } catch (error) {
-      console.error('Failed to delete message:', error);
+      void refetchMessages();
+    } catch (requestError: any) {
+      setError(requestError.response?.data?.message || 'Message could not be deleted.');
     }
   };
 
@@ -110,7 +107,11 @@ export default function AdminMessagesPage() {
           </p>
         </div>
 
-        {localMessages.length === 0 ? (
+        {loading ? (
+          <p className="px-4 text-sm text-gray-500">Loading messages...</p>
+        ) : error && localMessages.length === 0 ? (
+          <p role="alert" className="px-4 text-sm text-red-600">{error}</p>
+        ) : localMessages.length === 0 ? (
           <div
             className="rounded-lg p-6 sm:p-4 lg:p-8 text-center mx-2 sm:mx-1 lg:mx-0"
             style={{
@@ -167,6 +168,7 @@ export default function AdminMessagesPage() {
                         <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#22c55e' }}></span>
                       )}
                     </div>
+                    {error && localMessages.length > 0 && <p role="alert" className="absolute top-2 right-2 z-[60] rounded bg-red-100 px-3 py-2 text-xs text-red-700">{error}</p>}
                     <p className={`text-[9px] lg:text-[10px] line-clamp-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                       {message.message}
                     </p>
@@ -284,4 +286,3 @@ export default function AdminMessagesPage() {
     </div>
   );
 }
-

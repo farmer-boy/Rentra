@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
+import api from '../../api/client';
 
 export default function Contact() {
   const { isDark } = useTheme();
@@ -16,19 +17,7 @@ export default function Contact() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/contact/message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to send message');
-      }
+      await api.post('/contact/message', formData);
 
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', message: '' });
@@ -38,8 +27,8 @@ export default function Contact() {
         setSubmitted(false);
       }, 5000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
-      console.error('Form submission error:', err);
+      const requestError = err as { response?: { data?: { message?: string } } };
+      setError(requestError.response?.data?.message || 'Failed to send message. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -169,91 +158,9 @@ export default function Contact() {
           {/* Contact Info */}
           <div className="space-y-6">
             <h2 className="text-2xl font-bold mb-8">Contact Information</h2>
-
-            {/* Email */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
-              <div className="flex items-start gap-4">
-                <Mail className="text-green-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <h3 className="font-bold mb-1">Email</h3>
-                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>subssems336@gmail.com</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
-              <div className="flex items-start gap-4">
-                <Phone className="text-green-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <h3 className="font-bold mb-1">Phone</h3>
-                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>+92-306-4141188</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Address */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
-              <div className="flex items-start gap-4">
-                <MapPin className="text-green-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <h3 className="font-bold mb-1">Address</h3>
-                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>p/o khot mehtab khan khot rada kishan, Pakistan</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Hours */}
-            <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 hover:bg-[#1a1a1a]' : 'border-gray-400 hover:bg-gray-50'} transition cursor-pointer`}>
-              <div className="flex items-start gap-4">
-                <Clock className="text-green-500 mt-1 flex-shrink-0" size={24} />
-                <div>
-                  <h3 className="font-bold mb-1">Business Hours</h3>
-                  <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>24/7 Available</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Social Media */}
             <div className={`p-6 rounded-xl border ${isDark ? 'border-white/10 bg-[#1a1a1a]' : 'border-gray-400 bg-gray-50'}`}>
-              <h3 className="font-bold mb-4">Follow Us</h3>
-              <div className="flex gap-4">
-                <a
-                  href="https://www.facebook.com/profile.php?id=100093254713246"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-50 border border-gray-200'}`}
-                  title="Facebook"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#1877F2' }}>
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </a>
-                <a
-                  href="https://www.instagram.com/farhan.dev0/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-50 border border-gray-200'}`}
-                  title="Instagram"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: '#E4405F' }}>
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <circle cx="17.5" cy="6.5" r="1.5"></circle>
-                  </svg>
-                </a>
-                <a
-                  href="https://www.linkedin.com/in/f%E1%B4%80%CA%80%CA%9C%E1%B4%80%C9%B4-%E1%B5%88%E1%B5%89%E1%B5%9B-5224b0277/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`p-3 rounded-lg transition font-semibold text-sm flex items-center justify-center w-12 h-12 ${isDark ? 'bg-[#0f0f0f] hover:bg-white/10' : 'bg-white hover:bg-gray-50 border border-gray-200'}`}
-                  title="LinkedIn"
-                >
-                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#0A66C2' }}>
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.225 0z"/>
-                  </svg>
-                </a>
-              </div>
+              <Mail className="text-green-500 mb-3" size={24} />
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Use the form to send a message to the support inbox. A public support email, phone number, office address, business hours, and official social links are not configured here.</p>
             </div>
           </div>
         </div>
@@ -291,11 +198,7 @@ export default function Contact() {
           </div>
           <div>
             <h4 className="font-bold mb-4">Follow Us</h4>
-            <div className="flex gap-4 text-lg">
-              <a href="https://www.facebook.com/profile.php?id=100093254713246" target="_blank" rel="noopener noreferrer" className="hover:text-green-500">f</a>
-              <a href="https://www.instagram.com/farhan.dev0/" target="_blank" rel="noopener noreferrer" className="hover:text-green-500">📷</a>
-              <a href="https://www.linkedin.com/in/f%E1%B4%80%CA%80%CA%9C%E1%B4%80%C9%B4-%E1%B5%88%E1%B5%89%E1%B5%9B-5224b0277/" target="_blank" rel="noopener noreferrer" className="hover:text-green-500">in</a>
-            </div>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Official social channels are not configured.</p>
           </div>
         </div>
         <div className={`border-t pt-8 text-center text-sm ${isDark ? 'border-white/10 text-gray-400' : 'border-gray-400 text-gray-600'}`}>
@@ -305,6 +208,5 @@ export default function Contact() {
     </div>
   );
 }
-
 
 

@@ -1,72 +1,66 @@
+import { useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
-import Pill from '../../components/ui/Pill';
+import api from '../../api/client';
+
+interface Profile {
+  trustScore: number | null;
+}
 
 export default function TrustScores() {
   const { isDark } = useTheme();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    api.get<Profile>('/users/me')
+      .then(({ data }) => {
+        if (active) setProfile(data);
+      })
+      .catch(() => {
+        if (active) setError(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, []);
+
   return (
     <div>
       <div className="mb-6">
-        <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Trust Scores ⭐</h2>
-        <p className={`text-[13px] ${isDark ? 'text-gray-700' : 'text-gray-500'}`}>AI-generated trust scores for tenants and landlords</p>
+        <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Trust Score ⭐</h2>
+        <p className={`text-[13px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Your trust score reported by your account profile</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        {/* Tenant Scores */}
         <Card>
-          <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Tenant Scores</div>
-          <div className="space-y-3">
-            {[
-              { name: 'Ali Raza', score: 82, details: '3 rentals · 0 disputes · On-time 98%', pill: 'green' as const, status: 'Highly Trusted' },
-              { name: 'Usman Khan', score: 61, details: '1 rental · 1 dispute · On-time 70%', pill: 'yellow' as const, status: 'Average' },
-              { name: 'Bilal Ahmed', score: 28, details: '2 rentals · 3 disputes · On-time 40%', pill: 'red' as const, status: 'Low Trust' },
-            ].map((tenant) => (
-              <div key={tenant.name} className={`p-3 rounded-lg flex items-center gap-3 ${isDark ? 'bg-[#1f1f1f]' : 'bg-gray-50'}`}>
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg ${
-                  tenant.score >= 70 ? `${isDark ? 'bg-[#0f3d1f] text-green-400 border-2 border-green-500' : 'bg-green-100 text-green-700 border-2 border-green-400'}` :
-                  tenant.score >= 50 ? `${isDark ? 'bg-[#3d3d0f] text-yellow-400 border-2 border-yellow-500' : 'bg-yellow-100 text-yellow-700 border-2 border-yellow-400'}` :
-                  `${isDark ? 'bg-[#3d0f0f] text-red-400 border-2 border-red-500' : 'bg-red-100 text-red-700 border-2 border-red-400'}`
-                }`}>
-                  {tenant.score}<small className="text-[10px]">/100</small>
-                </div>
-                <div className="flex-1">
-                  <div className={`font-bold text-[13px] ${isDark ? 'text-white' : 'text-black'}`}>{tenant.name}</div>
-                  <div className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>{tenant.details}</div>
-                  <div className="mt-1"><Pill variant={tenant.pill}>{tenant.status}</Pill></div>
-                </div>
+          <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>My Score</div>
+          {loading ? (
+            <p className="py-6 text-center text-[12px] text-gray-500">Loading trust score…</p>
+          ) : error ? (
+            <p role="alert" className="py-6 text-center text-[12px] text-red-500">Unable to load your trust score right now.</p>
+          ) : profile?.trustScore == null ? (
+            <p className="py-6 text-center text-[12px] text-gray-500">No trust score is available for your account.</p>
+          ) : (
+            <div className="flex flex-col items-center py-6">
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center font-bold text-2xl ${isDark ? 'bg-[#0f3d1f] text-green-400 border-2 border-green-500' : 'bg-green-100 text-green-700 border-2 border-green-400'}`}>
+                {profile.trustScore}<span className="text-[11px] ml-1">/100</span>
               </div>
-            ))}
-          </div>
+              <p className={`mt-3 text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Overall score from your account profile.</p>
+            </div>
+          )}
         </Card>
 
-        {/* Landlord Scores */}
         <Card>
-          <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Landlord Scores</div>
-          <div className="space-y-3">
-            {[
-              { name: 'Ahmed Malik', score: 91, details: '5 tenants · Deposit returned 100%', pill: 'green' as const, status: 'Excellent' },
-              { name: 'Tariq Hussain', score: 55, details: '3 tenants · Deposit returned 60%', pill: 'yellow' as const, status: 'Moderate' },
-              { name: 'Rafiq Chaudhry', score: 19, details: '4 tenants · 3 illegal evictions reported', pill: 'red' as const, status: 'Avoid' },
-            ].map((landlord) => (
-              <div key={landlord.name} className={`p-3 rounded-lg flex items-center gap-3 ${isDark ? 'bg-[#1f1f1f]' : 'bg-gray-50'}`}>
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center font-bold text-lg ${
-                  landlord.score >= 70 ? `${isDark ? 'bg-[#0f3d1f] text-green-400 border-2 border-green-500' : 'bg-green-100 text-green-700 border-2 border-green-400'}` :
-                  landlord.score >= 50 ? `${isDark ? 'bg-[#3d3d0f] text-yellow-400 border-2 border-yellow-500' : 'bg-yellow-100 text-yellow-700 border-2 border-yellow-400'}` :
-                  `${isDark ? 'bg-[#3d0f0f] text-red-400 border-2 border-red-500' : 'bg-red-100 text-red-700 border-2 border-red-400'}`
-                }`}>
-                  {landlord.score}<small className="text-[10px]">/100</small>
-                </div>
-                <div className="flex-1">
-                  <div className={`font-bold text-[13px] ${isDark ? 'text-white' : 'text-black'}`}>{landlord.name}</div>
-                  <div className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-600'}`}>{landlord.details}</div>
-                  <div className="mt-1"><Pill variant={landlord.pill}>{landlord.status}</Pill></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>Other Tenant & Landlord Scores</div>
+          <p className={`py-6 text-center text-[12px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            No backend endpoint is available to retrieve trust scores for other tenants or landlords.
+          </p>
         </Card>
       </div>
     </div>
   );
 }
-

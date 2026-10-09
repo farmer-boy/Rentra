@@ -67,7 +67,7 @@ export class RoomTypesService {
   }
 
   async update(id: string, userId: string, dto: UpdateRoomTypeDto) {
-    await this.getOwnedRoomType(id, userId);
+    const roomType = await this.getOwnedRoomType(id, userId);
     const targetCount = dto.numberOfRooms ?? roomType.numberOfRooms;
     if (targetCount < 1)
       throw new BadRequestException('numberOfRooms must be at least 1');
@@ -170,9 +170,8 @@ export class RoomTypesService {
     });
     if (!property) throw new NotFoundException('Property not found');
     if (
-      ![PropertyType.HOTEL, PropertyType.GUEST_HOUSE].includes(
-        property.propertyType,
-      )
+      property.propertyType !== PropertyType.HOTEL &&
+      property.propertyType !== PropertyType.GUEST_HOUSE
     ) {
       throw new BadRequestException(
         'Room types are only available for hotels and guest houses',

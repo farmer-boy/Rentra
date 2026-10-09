@@ -41,10 +41,10 @@ export default function HomePage() {
         </div>
 
         <h1 className="mb-4 text-3xl font-extrabold leading-tight text-transparent md:text-5xl bg-gradient-to-r from-green-400 via-green-500 to-green-400 bg-clip-text">
-          Pakistan's First <br /> AI-Powered Rental Platform
+          Find and Manage <br /> Rental Properties
         </h1>
         <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-5 max-w-2xl mx-auto leading-relaxed`}>
-          Fake listing detection, AI trust scores, and digital agreements for secure, transparent renting. Protecting tenants and landlords across Pakistan's rental market.
+          Browse rental properties, connect with landlords, and manage your rental journey in one place.
         </p>
         <div className="flex flex-wrap justify-center gap-3">
           <Link to="/register" className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-black transition duration-300 transform rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl hover:shadow-green-500/50 hover:scale-105">
@@ -53,28 +53,6 @@ export default function HomePage() {
           <button className={`px-6 py-2 backdrop-blur-xl rounded-lg font-semibold text-sm transition duration-300 transform hover:scale-105 ${isDark ? 'bg-white/10 border border-white/20 hover:bg-white/20 text-white' : 'bg-black/10 border border-black/20 hover:bg-black/20 text-black'}`}>
             📌 List Your Property
           </button>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className={`py-10 px-4 backdrop-blur-xl relative overflow-hidden ${isDark ? 'bg-gradient-to-b from-green-500/5 to-transparent' : 'bg-gradient-to-b from-green-400/5 to-transparent'}`}>
-        <div className="absolute inset-0 -z-10">
-          <div className={`absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${isDark ? 'bg-green-500' : 'bg-green-400'}`}></div>
-          <div className={`absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-20 ${isDark ? 'bg-green-500' : 'bg-green-400'}`}></div>
-        </div>
-
-        <div className="relative grid max-w-5xl gap-6 mx-auto text-center md:grid-cols-4">
-          {[
-            { num: '1,284+', label: 'Active Listings' },
-            { num: '47', label: 'Fake Listings Blocked' },
-            { num: '328', label: 'Agreements Signed' },
-            { num: '4,821', label: 'Verified Users' },
-          ].map((stat, i) => (
-            <div key={i} className={`p-4 rounded-2xl backdrop-blur-md transition transform hover:scale-110 hover:shadow-2xl ${isDark ? 'bg-white/5 border border-white/10 hover:bg-white/10' : 'bg-black/5 border border-black/10 hover:bg-black/10'}`}>
-              <div className="mb-1 text-2xl font-bold text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">{stat.num}</div>
-              <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{stat.label}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -208,36 +186,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className={`py-20 px-4 backdrop-blur-xl relative overflow-hidden ${isDark ? 'bg-gradient-to-b from-green-500/5 to-transparent' : 'bg-gradient-to-b from-green-400/5 to-transparent'}`}>
-        <div className="absolute inset-0 -z-10">
-          <div className={`absolute -top-20 right-10 w-96 h-96 rounded-full blur-3xl opacity-20 ${isDark ? 'bg-green-500' : 'bg-green-400'}`}></div>
-        </div>
-
-        <div className="max-w-6xl mx-auto">
-          <h2 className="mb-4 text-4xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">What Our Users Say</h2>
-          <p className={`text-center mb-16 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Real stories from satisfied users</p>
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              { name: 'Farhan Khan', role: 'Tenant, Lahore', text: 'Found my dream apartment in 2 days. The trust score system gave me confidence in my landlord!' },
-              { name: 'Bella Donna', role: 'Landlord, Karachi', text: 'Verified tenants and automated rent collection. No more chasing payments!' },
-              { name: 'Chaudhry Samavia', role: 'Tenant, Islamabad', text: 'Had a dispute with landlord. Renova resolved it in 3 days instead of months in court!' },
-            ].map((testimonial, i) => (
-              <div key={i} className={`p-6 rounded-2xl backdrop-blur-md border transition duration-300 transform hover:scale-105 ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10' : 'bg-black/5 border-black/10 hover:bg-black/10'}`}>
-                <div className="flex gap-1 mb-3">
-                  {[...Array(5)].map((_, j) => <span key={j} className="text-lg text-yellow-400">★</span>)}
-                </div>
-                <p className={`mb-4 text-sm italic ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>"{testimonial.text}"</p>
-                <div className="pt-3 border-t border-white/5">
-                  <h4 className="text-sm font-bold text-green-400">{testimonial.name}</h4>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{testimonial.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* FAQ Section */}
       <section id="faq" className="relative max-w-2xl px-4 py-12 mx-auto">
         <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">FAQ</h2>
@@ -279,7 +227,7 @@ export default function HomePage() {
 
         <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">Ready to Rent Safely?</h2>
         <p className={`text-center mb-8 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-          Join thousands of Pakistani renters and landlords using Renova for transparent rentals.
+          Create an account to browse properties or manage your rentals.
         </p>
         
         <div className="grid gap-6 mb-8 md:grid-cols-2">
@@ -380,6 +328,5 @@ export default function HomePage() {
     </div>
   );
 }
-
 
 

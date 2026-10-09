@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 import type { JwtPayload } from '../../common/types/jwt-payload';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateRentalRequestDto } from './dto/create-rental-request.dto';
@@ -16,12 +18,13 @@ import { RentalRequestsService } from './rental-requests.service';
 
 @ApiTags('rental-requests')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class RentalRequestsController {
   constructor(private readonly rentalRequestsService: RentalRequestsService) {}
 
   @Post('properties/:id/rental-requests')
+  @Roles('TENANT')
   @ApiOperation({
     summary: 'Tenant sends a rental request for an active property',
   })
@@ -34,6 +37,7 @@ export class RentalRequestsController {
   }
 
   @Get('rental-requests/my')
+  @Roles('TENANT')
   @ApiOperation({
     summary: 'List rental requests created by the current tenant',
   })
@@ -42,6 +46,7 @@ export class RentalRequestsController {
   }
 
   @Get('rental-requests/received')
+  @Roles('LANDLORD')
   @ApiOperation({
     summary: 'List rental requests received by the current owner',
   })
@@ -50,6 +55,7 @@ export class RentalRequestsController {
   }
 
   @Patch('rental-requests/:id/accept')
+  @Roles('LANDLORD')
   @ApiOperation({
     summary: 'Owner accepts a pending request and creates an agreement',
   })
@@ -58,12 +64,14 @@ export class RentalRequestsController {
   }
 
   @Patch('rental-requests/:id/reject')
+  @Roles('LANDLORD')
   @ApiOperation({ summary: 'Owner rejects a pending request' })
   reject(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.rentalRequestsService.reject(id, user.sub);
   }
 
   @Patch('rental-requests/:id/cancel')
+  @Roles('TENANT')
   @ApiOperation({ summary: 'Tenant cancels a pending request' })
   cancel(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.rentalRequestsService.cancel(id, user.sub);

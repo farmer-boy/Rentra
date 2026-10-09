@@ -1,11 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateRentalRequestDto {
   @ApiPropertyOptional({ example: '2026-11-01', format: 'date' })
   @IsOptional()
-  @IsString()
+  @IsDateString()
   moveInDate?: string;
 
   @ApiPropertyOptional({

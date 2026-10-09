@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Send, Search, X } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { useChat } from "../../hooks/useChat";
+import api from "../../api/client";
 
 export default function ChatPage() {
   const token = useAuthStore((state) => state.token) || "";
@@ -18,6 +19,7 @@ export default function ChatPage() {
     notifications,
     fetchNotifications,
     fetchUnreadCount,
+    loading: chatLoading,
   } = useChat(token);
   const { user: authUser } = useAuthStore();
 
@@ -25,22 +27,38 @@ export default function ChatPage() {
   const [attachmentUrl, setAttachmentUrl] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationLoading, setConversationLoading] = useState(true);
+  const [conversationError, setConversationError] = useState("");
+  const [messageError, setMessageError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const loadConversations = useCallback(async () => {
+    setConversationLoading(true);
+    try {
+      await api.get("/messages/conversations");
+      await fetchConversations();
+      setConversationError("");
+    } catch (error: any) {
+      setConversationError(error.response?.data?.message || "Conversations could not be loaded.");
+    } finally {
+      setConversationLoading(false);
+    }
+  }, [fetchConversations]);
 
   // Fetch conversations on mount
   useEffect(() => {
-    fetchConversations();
+    void loadConversations();
     fetchNotifications();
     fetchUnreadCount();
     if (token) {
       const timer = setInterval(() => {
-        fetchConversations();
+        void loadConversations();
         fetchNotifications();
         fetchUnreadCount();
       }, 5000); // Poll every 5 seconds
       return () => clearInterval(timer);
     }
-  }, [token, fetchConversations, fetchNotifications, fetchUnreadCount]);
+  }, [token, loadConversations, fetchNotifications, fetchUnreadCount]);
 
   // Fetch messages when conversation changes
   useEffect(() => {
@@ -74,8 +92,9 @@ export default function ChatPage() {
       setMessageInput("");
       setAttachmentUrl("");
       await fetchMessages(currentConversation.id);
-    } catch (error) {
-      console.error("Error sending message:", error);
+      setMessageError("");
+    } catch {
+      setMessageError("Message could not be sent. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -139,7 +158,11 @@ export default function ChatPage() {
 
         {/* Conversations */}
         <div className="flex-1 overflow-y-auto">
-          {filteredConversations.length === 0 ? (
+          {conversationLoading && conversations.length === 0 ? (
+            <div className="p-4 text-center" style={{ color: "var(--text2)" }}><p className="text-sm">Loading conversations...</p></div>
+          ) : conversationError && conversations.length === 0 ? (
+            <div role="alert" className="p-4 text-center text-sm text-red-600">{conversationError}</div>
+          ) : filteredConversations.length === 0 ? (
             <div className="p-4 text-center" style={{ color: "var(--text2)" }}>
               <p className="text-sm">No conversations yet</p>
             </div>
@@ -226,6 +249,8 @@ export default function ChatPage() {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messageError && <p role="alert" className="text-sm text-red-600">{messageError}</p>}
+              {chatLoading && messages.length === 0 && <p className="text-center text-sm" style={{ color: "var(--text2)" }}>Loading messages...</p>}
               {messages.length === 0 ? (
                 <div
                   className="flex items-center justify-center h-full"

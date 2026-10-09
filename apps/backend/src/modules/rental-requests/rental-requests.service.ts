@@ -119,7 +119,8 @@ export class RentalRequestsService {
     if (request.status !== RentalRequestStatus.PENDING) {
       throw new BadRequestException('Only pending requests can be accepted');
     }
-    if (!request.listing)
+    const listing = request.listing;
+    if (!listing)
       throw new BadRequestException(
         'Property has no linked listing for an agreement',
       );
@@ -137,30 +138,27 @@ export class RentalRequestsService {
       await transaction.$queryRaw(
         Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${requestId}))`,
       );
-      const existingAgreement = await transaction.agreement.findFirst({
-        where: { rentalRequestId: requestId },
-        select: { id: true },
-      });
-      if (existingAgreement) {
-        throw new BadRequestException(
-          'An agreement already exists for this request',
-        );
-      }
-
-      const accepted = await transaction.rentalRequest.update({
-        where: { id: requestId },
+      const transition = await transaction.rentalRequest.updateMany({
+        where: {
+          id: requestId,
+          landlordId,
+          status: RentalRequestStatus.PENDING,
+        },
         data: { status: RentalRequestStatus.ACCEPTED },
       });
+      if (transition.count !== 1) {
+        throw new BadRequestException('Only pending requests can be accepted');
+      }
+
       const agreement = await transaction.agreement.create({
         data: {
           tenantId: request.tenantId,
           landlordId: request.landlordId,
-          listingId: request.listing.id,
+          listingId: listing.id,
           propertyId: request.propertyId,
           rentalRequestId: request.id,
-          rent: request.property?.price ?? request.listing.rent,
-          deposit:
-            request.property?.securityDeposit ?? request.listing.deposit ?? 0,
+          rent: request.property?.price ?? listing.rent,
+          deposit: request.property?.securityDeposit ?? listing.deposit ?? 0,
           startDate,
           endDate,
           status: AgreementStatus.ACTIVE,
@@ -173,6 +171,10 @@ export class RentalRequestsService {
           status: RentalRequestStatus.PENDING,
         },
         data: { status: RentalRequestStatus.REJECTED },
+      });
+      const accepted = await transaction.rentalRequest.findUniqueOrThrow({
+        where: { id: requestId },
+        include: this.requestInclude(),
       });
       return { accepted, agreement };
     });
@@ -209,9 +211,18 @@ export class RentalRequestsService {
     const request = await this.getOwnedRequest(requestId, landlordId);
     if (request.status !== RentalRequestStatus.PENDING)
       throw new BadRequestException('Only pending requests can be rejected');
-    const updated = await this.prisma.rentalRequest.update({
-      where: { id: requestId },
+    const transition = await this.prisma.rentalRequest.updateMany({
+      where: {
+        id: requestId,
+        landlordId,
+        status: RentalRequestStatus.PENDING,
+      },
       data: { status: RentalRequestStatus.REJECTED },
+    });
+    if (transition.count !== 1)
+      throw new BadRequestException('Only pending requests can be rejected');
+    const updated = await this.prisma.rentalRequest.findUniqueOrThrow({
+      where: { id: requestId },
       include: this.requestInclude(),
     });
     await this.notificationsService.create({
@@ -231,9 +242,18 @@ export class RentalRequestsService {
     if (!request) throw new NotFoundException('Rental request not found');
     if (request.status !== RentalRequestStatus.PENDING)
       throw new BadRequestException('Only pending requests can be cancelled');
-    return this.prisma.rentalRequest.update({
-      where: { id: requestId },
+    const transition = await this.prisma.rentalRequest.updateMany({
+      where: {
+        id: requestId,
+        tenantId,
+        status: RentalRequestStatus.PENDING,
+      },
       data: { status: RentalRequestStatus.CANCELLED },
+    });
+    if (transition.count !== 1)
+      throw new BadRequestException('Only pending requests can be cancelled');
+    return this.prisma.rentalRequest.findUniqueOrThrow({
+      where: { id: requestId },
       include: this.requestInclude(),
     });
   }

@@ -44,23 +44,6 @@ export default function TenantPostProperty() {
     }));
   };
 
-  const canProceed = (): boolean => {
-    const isValid: boolean = !!(
-      formData.propertyType &&
-      formData.country &&
-      formData.province &&
-      formData.city &&
-      formData.area &&
-      formData.address &&
-      formData.monthlyRent &&
-      formData.securityDeposit &&
-      formData.bedrooms &&
-      formData.areaSize &&
-      formData.description.length >= 20
-    );
-    return isValid;
-  };
-
   return (
     <>
       <div className="mb-6">
@@ -68,7 +51,7 @@ export default function TenantPostProperty() {
           Post Your Property
         </h1>
         <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Enter property details and let AI verify everything
+          Enter property details. Property submission is not available from this screen yet.
         </p>
       </div>
 
@@ -260,19 +243,8 @@ export default function TenantPostProperty() {
                   />
                 </div>
 
-                <button
-                  disabled={!canProceed()}
-                  className={`w-full py-2 text-sm rounded-lg font-semibold tracking-wide transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    canProceed()
-                      ? isDark
-                        ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white shadow-lg shadow-green-500/30'
-                        : 'bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 text-white shadow-lg shadow-green-400/30'
-                      : isDark
-                        ? 'bg-gray-700 text-gray-500'
-                        : 'bg-gray-300 text-gray-500'
-                  }`}
-                >
-                  Continue → AI Scan
+                <button type="button" disabled className="w-full py-2 text-sm rounded-lg font-semibold bg-gray-300 text-gray-500 cursor-not-allowed">
+                  Property submission unavailable
                 </button>
               </div>
             </Card>
@@ -283,12 +255,12 @@ export default function TenantPostProperty() {
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">🤖</span>
                 <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  AI Pre-Check
+                  Submission status
                 </h3>
               </div>
 
               <p className={`text-xs mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                Our AI will automatically verify:
+                This form is not connected to a property submission or verification API.
               </p>
 
               <div className="space-y-3">
@@ -301,10 +273,10 @@ export default function TenantPostProperty() {
                     <span className="text-xl">📸</span>
                     <div>
                       <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Photos are authentic (not stolen)
+                        Photo verification
                       </p>
                       <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        AI will check if photos match property description
+                        No verification service is available from this screen.
                       </p>
                     </div>
                   </div>
@@ -319,10 +291,10 @@ export default function TenantPostProperty() {
                     <span className="text-xl">💰</span>
                     <div>
                       <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Price is competitive for the area
+                        Rent estimate
                       </p>
                       <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        AI will compare with market rates in your area
+                        No rent-estimation service is available.
                       </p>
                     </div>
                   </div>
@@ -337,10 +309,10 @@ export default function TenantPostProperty() {
                     <span className="text-xl">👤</span>
                     <div>
                       <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Account posting frequency is normal
+                        Account review
                       </p>
                       <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        AI will verify your posting patterns are legitimate
+                        No automated account checks are available.
                       </p>
                     </div>
                   </div>
@@ -355,10 +327,10 @@ export default function TenantPostProperty() {
                     <span className="text-xl">✍️</span>
                     <div>
                       <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Description is genuine
+                        Description review
                       </p>
                       <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        AI will check if description matches the property details
+                        No automated description checks are available.
                       </p>
                     </div>
                   </div>
@@ -372,7 +344,7 @@ export default function TenantPostProperty() {
               }`}>
                 <p className="text-xs font-semibold flex items-start gap-2">
                   <span>✅</span>
-                  <span>Your listing will go live after AI verification is complete</span>
+                  <span>Submitting this form is currently unavailable.</span>
                 </p>
               </div>
             </Card>
@@ -381,4 +353,3 @@ export default function TenantPostProperty() {
     </>
   );
 }
-

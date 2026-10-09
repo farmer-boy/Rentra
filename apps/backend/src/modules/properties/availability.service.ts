@@ -11,7 +11,7 @@ import {
   BlockAvailabilityDto,
 } from './dto/availability-range.dto';
 
-const UNAVAILABLE_STATUSES = [
+const UNAVAILABLE_STATUSES: AvailabilityStatus[] = [
   'BLOCKED',
   'MAINTENANCE',
   'BOOKED',

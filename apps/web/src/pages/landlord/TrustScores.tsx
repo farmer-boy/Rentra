@@ -1,159 +1,55 @@
-import { Star, TrendingUp, AlertCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertCircle, Star } from 'lucide-react';
+import api from '../../api/client';
 import Card from '../../components/ui/Card';
 
-interface TenantScore {
-  name: string;
-  property: string;
-  overallScore: number;
-  paymentHistory: number;
-  propertyMaintenance: number;
-  communication: number;
-  reliability: number;
+interface RentalRequest {
+  id: string;
+  status: string;
+  tenant: { id: string; fullName: string };
+  listing?: { title: string } | null;
+  property?: { title: string } | null;
 }
+interface ApplicantScore extends RentalRequest { trustScore: number | null }
 
 const LandlordTrustScores = () => {
-  const tenantScores: TenantScore[] = [
-    {
-      name: 'John Smith',
-      property: 'Modern 2BR Apartment Downtown',
-      overallScore: 4.8,
-      paymentHistory: 5.0,
-      propertyMaintenance: 4.8,
-      communication: 4.6,
-      reliability: 4.8,
-    },
-    {
-      name: 'Sarah Johnson',
-      property: 'Spacious 3BR House with Backyard',
-      overallScore: 4.5,
-      paymentHistory: 4.5,
-      propertyMaintenance: 4.4,
-      communication: 4.6,
-      reliability: 4.4,
-    },
-    {
-      name: 'Michael Brown',
-      property: 'Spacious 3BR House with Backyard',
-      overallScore: 3.9,
-      paymentHistory: 3.5,
-      propertyMaintenance: 4.0,
-      communication: 3.8,
-      reliability: 4.2,
-    },
-  ];
+  const [applicants, setApplicants] = useState<ApplicantScore[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const getScoreColor = (score: number) => {
-    if (score >= 4.5) return 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/20';
-    if (score >= 4.0) return 'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/20';
-    return 'text-orange-600 bg-orange-50 dark:text-orange-400 dark:bg-orange-900/20';
-  };
-
-  const getRatingBar = (score: number) => {
-    if (score >= 4.5) return 'bg-green-500';
-    if (score >= 4.0) return 'bg-yellow-500';
-    return 'bg-orange-500';
-  };
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const { data } = await api.get('/rental-requests/received');
+        const requests: RentalRequest[] = Array.isArray(data) ? data : data.data ?? [];
+        const enriched = await Promise.all(requests.map(async (request) => {
+          const { data: profile } = await api.get(`/users/${request.tenant.id}`);
+          return { ...request, trustScore: profile.trustScore ?? null };
+        }));
+        setApplicants(enriched);
+      } catch (requestError: any) {
+        setError(requestError.response?.data?.message || 'Tenant trust scores could not be loaded.');
+      } finally { setLoading(false); }
+    };
+    void load();
+  }, []);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Tenant Trust Scores</h1>
-        <p className="text-gray-600 dark:text-gray-300">Review trust scores of your tenants before approving applications</p>
-      </div>
-
-      {/* Info Card */}
+      <div><h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Tenant Trust Scores</h1><p className="text-gray-600 dark:text-gray-300">Trust scores from applicants who have sent you a rental request</p></div>
       <Card className="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400">
-        <div className="flex items-start gap-3">
-          <AlertCircle size={20} className="text-blue-600 dark:text-blue-300 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-800 dark:text-blue-300">
-            <strong>Trust Scores</strong> are calculated based on tenant behavior: payment history, property maintenance, communication, and overall reliability. Higher scores indicate more reliable tenants.
-          </div>
-        </div>
+        <div className="flex items-start gap-3"><AlertCircle size={20} className="text-blue-600 dark:text-blue-300 flex-shrink-0 mt-0.5" /><p className="text-sm text-blue-800 dark:text-blue-300">The score shown is the tenant account trust score returned by the profile API. A detailed score breakdown is not currently available.</p></div>
       </Card>
-
-      {/* Tenant Scores */}
-      <div className="space-y-4">
-        {tenantScores.map((tenant, idx) => (
-          <Card key={idx} className="p-5">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{tenant.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{tenant.property}</p>
-              </div>
-              <div className={`px-4 py-2 rounded-lg text-center ${getScoreColor(tenant.overallScore)}`}>
-                <div className="flex items-center gap-1 justify-center mb-1">
-                  <Star size={16} className="fill-current" />
-                  <span className="text-2xl font-bold">{tenant.overallScore}</span>
-                </div>
-                <p className="text-xs font-semibold">Overall</p>
-              </div>
+      {loading ? <p className="text-sm text-gray-500">Loading rental applicants...</p> : error ? <p role="alert" className="text-sm text-red-600">{error}</p> : applicants.length === 0 ? <Card className="p-5 text-sm text-gray-500">No rental requests have been received.</Card> : (
+        <div className="space-y-4">{applicants.map((applicant) => (
+          <Card key={applicant.id} className="p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div><h3 className="text-lg font-semibold text-gray-900 dark:text-white">{applicant.tenant.fullName}</h3><p className="text-sm text-gray-600 dark:text-gray-400">{applicant.listing?.title || applicant.property?.title || 'Property not specified'}</p><p className="mt-1 text-xs text-gray-500">Request status: {applicant.status.replace('_', ' ').toLowerCase()}</p></div>
+              <div className="rounded-lg bg-gray-100 px-4 py-2 text-center dark:bg-gray-800"><div className="flex items-center justify-center gap-1">{applicant.trustScore == null ? <span className="text-sm text-gray-500">Not available</span> : <><Star size={16} className="fill-yellow-400 text-yellow-400" /><span className="text-2xl font-bold">{applicant.trustScore}</span></>}</div><p className="text-xs text-gray-500">Trust score {applicant.trustScore == null ? '' : '/100'}</p></div>
             </div>
-
-            {/* Score Breakdown */}
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Payment History</p>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{tenant.paymentHistory}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className={`${getRatingBar(tenant.paymentHistory)} h-2 rounded-full`}
-                    style={{ width: `${(tenant.paymentHistory / 5) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Property Maintenance</p>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{tenant.propertyMaintenance}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className={`${getRatingBar(tenant.propertyMaintenance)} h-2 rounded-full`}
-                    style={{ width: `${(tenant.propertyMaintenance / 5) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Communication</p>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{tenant.communication}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className={`${getRatingBar(tenant.communication)} h-2 rounded-full`}
-                    style={{ width: `${(tenant.communication / 5) * 100}%` }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Reliability</p>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{tenant.reliability}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className={`${getRatingBar(tenant.reliability)} h-2 rounded-full`}
-                    style={{ width: `${(tenant.reliability / 5) * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Trend indicator */}
-            {tenant.overallScore >= 4.5 && (
-              <div className="mt-4 flex items-center gap-2 text-green-600 dark:text-green-400 text-sm font-semibold">
-                <TrendingUp size={14} />
-                Excellent tenant - Recommended for lease renewal
-              </div>
-            )}
           </Card>
-        ))}
-      </div>
+        ))}</div>
+      )}
     </div>
   );
 };
