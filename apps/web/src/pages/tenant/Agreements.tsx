@@ -3,17 +3,17 @@ import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
-import api from '../../api/client';
+import { agreementsAPI } from '../../api/agreements';
 
 interface Agreement {
   id: string;
   tenantId: string;
   landlordId: string;
   listingId: string;
-  rent: number;
-  deposit: number;
+  monthlyRent: number;
+  securityDeposit: number | null;
   startDate: string;
-  endDate: string;
+  endDate: string | null;
   status: string;
   tenant?: { fullName: string };
   landlord?: { fullName: string };
@@ -31,10 +31,9 @@ export default function Agreements() {
     if (!user?.id) {
       return () => { active = false; };
     }
-    api.get<{ data?: Agreement[] }>('/agreements')
-      .then(({ data }) => {
-        const records = Array.isArray(data.data) ? data.data : [];
-        if (active) setAgreements(records.filter((agreement) => agreement.tenantId === user.id));
+    agreementsAPI.mine()
+      .then((records) => {
+        if (active) setAgreements(records.filter((agreement) => agreement.tenantId === user.id) as Agreement[]);
       })
       .catch(() => {
         if (active) setError(true);
@@ -47,7 +46,7 @@ export default function Agreements() {
 
   const statusVariant = (status: string): 'green' | 'yellow' | 'red' => {
     if (status === 'ACTIVE' || status === 'SIGNED') return 'green';
-    if (status === 'CANCELLED' || status === 'ENDED' || status === 'TERMINATED') return 'red';
+    if (status === 'CANCELLED' || status === 'ENDED' || status === 'TERMINATED' || status === 'EXPIRED') return 'red';
     return 'yellow';
   };
 
@@ -82,10 +81,10 @@ export default function Agreements() {
                   <Pill variant={statusVariant(agreement.status)}>{agreement.status}</Pill>
                 </div>
                 <div className={`grid grid-cols-2 gap-2 text-[11px] ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <div>Rent: Rs {Number(agreement.rent).toLocaleString()}</div>
-                  <div>Deposit: Rs {Number(agreement.deposit).toLocaleString()}</div>
+                  <div>Rent: Rs {Number(agreement.monthlyRent).toLocaleString()}</div>
+                  <div>Deposit: Rs {Number(agreement.securityDeposit ?? 0).toLocaleString()}</div>
                   <div>Start: {new Date(agreement.startDate).toLocaleDateString()}</div>
-                  <div>End: {new Date(agreement.endDate).toLocaleDateString()}</div>
+                  <div>End: {agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'No end date set'}</div>
                 </div>
               </div>
             ))}

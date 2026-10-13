@@ -163,22 +163,6 @@ export class UsersController {
     };
   }
 
-  @Patch(':id/trust-score')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ADMIN')
-  @ApiResponse({ status: 200, type: UserResponseDto })
-  async updateTrustScore(
-    @Param('id') id: string,
-    @Body() body: { score: number },
-  ) {
-    const user = await this.usersService.updateTrustScore(id, body.score);
-    return {
-      message: 'Trust score updated successfully',
-      data: user,
-    };
-  }
-
   @Post(':id/suspend')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FileText } from 'lucide-react';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { agreementsAPI } from '../../api/agreements';
+import { listingsAPI } from '../../api/listings';
 import { useAuthStore } from '../../store/authStore';
 
 interface Agreement {
@@ -9,7 +10,8 @@ interface Agreement {
   landlordId: string;
   tenant?: { fullName?: string; email?: string };
   listingId: string;
-  rent: number;
+  monthlyRent: number;
+  securityDeposit: number | null;
   startDate: string;
   endDate: string | null;
   pdfUrl?: string | null;
@@ -42,10 +44,9 @@ const LandlordAgreements = () => {
     let active = true;
     if (!user?.id) return () => { active = false; };
 
-    Promise.all([api.get('/agreements'), api.get('/listings/landlord/my-listings')])
-      .then(([agreementResponse, listingResponse]) => {
-        const receivedAgreements = responseList<Agreement>(agreementResponse.data?.data, 'agreement');
-        const receivedListings = responseList<Listing>(listingResponse.data?.data, 'property');
+    Promise.all([agreementsAPI.mine(), listingsAPI.getMyListings<Listing>()])
+      .then(([agreements, receivedListings]) => {
+        const receivedAgreements = responseList<Agreement>(agreements, 'agreement');
         if (active) {
           setError('');
           setAgreements(receivedAgreements.filter((agreement) => agreement.landlordId === user.id));
@@ -108,7 +109,7 @@ const LandlordAgreements = () => {
                   <div className="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
                     <div><p className="text-gray-500 dark:text-gray-400">Start date</p><p className="font-medium text-gray-900 dark:text-white">{new Date(agreement.startDate).toLocaleDateString()}</p></div>
                     <div><p className="text-gray-500 dark:text-gray-400">End date</p><p className="font-medium text-gray-900 dark:text-white">{agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'Not specified'}</p></div>
-                    <div><p className="text-gray-500 dark:text-gray-400">Rent</p><p className="font-medium text-gray-900 dark:text-white">PKR {agreement.rent.toLocaleString()}</p></div>
+                    <div><p className="text-gray-500 dark:text-gray-400">Monthly rent</p><p className="font-medium text-gray-900 dark:text-white">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
                   </div>
                   {agreement.pdfUrl && <a href={agreement.pdfUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:underline">View agreement document</a>}
                 </Card>

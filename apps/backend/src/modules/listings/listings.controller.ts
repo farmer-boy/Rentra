@@ -21,13 +21,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ListingAvailability } from '@prisma/client';
 import { ListingsService } from './listings.service';
 import { AmenitiesDto } from './dto/amenities.dto';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { ListingQueryDto } from './dto/listing-query.dto';
 import { PropertyImageDto } from './dto/property-image.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
+import { UpdateHostelBedStatusDto } from './dto/update-hostel-bed-status.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -77,7 +77,11 @@ export class ListingsController {
     @Query() query: ListingQueryDto,
   ) {
     const listings = await this.listingsService.getByLandlord(user.sub, query);
-    return { message: 'Your listings', data: listings.items, pagination: listings.pagination };
+    return {
+      message: 'Your listings',
+      data: listings.items,
+      pagination: listings.pagination,
+    };
   }
 
   @Get('landlord/analytics')
@@ -98,9 +102,36 @@ export class ListingsController {
     };
   }
 
+  @Patch(':id/hostel-beds/:bedId/status')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary:
+      'Update the status of a bed in a hostel owned by the current landlord',
+  })
+  async updateHostelBedStatus(
+    @Param('id') listingId: string,
+    @Param('bedId') bedId: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateHostelBedStatusDto,
+  ) {
+    return {
+      message: 'Hostel bed status updated successfully',
+      data: await this.listingsService.updateHostelBedStatus(
+        listingId,
+        bedId,
+        user.sub,
+        dto,
+      ),
+    };
+  }
+
   @Post(':id/view')
   @ApiOperation({ summary: 'Record a property view' })
-  async recordPropertyView(@Param('id') id: string, @Body('sessionId') sessionId?: string) {
+  async recordPropertyView(
+    @Param('id') id: string,
+    @Body('sessionId') sessionId?: string,
+  ) {
     return this.listingsService.recordView(id, sessionId);
   }
 
@@ -123,7 +154,10 @@ export class ListingsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Publish a property owned by the current landlord' })
-  async publishListing(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+  async publishListing(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return {
       message: 'Listing published successfully',
       data: await this.listingsService.publish(id, user.sub),
@@ -133,8 +167,13 @@ export class ListingsController {
   @Patch(':id/unpublish')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Unpublish a property owned by the current landlord' })
-  async unpublishListing(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+  @ApiOperation({
+    summary: 'Unpublish a property owned by the current landlord',
+  })
+  async unpublishListing(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return {
       message: 'Listing unpublished successfully',
       data: await this.listingsService.unpublish(id, user.sub),
@@ -152,7 +191,11 @@ export class ListingsController {
   ) {
     return {
       message: 'Listing availability updated successfully',
-      data: await this.listingsService.setAvailability(id, user.sub, dto.availability),
+      data: await this.listingsService.setAvailability(
+        id,
+        user.sub,
+        dto.availability,
+      ),
     };
   }
 
@@ -165,7 +208,10 @@ export class ListingsController {
     @CurrentUser() user: JwtPayload,
     @Body() dto: PropertyImageDto,
   ) {
-    return { message: 'Property image added successfully', data: await this.listingsService.addImage(id, user.sub, dto) };
+    return {
+      message: 'Property image added successfully',
+      data: await this.listingsService.addImage(id, user.sub, dto),
+    };
   }
 
   @Post(':id/images/upload')
@@ -173,7 +219,12 @@ export class ListingsController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
   @ApiOperation({ summary: 'Upload an image for an owned property' })
   async uploadImage(
     @Param('id') id: string,
@@ -214,7 +265,10 @@ export class ListingsController {
     @CurrentUser() user: JwtPayload,
     @Body() dto: AmenitiesDto,
   ) {
-    return { message: 'Property amenities updated successfully', data: await this.listingsService.setAmenities(id, user.sub, dto) };
+    return {
+      message: 'Property amenities updated successfully',
+      data: await this.listingsService.setAmenities(id, user.sub, dto),
+    };
   }
 
   @Delete(':id')

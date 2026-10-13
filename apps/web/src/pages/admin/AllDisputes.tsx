@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Card from '../../components/ui/Card';
 import { Scale } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
+import api from '../../api/client';
 
 interface AdminDispute {
   id: string;
@@ -27,6 +28,7 @@ const AdminAllDisputes = () => {
   const [disputes, setDisputes] = useState<AdminDispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionId, setActionId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -58,6 +60,22 @@ const AdminAllDisputes = () => {
     }
   };
   const statValue = (value: number) => loading || error ? '—' : value;
+
+  const resolveDispute = async (dispute: AdminDispute) => {
+    const resolution = window.prompt('Enter the documented dispute resolution:');
+    if (!resolution?.trim()) return;
+    setActionId(dispute.id);
+    try {
+      await api.patch(`/admin/disputes/${dispute.id}/resolve`, { resolution });
+      setDisputes((current) => current.map((item) => (
+        item.id === dispute.id ? { ...item, status: 'RESOLVED' } : item
+      )));
+    } catch {
+      setError('The dispute could not be resolved. Please refresh and try again.');
+    } finally {
+      setActionId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -117,6 +135,16 @@ const AdminAllDisputes = () => {
                   <p className="text-xs text-gray-500 dark:text-gray-500">
                     Filed {dispute.createdAt ? new Date(dispute.createdAt).toLocaleDateString() : 'date unavailable'}
                   </p>
+                  {!['RESOLVED', 'REJECTED', 'CLOSED'].includes(dispute.status) && (
+                    <button
+                      type="button"
+                      disabled={actionId === dispute.id}
+                      onClick={() => void resolveDispute(dispute)}
+                      className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                    >
+                      {actionId === dispute.id ? 'Saving...' : 'Resolve'}
+                    </button>
+                  )}
                 </div>
               </div>
             </Card>

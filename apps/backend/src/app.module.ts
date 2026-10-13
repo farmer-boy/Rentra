@@ -18,6 +18,10 @@ import { SavedSearchesModule } from './modules/saved-searches/saved-searches.mod
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { RentalRequestsModule } from './modules/rental-requests/rental-requests.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
+import { TrustScoreModule } from './modules/trust-score/trust-score.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { VerificationModule } from './modules/verification/verification.module';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 
 @Module({
   imports: [
@@ -43,6 +47,10 @@ import { BookingsModule } from './modules/bookings/bookings.module';
     NotificationsModule,
     RentalRequestsModule,
     BookingsModule,
+    TrustScoreModule,
+    ReportsModule,
+    VerificationModule,
+    RecommendationsModule,
   ],
 })
 export class AppModule {}

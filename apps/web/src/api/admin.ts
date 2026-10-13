@@ -1,10 +1,23 @@
 import api from './client';
-import type { User, Listing, TrustScore, Dispute, PaginatedResponse } from './types';
+import type { User, Listing, Dispute, PaginatedResponse } from './types';
+
+export interface AdminListFilters {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  role?: string;
+  type?: string;
+  city?: string;
+  verificationStatus?: string;
+  from?: string;
+  to?: string;
+}
 
 export const adminAPI = {
   // User Management
-  getAllUsers: async (page = 1, limit = 20): Promise<PaginatedResponse<User>> => {
-    const response = await api.get('/admin/users', { params: { page, limit } });
+  getAllUsers: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<User>> => {
+    const response = await api.get('/admin/users', { params: filters });
     return response.data;
   },
 
@@ -13,24 +26,29 @@ export const adminAPI = {
     return response.data;
   },
 
-  suspendUser: async (id: string): Promise<User> => {
-    const response = await api.patch(`/admin/users/${id}/suspend`);
+  suspendUser: async (id: string, reason: string): Promise<User> => {
+    const response = await api.post(`/admin/users/${id}/suspend`, { reason });
     return response.data;
   },
 
-  activateUser: async (id: string): Promise<User> => {
-    const response = await api.patch(`/admin/users/${id}/activate`);
+  activateUser: async (id: string, reason: string): Promise<User> => {
+    const response = await api.post(`/admin/users/${id}/unsuspend`, { reason });
     return response.data;
   },
+
+  verifyUser: async (id: string): Promise<User> =>
+    (await api.post(`/admin/users/${id}/verify`)).data,
+  verifyLandlordProfile: async (id: string) =>
+    (await api.patch(`/admin/landlord-profiles/${id}/verify`)).data,
 
   // Listing Moderation
-  getAllListings: async (page = 1, limit = 20): Promise<PaginatedResponse<Listing>> => {
-    const response = await api.get('/admin/listings', { params: { page, limit } });
+  getAllListings: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<Listing>> => {
+    const response = await api.get('/admin/listings', { params: filters });
     return response.data;
   },
 
-  getFlaggedListings: async (): Promise<Listing[]> => {
-    const response = await api.get('/admin/listings/flagged');
+  getProperties: async (filters: AdminListFilters = {}) => {
+    const response = await api.get('/admin/properties', { params: filters });
     return response.data;
   },
 
@@ -38,20 +56,8 @@ export const adminAPI = {
     const response = await api.patch(`/admin/listings/${id}/flag`, { reason });
     return response.data;
   },
-
-  approveListings: async (id: string): Promise<Listing> => {
-    const response = await api.patch(`/admin/listings/${id}/approve`);
-    return response.data;
-  },
-
-  rejectListing: async (id: string, reason: string): Promise<Listing> => {
-    const response = await api.patch(`/admin/listings/${id}/reject`, { reason });
-    return response.data;
-  },
-
-  removeListings: async (id: string): Promise<void> => {
-    await api.delete(`/admin/listings/${id}`);
-  },
+  verifyListing: async (id: string): Promise<Listing> =>
+    (await api.patch(`/admin/listings/${id}/verify`)).data,
 
   // Disputes
   getAllDisputes: async (page = 1, limit = 20): Promise<PaginatedResponse<Dispute>> => {
@@ -59,20 +65,16 @@ export const adminAPI = {
     return response.data;
   },
 
-  // Trust Scores
-  getTrustScore: async (userId: string): Promise<TrustScore> => {
-    const response = await api.get(`/admin/trust-scores/${userId}`);
+  getDashboardStats: async () => {
+    const response = await api.get('/admin/dashboard/stats');
     return response.data;
   },
 
-  updateTrustScore: async (userId: string, score: number): Promise<TrustScore> => {
-    const response = await api.patch(`/admin/trust-scores/${userId}`, { score });
-    return response.data;
-  },
+  getDashboardActivity: async () =>
+    (await api.get('/admin/dashboard/activity')).data,
 
-  // Dashboard Stats
-  getStats: async () => {
-    const response = await api.get('/admin/stats');
+  getResourcePage: async (path: string, filters: AdminListFilters = {}) => {
+    const response = await api.get(path, { params: filters });
     return response.data;
   },
 };

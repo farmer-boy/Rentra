@@ -2,14 +2,18 @@ import { useEffect, useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
-import api from '../../api/client';
+import { paymentsAPI } from '../../api/payments';
 
 interface Payment {
   id: string;
   amount: number;
-  method?: string;
+  currency: string;
+  provider: string;
   status: string;
-  agreementId: string;
+  bookingId: string | null;
+  agreementId: string | null;
+  billingMonth: string | null;
+  paidAt: string | null;
   createdAt: string;
 }
 
@@ -21,9 +25,9 @@ export default function Payments() {
 
   useEffect(() => {
     let active = true;
-    api.get<{ data?: Payment[] }>('/payments/tenant/my-payments')
-      .then(({ data }) => {
-        if (active) setPayments(Array.isArray(data.data) ? data.data : []);
+    paymentsAPI.getMyPayments()
+      .then((records) => {
+        if (active) setPayments(Array.isArray(records) ? records as Payment[] : []);
       })
       .catch(() => {
         if (active) setError(true);
@@ -35,7 +39,7 @@ export default function Payments() {
   }, []);
 
   const getStatusVariant = (status: string): 'green' | 'yellow' | 'red' => {
-    if (status === 'PAID' || status === 'COMPLETED') return 'green';
+    if (status === 'SUCCESS' || status === 'PAID' || status === 'COMPLETED') return 'green';
     if (status === 'FAILED') return 'red';
     return 'yellow';
   };
@@ -64,12 +68,12 @@ export default function Payments() {
                     {new Date(payment.createdAt).toLocaleDateString()}
                   </div>
                   <div className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {payment.method ? `${payment.method} · ` : ''}Agreement {payment.agreementId}
+                    {payment.provider.replace(/_/g, ' ')} · {payment.agreementId ? `Agreement ${payment.agreementId}` : `Booking ${payment.bookingId}`}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-[12px] font-bold ${payment.status === 'PAID' || payment.status === 'COMPLETED' ? 'text-green-600' : payment.status === 'FAILED' ? 'text-red-600' : 'text-yellow-600'}`}>
-                    Rs {Number(payment.amount).toLocaleString()}
+                  <div className={`text-[12px] font-bold ${payment.status === 'SUCCESS' || payment.status === 'PAID' || payment.status === 'COMPLETED' ? 'text-green-600' : payment.status === 'FAILED' ? 'text-red-600' : 'text-yellow-600'}`}>
+                    {payment.currency} {Number(payment.amount).toLocaleString()}
                   </div>
                   <Pill variant={getStatusVariant(payment.status)}>{payment.status}</Pill>
                 </div>

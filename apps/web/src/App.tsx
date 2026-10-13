@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, CheckCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays } from 'lucide-react';
 
@@ -57,13 +58,14 @@ import ChatPage from './pages/messages/ChatPage';
 // Admin Pages
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProfile from './pages/admin/Profile';
-import AdminListings from './pages/admin/AllListings';
 import AdminAllUsers from './pages/admin/AllUsers';
 import AdminAllDisputes from './pages/admin/AllDisputes';
 import AdminPlatformAnalytics from './pages/admin/PlatformAnalytics';
 import AdminMessages from './pages/admin/Messages';
-import AdminReviews from './pages/admin/Reviews';
+import AdminResourcePage from './pages/admin/AdminResourcePage';
+import VerificationQueue from './pages/admin/VerificationQueue';
 import NotificationsPage from './pages/notifications/NotificationsPage';
+import { useAuthStore } from './store/authStore';
 
 // Nav configs
 const tenantNavSections = [
@@ -146,6 +148,11 @@ export default function App() {
 
 function AppContent() {
   const { isDark } = useTheme();
+  const initializeAuth = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    void initializeAuth();
+  }, [initializeAuth]);
 
   return (
     <BrowserRouter>
@@ -188,7 +195,7 @@ function AppContent() {
           <Route path="rental-requests" element={<TenantRentalRequests />} />
           <Route path="bookings" element={<TenantBookings />} />
           <Route path="messages" element={<ChatPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="notifications" element={<AdminResourcePage />} />
           <Route path="post" element={<PostProperty />} />
           <Route path="detector" element={<AIDetector />} />
           <Route path="estimator" element={<RentEstimator />} />
@@ -234,9 +241,9 @@ function AppContent() {
           </ProtectedRoute>
         }>
           <Route index element={<AdminDashboard />} />
-          <Route path="listings" element={<AdminListings />} />
-          <Route path="approvals" element={<AdminListings />} />
-          <Route path="reported" element={<AdminListings />} />
+          <Route path="listings" element={<AdminResourcePage />} />
+          <Route path="approvals" element={<VerificationQueue />} />
+          <Route path="reported" element={<AdminResourcePage />} />
           <Route path="users" element={<AdminAllUsers />} />
           <Route path="users/tenants" element={<AdminAllUsers />} />
           <Route path="users/landlords" element={<AdminAllUsers />} />
@@ -244,7 +251,18 @@ function AppContent() {
           <Route path="users/banned" element={<AdminAllUsers />} />
           <Route path="messages" element={<AdminMessages />} />
           <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="reviews" element={<AdminResourcePage />} />
+          <Route path="properties" element={<AdminResourcePage />} />
+          <Route path="hosts" element={<AdminResourcePage />} />
+          <Route path="hotels" element={<AdminResourcePage />} />
+          <Route path="hostels" element={<AdminResourcePage />} />
+          <Route path="bookings" element={<AdminResourcePage />} />
+          <Route path="rental-requests" element={<AdminResourcePage />} />
+          <Route path="agreements" element={<AdminResourcePage />} />
+          <Route path="payments" element={<AdminResourcePage />} />
+          <Route path="reports" element={<AdminResourcePage />} />
+          <Route path="verification" element={<VerificationQueue />} />
+          <Route path="audit" element={<AdminResourcePage />} />
           <Route path="disputes" element={<AdminAllDisputes />} />
           <Route path="disputes/open" element={<AdminAllDisputes />} />
           <Route path="disputes/resolved" element={<AdminAllDisputes />} />

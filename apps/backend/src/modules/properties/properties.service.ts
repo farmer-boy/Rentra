@@ -14,6 +14,7 @@ import {
   PropertyStatus,
   Role,
   RentalDuration,
+  VerificationStatus,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { UploadService, ImageUploadFile } from '../listings/upload.service';
@@ -28,6 +29,7 @@ import {
 } from './dto/property-search.dto';
 import { PropertyStatsQueryDto } from './dto/property-stats-query.dto';
 import { NearbyPropertiesDto } from './dto/nearby-properties.dto';
+import { AuditService } from '../audit/audit.service';
 
 const EARTH_RADIUS_KM = 6371.0088;
 
@@ -37,6 +39,7 @@ export class PropertiesService {
     private readonly prisma: PrismaService,
     private readonly locationsService: LocationsService,
     private readonly uploadService: UploadService,
+    private readonly auditService: AuditService,
   ) {}
 
   async create(ownerId: string, dto: CreatePropertyDto) {
@@ -51,7 +54,7 @@ export class PropertiesService {
     const status = PropertyStatus.PENDING_VERIFICATION;
     const listingStatus = this.toListingStatus(status);
 
-    return this.prisma.property.create({
+    const property = await this.prisma.property.create({
       data: {
         ownerId,
         title: dto.title.trim(),
@@ -105,6 +108,7 @@ export class PropertiesService {
       },
       include: this.propertyInclude(),
     });
+    return this.withRentraVerified(property);
   }
 
   async findAll(query: PropertyQueryDto, requesterId?: string) {
@@ -148,7 +152,7 @@ export class PropertiesService {
     ]);
 
     return {
-      items,
+      items: items.map((property) => this.withRentraVerified(property)),
       pagination: {
         page: query.page,
         limit: query.limit,
@@ -287,7 +291,7 @@ export class PropertiesService {
 
     return {
       items: properties.map((property) => ({
-        ...property,
+        ...this.withRentraVerified(property),
         ...(distanceById.has(property.id) && {
           distanceKm: distanceById.get(property.id),
         }),
@@ -336,6 +340,7 @@ export class PropertiesService {
         price: property.price,
         type: property.propertyType,
         distanceKm: property.distanceKm,
+        isRentraVerified: property.isRentraVerified,
       })),
     };
   }
@@ -354,7 +359,7 @@ export class PropertiesService {
       throw new NotFoundException('Property not found');
     }
 
-    return property;
+    return this.withRentraVerified(property);
   }
 
   async recordView(
@@ -567,6 +572,19 @@ export class PropertiesService {
           ? PropertyStatus.ACTIVE
           : current.status;
 
+    const materialDetailsChanged = [
+      dto.title,
+      dto.description,
+      dto.type,
+      dto.address,
+      dto.country,
+      dto.city,
+      dto.area,
+      dto.latitude,
+      dto.longitude,
+      dto.price,
+      dto.areaSizeSqft,
+    ].some((value) => value !== undefined);
     const propertyData: Prisma.PropertyUpdateInput = {
       ...(dto.title !== undefined && { title: dto.title.trim() }),
       ...(dto.description !== undefined && { description: dto.description }),
@@ -592,10 +610,29 @@ export class PropertiesService {
       ...(locationId && { location: { connect: { id: locationId } } }),
       ...(dto.availability !== undefined && { availability: dto.availability }),
       ...(nextStatus !== current.status && { status: nextStatus }),
+      ...(materialDetailsChanged &&
+        current.verificationStatus === VerificationStatus.APPROVED && {
+          verificationStatus: VerificationStatus.UNVERIFIED,
+        }),
     };
 
     await this.prisma.$transaction(async (transaction) => {
       await transaction.property.update({ where: { id }, data: propertyData });
+      if (
+        materialDetailsChanged &&
+        current.verificationStatus === VerificationStatus.APPROVED
+      ) {
+        await this.auditService.record(transaction, {
+          actorId: requesterId,
+          actorRole: 'USER',
+          entityType: 'PROPERTY',
+          entityId: id,
+          action: 'PROPERTY_VERIFICATION_INVALIDATED_BY_UPDATE',
+          previousStatus: VerificationStatus.APPROVED,
+          newStatus: VerificationStatus.UNVERIFIED,
+          reason: 'Material property details changed',
+        });
+      }
       const listingId = current.listings[0]?.id;
       if (listingId) {
         await transaction.listing.update({
@@ -694,10 +731,13 @@ export class PropertiesService {
       }),
     ]);
 
-    return this.prisma.property.findUnique({
+    const updatedProperty = await this.prisma.property.findUnique({
       where: { id },
       include: this.propertyInclude(),
     });
+    return updatedProperty
+      ? this.withRentraVerified(updatedProperty)
+      : updatedProperty;
   }
 
   async assignManager(propertyId: string, ownerId: string, managerId: string) {
@@ -984,6 +1024,16 @@ export class PropertiesService {
         },
       },
     } satisfies Prisma.PropertyInclude;
+  }
+
+  private withRentraVerified<
+    T extends { verificationStatus: VerificationStatus },
+  >(property: T) {
+    return {
+      ...property,
+      isRentraVerified:
+        property.verificationStatus === VerificationStatus.APPROVED,
+    };
   }
 
   private searchOrderBy(

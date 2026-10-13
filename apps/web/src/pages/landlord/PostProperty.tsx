@@ -3,7 +3,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
 
 const PROPERTY_TYPES = ['House', 'Apartment', 'Flat', 'Portion', 'Room', 'Hostel', 'Hotel', 'Guest House', 'Studio', 'Farmhouse', 'PG / Paying Guest', 'Shared Room'];
 const IMAGE_CATEGORIES = ['Living Room', 'Bedroom', 'Kitchen', 'Bathroom', 'Balcony', 'Building Exterior', 'Parking'];
@@ -176,7 +176,7 @@ export default function LandlordPostProperty() {
     if (!canProceed()) return;
     setSubmitting(true);
     try {
-      const response = await api.post('/listings', {
+      const listing = await listingsAPI.create<{ id: string }>({
         title: formData.title,
         description: formData.description,
         rules: formData.rules,
@@ -201,13 +201,13 @@ export default function LandlordPostProperty() {
         imageUrl: formData.imageUrl || undefined,
         amenities: formData.amenities.split(',').map((item) => item.trim()).filter(Boolean),
       });
-      const listingId = response.data.data.id;
+      const listingId = listing.id;
       for (const [index, photo] of formData.photos.entries()) {
         const upload = new FormData();
         upload.append('file', photo);
         upload.append('altText', IMAGE_CATEGORIES[index] ?? `Property image ${index + 1}`);
         upload.append('sortOrder', String(index));
-        await api.post(`/listings/${listingId}/images/upload`, upload, { headers: { 'Content-Type': 'multipart/form-data' } });
+        await listingsAPI.uploadImage(listingId, upload);
       }
       toast.success('Property submitted for admin verification');
       navigate('/landlord');

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   BookingStatus,
+  HostelBedStatus,
   NotificationType,
   Prisma,
   PropertyStatus,
@@ -79,18 +80,25 @@ export class BookingsService {
 
       const hostelBedId = dto.hostelBedId;
       let hostelRoomId: string | undefined;
+      let hostelBedPrice: number | undefined;
       if (hostelBedId) {
         const bed = await transaction.hostelBed.findFirst({
           where: { id: hostelBedId, room: { listingId: listing.id } },
-          select: { id: true, isAvailable: true, hostelRoomId: true },
+          select: {
+            id: true,
+            status: true,
+            hostelRoomId: true,
+            room: { select: { price: true } },
+          },
         });
         if (!bed)
           throw new BadRequestException(
             'Hostel bed does not belong to this property',
           );
-        if (!bed.isAvailable)
+        if (bed.status !== HostelBedStatus.AVAILABLE)
           throw new BadRequestException('Hostel bed is not available');
         hostelRoomId = bed.hostelRoomId;
+        hostelBedPrice = bed.room.price;
         if (dto.guests !== 1)
           throw new BadRequestException(
             'A hostel bed booking must be for exactly one guest',
@@ -143,7 +151,19 @@ export class BookingsService {
         for (const candidate of roomCandidates) {
           const occupied = await transaction.booking.findFirst({
             where: {
-              hotelRoomId: candidate.id,
+              OR: [
+                { hotelRoomId: candidate.id },
+                {
+                  propertyId,
+                  hotelRoomId: null,
+                  hostelBedId: null,
+                },
+                {
+                  listingId: listing.id,
+                  hotelRoomId: null,
+                  hostelBedId: null,
+                },
+              ],
               status: { in: ACTIVE_BOOKING_STATUSES },
               startDate: { lt: checkOut },
               endDate: { gt: checkIn },
@@ -199,8 +219,13 @@ export class BookingsService {
                     hotelRoomId: null,
                     hostelBedId: null,
                   },
+                  {
+                    listingId: listing.id,
+                    hotelRoomId: null,
+                    hostelBedId: null,
+                  },
                 ]
-              : [{ propertyId }]),
+              : [{ propertyId }, { listingId: listing.id }]),
           ],
           status: { in: ACTIVE_BOOKING_STATUSES },
           startDate: { lt: checkOut },
@@ -215,9 +240,12 @@ export class BookingsService {
 
       const nights = (checkOut.getTime() - checkIn.getTime()) / 86_400_000;
       const nightlyPrice =
-        room?.roomType?.price ?? room?.basePrice ?? property.price;
+        room?.roomType?.price ??
+        room?.basePrice ??
+        hostelBedPrice ??
+        property.price;
       const totalAmount = nightlyPrice * nights;
-      return transaction.booking.create({
+      const createdBooking = await transaction.booking.create({
         data: {
           tenantId,
           propertyId,
@@ -232,6 +260,31 @@ export class BookingsService {
         },
         include: this.bookingInclude(),
       });
+      if (hostelBedId && hostelRoomId) {
+        await transaction.hostelBed.update({
+          where: { id: hostelBedId },
+          data: { status: HostelBedStatus.RESERVED },
+        });
+        const availableBeds = await transaction.hostelBed.count({
+          where: {
+            hostelRoomId,
+            status: HostelBedStatus.AVAILABLE,
+          },
+        });
+        await transaction.hostelRoom.update({
+          where: { id: hostelRoomId },
+          data: { availableBeds },
+        });
+        const inventory = await transaction.hostelRoom.aggregate({
+          where: { listingId: listing.id },
+          _sum: { availableBeds: true },
+        });
+        await transaction.hostelDetails.updateMany({
+          where: { listingId: listing.id },
+          data: { availableBeds: inventory._sum.availableBeds ?? 0 },
+        });
+      }
+      return createdBooking;
     });
 
     const bookingRecord: unknown = booking;
@@ -313,11 +366,57 @@ export class BookingsService {
     if (!ACTIVE_BOOKING_STATUSES.includes(booking.status)) {
       throw new BadRequestException('This booking cannot be cancelled');
     }
-    const updated: unknown = await this.prisma.booking.update({
-      where: { id },
-      data: { status: BookingStatus.CANCELLED, cancelledAt: new Date() },
-      include: this.bookingInclude(),
-    });
+    const updated: unknown = await this.prisma.$transaction(
+      async (transaction) => {
+        await transaction.$queryRaw(Prisma.sql`
+        SELECT pg_advisory_xact_lock(hashtext(${booking.propertyId ?? booking.listingId ?? id}))
+      `);
+        const cancelled = await transaction.booking.update({
+          where: { id },
+          data: { status: BookingStatus.CANCELLED, cancelledAt: new Date() },
+          include: this.bookingInclude(),
+        });
+        if (booking.hostelBedId) {
+          const released = await transaction.hostelBed.updateMany({
+            where: {
+              id: booking.hostelBedId,
+              status: HostelBedStatus.RESERVED,
+            },
+            data: { status: HostelBedStatus.AVAILABLE },
+          });
+          if (released.count) {
+            const bed = await transaction.hostelBed.findUnique({
+              where: { id: booking.hostelBedId },
+              select: {
+                hostelRoomId: true,
+                room: { select: { listingId: true } },
+              },
+            });
+            if (bed) {
+              const availableBeds = await transaction.hostelBed.count({
+                where: {
+                  hostelRoomId: bed.hostelRoomId,
+                  status: HostelBedStatus.AVAILABLE,
+                },
+              });
+              await transaction.hostelRoom.update({
+                where: { id: bed.hostelRoomId },
+                data: { availableBeds },
+              });
+              const inventory = await transaction.hostelRoom.aggregate({
+                where: { listingId: bed.room.listingId },
+                _sum: { availableBeds: true },
+              });
+              await transaction.hostelDetails.updateMany({
+                where: { listingId: bed.room.listingId },
+                data: { availableBeds: inventory._sum.availableBeds ?? 0 },
+              });
+            }
+          }
+        }
+        return cancelled;
+      },
+    );
     const recipientId =
       bookingAccess.tenantId === userId ? ownerId : bookingAccess.tenantId;
     if (recipientId) {
@@ -392,7 +491,15 @@ export class BookingsService {
         select: {
           id: true,
           bedNumber: true,
-          room: { select: { roomNumber: true } },
+          status: true,
+          room: {
+            select: {
+              roomNumber: true,
+              roomType: true,
+              price: true,
+              genderPolicy: true,
+            },
+          },
         },
       },
     } satisfies Prisma.BookingInclude;

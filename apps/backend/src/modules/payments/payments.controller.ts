@@ -1,18 +1,23 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Patch,
+  Headers,
   Param,
-  Body,
+  ParseEnumPipe,
+  Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { PaymentsService } from './payments.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import type { RawBodyRequest } from '@nestjs/common';
+import type { Request } from 'express';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { PaymentProviderType } from '@prisma/client';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
-import { PaymentMethod } from '@prisma/client';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { InitiatePaymentDto } from './dto/initiate-payment.dto';
+import { PaymentsService } from './payments.service';
 
 @ApiTags('payments')
 @Controller('payments')
@@ -22,77 +27,115 @@ export class PaymentsController {
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async createPayment(
+  @ApiOperation({
+    summary:
+      'Initiate a booking or agreement payment; amount and payer are resolved server-side',
+  })
+  initiate(
     @CurrentUser() user: JwtPayload,
-    @Body()
-    body: { amount: number; method: PaymentMethod; agreementId: string },
+    @Body() dto: InitiatePaymentDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
-    const payment = await this.paymentsService.create(
-      user.sub,
-      body.amount,
-      body.method,
-      body.agreementId,
-    );
-    return {
-      message: 'Payment created successfully',
-      data: payment,
-    };
+    return this.paymentsService.initiate(user.sub, dto, idempotencyKey?.trim());
   }
 
-  @Get()
+  @Get('my')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getAllPayments() {
-    const payments = await this.paymentsService.findAll();
-    return {
-      message: 'Tamam payments',
-      data: payments,
-      count: payments.length,
-    };
-  }
-
-  @Get(':id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getPaymentById(@Param('id') id: string) {
-    const payment = await this.paymentsService.findById(id);
-    return {
-      message: 'Payment details',
-      data: payment,
-    };
-  }
-
-  @Patch(':id/complete')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async completePayment(@Param('id') id: string) {
-    const payment = await this.paymentsService.complete(id);
-    return {
-      message: 'Payment completed successfully',
-      data: payment,
-    };
-  }
-
-  @Patch(':id/fail')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async failPayment(@Param('id') id: string) {
-    const payment = await this.paymentsService.fail(id);
-    return {
-      message: 'Payment failed',
-      data: payment,
-    };
+  @ApiOperation({ summary: 'List payments visible to the current user' })
+  async my(@CurrentUser() user: JwtPayload) {
+    const payments = await this.paymentsService.getMyPayments(user.sub);
+    return { message: 'Your payment records', data: payments };
   }
 
   @Get('tenant/my-payments')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  async getMyPayments(@CurrentUser() user: JwtPayload) {
-    const payments = await this.paymentsService.getByTenant(user.sub);
+  async myLegacy(@CurrentUser() user: JwtPayload) {
+    const payments = await this.paymentsService.getMyPayments(user.sub);
     return {
-      message: 'Aapki payments',
+      message: 'Your payment records',
       data: payments,
       count: payments.length,
     };
+  }
+
+  @Get('agreement/:agreementId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async byAgreement(
+    @Param('agreementId') agreementId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const payments = await this.paymentsService.getAgreementPayments(
+      agreementId,
+      user.sub,
+    );
+    return { message: 'Agreement payments', data: payments };
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async list(@CurrentUser() user: JwtPayload) {
+    const payments = await this.paymentsService.getMyPayments(user.sub);
+    return {
+      message: 'Your payment records',
+      data: payments,
+      count: payments.length,
+    };
+  }
+
+  @Post('providers/:provider/webhook')
+  @ApiOperation({
+    summary:
+      'Provider callback; the provider adapter must verify its official signature before processing',
+  })
+  webhook(
+    @Param('provider', new ParseEnumPipe(PaymentProviderType))
+    provider: PaymentProviderType,
+    @Req() request: RawBodyRequest<Request>,
+    @Body() parsedPayload: unknown,
+    @Headers() headers: Record<string, string | string[] | undefined>,
+  ) {
+    return this.paymentsService.handleWebhook(
+      provider,
+      request.rawBody ?? parsedPayload,
+      headers,
+    );
+  }
+
+  @Post(':id/verify')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary:
+      'Verify transaction status server-to-server with its configured provider',
+  })
+  verify(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.paymentsService.verify(id, user.sub);
+  }
+
+  @Post(':id/refund')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request a provider-verified full refund' })
+  refund(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.paymentsService.refund(id, user.sub);
+  }
+
+  @Get(':id/receipt')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get a receipt for a verified successful payment' })
+  receipt(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.paymentsService.getReceipt(id, user.sub);
+  }
+
+  @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  getById(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.paymentsService.getById(id, user.sub);
   }
 }

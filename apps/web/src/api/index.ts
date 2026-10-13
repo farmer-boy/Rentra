@@ -6,9 +6,24 @@ export { listingsAPI } from './listings';
 export { agreementsAPI } from './agreements';
 export { paymentsAPI } from './payments';
 export { disputesAPI } from './disputes';
+export type { CreateDisputeInput } from './disputes';
 export { reviewsAPI } from './reviews';
 export { usersAPI } from './users';
 export { adminAPI } from './admin';
+export { propertiesAPI } from './properties';
+export type { PropertyRecord, CreatePropertyInput } from './properties';
+export type { CreateListingInput } from './listings';
+export { searchAPI } from './search';
+export { favoritesAPI } from './favorites';
+export { savedSearchesAPI } from './savedSearches';
+export { messagesAPI } from './messages';
+export { notificationsAPI } from './notifications';
+export { rentalRequestsAPI } from './rentalRequests';
+export { bookingsAPI } from './bookings';
+export { availabilityAPI } from './availability';
+export { reportsAPI } from './reports';
+export { verificationAPI } from './verification';
+export { recommendationsAPI } from './recommendations';
 
 // Export types
 export type {
@@ -20,7 +35,6 @@ export type {
   Listing,
   CreateListingRequest,
   Agreement,
-  CreateAgreementRequest,
   Payment,
   CreatePaymentRequest,
   Dispute,

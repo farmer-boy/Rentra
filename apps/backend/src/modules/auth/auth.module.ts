@@ -7,10 +7,12 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { EmailService } from './email.service';
 import { UsersModule } from '../users/users.module';
+import { TrustScoreModule } from '../trust-score/trust-score.module';
 
 @Module({
   imports: [
     UsersModule,
+    TrustScoreModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],

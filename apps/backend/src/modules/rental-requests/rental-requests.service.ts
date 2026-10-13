@@ -13,6 +13,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { AcceptRentalRequestDto } from './dto/accept-rental-request.dto';
 import { CreateRentalRequestDto } from './dto/create-rental-request.dto';
 
 @Injectable()
@@ -103,7 +104,11 @@ export class RentalRequestsService {
     });
   }
 
-  async accept(requestId: string, landlordId: string) {
+  async accept(
+    requestId: string,
+    landlordId: string,
+    dto: AcceptRentalRequestDto = {},
+  ) {
     const request = await this.prisma.rentalRequest.findUnique({
       where: { id: requestId },
       include: {
@@ -125,14 +130,64 @@ export class RentalRequestsService {
         'Property has no linked listing for an agreement',
       );
 
-    const startDate = request.moveInDate ?? new Date();
-    const endDate = request.durationMonths
-      ? new Date(
-          new Date(startDate).setMonth(
-            startDate.getMonth() + request.durationMonths,
-          ),
-        )
-      : null;
+    const parseAgreementDate = (value: string, field: string) => {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      if (!match) {
+        throw new BadRequestException(`${field} must use YYYY-MM-DD format`);
+      }
+      const date = new Date(`${value}T00:00:00.000Z`);
+      if (
+        Number.isNaN(date.getTime()) ||
+        date.toISOString().slice(0, 10) !== value
+      ) {
+        throw new BadRequestException(`${field} must be a valid date`);
+      }
+      return date;
+    };
+    const startDate = dto.startDate
+      ? parseAgreementDate(dto.startDate, 'startDate')
+      : (request.moveInDate ?? new Date());
+    if (Number.isNaN(startDate.getTime())) {
+      throw new BadRequestException('Agreement startDate must be a valid date');
+    }
+    const endDate = dto.endDate
+      ? parseAgreementDate(dto.endDate, 'endDate')
+      : request.durationMonths
+        ? new Date(startDate)
+        : null;
+    if (endDate && !dto.endDate && request.durationMonths) {
+      const originalDay = endDate.getUTCDate();
+      endDate.setUTCDate(1);
+      endDate.setUTCMonth(endDate.getUTCMonth() + request.durationMonths);
+      const lastDayOfTargetMonth = new Date(
+        Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth() + 1, 0),
+      ).getUTCDate();
+      endDate.setUTCDate(Math.min(originalDay, lastDayOfTargetMonth));
+    }
+    if (endDate && endDate <= startDate) {
+      throw new BadRequestException(
+        'Agreement endDate must be after startDate',
+      );
+    }
+    const monthlyRent =
+      dto.monthlyRent ?? request.property?.price ?? listing.rent;
+    const securityDeposit =
+      dto.securityDeposit ??
+      request.property?.securityDeposit ??
+      listing.deposit ??
+      0;
+    const paymentDueDay = dto.paymentDueDay ?? 1;
+    if (
+      !Number.isSafeInteger(monthlyRent) ||
+      monthlyRent < 0 ||
+      !Number.isSafeInteger(securityDeposit) ||
+      securityDeposit < 0 ||
+      !Number.isInteger(paymentDueDay) ||
+      paymentDueDay < 1 ||
+      paymentDueDay > 28
+    ) {
+      throw new BadRequestException('Agreement payment terms are invalid');
+    }
 
     const result = await this.prisma.$transaction(async (transaction) => {
       await transaction.$queryRaw(
@@ -157,10 +212,12 @@ export class RentalRequestsService {
           listingId: listing.id,
           propertyId: request.propertyId,
           rentalRequestId: request.id,
-          rent: request.property?.price ?? listing.rent,
-          deposit: request.property?.securityDeposit ?? listing.deposit ?? 0,
+          monthlyRent,
+          securityDeposit,
           startDate,
           endDate,
+          paymentDueDay,
+          rules: dto.rules ?? listing.rules,
           status: AgreementStatus.ACTIVE,
         },
       });

@@ -4,7 +4,7 @@ export interface User {
   email: string;
   fullName: string;
   phone: string;
-  cnic: string;
+  cnic?: string;
   password?: string;
   role?: 'TENANT' | 'LANDLORD' | 'ADMIN';
   roles?: Array<'TENANT' | 'LANDLORD' | 'ADMIN'>;
@@ -68,98 +68,119 @@ export interface CreateListingRequest {
   title: string;
   description: string;
   address: string;
-  price: number;
+  city: string;
+  country: string;
+  province: string;
+  rent: number;
+  area: string;
+  sqft: number;
+  deposit: number;
+  propertyType: string;
   bedrooms: number;
   bathrooms: number;
-  squareFeet: number;
-  images: string[];
-  amenities: string[];
+  rules?: string;
+  blockSector?: string;
+  rentalDuration?: string;
+  availableFrom?: string;
+  latitude?: number;
+  longitude?: number;
+  imageUrl?: string;
+  imageUrls?: string[];
+  amenities?: string[];
 }
 
 // Agreement types
 export interface Agreement {
   id: string;
-  title: string;
-  content: string;
   listingId: string;
   tenantId: string;
   landlordId: string;
-  status: 'PENDING' | 'SIGNED' | 'TERMINATED';
-  signedAt: string | null;
+  monthlyRent: number;
+  securityDeposit: number | null;
+  startDate: string;
+  endDate: string | null;
+  status: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface CreateAgreementRequest {
-  title: string;
-  content: string;
-  listingId: string;
-  tenantId: string;
 }
 
 // Payment types
 export interface Payment {
   id: string;
+  userId: string;
+  bookingId: string | null;
+  agreementId: string | null;
   amount: number;
-  status: 'PENDING' | 'COMPLETED' | 'FAILED';
-  type: 'RENT' | 'DEPOSIT' | 'OTHER';
-  agreementId: string;
-  paidBy: string;
-  paidTo: string;
-  dueDate: string;
+  currency: string;
+  provider: 'JAZZCASH' | 'EASYPAISA' | 'CARD' | 'BANK_TRANSFER' | 'OTHER' | 'LEGACY';
+  status: 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
+  transactionId: string | null;
+  paidAt: string | null;
+  billingMonth: string | null;
+  dueAt: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreatePaymentRequest {
-  amount: number;
-  type: 'RENT' | 'DEPOSIT' | 'OTHER';
-  agreementId: string;
-  dueDate: string;
+  bookingId?: string;
+  agreementId?: string;
+  billingMonth?: string;
+  provider: 'JAZZCASH' | 'EASYPAISA' | 'CARD' | 'BANK_TRANSFER' | 'OTHER';
 }
 
 // Dispute types
 export interface Dispute {
   id: string;
-  title: string;
+  type: string;
+  reason: string;
   description: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
-  agreementId: string;
-  initiatedBy: string;
+  status: string;
+  bookingId?: string | null;
+  paymentId?: string | null;
+  agreementId?: string | null;
+  createdById: string;
   updatedAt: string;
   createdAt: string;
 }
 
 export interface CreateDisputeRequest {
-  title: string;
+  type: string;
+  reason: string;
   description: string;
-  agreementId: string;
+  bookingId?: string;
+  paymentId?: string;
+  agreementId?: string;
 }
 
 // Review types
 export interface Review {
   id: string;
+  userId: string;
+  listingId: string;
+  propertyId?: string | null;
+  bookingId?: string | null;
+  agreementId?: string | null;
+  reviewType: 'PROPERTY' | 'LANDLORD';
   rating: number;
-  comment: string;
-  authorId: string;
-  targetUserId: string;
-  agreementId: string;
+  comment: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateReviewRequest {
+  reviewType: 'PROPERTY' | 'LANDLORD';
+  listingId: string;
+  bookingId?: string;
+  agreementId?: string;
   rating: number;
-  comment: string;
-  targetUserId: string;
-  agreementId: string;
+  comment?: string;
 }
 
 // API Response types
 export interface ApiResponse<T> {
-  success: boolean;
   data: T;
-  message: string;
+  message?: string;
+  count?: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -167,5 +188,5 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
-  pages: number;
+  totalPages: number;
 }

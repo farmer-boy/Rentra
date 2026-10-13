@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, Bath, BedDouble, Check, Heart, MapPin, MessageCircle, Phone, Ruler, ShieldCheck, Star } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
+import { favoritesAPI } from '../../api/favorites';
+import { reviewsAPI } from '../../api/reviews';
+import { messagesAPI } from '../../api/messages';
 
 type Listing = {
   id: string; title: string; description: string; city: string; area: string; address: string; type: string; rent: number; deposit: number;
@@ -30,13 +33,13 @@ export default function ListingDetails() {
     const sessionKey = 'rentra-view-session';
     let sessionId = sessionStorage.getItem(sessionKey);
     if (!sessionId) { sessionId = crypto.randomUUID(); sessionStorage.setItem(sessionKey, sessionId); }
-    api.get(`/listings/${id}`).then((response) => { if (active) setListing(response.data.data); })
+    listingsAPI.getOne<Listing>(id).then((record) => { if (active) setListing(record); })
       .catch((requestError) => { if (active) setError(requestError.response?.data?.message || 'Property could not be loaded.'); })
       .finally(() => { if (active) setLoading(false); });
-    api.get(`/favorites/${id}`).then((response) => { if (active) setSaved(Boolean(response.data.saved)); }).catch(() => undefined);
-    api.post(`/listings/${id}/view`, { sessionId }).catch(() => undefined);
-    api.get(`/reviews/listing/${id}`).then((response) => {
-      if (active) setRating(response.data.count ? { average: Number(response.data.averageRating), count: response.data.count } : { average: 0, count: 0 });
+    favoritesAPI.has(id).then((response) => { if (active) setSaved(Boolean(response.saved)); }).catch(() => undefined);
+    listingsAPI.recordView(id, sessionId).catch((requestError) => console.warn('Could not record property view.', requestError));
+    reviewsAPI.getListingSummary(id).then((response) => {
+      if (active) setRating(response.count ? { average: Number(response.averageRating), count: response.count } : { average: 0, count: 0 });
     }).catch(() => { if (active) setRatingError('Rating information is unavailable.'); });
     return () => { active = false; };
   }, [id]);
@@ -49,13 +52,13 @@ export default function ListingDetails() {
   const location = [listing.area, listing.city].filter(Boolean).join(', ');
   const toggleSaved = async () => {
     try {
-      if (saved) await api.delete(`/favorites/${listing.id}`);
-      else await api.post(`/favorites/${listing.id}`);
+      if (saved) await favoritesAPI.remove(listing.id);
+      else await favoritesAPI.add(listing.id);
       setSaved(!saved); toast.success(saved ? 'Removed from saved properties' : 'Property saved');
     } catch { toast.error('Please sign in to save properties.'); }
   };
   const startChat = async () => {
-    try { await api.post(`/messages/conversation/${listing.landlord.id}`, {}, { params: { listingId: listing.id } }); navigate('/tenant/messages'); }
+    try { await messagesAPI.getOrCreateConversation(listing.landlord.id, listing.id); navigate('/tenant/messages'); }
     catch { toast.error('Please sign in to start a chat.'); }
   };
   return <div className="max-w-5xl space-y-6 pb-8">

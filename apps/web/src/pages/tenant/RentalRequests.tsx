@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ClipboardList, MapPin } from 'lucide-react';
-import api from '../../api/client';
+import { rentalRequestsAPI } from '../../api/rentalRequests';
 import Card from '../../components/ui/Card';
 
 interface RentalRequest {
@@ -29,9 +29,9 @@ export default function TenantRentalRequests() {
     setLoading(true);
     setError('');
     try {
-      const response = await api.get<RentalRequest[]>('/rental-requests/my');
-      if (!Array.isArray(response.data)) throw new Error('Invalid rental-request response.');
-      setRequests(response.data);
+      const results = await rentalRequestsAPI.mine<RentalRequest>();
+      if (!Array.isArray(results)) throw new Error('Invalid rental-request response.');
+      setRequests(results);
     } catch (cause) {
       setError(getErrorMessage(cause));
     } finally {
@@ -45,8 +45,8 @@ export default function TenantRentalRequests() {
     setCancellingId(id);
     setActionError('');
     try {
-      const response = await api.patch<RentalRequest>(`/rental-requests/${id}/cancel`);
-      setRequests((current) => current.map((request) => request.id === id ? response.data : request));
+      const request = await rentalRequestsAPI.cancel<RentalRequest>(id);
+      setRequests((current) => current.map((item) => item.id === id ? request : item));
     } catch (cause) {
       setActionError(getErrorMessage(cause));
     } finally {

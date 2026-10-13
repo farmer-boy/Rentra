@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, CheckCircle, Clock3, Home, MessageCircle, Plus, Star, Wallet } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 
@@ -16,10 +16,10 @@ export default function LandlordDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    Promise.all([api.get('/listings/landlord/my-listings'), api.get('/listings/landlord/analytics')])
-      .then(([listingResponse, analyticsResponse]) => {
-        setListings(listingResponse.data.data ?? []);
-        setAnalytics(analyticsResponse.data);
+    Promise.all([listingsAPI.getMyListings<Listing>(), listingsAPI.getLandlordAnalytics()])
+      .then(([receivedListings, receivedAnalytics]) => {
+        setListings(receivedListings);
+        setAnalytics(receivedAnalytics as Analytics);
       })
       .catch((requestError) => setError(requestError.response?.data?.message || 'Dashboard data could not be loaded.'))
       .finally(() => setLoading(false));

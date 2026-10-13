@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 import { LocationsModule } from '../locations/locations.module';
+import { AuditModule } from '../audit/audit.module';
 import { ListingsModule } from '../listings/listings.module';
 import { PropertiesController } from './properties.controller';
 import { AmenitiesController } from './amenities.controller';
@@ -11,9 +12,14 @@ import { RoomTypesService } from './room-types.service';
 import { RoomTypesController } from './room-types.controller';
 
 @Module({
-  imports: [PrismaModule, LocationsModule, ListingsModule],
+  imports: [PrismaModule, LocationsModule, ListingsModule, AuditModule],
   controllers: [PropertiesController, AmenitiesController, RoomTypesController],
-  providers: [PropertiesService, OptionalJwtAuthGuard, AvailabilityService, RoomTypesService],
+  providers: [
+    PropertiesService,
+    OptionalJwtAuthGuard,
+    AvailabilityService,
+    RoomTypesService,
+  ],
   exports: [PropertiesService, AvailabilityService],
 })
 export class PropertiesModule {}

@@ -1,25 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
-  private readonly transporter: nodemailer.Transporter;
-
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER || 'subssems336@gmail.com',
-        pass: process.env.GMAIL_PASSWORD || '',
-      },
-    });
-  }
-
   async sendVerificationEmail(email: string, token: string) {
-    const verificationUrl = `http://localhost:3000/api/auth/verify-email?token=${token}`;
+    const verificationUrl = `${this.apiBaseUrl()}/auth/verify-email?token=${encodeURIComponent(token)}`;
 
-    await this.transporter.sendMail({
-      from: process.env.GMAIL_USER || 'subssems336@gmail.com',
+    await this.transporter().sendMail({
+      from: this.sender(),
       to: email,
       subject: 'Verify your Rentra account',
       html: `
@@ -31,10 +19,9 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, token: string) {
-    const resetUrl = `http://localhost:3000/api/auth/reset-password?token=${token}`;
+    const resetUrl = `${this.apiBaseUrl()}/auth/reset-password?token=${encodeURIComponent(token)}`;
 
-    await this.transporter.sendMail({
-      from: process.env.GMAIL_USER || 'subssems336@gmail.com',
+    await this.transporter().sendMail({
       to: email,
       subject: 'Reset your Rentra password',
       html: `
@@ -43,5 +30,43 @@ export class EmailService {
         <p><a href="${resetUrl}">Reset Password</a></p>
       `,
     });
+  }
+
+  private transporter() {
+    const user = process.env.GMAIL_USER;
+    const password = process.env.GMAIL_PASSWORD;
+    if (!user || !password) {
+      throw new ServiceUnavailableException(
+        'Email verification delivery is not configured',
+      );
+    }
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user, pass: password },
+    });
+  }
+
+  private sender() {
+    const user = process.env.GMAIL_USER;
+    if (!user) {
+      throw new ServiceUnavailableException(
+        'Email verification delivery is not configured',
+      );
+    }
+    return user;
+  }
+
+  private apiBaseUrl() {
+    const baseUrl =
+      process.env.API_PUBLIC_URL ??
+      (process.env.NODE_ENV === 'production'
+        ? undefined
+        : 'http://localhost:3000/api');
+    if (!baseUrl || !/^https?:\/\//i.test(baseUrl)) {
+      throw new ServiceUnavailableException(
+        'API_PUBLIC_URL must be configured for verification emails',
+      );
+    }
+    return baseUrl.replace(/\/+$/, '');
   }
 }

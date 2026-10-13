@@ -26,6 +26,7 @@ export class AvailabilityRangeDto {
   endDate!: string;
 
   @ApiPropertyOptional({
+    name: 'hotelRoomId',
     description:
       'Optionally scope availability to one hotel room, hostel room, or hostel bed.',
   })
@@ -35,14 +36,14 @@ export class AvailabilityRangeDto {
   @MaxLength(128)
   hotelRoomId?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ name: 'hostelRoomId' })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   @MaxLength(128)
   hostelRoomId?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ name: 'hostelBedId' })
   @IsOptional()
   @IsString()
   @IsNotEmpty()

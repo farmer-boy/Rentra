@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import { Send, Search, X } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { useChat } from "../../hooks/useChat";
-import api from "../../api/client";
 
 export default function ChatPage() {
   const token = useAuthStore((state) => state.token) || "";
@@ -20,7 +19,7 @@ export default function ChatPage() {
     fetchNotifications,
     fetchUnreadCount,
     loading: chatLoading,
-  } = useChat(token);
+  } = useChat();
   const { user: authUser } = useAuthStore();
 
   const [messageInput, setMessageInput] = useState("");
@@ -35,7 +34,6 @@ export default function ChatPage() {
   const loadConversations = useCallback(async () => {
     setConversationLoading(true);
     try {
-      await api.get("/messages/conversations");
       await fetchConversations();
       setConversationError("");
     } catch (error: any) {

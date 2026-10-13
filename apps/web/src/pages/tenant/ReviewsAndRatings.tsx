@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/ThemeContext';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { reviewsAPI } from '../../api/reviews';
 
 interface Review {
   id: string;
@@ -25,10 +25,9 @@ export default function ReviewsAndRatings() {
     if (!user?.id) {
       return () => { active = false; };
     }
-    api.get<{ data?: Review[] }>('/reviews')
-      .then(({ data }) => {
-        const records = Array.isArray(data.data) ? data.data : [];
-        if (active) setReviews(records.filter((review) => review.userId === user.id));
+    reviewsAPI.getAll()
+      .then((records) => {
+        if (active) setReviews(records.filter((review) => review.userId === user.id) as Review[]);
       })
       .catch(() => {
         if (active) setError(true);

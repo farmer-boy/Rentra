@@ -9,10 +9,11 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, TrustSource, User } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { EmailService } from './email.service';
 import { createHash, randomBytes } from 'crypto';
+import { TrustScoreService } from '../trust-score/trust-score.service';
 
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -25,6 +26,7 @@ export class AuthService {
     private jwtService: JwtService,
     private emailService: EmailService,
     private usersService: UsersService,
+    private trustScoreService: TrustScoreService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -70,11 +72,7 @@ export class AuthService {
       },
     });
 
-    try {
-      await this.emailService.sendVerificationEmail(user.email, token);
-    } catch (error) {
-      console.error('Verification email failed:', error);
-    }
+    await this.emailService.sendVerificationEmail(user.email, token);
 
     const tokens = await this.issueTokens(user);
 
@@ -174,26 +172,62 @@ export class AuthService {
   async verifyEmail(token: string) {
     const verificationToken = await this.prisma.verificationToken.findUnique({
       where: { token },
+      include: { user: { select: { email: true } } },
     });
 
     if (!verificationToken) {
       throw new BadRequestException('Invalid or expired verification token');
     }
 
-    if (verificationToken.expiresAt < new Date()) {
+    if (
+      verificationToken.expiresAt < new Date() ||
+      verificationToken.email !== verificationToken.user.email
+    ) {
       throw new BadRequestException('Verification token has expired');
     }
 
     await this.prisma.user.update({
       where: { id: verificationToken.userId },
-      data: { isVerified: true },
+      data: { isVerified: true, emailVerifiedAt: new Date() },
     });
 
     await this.prisma.verificationToken.delete({
       where: { token },
     });
 
+    await this.trustScoreService.recalculateForUser(
+      verificationToken.userId,
+      TrustSource.VERIFICATION,
+      'Email verification completed',
+    );
+
     return { message: 'Email verified successfully' };
+  }
+
+  async requestEmailVerification(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, email: true, emailVerifiedAt: true },
+    });
+    if (!user) {
+      throw new UnauthorizedException('Authenticated user no longer exists');
+    }
+    if (user.emailVerifiedAt) {
+      return { message: 'Email address is already verified' };
+    }
+
+    await this.prisma.verificationToken.deleteMany({ where: { userId } });
+    const token = randomBytes(32).toString('hex');
+    await this.prisma.verificationToken.create({
+      data: {
+        email: user.email,
+        token,
+        userId,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      },
+    });
+    await this.emailService.sendVerificationEmail(user.email, token);
+    return { message: 'Email verification link sent' };
   }
 
   async forgotPassword(email: string) {
@@ -283,10 +317,11 @@ export class AuthService {
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
-      cnic: user.cnic,
       roles: user.roles,
       trustScore: user.trustScore,
-      isVerified: user.isVerified,
+      isVerified: user.emailVerifiedAt !== null,
+      emailVerified: user.emailVerifiedAt !== null,
+      phoneVerified: user.phoneVerifiedAt !== null,
       isSuspended: user.isSuspended,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

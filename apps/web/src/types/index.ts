@@ -1,11 +1,28 @@
 export type Role = 'TENANT' | 'LANDLORD' | 'ADMIN';
+export type PaymentStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'SUCCESS'
+  | 'FAILED'
+  | 'REFUNDED'
+  | 'AUTHORIZED'
+  | 'PAID'
+  | 'COMPLETED'
+  | 'PARTIALLY_REFUNDED';
+export type PaymentProviderType =
+  | 'JAZZCASH'
+  | 'EASYPAISA'
+  | 'CARD'
+  | 'BANK_TRANSFER'
+  | 'OTHER'
+  | 'LEGACY';
 
 export interface User {
   id: string;
   fullName: string;
   email: string;
   phone: string;
-  cnic: string;
+  cnic?: string;
   role?: Role;
   roles?: Role[];
   trustScore: number;
@@ -17,9 +34,11 @@ export interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   login: (user: User, token: string) => void;
   updateUser: (user: Partial<User>) => void;
   logout: () => void;
+  initialize: () => Promise<void>;
 }
 
 export interface Listing {
@@ -111,14 +130,18 @@ export interface Agreement {
 
 export interface Payment {
   id: string;
-  agreementId: string;
+  userId: string;
+  bookingId: string | null;
+  agreementId: string | null;
   agreement?: Agreement;
-  tenantId: string;
   amount: number;
-  method: 'JAZZCASH' | 'EASYPAISA' | 'BANK_TRANSFER';
-  status: 'PENDING' | 'COMPLETED' | 'FAILED';
-  transactionId?: string;
-  month: string;
+  currency: string;
+  provider: PaymentProviderType;
+  status: PaymentStatus;
+  transactionId: string | null;
+  paidAt: string | null;
+  billingMonth: string | null;
+  dueAt: string | null;
   createdAt: string;
 }
 

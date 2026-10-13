@@ -24,6 +24,23 @@ enum UserVerificationStatus {
   REJECTED
 }
 
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VerificationKind {
+  IDENTITY
+  HOST
+  PROPERTY
+}
+
+enum VerificationChallengeKind {
+  PHONE
+}
+
 enum PropertyType {
   HOUSE
   APARTMENT
@@ -113,6 +130,8 @@ enum AgreementStatus {
   ACTIVE
   ENDED
   CANCELLED
+  EXPIRED
+  TERMINATED
 }
 
 enum PaymentMethod {
@@ -123,11 +142,22 @@ enum PaymentMethod {
 
 enum PaymentStatus {
   PENDING
+  PROCESSING
+  SUCCESS
   AUTHORIZED
   PAID
   FAILED
   REFUNDED
   PARTIALLY_REFUNDED
+}
+
+enum PaymentProviderType {
+  JAZZCASH
+  EASYPAISA
+  CARD
+  BANK_TRANSFER
+  OTHER
+  LEGACY
 }
 
 enum AvailabilityStatus {
@@ -152,6 +182,13 @@ enum HostelGenderPolicy {
   MALE
   FEMALE
   MIXED
+}
+
+enum HostelBedStatus {
+  AVAILABLE
+  RESERVED
+  OCCUPIED
+  MAINTENANCE
 }
 
 enum NotificationType {
@@ -184,6 +221,7 @@ enum ReportTargetType {
   BOOKING
   USER
   MESSAGE
+  REVIEW
 }
 
 enum ReportStatus {
@@ -200,6 +238,11 @@ enum ReviewTargetType {
   HOST
   HOTEL
   HOSTEL
+}
+
+enum ReviewType {
+  PROPERTY
+  LANDLORD
 }
 
 enum TrustSource {
@@ -230,52 +273,70 @@ enum ContactMessageStatus {
 enum DisputeStatus {
   OPEN
   MEDIATION
+  UNDER_REVIEW
+  AWAITING_INFORMATION
   RESOLVED
+  REJECTED
   CLOSED
 }
 
-model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  phone       String   @unique
-  password    String
-  fullName    String
-  cnic        String?  @unique
-  roles       Role[]   @default([TENANT])
-  trustScore  Int      @default(50)
-  isVerified  Boolean  @default(false)
-  isSuspended Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum DisputeType {
+  BOOKING
+  PAYMENT
+  AGREEMENT
+  RENTAL_ISSUE
+}
 
-  profile              UserProfile?
-  landlordProfile      LandlordProfile?
-  agentProfile         AgentProfile?
-  verificationRecords  VerificationRecord[]
-  properties           Property[]
-  managedProperties    PropertyManager[]
-  listings             Listing[]
-  favorites            Favorite[]
-  savedSearches        SavedSearch[]
-  reviews              Review[]
-  bookings             Booking[]
-  propertyViews        PropertyView[]
-  notifications        Notification[]
-  reports              Report[]
-  adminActions         AdminAction[]
-  rentalsAsTenant      RentalRequest[]      @relation("RequestTenant")
-  rentalsAsLandlord    RentalRequest[]      @relation("RequestLandlord")
-  tenantAgreements     Agreement[]          @relation("TenantAgreements")
-  landlordAgreements   Agreement[]          @relation("LandlordAgreements")
-  payments             Payment[]
-  disputes             Dispute[]            @relation("TenantDisputes")
-  conversationsAsUser1 Conversation[]       @relation("User1")
-  conversationsAsUser2 Conversation[]       @relation("User2")
-  sentMessages         Message[]            @relation("Sender")
-  verificationTokens   VerificationToken[]
-  resetPasswordTokens  ResetPasswordToken[]
-  refreshTokens        RefreshToken[]
-  trustScores          TrustScore[]
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  phone           String    @unique
+  password        String
+  fullName        String
+  cnic            String?   @unique
+  roles           Role[]    @default([TENANT])
+  trustScore      Int       @default(50)
+  isVerified      Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  isSuspended     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  profile                 UserProfile?
+  landlordProfile         LandlordProfile?
+  agentProfile            AgentProfile?
+  verificationRecords     VerificationRecord[]
+  properties              Property[]
+  managedProperties       PropertyManager[]
+  listings                Listing[]
+  favorites               Favorite[]
+  savedSearches           SavedSearch[]
+  reviews                 Review[]
+  reviewsAsLandlord       Review[]                 @relation("ReviewLandlord")
+  bookings                Booking[]
+  propertyViews           PropertyView[]
+  notifications           Notification[]
+  reports                 Report[]                 @relation("ReportReporter")
+  reportsAssigned         Report[]                 @relation("AssignedReports")
+  adminActions            AdminAction[]
+  rentalsAsTenant         RentalRequest[]          @relation("RequestTenant")
+  rentalsAsLandlord       RentalRequest[]          @relation("RequestLandlord")
+  tenantAgreements        Agreement[]              @relation("TenantAgreements")
+  landlordAgreements      Agreement[]              @relation("LandlordAgreements")
+  payments                Payment[]
+  disputesCreated         Dispute[]                @relation("DisputeCreator")
+  disputesAssigned        Dispute[]                @relation("AssignedDisputes")
+  conversationsAsUser1    Conversation[]           @relation("User1")
+  conversationsAsUser2    Conversation[]           @relation("User2")
+  sentMessages            Message[]                @relation("Sender")
+  verificationTokens      VerificationToken[]
+  resetPasswordTokens     ResetPasswordToken[]
+  refreshTokens           RefreshToken[]
+  trustScores             TrustScore[]
+  verificationSubmissions VerificationSubmission[] @relation("VerificationSubmitter")
+  reviewedVerifications   VerificationSubmission[] @relation("VerificationReviewer")
+  verificationChallenges  VerificationChallenge[]
 }
 
 model UserProfile {
@@ -355,51 +416,54 @@ model Location {
 }
 
 model Property {
-  id              String              @id @default(cuid())
-  ownerId         String
-  title           String
-  description     String?
-  propertyType    PropertyType
-  rentalMode      RentalDuration      @default(MONTHLY)
-  price           Int                 @default(0)
-  securityDeposit Int?
-  bedrooms        Int                 @default(0)
-  bathrooms       Int                 @default(0)
-  areaSizeSqft    Int?
-  furnishedStatus FurnishedStatus     @default(UNFURNISHED)
-  availability    ListingAvailability @default(AVAILABLE)
-  rules           String?
-  status          PropertyStatus      @default(PENDING_VERIFICATION)
-  country         String              @default("Pakistan")
-  city            String?
-  area            String?
-  address         String
-  latitude        Float?
-  longitude       Float?
-  locationId      String?
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  id                 String              @id @default(cuid())
+  ownerId            String
+  title              String
+  description        String?
+  propertyType       PropertyType
+  rentalMode         RentalDuration      @default(MONTHLY)
+  price              Int                 @default(0)
+  securityDeposit    Int?
+  bedrooms           Int                 @default(0)
+  bathrooms          Int                 @default(0)
+  areaSizeSqft       Int?
+  furnishedStatus    FurnishedStatus     @default(UNFURNISHED)
+  availability       ListingAvailability @default(AVAILABLE)
+  rules              String?
+  status             PropertyStatus      @default(PENDING_VERIFICATION)
+  verificationStatus VerificationStatus  @default(UNVERIFIED)
+  country            String              @default("Pakistan")
+  city               String?
+  area               String?
+  address            String
+  latitude           Float?
+  longitude          Float?
+  locationId         String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
-  owner            User              @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  location         Location?         @relation("PropertyLocation", fields: [locationId], references: [id], onDelete: SetNull)
-  managers         PropertyManager[]
-  images           PropertyImage[]   @relation("PropertyImageProperty")
-  amenities        PropertyAmenity[]
-  listings         Listing[]
-  favorites        Favorite[]        @relation("FavoriteProperty")
-  views            PropertyView[]    @relation("PropertyViewProperty")
-  bookings         Booking[]
-  rentalRequests   RentalRequest[]
-  agreements       Agreement[]
-  reviews          Review[]          @relation("ReviewProperty")
-  reports          Report[]          @relation("ReportProperty")
-  availabilityData Availability[]
-  hotel            Hotel?
-  hostel           Hostel?
-  disputes         Dispute[]
-  conversations    Conversation[]
+  owner                   User                     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  location                Location?                @relation("PropertyLocation", fields: [locationId], references: [id], onDelete: SetNull)
+  managers                PropertyManager[]
+  images                  PropertyImage[]          @relation("PropertyImageProperty")
+  amenities               PropertyAmenity[]
+  listings                Listing[]
+  favorites               Favorite[]               @relation("FavoriteProperty")
+  views                   PropertyView[]           @relation("PropertyViewProperty")
+  bookings                Booking[]
+  rentalRequests          RentalRequest[]
+  agreements              Agreement[]
+  reviews                 Review[]                 @relation("ReviewProperty")
+  reports                 Report[]                 @relation("ReportProperty")
+  availabilityData        Availability[]
+  hotel                   Hotel?
+  hostel                  Hostel?
+  disputes                Dispute[]
+  conversations           Conversation[]
+  verificationSubmissions VerificationSubmission[]
 
   @@index([ownerId, status])
+  @@index([verificationStatus, status])
   @@index([status, createdAt])
   @@index([status, price])
   @@index([status, bedrooms, bathrooms])
@@ -616,14 +680,17 @@ model HostelDetails {
 }
 
 model HostelRoom {
-  id            String   @id @default(cuid())
+  id            String              @id @default(cuid())
   listingId     String
   hostelId      String?
   roomNumber    String
+  roomType      String              @default("STANDARD")
   capacity      Int
   availableBeds Int
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  genderPolicy  HostelGenderPolicy?
+  price         Int                 @default(0)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   listing      Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
   hostel       Hostel?        @relation(fields: [hostelId], references: [id], onDelete: SetNull)
@@ -635,12 +702,12 @@ model HostelRoom {
 }
 
 model HostelBed {
-  id           String   @id @default(cuid())
+  id           String          @id @default(cuid())
   hostelRoomId String
   bedNumber    String
-  isAvailable  Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  status       HostelBedStatus @default(AVAILABLE)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   room         HostelRoom     @relation(fields: [hostelRoomId], references: [id], onDelete: Cascade)
   bookings     Booking[]
@@ -759,20 +826,23 @@ model RentalRequest {
 }
 
 model Agreement {
-  id              String          @id @default(cuid())
-  listingId       String
-  propertyId      String?
-  tenantId        String
-  landlordId      String
-  rentalRequestId String?
-  rent            Int
-  deposit         Int?
-  startDate       DateTime
-  endDate         DateTime?
-  pdfUrl          String?
-  status          AgreementStatus @default(PENDING)
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  id                String          @id @default(cuid())
+  listingId         String
+  propertyId        String?
+  tenantId          String
+  landlordId        String
+  rentalRequestId   String?
+  monthlyRent       Int             @map("rent")
+  securityDeposit   Int?            @map("deposit")
+  startDate         DateTime
+  endDate           DateTime?
+  paymentDueDay     Int             @default(1)
+  rules             String?
+  terminationReason String?
+  pdfUrl            String?
+  status            AgreementStatus @default(DRAFT)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
 
   listing       Listing?       @relation(fields: [listingId], references: [id], onDelete: Restrict)
   property      Property?      @relation(fields: [propertyId], references: [id], onDelete: SetNull)
@@ -789,54 +859,87 @@ model Agreement {
 }
 
 model Payment {
-  id              String        @id @default(cuid())
-  bookingId       String?
-  rentalRequestId String?
-  agreementId     String?
-  tenantId        String
-  amount          Int
-  currency        String        @default("PKR")
-  method          PaymentMethod
-  status          PaymentStatus @default(PENDING)
-  transactionId   String?
-  receiptUrl      String?
-  billingMonth    DateTime?     @map("month")
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id                  String              @id @default(cuid())
+  bookingId           String?
+  rentalRequestId     String?
+  agreementId         String?
+  userId              String              @map("tenantId")
+  amount              Int
+  currency            String              @default("PKR")
+  provider            PaymentProviderType @default(LEGACY)
+  method              PaymentMethod?
+  status              PaymentStatus       @default(PENDING)
+  transactionId       String?             @unique
+  refundTransactionId String?
+  idempotencyKey      String?
+  receiptUrl          String?
+  paidAt              DateTime?
+  billingMonth        DateTime?           @map("month")
+  dueAt               DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
 
-  booking       Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-  rentalRequest RentalRequest? @relation(fields: [rentalRequestId], references: [id], onDelete: SetNull)
-  agreement     Agreement?     @relation(fields: [agreementId], references: [id], onDelete: SetNull)
-  tenant        User           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  booking       Booking?              @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  rentalRequest RentalRequest?        @relation(fields: [rentalRequestId], references: [id], onDelete: SetNull)
+  agreement     Agreement?            @relation(fields: [agreementId], references: [id], onDelete: SetNull)
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  webhookEvents PaymentWebhookEvent[]
+  disputes      Dispute[]
 
-  @@index([tenantId, status])
+  @@unique([userId, idempotencyKey])
+  @@index([userId, status])
   @@index([agreementId, status])
   @@index([bookingId, status])
 }
 
+model PaymentWebhookEvent {
+  id         String              @id @default(cuid())
+  provider   PaymentProviderType
+  eventId    String
+  paymentId  String
+  receivedAt DateTime            @default(now())
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, eventId])
+  @@index([paymentId, receivedAt])
+}
+
 model Review {
-  id          String            @id @default(cuid())
-  userId      String
-  listingId   String?
-  propertyId  String?
-  bookingId   String?
-  agreementId String?
-  rating      Int
-  comment     String?
-  targetType  ReviewTargetType?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  id            String            @id @default(cuid())
+  userId        String
+  listingId     String?
+  propertyId    String?
+  bookingId     String?
+  agreementId   String?
+  landlordId    String?
+  reviewType    ReviewType        @default(PROPERTY)
+  rating        Int
+  comment       String?
+  cleanliness   Int?
+  location      Int?
+  accuracy      Int?
+  communication Int?
+  facilities    Int?
+  targetType    ReviewTargetType?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  landlord  User?      @relation("ReviewLandlord", fields: [landlordId], references: [id], onDelete: Cascade)
   listing   Listing?   @relation("ReviewListing", fields: [listingId], references: [id], onDelete: SetNull)
   property  Property?  @relation("ReviewProperty", fields: [propertyId], references: [id], onDelete: SetNull)
   booking   Booking?   @relation("ReviewBooking", fields: [bookingId], references: [id], onDelete: SetNull)
   agreement Agreement? @relation("ReviewAgreement", fields: [agreementId], references: [id], onDelete: SetNull)
 
-  @@unique([listingId, userId])
-  @@unique([propertyId, userId])
-  @@index([listingId, createdAt])
-  @@index([propertyId, createdAt])
+  @@unique([bookingId, userId, reviewType])
+  @@unique([agreementId, userId, reviewType])
+  @@index([listingId, reviewType, createdAt])
+  @@index([propertyId, reviewType, createdAt])
+  @@index([landlordId, createdAt])
+  @@index([userId, createdAt])
+  @@index([bookingId])
+  @@index([agreementId])
 }
 
 model TrustScore {
@@ -853,49 +956,84 @@ model TrustScore {
 }
 
 model Report {
-  id          String           @id @default(cuid())
-  reporterId  String
-  targetType  ReportTargetType
-  targetId    String
-  propertyId  String?
-  listingId   String?
-  messageId   String?
-  reason      String
-  description String?
-  status      ReportStatus     @default(OPEN)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id                 String           @id @default(cuid())
+  reporterId         String
+  targetType         ReportTargetType
+  targetId           String
+  propertyId         String?
+  listingId          String?
+  messageId          String?
+  reason             String
+  description        String?
+  status             ReportStatus     @default(OPEN)
+  assignedAdminId    String?
+  resolutionNote     String?
+  resolvedAt         DateTime?
+  violationConfirmed Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
-  reporter User      @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-  property Property? @relation("ReportProperty", fields: [propertyId], references: [id], onDelete: SetNull)
-  listing  Listing?  @relation("ReportListing", fields: [listingId], references: [id], onDelete: SetNull)
-  message  Message?  @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  reporter      User      @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  assignedAdmin User?     @relation("AssignedReports", fields: [assignedAdminId], references: [id], onDelete: SetNull)
+  property      Property? @relation("ReportProperty", fields: [propertyId], references: [id], onDelete: SetNull)
+  listing       Listing?  @relation("ReportListing", fields: [listingId], references: [id], onDelete: SetNull)
+  message       Message?  @relation(fields: [messageId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
+  @@index([reporterId, createdAt])
+  @@index([targetType, targetId, status])
+  @@index([assignedAdminId, status, createdAt])
   @@index([listingId])
   @@index([messageId])
 }
 
 model Dispute {
-  id          String        @id @default(cuid())
-  propertyId  String?
-  bookingId   String?
-  agreementId String?
-  tenantId    String
-  title       String
-  description String
-  amount      Int?
-  status      DisputeStatus @default(OPEN)
-  resolution  String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  propertyId      String?
+  bookingId       String?
+  paymentId       String?
+  agreementId     String?
+  createdById     String        @map("tenantId")
+  type            DisputeType   @default(AGREEMENT)
+  title           String
+  description     String
+  amount          Int?
+  status          DisputeStatus @default(OPEN)
+  resolution      String?
+  assignedAdminId String?
+  resolutionNote  String?
+  resolvedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  property  Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  booking   Booking?   @relation(fields: [bookingId], references: [id], onDelete: SetNull)
-  agreement Agreement? @relation(fields: [agreementId], references: [id], onDelete: SetNull)
-  tenant    User       @relation("TenantDisputes", fields: [tenantId], references: [id], onDelete: Cascade)
+  property      Property?  @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  booking       Booking?   @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  payment       Payment?   @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  agreement     Agreement? @relation(fields: [agreementId], references: [id], onDelete: SetNull)
+  createdBy     User       @relation("DisputeCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedAdmin User?      @relation("AssignedDisputes", fields: [assignedAdminId], references: [id], onDelete: SetNull)
 
   @@index([status, createdAt])
+  @@index([createdById, createdAt])
+  @@index([paymentId])
+  @@index([assignedAdminId, status, createdAt])
+}
+
+model ModerationAuditEvent {
+  id             String   @id @default(cuid())
+  actorId        String?
+  actorRole      String?
+  entityType     String
+  entityId       String
+  action         String
+  previousStatus String?
+  newStatus      String?
+  reason         String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
 }
 
 model Conversation {
@@ -1005,6 +1143,47 @@ model VerificationToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([email, token])
+}
+
+model VerificationSubmission {
+  id           String             @id @default(cuid())
+  activeKey    String?            @unique
+  userId       String
+  propertyId   String?
+  kind         VerificationKind
+  status       VerificationStatus @default(PENDING)
+  details      Json?
+  evidenceUrls String[]           @default([])
+  reviewerId   String?
+  reviewNotes  String?
+  submittedAt  DateTime           @default(now())
+  reviewedAt   DateTime?
+  updatedAt    DateTime           @updatedAt
+
+  user     User      @relation("VerificationSubmitter", fields: [userId], references: [id], onDelete: Cascade)
+  reviewer User?     @relation("VerificationReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([kind, status, submittedAt])
+  @@index([userId, kind, submittedAt])
+  @@index([propertyId, kind, submittedAt])
+}
+
+model VerificationChallenge {
+  id         String                    @id @default(cuid())
+  userId     String
+  kind       VerificationChallengeKind
+  target     String
+  tokenHash  String                    @unique
+  expiresAt  DateTime
+  attempts   Int                       @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime                  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, createdAt])
+  @@index([expiresAt])
 }
 
 model ResetPasswordToken {

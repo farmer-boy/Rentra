@@ -1,7 +1,5 @@
-import { useState, useCallback, useMemo } from "react";
-import axios from "axios";
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+import { useCallback, useState } from 'react';
+import { messagesAPI } from '../api/messages';
 
 interface Message {
   id: string;
@@ -40,7 +38,7 @@ interface Notification {
   data?: { conversationId?: string; listingId?: string };
 }
 
-export const useChat = (token?: string) => {
+export const useChat = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] =
     useState<Conversation | null>(null);
@@ -49,115 +47,85 @@ export const useChat = (token?: string) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const axiosInstance = useMemo(
-    () =>
-      axios.create({
-        baseURL: API_BASE,
-        headers: { Authorization: `Bearer ${token}` },
-      }),
-    [token],
-  );
-
-  // Get all conversations
   const fetchConversations = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/messages/conversations");
-      setConversations(response.data);
-    } catch (error) {
-      console.error("Failed to fetch conversations:", error);
+      setConversations(await messagesAPI.conversations());
     } finally {
       setLoading(false);
     }
-  }, [axiosInstance]);
+  }, []);
 
-  // Get or create conversation with a user
+  const fetchMessages = useCallback(
+    async (conversationId: string, limit = 50, offset = 0) => {
+      try {
+        setMessages(await messagesAPI.messages(conversationId, limit, offset));
+      } catch (error) {
+        console.error('Failed to fetch messages:', error);
+      }
+    },
+    [],
+  );
+
   const startConversation = useCallback(
     async (otherUserId: string, listingId?: string) => {
       try {
         setLoading(true);
-        const response = await axiosInstance.post(
-          `/messages/conversation/${otherUserId}`,
-          {},
-          { params: { listingId } },
+        const conversation = await messagesAPI.getOrCreateConversation(
+          otherUserId,
+          listingId,
         );
-        setCurrentConversation(response.data);
-        await fetchMessages(response.data.id);
-        return response.data;
+        setCurrentConversation(conversation);
+        await fetchMessages(conversation.id);
+        return conversation;
       } catch (error) {
-        console.error("Failed to start conversation:", error);
+        console.error('Failed to start conversation:', error);
       } finally {
         setLoading(false);
       }
     },
-    [axiosInstance],
+    [fetchMessages],
   );
 
-  // Get messages in conversation
-  const fetchMessages = useCallback(
-    async (conversationId: string, limit = 50, offset = 0) => {
-      try {
-        const response = await axiosInstance.get(
-          `/messages/conversation/${conversationId}`,
-          { params: { limit, offset } },
-        );
-        setMessages(response.data);
-      } catch (error) {
-        console.error("Failed to fetch messages:", error);
-      }
-    },
-    [axiosInstance],
-  );
-
-  // Send a message
   const sendMessage = useCallback(
     async (conversationId: string, content: string, attachmentUrl?: string) => {
-      try {
-        const response = await axiosInstance.post(
-          `/messages/conversation/${conversationId}/send`,
-          { content, attachmentUrl },
-        );
-        setMessages((prev) => [...prev, response.data]);
-        return response.data;
-      } catch (error) {
-        console.error("Failed to send message:", error);
-      }
+      const message = await messagesAPI.send(conversationId, {
+        content,
+        attachmentUrl,
+      });
+      setMessages((previous) => [...previous, message]);
+      return message;
     },
-    [axiosInstance],
+    [],
   );
 
-  // Get unread count
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const response = await axiosInstance.get("/messages/unread-count");
-      setUnreadCount(response.data.unreadCount);
+      const response = await messagesAPI.unreadCount();
+      setUnreadCount(response.unreadCount);
     } catch (error) {
-      console.error("Failed to fetch unread count:", error);
+      console.error('Failed to fetch unread count:', error);
     }
-  }, [axiosInstance]);
+  }, []);
 
   const fetchNotifications = useCallback(async () => {
     try {
-      const response = await axiosInstance.get("/messages/notifications");
-      setNotifications(response.data);
+      setNotifications(await messagesAPI.legacyNotifications());
     } catch (error) {
-      console.error("Failed to fetch notifications:", error);
+      console.error('Failed to fetch message notifications:', error);
     }
-  }, [axiosInstance]);
+  }, []);
 
-  // Mark conversation as read
   const markAsRead = useCallback(
     async (conversationId: string) => {
       try {
-        await axiosInstance.post(
-          `/messages/conversation/${conversationId}/read`,
-        );
+        await messagesAPI.markRead(conversationId);
         await fetchUnreadCount();
       } catch (error) {
-        console.error("Failed to mark as read:", error);
+        console.error('Failed to mark conversation as read:', error);
       }
     },
-    [axiosInstance, fetchUnreadCount],
+    [fetchUnreadCount],
   );
 
   return {

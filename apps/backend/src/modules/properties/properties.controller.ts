@@ -125,7 +125,11 @@ export class PropertiesController {
 
   @Get(':id/room-types')
   @UseGuards(OptionalJwtAuthGuard)
-  @ApiOperation({ summary: 'List room types and units for a property' })
+  @ApiOperation({
+    summary: 'List room types, units, prices, capacities, and amenities',
+    description:
+      'Each room exposes its operational isAvailable flag. Date-specific booked, blocked, or maintenance availability is returned by GET /properties/:id/availability.',
+  })
   getRoomTypes(@Param('id') id: string, @CurrentUser() user?: JwtPayload) {
     return this.roomTypesService.list(id, user?.sub ?? '');
   }
@@ -134,7 +138,7 @@ export class PropertiesController {
   @ApiOperation({
     summary: 'Get daily availability for a date range',
     description:
-      'The start date is inclusive and end date exclusive. Optionally provide exactly one hotelRoomId, hostelRoomId, or hostelBedId to check a specific unit. Without a unit ID, unit inventory is aggregated and a date is BOOKED only when all units are unavailable.',
+      'Returns one row per calendar day for DAILY, NIGHTLY, WEEKLY, and MONTHLY rental modes. The start date is inclusive and end date exclusive; ranges are limited to 366 days. Optionally provide exactly one hotelRoomId, hostelRoomId, or hostelBedId to check a specific unit. Without a unit ID, unit inventory is aggregated and a date is BOOKED only when all available units are unavailable.',
   })
   getAvailability(
     @Param('id') id: string,

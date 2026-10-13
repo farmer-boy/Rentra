@@ -7,6 +7,7 @@ import {
 import {
   AvailabilityStatus,
   BookingStatus,
+  HostelBedStatus,
   Prisma,
   PropertyStatus,
 } from '@prisma/client';
@@ -56,6 +57,7 @@ export class AvailabilityService {
       select: {
         id: true,
         status: true,
+        rentalMode: true,
         listings: { select: { id: true } },
         hotel: {
           select: { rooms: { select: { id: true, isAvailable: true } } },
@@ -74,7 +76,7 @@ export class AvailabilityService {
           where: { listingId: { in: listingIds } },
           select: {
             id: true,
-            beds: { select: { id: true, isAvailable: true } },
+            beds: { select: { id: true, status: true } },
           },
         })
       : [];
@@ -87,7 +89,9 @@ export class AvailabilityService {
         .filter((room) => room.isAvailable)
         .map((room) => room.id) ?? [];
     const availableHostelBedIds = hostelRooms.flatMap((room) =>
-      room.beds.filter((bed) => bed.isAvailable).map((bed) => bed.id),
+      room.beds
+        .filter((bed) => bed.status === HostelBedStatus.AVAILABLE)
+        .map((bed) => bed.id),
     );
 
     if (range.hotelRoomId && !hotelRoomIds.includes(range.hotelRoomId)) {
@@ -173,12 +177,15 @@ export class AvailabilityService {
           endDate: true,
           hotelRoomId: true,
           hostelBedId: true,
+          status: true,
         },
       }),
     ]);
 
     return {
       propertyId,
+      rentalMode: property.rentalMode,
+      granularity: 'DAY',
       startDate: range.startDate,
       endDate: range.endDate,
       dates: dates.map((date) => {
@@ -237,8 +244,22 @@ export class AvailabilityService {
               ? !availableHostelBedIds.includes(range.hostelBedId)
               : !hostelRooms
                   .find((room) => room.id === range.hostelRoomId)
-                  ?.beds.some((bed) => bed.isAvailable);
-          if (selectedUnitDisabled) status = 'UNAVAILABLE';
+                  ?.beds.some(
+                    (bed) => bed.status === HostelBedStatus.AVAILABLE,
+                  );
+          if (selectedUnitDisabled) {
+            const selectedBed = range.hostelBedId
+              ? hostelRooms
+                  .flatMap((room) => room.beds)
+                  .find((bed) => bed.id === range.hostelBedId)
+              : undefined;
+            status =
+              selectedBed?.status === HostelBedStatus.MAINTENANCE
+                ? 'MAINTENANCE'
+                : selectedBed
+                  ? 'BOOKED'
+                  : 'UNAVAILABLE';
+          }
           const unitBooking = inRangeBookings.some((booking) =>
             range.hotelRoomId
               ? booking.hotelRoomId === range.hotelRoomId
@@ -266,18 +287,28 @@ export class AvailabilityService {
             );
             return unitBooked ? 'BOOKED' : (unitBlocked?.status ?? 'AVAILABLE');
           });
-          const hostelAvailability = availableHostelBedIds.map((unitId) => {
-            const unitBooked = inRangeBookings.some(
-              (booking) => booking.hostelBedId === unitId,
-            );
-            const bedBlocked = rows.find(
-              (row) =>
-                (row.hostelBedId === unitId ||
-                  selectedHostelRoomIds.includes(row.hostelRoomId ?? '')) &&
-                UNAVAILABLE_STATUSES.includes(row.status),
-            );
-            return unitBooked ? 'BOOKED' : (bedBlocked?.status ?? 'AVAILABLE');
-          });
+          const hostelAvailability = hostelRooms.flatMap((room) =>
+            room.beds.map((bed) => {
+              const bedBlocked = rows.find(
+                (row) =>
+                  (row.hostelBedId === bed.id ||
+                    row.hostelRoomId === room.id) &&
+                  UNAVAILABLE_STATUSES.includes(row.status),
+              );
+              const bedBooking = inRangeBookings.find(
+                (booking) => booking.hostelBedId === bed.id,
+              );
+              return bedBooking
+                ? bedBooking.status === BookingStatus.CONFIRMED
+                  ? 'BOOKED'
+                  : 'HOLD'
+                : bed.status === HostelBedStatus.MAINTENANCE
+                  ? 'MAINTENANCE'
+                  : bed.status !== HostelBedStatus.AVAILABLE
+                    ? 'BOOKED'
+                    : (bedBlocked?.status ?? 'AVAILABLE');
+            }),
+          );
           const unitStatuses = [...hotelAvailability, ...hostelAvailability];
           const hasUnits = hotelRoomIds.length > 0 || hostelBedIds.length > 0;
           if (hasUnits && unitStatuses.length === 0) {
@@ -311,19 +342,46 @@ export class AvailabilityService {
       await transaction.$queryRaw(Prisma.sql`
         SELECT pg_advisory_xact_lock(hashtext(${propertyId}))
       `);
+      const scope = await this.resolveScope(transaction, propertyId, dto);
       const property = await transaction.property.findUnique({
         where: { id: propertyId },
         select: { listings: { select: { id: true } } },
       });
       if (!property) throw new NotFoundException('Property not found');
+      const wholePropertyBooking: Prisma.BookingWhereInput[] = [
+        {
+          propertyId,
+          hotelRoomId: null,
+          hostelBedId: null,
+        },
+        ...property.listings.map((listing) => ({
+          listingId: listing.id,
+          hotelRoomId: null,
+          hostelBedId: null,
+        })),
+      ];
+      const allPropertyBookings: Prisma.BookingWhereInput[] = [
+        { propertyId },
+        ...property.listings.map((listing) => ({
+          listingId: listing.id,
+        })),
+      ];
+      const unitBooking: Prisma.BookingWhereInput[] = scope.hotelRoomId
+        ? [{ hotelRoomId: scope.hotelRoomId }]
+        : scope.hostelBedId
+          ? [{ hostelBedId: scope.hostelBedId }]
+          : scope.hostelRoomId
+            ? [
+                {
+                  hostelBed: { hostelRoomId: scope.hostelRoomId },
+                },
+              ]
+            : [];
       const conflict = await transaction.booking.findFirst({
         where: {
-          OR: [
-            { propertyId },
-            ...property.listings.map((listing) => ({
-              listingId: listing.id,
-            })),
-          ],
+          OR: scope.propertyId
+            ? allPropertyBookings
+            : [...wholePropertyBooking, ...unitBooking],
           status: { in: ACTIVE_BOOKING_STATUSES },
           startDate: { lt: end },
           endDate: { gt: start },
@@ -337,7 +395,7 @@ export class AvailabilityService {
 
       const unavailableRow = await transaction.availability.findFirst({
         where: {
-          propertyId,
+          ...scope,
           date: { gte: start, lt: end },
           status: { in: UNAVAILABLE_STATUSES },
         },
@@ -351,7 +409,7 @@ export class AvailabilityService {
 
       for (const date of dates) {
         const existing = await transaction.availability.findFirst({
-          where: { propertyId, date },
+          where: { ...scope, date },
         });
         if (existing) {
           await transaction.availability.update({
@@ -364,7 +422,7 @@ export class AvailabilityService {
         } else {
           await transaction.availability.create({
             data: {
-              propertyId,
+              ...scope,
               date,
               status: dto.status as AvailabilityStatus,
               blockedReason: dto.reason?.trim(),
@@ -374,6 +432,7 @@ export class AvailabilityService {
       }
       return {
         propertyId,
+        ...this.scopeResponse(scope),
         startDate: dto.startDate,
         endDate: dto.endDate,
         status: dto.status,
@@ -393,14 +452,19 @@ export class AvailabilityService {
       await transaction.$queryRaw(Prisma.sql`
         SELECT pg_advisory_xact_lock(hashtext(${propertyId}))
       `);
+      const scope = await this.resolveScope(transaction, propertyId, range);
       const result = await transaction.availability.deleteMany({
         where: {
-          propertyId,
+          ...scope,
           date: { gte: start, lt: end },
           status: { in: ['BLOCKED', 'MAINTENANCE'] },
         },
       });
-      return { propertyId, removed: result.count };
+      return {
+        propertyId,
+        ...this.scopeResponse(scope),
+        removed: result.count,
+      };
     });
   }
 
@@ -468,6 +532,95 @@ export class AvailabilityService {
         'Only the property owner or manager can manage availability',
       );
     }
+  }
+
+  private async resolveScope(
+    transaction: Prisma.TransactionClient,
+    propertyId: string,
+    range: AvailabilityRangeDto,
+  ) {
+    const unitIds = [
+      range.hotelRoomId,
+      range.hostelRoomId,
+      range.hostelBedId,
+    ].filter((id): id is string => Boolean(id));
+    if (unitIds.length > 1) {
+      throw new BadRequestException(
+        'Select only one hotel room, hostel room, or hostel bed',
+      );
+    }
+
+    if (range.hotelRoomId) {
+      const room = await transaction.hotelRoom.findFirst({
+        where: { id: range.hotelRoomId, hotel: { propertyId } },
+        select: { id: true },
+      });
+      if (!room)
+        throw new NotFoundException('Hotel room not found for this property');
+      return {
+        propertyId: null,
+        listingId: null,
+        hotelRoomId: room.id,
+        hostelRoomId: null,
+        hostelBedId: null,
+      };
+    }
+
+    if (range.hostelRoomId) {
+      const room = await transaction.hostelRoom.findFirst({
+        where: {
+          id: range.hostelRoomId,
+          listing: { propertyId },
+        },
+        select: { id: true },
+      });
+      if (!room)
+        throw new NotFoundException('Hostel room not found for this property');
+      return {
+        propertyId: null,
+        listingId: null,
+        hotelRoomId: null,
+        hostelRoomId: room.id,
+        hostelBedId: null,
+      };
+    }
+
+    if (range.hostelBedId) {
+      const bed = await transaction.hostelBed.findFirst({
+        where: {
+          id: range.hostelBedId,
+          room: { listing: { propertyId } },
+        },
+        select: { id: true },
+      });
+      if (!bed)
+        throw new NotFoundException('Hostel bed not found for this property');
+      return {
+        propertyId: null,
+        listingId: null,
+        hotelRoomId: null,
+        hostelRoomId: null,
+        hostelBedId: bed.id,
+      };
+    }
+
+    return {
+      propertyId,
+      listingId: null,
+      hotelRoomId: null,
+      hostelRoomId: null,
+      hostelBedId: null,
+    };
+  }
+
+  private scopeResponse(
+    scope: Awaited<ReturnType<AvailabilityService['resolveScope']>>,
+  ) {
+    return {
+      ...(scope.hotelRoomId && { hotelRoomId: scope.hotelRoomId }),
+      ...(scope.hostelRoomId && { hostelRoomId: scope.hostelRoomId }),
+      ...(scope.hostelBedId && { hostelBedId: scope.hostelBedId }),
+    };
   }
 
   private parseRange(range: AvailabilityRangeDto) {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Bell, CheckCheck } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import api from '../../api/client';
+import { notificationsAPI } from '../../api/notifications';
 
 interface Notification {
   id: string;
@@ -24,8 +24,7 @@ export default function NotificationsPage() {
     setLoading(true);
     setError('');
     try {
-      const { data } = await api.get<Notification[]>('/notifications');
-      setNotifications(data);
+      setNotifications(await notificationsAPI.list());
     } catch (requestError: unknown) {
       const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;
       setError(typeof message === 'string' ? message : 'Notifications could not be loaded.');
@@ -42,7 +41,7 @@ export default function NotificationsPage() {
     setSavingId(id);
     setError('');
     try {
-      await api.patch(`/notifications/${id}/read`);
+      await notificationsAPI.markRead(id);
       setNotifications((items) => items.map((item) => item.id === id ? { ...item, isRead: true } : item));
     } catch (requestError: unknown) {
       const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;
@@ -56,7 +55,7 @@ export default function NotificationsPage() {
     setMarkingAll(true);
     setError('');
     try {
-      await api.patch('/notifications/read-all');
+      await notificationsAPI.markAllRead();
       setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
     } catch (requestError: unknown) {
       const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;

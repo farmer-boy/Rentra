@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { CalendarDays, MapPin } from 'lucide-react';
-import api from '../../api/client';
+import { bookingsAPI } from '../../api/bookings';
 import Card from '../../components/ui/Card';
 
 interface Booking {
@@ -31,9 +31,9 @@ export default function TenantBookings() {
     setLoading(true);
     setError('');
     try {
-      const response = await api.get<Booking[]>('/bookings/my');
-      if (!Array.isArray(response.data)) throw new Error('Invalid booking response.');
-      setBookings(response.data);
+      const results = await bookingsAPI.mine<Booking>();
+      if (!Array.isArray(results)) throw new Error('Invalid booking response.');
+      setBookings(results);
     } catch (cause) {
       setError(getErrorMessage(cause));
     } finally {
@@ -47,8 +47,8 @@ export default function TenantBookings() {
     setCancellingId(id);
     setActionError('');
     try {
-      const response = await api.patch<Booking>(`/bookings/${id}/cancel`);
-      setBookings((current) => current.map((booking) => booking.id === id ? response.data : booking));
+      const booking = await bookingsAPI.cancel<Booking>(id);
+      setBookings((current) => current.map((item) => item.id === id ? booking : item));
     } catch (cause) {
       setActionError(getErrorMessage(cause));
     } finally {

@@ -1,87 +1,49 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Patch,
   Param,
-  Body,
+  Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { DisputesService } from './disputes.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateDisputeDto } from './dto/create-dispute.dto';
+import { DisputeQueryDto } from './dto/dispute-query.dto';
+import { DisputesService } from './disputes.service';
 
 @ApiTags('disputes')
+@ApiBearerAuth()
 @Controller('disputes')
+@UseGuards(JwtAuthGuard)
 export class DisputesController {
   constructor(private readonly disputesService: DisputesService) {}
 
   @Post()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async createDispute(
+  create(
     @CurrentUser() user: JwtPayload,
-    @Body() body: { agreementId: string; title: string; description: string },
+    @Body() dto: CreateDisputeDto,
   ) {
-    const dispute = await this.disputesService.create(
-      user.sub,
-      body.agreementId,
-      body.title,
-      body.description,
-    );
-    return {
-      message: 'Dispute file ho gaya',
-      data: dispute,
-    };
+    return this.disputesService.create(user.sub, dto);
   }
 
-  @Get()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getAllDisputes() {
-    const disputes = await this.disputesService.findAll();
-    return {
-      message: 'Tamam disputes',
-      data: disputes,
-      count: disputes.length,
-    };
+  @Get('my')
+  getMine(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: DisputeQueryDto,
+  ) {
+    return this.disputesService.getMine(user.sub, query);
   }
 
   @Get(':id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getDisputeById(@Param('id') id: string) {
-    const dispute = await this.disputesService.findById(id);
-    return {
-      message: 'Dispute details',
-      data: dispute,
-    };
-  }
-
-  @Patch(':id/resolve')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async resolveDispute(
-    @Param('id') id: string,
-    @Body() body: { resolution: string },
-  ) {
-    const dispute = await this.disputesService.resolve(id, body.resolution);
-    return {
-      message: 'Dispute resolve ho gaya',
-      data: dispute,
-    };
-  }
-
-  @Patch(':id/close')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async closeDispute(@Param('id') id: string) {
-    const dispute = await this.disputesService.close(id);
-    return {
-      message: 'Dispute close kar diya',
-      data: dispute,
-    };
+  getById(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.disputesService.getById(
+      id,
+      user.sub,
+      user.roles.includes('ADMIN'),
+    );
   }
 }

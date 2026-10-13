@@ -69,7 +69,4 @@ export class CreateUserDto {
   @IsEnum(Role)
   role?: Role;
 
-  @ApiProperty({ example: 50, default: 50 })
-  @IsOptional()
-  trustScore?: number;
 }

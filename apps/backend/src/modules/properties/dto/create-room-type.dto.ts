@@ -1,17 +1,22 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayUnique,
+  IsNotEmpty,
   IsArray,
   IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
   Min,
 } from 'class-validator';
 
-function parseAmenities(value: unknown) {
+function parseAmenities(value: unknown): unknown {
   if (Array.isArray(value))
-    return value.filter((item): item is string => typeof item === 'string');
+    return (value as unknown[]).map((item: unknown) =>
+      typeof item === 'string' ? item.trim() : item,
+    );
   if (typeof value === 'string')
     return value
       .split(',')
@@ -20,9 +25,15 @@ function parseAmenities(value: unknown) {
   return value;
 }
 
+function trimString(value: unknown) {
+  return typeof value === 'string' ? value.trim() : value;
+}
+
 export class CreateRoomTypeDto {
   @ApiProperty({ example: 'Deluxe Room' })
+  @Transform(({ value }) => trimString(value))
   @IsString()
+  @IsNotEmpty()
   @MaxLength(100)
   name!: string;
 
@@ -42,12 +53,16 @@ export class CreateRoomTypeDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(500)
   numberOfRooms!: number;
 
   @ApiPropertyOptional({ type: [String], example: ['WiFi', 'AC', 'Parking'] })
   @IsOptional()
   @Transform(({ value }) => parseAmenities(value))
   @IsArray()
+  @ArrayUnique()
+  @MaxLength(50, { each: true })
+  @IsNotEmpty({ each: true })
   @IsString({ each: true })
   amenities?: string[];
 }

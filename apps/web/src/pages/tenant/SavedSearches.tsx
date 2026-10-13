@@ -1,16 +1,11 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Bookmark, Trash2 } from 'lucide-react';
-import api from '../../api/client';
+import { savedSearchesAPI, type SavedSearchRecord } from '../../api/savedSearches';
 import Card from '../../components/ui/Card';
 
-interface SavedSearch {
-  id: string;
-  name: string;
-  filtersJson: Record<string, unknown>;
-  createdAt: string;
-}
+type SavedSearch = SavedSearchRecord;
 
-interface SearchFilters {
+interface SearchFilters extends Record<string, unknown> {
   city?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -35,9 +30,9 @@ export default function SavedSearches() {
     setLoading(true);
     setError('');
     try {
-      const response = await api.get<SavedSearch[]>('/saved-searches');
-      if (!Array.isArray(response.data)) throw new Error('Invalid saved-search response.');
-      setSearches(response.data);
+      const results = await savedSearchesAPI.list();
+      if (!Array.isArray(results)) throw new Error('Invalid saved-search response.');
+      setSearches(results);
     } catch (cause) {
       setError(getErrorMessage(cause));
     } finally {
@@ -61,8 +56,8 @@ export default function SavedSearches() {
     setSaving(true);
     setActionError('');
     try {
-      const response = await api.post<SavedSearch>('/saved-searches', { name, filters });
-      setSearches((current) => [response.data, ...current]);
+      const created = await savedSearchesAPI.create({ name, filters });
+      setSearches((current) => [created, ...current]);
       setName('');
       setCity('');
       setMinPrice('');
@@ -77,7 +72,7 @@ export default function SavedSearches() {
   const deleteSearch = async (id: string) => {
     setActionError('');
     try {
-      await api.delete(`/saved-searches/${id}`);
+      await savedSearchesAPI.remove(id);
       setSearches((current) => current.filter((search) => search.id !== id));
     } catch (cause) {
       setActionError(getErrorMessage(cause));

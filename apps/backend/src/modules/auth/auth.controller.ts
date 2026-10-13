@@ -68,6 +68,14 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
+  @Post('verify-email/request')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send a verification link to the current email' })
+  async requestEmailVerification(@CurrentUser() user: JwtPayload) {
+    return this.authService.requestEmailVerification(user.sub);
+  }
+
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Request a password reset email' })

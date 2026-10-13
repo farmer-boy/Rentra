@@ -1,10 +1,11 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PropertyStatus, PropertyType } from '@prisma/client';
+import { Prisma, PropertyStatus, PropertyType } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateRoomTypeDto } from './dto/create-room-type.dto';
 import { UpdateRoomTypeDto } from './dto/update-room-type.dto';
@@ -15,29 +16,42 @@ export class RoomTypesService {
 
   async create(propertyId: string, userId: string, dto: CreateRoomTypeDto) {
     await this.assertCanManage(propertyId, userId);
-    const hotel = await this.ensureHotel(propertyId);
-    const roomType = await this.prisma.$transaction(async (transaction) => {
-      const created = await transaction.roomType.create({
-        data: {
-          hotelId: hotel.id,
-          name: dto.name.trim(),
-          capacity: dto.capacity,
-          price: dto.price,
-          numberOfRooms: dto.numberOfRooms,
-          amenities: dto.amenities ?? [],
-        },
+    const roomType = await this.prisma
+      .$transaction(async (transaction) => {
+        await this.lockPropertyInventory(transaction, propertyId);
+        const hotel = await this.ensureHotel(transaction, propertyId);
+        const created = await transaction.roomType.create({
+          data: {
+            hotelId: hotel.id,
+            name: dto.name.trim(),
+            capacity: dto.capacity,
+            price: dto.price,
+            numberOfRooms: dto.numberOfRooms,
+            amenities: dto.amenities ?? [],
+          },
+        });
+        const existingRooms = await transaction.hotelRoom.findMany({
+          where: { hotelId: hotel.id },
+          select: { roomNumber: true },
+        });
+        await transaction.hotelRoom.createMany({
+          data: this.generateRoomNumbers(
+            dto.name.trim(),
+            dto.numberOfRooms,
+            existingRooms.map((room) => room.roomNumber),
+          ).map((roomNumber) => ({
+            hotelId: hotel.id,
+            roomTypeId: created.id,
+            roomNumber,
+            capacity: dto.capacity,
+            basePrice: dto.price,
+          })),
+        });
+        return created;
+      })
+      .catch((error: unknown) => {
+        this.throwRoomTypeConflict(error);
       });
-      await transaction.hotelRoom.createMany({
-        data: Array.from({ length: dto.numberOfRooms }, (_, index) => ({
-          hotelId: hotel.id,
-          roomTypeId: created.id,
-          roomNumber: `${dto.name.trim()} ${index + 1}`,
-          capacity: dto.capacity,
-          basePrice: dto.price,
-        })),
-      });
-      return created;
-    });
     return this.findById(roomType.id, userId);
   }
 
@@ -67,28 +81,25 @@ export class RoomTypesService {
   }
 
   async update(id: string, userId: string, dto: UpdateRoomTypeDto) {
-    const roomType = await this.getOwnedRoomType(id, userId);
-    const targetCount = dto.numberOfRooms ?? roomType.numberOfRooms;
-    if (targetCount < 1)
-      throw new BadRequestException('numberOfRooms must be at least 1');
-
-    return this.prisma
+    const ownedRoomType = await this.getOwnedRoomType(id, userId);
+    await this.prisma
       .$transaction(async (transaction) => {
-        const updated = await transaction.roomType.update({
+        await this.lockPropertyInventory(
+          transaction,
+          ownedRoomType.hotel.propertyId,
+        );
+        const roomType = await transaction.roomType.findUnique({
           where: { id },
-          data: {
-            ...(dto.name !== undefined && { name: dto.name.trim() }),
-            ...(dto.capacity !== undefined && { capacity: dto.capacity }),
-            ...(dto.price !== undefined && { price: dto.price }),
-            ...(dto.numberOfRooms !== undefined && {
-              numberOfRooms: dto.numberOfRooms,
-            }),
-            ...(dto.amenities !== undefined && { amenities: dto.amenities }),
-          },
         });
+        if (!roomType) throw new NotFoundException('Room type not found');
+
+        const targetCount = dto.numberOfRooms ?? roomType.numberOfRooms;
+        if (targetCount < 1)
+          throw new BadRequestException('numberOfRooms must be at least 1');
+
         const rooms = await transaction.hotelRoom.findMany({
           where: { roomTypeId: id },
-          orderBy: { roomNumber: 'desc' },
+          orderBy: { roomNumber: 'asc' },
           include: {
             bookings: {
               where: {
@@ -96,34 +107,66 @@ export class RoomTypesService {
                   in: ['PENDING', 'PAYMENT_PENDING', 'HELD', 'CONFIRMED'],
                 },
               },
-              select: { id: true },
+              select: { id: true, guests: true },
             },
           },
         });
+        const targetCapacity = dto.capacity ?? roomType.capacity;
+        if (
+          dto.capacity !== undefined &&
+          rooms.some((room) =>
+            room.bookings.some((booking) => booking.guests > targetCapacity),
+          )
+        ) {
+          throw new BadRequestException(
+            'Cannot reduce capacity below the guest count of an active booking',
+          );
+        }
+
         if (targetCount < rooms.length) {
-          const removable = rooms.slice(0, rooms.length - targetCount);
-          if (removable.some((room) => room.bookings.length)) {
+          const roomsToRemove = rooms.length - targetCount;
+          const removableRooms = rooms
+            .filter((room) => room.bookings.length === 0)
+            .slice(0, roomsToRemove);
+          if (removableRooms.length !== roomsToRemove) {
             throw new BadRequestException(
               'Cannot remove rooms with active bookings',
             );
           }
           await transaction.hotelRoom.deleteMany({
-            where: { id: { in: removable.map((room) => room.id) } },
+            where: { id: { in: removableRooms.map((room) => room.id) } },
           });
         } else if (targetCount > rooms.length) {
+          const existingRooms = await transaction.hotelRoom.findMany({
+            where: { hotelId: roomType.hotelId },
+            select: { roomNumber: true },
+          });
+          const roomNumbers = this.generateRoomNumbers(
+            dto.name?.trim() ?? roomType.name,
+            targetCount - rooms.length,
+            existingRooms.map((room) => room.roomNumber),
+          );
           await transaction.hotelRoom.createMany({
-            data: Array.from(
-              { length: targetCount - rooms.length },
-              (_, index) => ({
-                hotelId: roomType.hotelId,
-                roomTypeId: id,
-                roomNumber: `${dto.name?.trim() ?? roomType.name} ${rooms.length + index + 1}`,
-                capacity: dto.capacity ?? roomType.capacity,
-                basePrice: dto.price ?? roomType.price,
-              }),
-            ),
+            data: roomNumbers.map((roomNumber) => ({
+              hotelId: roomType.hotelId,
+              roomTypeId: id,
+              roomNumber,
+              capacity: targetCapacity,
+              basePrice: dto.price ?? roomType.price,
+            })),
           });
         }
+
+        await transaction.roomType.update({
+          where: { id },
+          data: {
+            ...(dto.name !== undefined && { name: dto.name.trim() }),
+            ...(dto.capacity !== undefined && { capacity: dto.capacity }),
+            ...(dto.price !== undefined && { price: dto.price }),
+            numberOfRooms: targetCount,
+            ...(dto.amenities !== undefined && { amenities: dto.amenities }),
+          },
+        });
         if (dto.capacity !== undefined || dto.price !== undefined) {
           await transaction.hotelRoom.updateMany({
             where: { roomTypeId: id },
@@ -133,25 +176,31 @@ export class RoomTypesService {
             },
           });
         }
-        return updated;
       })
-      .then(() => this.findById(id, userId));
+      .catch((error: unknown) => {
+        this.throwRoomTypeConflict(error);
+      });
+    return this.findById(id, userId);
   }
 
   async remove(id: string, userId: string) {
     const roomType = await this.getOwnedRoomType(id, userId);
-    const activeBooking = await this.prisma.booking.findFirst({
-      where: {
-        hotelRoom: { roomTypeId: id },
-        status: { in: ['PENDING', 'PAYMENT_PENDING', 'HELD', 'CONFIRMED'] },
-      },
-      select: { id: true },
+    await this.prisma.$transaction(async (transaction) => {
+      await this.lockPropertyInventory(transaction, roomType.hotel.propertyId);
+      const activeBooking = await transaction.booking.findFirst({
+        where: {
+          hotelRoom: { roomTypeId: id },
+          status: { in: ['PENDING', 'PAYMENT_PENDING', 'HELD', 'CONFIRMED'] },
+        },
+        select: { id: true },
+      });
+      if (activeBooking)
+        throw new BadRequestException(
+          'Cannot delete a room type with active bookings',
+        );
+      await transaction.hotelRoom.deleteMany({ where: { roomTypeId: id } });
+      await transaction.roomType.delete({ where: { id } });
     });
-    if (activeBooking)
-      throw new BadRequestException(
-        'Cannot delete a room type with active bookings',
-      );
-    await this.prisma.roomType.delete({ where: { id } });
     return { id, deleted: true };
   }
 
@@ -163,8 +212,11 @@ export class RoomTypesService {
     });
   }
 
-  private async ensureHotel(propertyId: string) {
-    const property = await this.prisma.property.findUnique({
+  private async ensureHotel(
+    transaction: Prisma.TransactionClient,
+    propertyId: string,
+  ) {
+    const property = await transaction.property.findUnique({
       where: { id: propertyId },
       select: { propertyType: true, hotel: true },
     });
@@ -177,7 +229,45 @@ export class RoomTypesService {
         'Room types are only available for hotels and guest houses',
       );
     }
-    return property.hotel ?? this.prisma.hotel.create({ data: { propertyId } });
+    return property.hotel ?? transaction.hotel.create({ data: { propertyId } });
+  }
+
+  private async lockPropertyInventory(
+    transaction: Prisma.TransactionClient,
+    propertyId: string,
+  ) {
+    await transaction.$queryRaw(
+      Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${propertyId}))`,
+    );
+  }
+
+  private generateRoomNumbers(
+    roomTypeName: string,
+    count: number,
+    existingRoomNumbers: string[],
+  ) {
+    const used = new Set(existingRoomNumbers);
+    const roomNumbers: string[] = [];
+    for (let suffix = 1; roomNumbers.length < count; suffix += 1) {
+      const roomNumber = `${roomTypeName} ${suffix}`;
+      if (!used.has(roomNumber)) {
+        used.add(roomNumber);
+        roomNumbers.push(roomNumber);
+      }
+    }
+    return roomNumbers;
+  }
+
+  private throwRoomTypeConflict(error: unknown): never {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      throw new ConflictException(
+        'A room type or room number with these details already exists',
+      );
+    }
+    throw error;
   }
 
   private async getOwnedRoomType(id: string, userId: string) {

@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, TrustSource } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { CreateUserDto, Role } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -12,10 +12,14 @@ import { CreateLandlordProfileDto } from './dto/create-landlord-profile.dto';
 import { UpdateLandlordProfileDto } from './dto/update-landlord-profile.dto';
 import { UpdateMyProfileDto } from './dto/update-my-profile.dto';
 import * as bcrypt from 'bcryptjs';
+import { TrustScoreService } from '../trust-score/trust-score.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly trustScoreService: TrustScoreService,
+  ) {}
 
   async createAuthAccount(data: {
     fullName: string;
@@ -46,7 +50,7 @@ export class UsersService {
         cnic: true,
         roles: true,
         trustScore: true,
-        isVerified: true,
+        emailVerifiedAt: true,
         isSuspended: true,
         createdAt: true,
       },
@@ -56,7 +60,7 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    return { ...user, isVerified: user.emailVerifiedAt !== null };
   }
 
   async getMyProfile(userId: string) {
@@ -69,11 +73,13 @@ export class UsersService {
         phone: true,
         roles: true,
         trustScore: true,
-        isVerified: true,
+        emailVerifiedAt: true,
+        phoneVerifiedAt: true,
         createdAt: true,
         profile: { select: { bio: true, avatarUrl: true } },
-        verificationRecords: {
-          orderBy: { createdAt: 'desc' },
+        verificationSubmissions: {
+          where: { kind: 'IDENTITY' },
+          orderBy: { submittedAt: 'desc' },
           take: 1,
           select: { status: true },
         },
@@ -92,10 +98,14 @@ export class UsersService {
       bio: user.profile?.bio ?? null,
       avatarUrl: user.profile?.avatarUrl ?? null,
       roles: user.roles,
-      verificationStatus: user.isVerified
-        ? 'VERIFIED'
-        : (user.verificationRecords[0]?.status ?? 'UNVERIFIED'),
-      isVerified: user.isVerified,
+      verificationStatus:
+        user.verificationSubmissions[0]?.status ??
+        (user.emailVerifiedAt ? 'EMAIL_VERIFIED' : 'UNVERIFIED'),
+      isVerified: user.emailVerifiedAt !== null,
+      emailVerified: user.emailVerifiedAt !== null,
+      phoneVerified: user.phoneVerifiedAt !== null,
+      identityVerificationStatus:
+        user.verificationSubmissions[0]?.status ?? 'UNVERIFIED',
       trustScore: user.trustScore,
       createdAt: user.createdAt,
     };
@@ -109,11 +119,12 @@ export class UsersService {
         fullName: true,
         roles: true,
         trustScore: true,
-        isVerified: true,
+        emailVerifiedAt: true,
         createdAt: true,
         profile: { select: { bio: true, avatarUrl: true } },
-        verificationRecords: {
-          orderBy: { createdAt: 'desc' },
+        verificationSubmissions: {
+          where: { kind: 'IDENTITY' },
+          orderBy: { submittedAt: 'desc' },
           take: 1,
           select: { status: true },
         },
@@ -130,10 +141,13 @@ export class UsersService {
       bio: user.profile?.bio ?? null,
       avatarUrl: user.profile?.avatarUrl ?? null,
       roles: user.roles,
-      verificationStatus: user.isVerified
-        ? 'VERIFIED'
-        : (user.verificationRecords[0]?.status ?? 'UNVERIFIED'),
-      isVerified: user.isVerified,
+      verificationStatus:
+        user.verificationSubmissions[0]?.status ??
+        (user.emailVerifiedAt ? 'EMAIL_VERIFIED' : 'UNVERIFIED'),
+      isVerified: user.emailVerifiedAt !== null,
+      emailVerified: user.emailVerifiedAt !== null,
+      identityVerificationStatus:
+        user.verificationSubmissions[0]?.status ?? 'UNVERIFIED',
       trustScore: user.trustScore,
       createdAt: user.createdAt,
     };
@@ -148,7 +162,7 @@ export class UsersService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true },
+      select: { id: true, email: true, phone: true },
     });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -156,8 +170,15 @@ export class UsersService {
 
     const userData: Prisma.UserUpdateInput = {};
     if (dto.fullName !== undefined) userData.fullName = dto.fullName;
-    if (dto.email !== undefined) userData.email = dto.email;
-    if (dto.phone !== undefined) userData.phone = dto.phone;
+    if (dto.email !== undefined && dto.email !== user.email) {
+      userData.email = dto.email;
+      userData.emailVerifiedAt = null;
+      userData.isVerified = false;
+    }
+    if (dto.phone !== undefined && dto.phone !== user.phone) {
+      userData.phone = dto.phone;
+      userData.phoneVerifiedAt = null;
+    }
 
     const profileCreate = {
       userId,
@@ -175,6 +196,11 @@ export class UsersService {
             where: { id: userId },
             data: userData,
           });
+          if (userData.email !== undefined) {
+            await transaction.verificationToken.deleteMany({
+              where: { userId },
+            });
+          }
         }
         await transaction.userProfile.upsert({
           where: { userId },
@@ -190,6 +216,17 @@ export class UsersService {
         throw new ConflictException('Email or phone number is already in use');
       }
       throw error;
+    }
+
+    if (
+      (dto.email !== undefined && dto.email !== user.email) ||
+      (dto.phone !== undefined && dto.phone !== user.phone)
+    ) {
+      await this.trustScoreService.recalculateForUser(
+        userId,
+        TrustSource.VERIFICATION,
+        'Contact details changed; verification status reset',
+      );
     }
 
     return this.getMyProfile(userId);
@@ -212,7 +249,12 @@ export class UsersService {
     // Hash password
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    const roles = dto.roles && dto.roles.length > 0 ? dto.roles : dto.role ? [dto.role] : [Role.TENANT, Role.LANDLORD];
+    const roles =
+      dto.roles && dto.roles.length > 0
+        ? dto.roles
+        : dto.role
+          ? [dto.role]
+          : [Role.TENANT, Role.LANDLORD];
 
     return await this.prisma.user.create({
       data: {
@@ -222,7 +264,7 @@ export class UsersService {
         cnic: dto.cnic ?? null,
         password: hashedPassword,
         roles,
-        trustScore: dto.trustScore || 50,
+        trustScore: 50,
       },
       select: {
         id: true,
@@ -332,9 +374,14 @@ export class UsersService {
       }
     }
 
-    const roles = dto.roles && dto.roles.length > 0 ? dto.roles : dto.role ? [dto.role] : user.roles;
+    const roles =
+      dto.roles && dto.roles.length > 0
+        ? dto.roles
+        : dto.role
+          ? [dto.role]
+          : user.roles;
 
-    return await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id },
       data: {
         fullName: dto.fullName ?? user.fullName,
@@ -342,9 +389,14 @@ export class UsersService {
         phone: dto.phone ?? user.phone,
         cnic: dto.cnic ?? user.cnic,
         roles,
-        trustScore: dto.trustScore ?? user.trustScore,
-        isVerified: dto.isVerified ?? user.isVerified,
         isSuspended: dto.isSuspended ?? user.isSuspended,
+        ...(dto.email !== undefined &&
+          dto.email !== user.email && {
+            emailVerifiedAt: null,
+            isVerified: false,
+          }),
+        ...(dto.phone !== undefined &&
+          dto.phone !== user.phone && { phoneVerifiedAt: null }),
       },
       select: {
         id: true,
@@ -360,6 +412,18 @@ export class UsersService {
         updatedAt: true,
       },
     });
+    if (
+      (dto.email !== undefined && dto.email !== user.email) ||
+      (dto.phone !== undefined && dto.phone !== user.phone)
+    ) {
+      await this.prisma.verificationToken.deleteMany({ where: { userId: id } });
+      await this.trustScoreService.recalculateForUser(
+        id,
+        TrustSource.VERIFICATION,
+        'Contact details changed; verification status reset',
+      );
+    }
+    return updatedUser;
   }
 
   async updateTrustScore(id: string, score: number) {
@@ -422,22 +486,14 @@ export class UsersService {
   }
 
   async verify(id: string) {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-
-    return await this.prisma.user.update({
+    const user = await this.prisma.user.findUnique({
       where: { id },
-      data: { isVerified: true },
-      select: {
-        id: true,
-        email: true,
-        fullName: true,
-        isVerified: true,
-        updatedAt: true,
-      },
+      select: { id: true },
     });
+    if (!user) throw new BadRequestException('User not found');
+    throw new ConflictException(
+      'Use the email confirmation or administrator verification submission workflow',
+    );
   }
 
   async delete(id: string) {
@@ -456,10 +512,7 @@ export class UsersService {
     });
   }
 
-  async createLandlordProfile(
-    userId: string,
-    dto: CreateLandlordProfileDto,
-  ) {
+  async createLandlordProfile(userId: string, dto: CreateLandlordProfileDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, roles: true },
@@ -516,10 +569,7 @@ export class UsersService {
     return profile;
   }
 
-  async updateLandlordProfile(
-    userId: string,
-    dto: UpdateLandlordProfileDto,
-  ) {
+  async updateLandlordProfile(userId: string, dto: UpdateLandlordProfileDto) {
     await this.getLandlordProfile(userId);
 
     return this.prisma.landlordProfile.update({

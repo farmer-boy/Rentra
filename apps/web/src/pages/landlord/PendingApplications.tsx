@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle, Clock, Home, MapPin, User, XCircle } from 'lucide-react';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { rentalRequestsAPI } from '../../api/rentalRequests';
 import { useAuthStore } from '../../store/authStore';
 
 interface RentalRequest {
@@ -34,12 +34,12 @@ const PendingApplications = () => {
     let active = true;
     if (!user?.id) return () => { active = false; };
 
-    api.get('/rental-requests/received')
-      .then((response) => {
-        if (!Array.isArray(response.data)) throw new Error('The server returned invalid rental request data.');
+    rentalRequestsAPI.received<RentalRequest>()
+      .then((requests) => {
+        if (!Array.isArray(requests)) throw new Error('The server returned invalid rental request data.');
         if (active) {
           setError('');
-          setRequests((response.data as RentalRequest[]).filter((request) => request.status === 'PENDING'));
+          setRequests(requests.filter((request) => request.status === 'PENDING'));
         }
       })
       .catch((cause: unknown) => { if (active) setError(errorMessage(cause)); })
@@ -52,7 +52,8 @@ const PendingApplications = () => {
     setProcessingId(id);
     setActionError('');
     try {
-      await api.patch(`/rental-requests/${id}/${decision}`);
+      if (decision === 'accept') await rentalRequestsAPI.accept(id);
+      else await rentalRequestsAPI.reject(id);
       setRequests((current) => current.filter((request) => request.id !== id));
     } catch (cause) {
       setActionError(errorMessage(cause));

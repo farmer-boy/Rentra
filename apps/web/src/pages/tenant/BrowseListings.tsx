@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import api from '../../api/client';
+import { searchAPI } from '../../api/search';
 import Card from '../../components/ui/Card';
 
 const propertyTypes = ['HOSTEL', 'HOTEL', 'GUEST_HOUSE', 'HOUSE', 'APARTMENT', 'FLAT', 'ROOM', 'PORTION', 'STUDIO', 'FARMHOUSE', 'PG', 'SHARED_ROOM'];
@@ -42,8 +42,8 @@ export default function BrowseListings() {
     setLoading(true); setError('');
     try {
       const params = Object.fromEntries(Object.entries({ ...filters, amenities: selectedAmenities.join(',') }).filter(([, value]) => value));
-      const response = await api.get('/listings', { params });
-      setListings(response.data.data ?? []);
+      const response = await searchAPI.listings<Listing>(params);
+      setListings(response.data ?? []);
     } catch (requestError: any) { setListings([]); setError(requestError.response?.data?.message || 'Could not load properties.'); }
     finally { setLoading(false); }
   };

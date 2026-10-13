@@ -1,104 +1,46 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-import { AgreementsService } from './agreements.service';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import type { JwtPayload } from '../../common/types/jwt-payload';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AgreementsService } from './agreements.service';
+import { TerminateAgreementDto } from './dto/terminate-agreement.dto';
 
 @ApiTags('agreements')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('agreements')
 export class AgreementsController {
   constructor(private readonly agreementsService: AgreementsService) {}
 
-  @Post()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async createAgreement(
-    @Body()
-    body: {
-      tenantId: string;
-      landlordId: string;
-      listingId: string;
-      rent: number;
-      deposit: number;
-      startDate: string;
-      endDate: string;
-    },
-  ) {
-    const agreement = await this.agreementsService.create(
-      body.tenantId,
-      body.landlordId,
-      body.listingId,
-      body.rent,
-      body.deposit,
-      body.startDate,
-      body.endDate,
-    );
+  @Get('my')
+  @ApiOperation({
+    summary: 'List agreements for the current tenant or landlord',
+  })
+  async my(@CurrentUser() user: JwtPayload) {
+    const agreements = await this.agreementsService.myAgreements(user.sub);
     return {
-      message: 'Agreement created successfully',
-      data: agreement,
-    };
-  }
-
-  @Get()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getAllAgreements() {
-    const agreements = await this.agreementsService.findAll();
-    return {
-      message: 'All agreements',
+      message: 'Your agreements',
       data: agreements,
       count: agreements.length,
     };
   }
 
   @Get(':id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async getAgreementById(@Param('id') id: string) {
-    const agreement = await this.agreementsService.findById(id);
-    return {
-      message: 'Agreement details',
-      data: agreement,
-    };
-  }
-
-  @Patch(':id/approve')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async approveAgreement(@Param('id') id: string) {
-    const agreement = await this.agreementsService.approve(id);
-    return {
-      message: 'Agreement approved successfully',
-      data: agreement,
-    };
-  }
-
-  @Patch(':id/reject')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async rejectAgreement(@Param('id') id: string) {
-    const agreement = await this.agreementsService.reject(id);
-    return {
-      message: 'Agreement rejected',
-      data: agreement,
-    };
+  @ApiOperation({ summary: 'Get an agreement as its tenant or landlord' })
+  async getById(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    const agreement = await this.agreementsService.findById(id, user.sub);
+    return { message: 'Agreement details', data: agreement };
   }
 
   @Patch(':id/terminate')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
-  async terminateAgreement(@Param('id') id: string) {
-    const agreement = await this.agreementsService.terminate(id);
-    return {
-      message: 'Agreement terminated successfully',
-      data: agreement,
-    };
+  @ApiOperation({ summary: 'Terminate an active agreement as a participant' })
+  async terminate(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: TerminateAgreementDto = {},
+  ) {
+    const agreement = await this.agreementsService.terminate(id, user.sub, dto);
+    return { message: 'Agreement terminated successfully', data: agreement };
   }
 }

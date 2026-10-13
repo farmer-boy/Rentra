@@ -4,7 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
 
   // Global prefix
   app.setGlobalPrefix('api');
@@ -43,8 +43,12 @@ async function bootstrap() {
         'http://127.0.0.1:5186',
       ];
 
-      const localOriginPattern = /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?$/i;
-      const isAllowed = !origin || allowedOrigins.includes(origin) || localOriginPattern.test(origin || '');
+      const localOriginPattern =
+        /^http:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(?::\d+)?$/i;
+      const isAllowed =
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        localOriginPattern.test(origin || '');
 
       if (isAllowed) {
         callback(null, true);
@@ -71,7 +75,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Rentra API')
     .setDescription(
-      'Pakistan\'s first AI-powered transparent rental platform API',
+      "Pakistan's first AI-powered transparent rental platform API",
     )
     .setVersion('1.0')
     .addBearerAuth()

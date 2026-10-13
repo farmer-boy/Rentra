@@ -4,9 +4,6 @@ import {
   IsEmail,
   IsEnum,
   IsBoolean,
-  IsNumber,
-  Min,
-  Max,
   IsArray,
   ArrayUnique,
 } from 'class-validator';
@@ -53,23 +50,12 @@ export class UpdateUserDto {
   @ApiProperty({
     enum: Role,
     required: false,
-    description: 'Legacy alias kept for compatibility while the app uses roles[].',
+    description:
+      'Legacy alias kept for compatibility while the app uses roles[].',
   })
   @IsOptional()
   @IsEnum(Role)
   role?: Role;
-
-  @ApiProperty({ example: 75, minimum: 0, maximum: 100, required: false })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  trustScore?: number;
-
-  @ApiProperty({ example: true, required: false })
-  @IsOptional()
-  @IsBoolean()
-  isVerified?: boolean;
 
   @ApiProperty({ example: false, required: false })
   @IsOptional()

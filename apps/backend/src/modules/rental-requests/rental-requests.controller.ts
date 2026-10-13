@@ -13,6 +13,7 @@ import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import type { JwtPayload } from '../../common/types/jwt-payload';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AcceptRentalRequestDto } from './dto/accept-rental-request.dto';
 import { CreateRentalRequestDto } from './dto/create-rental-request.dto';
 import { RentalRequestsService } from './rental-requests.service';
 
@@ -57,10 +58,15 @@ export class RentalRequestsController {
   @Patch('rental-requests/:id/accept')
   @Roles('LANDLORD')
   @ApiOperation({
-    summary: 'Owner accepts a pending request and creates an agreement',
+    summary:
+      'Owner accepts a pending request and creates an active agreement with optional final terms',
   })
-  accept(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.rentalRequestsService.accept(id, user.sub);
+  accept(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: AcceptRentalRequestDto,
+  ) {
+    return this.rentalRequestsService.accept(id, user.sub, dto);
   }
 
   @Patch('rental-requests/:id/reject')

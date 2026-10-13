@@ -45,23 +45,9 @@ async function main() {
       },
     });
 
-    const adminUser = await prisma.user.create({
-      data: {
-        email: 'admin@rentra.com',
-        phone: '+923005555555',
-        fullName: 'Rentra Admin',
-        password: hashedPassword,
-        cnic: '11111-1111111-1',
-        roles: ['ADMIN'],
-        trustScore: 100,
-        isVerified: true,
-      },
-    });
-
     console.log('✅ Users created:');
     console.log(`   - ${user1.fullName} (${user1.email})`);
     console.log(`   - ${user2.fullName} (${user2.email})`);
-    console.log(`   - ${adminUser.fullName} (${adminUser.email})`);
 
     // Create test listing
     const listing = await prisma.listing.create({
@@ -108,7 +94,6 @@ async function main() {
     console.log('\n📝 Test Credentials:');
     console.log('   Landlord: landlord@test.com / password123');
     console.log('   Tenant: tenant@test.com / password123');
-    console.log('   Admin: admin@rentra.com / password123');
   } catch (error) {
     console.error('❌ Seeding failed:', error);
     throw error;
@@ -123,7 +108,6 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
 
 
 

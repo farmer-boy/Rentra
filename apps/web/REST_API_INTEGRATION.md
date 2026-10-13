@@ -1,420 +1,109 @@
-# REST API Integration Guide
+# Web REST API integration
 
-## Overview
-The Rentra web application connects to a NestJS backend API running on `http://localhost:3000/api`. This document describes all available API clients and their usage.
+The web app uses one Axios client (`src/api/client.ts`) and feature modules in
+`src/api/`. API paths below are relative to the NestJS global `/api` prefix.
 
 ## Configuration
 
-### Environment Variables
-Create a `.env.local` file in `apps/web/`:
-```
-VITE_API_URL=http://localhost:3000/api
-```
+Create `apps/web/.env.local` from `.env.example` and set:
 
-## API Clients
-
-All API clients are located in `src/api/` directory and use a centralized Axios instance configured with:
-- Base URL: `http://localhost:3000/api`
-- Default headers: `Content-Type: application/json`
-- Credentials: Enabled (cookies, sessions)
-- Automatic JWT token attachment to all requests
-- Token refresh on 401 responses
-
-### 1. Authentication API (`src/api/auth.ts`)
-
-```typescript
-import { authAPI } from '@/api/auth';
-
-// Register a new user
-await authAPI.register({
-  email: 'user@example.com',
-  password: 'secure123',
-  name: 'John Doe',
-  role: 'TENANT' // or 'LANDLORD', 'ADMIN'
-});
-
-// Login
-const { accessToken, user } = await authAPI.login({
-  email: 'user@example.com',
-  password: 'secure123'
-});
-
-// Get current user
-const me = await authAPI.getMe();
-
-// Logout
-authAPI.logout();
+```dotenv
+VITE_API_BASE_URL=http://localhost:3000/api
+VITE_API_TIMEOUT_MS=15000
 ```
 
-**Endpoints:**
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - Login user
-- `GET /auth/me` - Get current user info
-- `POST /auth/refresh` - Refresh access token
-
----
-
-### 2. Listings API (`src/api/listings.ts`)
-
-```typescript
-import { listingsAPI } from '@/api/listings';
-
-// Get all listings (paginated)
-const listings = await listingsAPI.getAll(1, 10);
-
-// Get single listing
-const listing = await listingsAPI.getOne('listing-id');
-
-// Create new listing (Landlord)
-const newListing = await listingsAPI.create({
-  title: 'Beautiful 2BR Apartment',
-  description: 'Modern apartment in downtown',
-  address: '123 Main St, City, State 12345',
-  price: 1500,
-  bedrooms: 2,
-  bathrooms: 1,
-  squareFeet: 950,
-  images: ['url1', 'url2'],
-  amenities: ['WiFi', 'AC', 'Parking']
-});
-
-// Update listing
-const updated = await listingsAPI.update('listing-id', {
-  price: 1600,
-  amenities: ['WiFi', 'AC', 'Parking', 'Gym']
-});
-
-// Delete listing
-await listingsAPI.delete('listing-id');
-
-// Get my listings (Landlord)
-const myListings = await listingsAPI.getMyListings();
-
-// Search listings
-const results = await listingsAPI.search('downtown apartment');
-```
-
-**Endpoints:**
-- `GET /listings` - Get all listings (paginated)
-- `GET /listings/:id` - Get single listing
-- `POST /listings` - Create listing
-- `PATCH /listings/:id` - Update listing
-- `DELETE /listings/:id` - Delete listing
-- `GET /listings/my` - Get user's listings
-- `GET /listings/search` - Search listings
-
----
-
-### 3. Agreements API (`src/api/agreements.ts`)
-
-```typescript
-import { agreementsAPI } from '@/api/agreements';
-
-// Get all agreements (paginated)
-const agreements = await agreementsAPI.getAll(1, 10);
-
-// Get single agreement
-const agreement = await agreementsAPI.getById('agreement-id');
-
-// Create agreement
-const newAgreement = await agreementsAPI.create({
-  title: 'Lease Agreement',
-  content: '... agreement text ...',
-  listingId: 'listing-id',
-  tenantId: 'tenant-id'
-});
-
-// Sign agreement
-const signed = await agreementsAPI.sign('agreement-id');
-
-// Get agreements for a listing
-const listingAgreements = await agreementsAPI.getByListing('listing-id');
-```
-
-**Endpoints:**
-- `GET /agreements` - Get all agreements (paginated)
-- `GET /agreements/:id` - Get single agreement
-- `POST /agreements` - Create agreement
-- `PATCH /agreements/:id` - Update agreement
-- `POST /agreements/:id/sign` - Sign agreement
-
----
-
-### 4. Payments API (`src/api/payments.ts`)
-
-```typescript
-import { paymentsAPI } from '@/api/payments';
-
-// Get all payments (paginated)
-const payments = await paymentsAPI.getAll(1, 10);
-
-// Get single payment
-const payment = await paymentsAPI.getById('payment-id');
-
-// Create payment
-const newPayment = await paymentsAPI.create({
-  amount: 1500,
-  type: 'RENT', // or 'DEPOSIT', 'OTHER'
-  agreementId: 'agreement-id',
-  dueDate: '2026-05-01'
-});
-
-// Get payment history for agreement
-const history = await paymentsAPI.getHistory('agreement-id');
-
-// Get my payments
-const myPayments = await paymentsAPI.getMyPayments();
-```
-
-**Endpoints:**
-- `GET /payments` - Get all payments (paginated)
-- `GET /payments/:id` - Get single payment
-- `POST /payments` - Create payment
-- `GET /payments/agreement/:id` - Get agreement payments
-- `GET /payments/my` - Get current user's payments
-
----
-
-### 5. Disputes API (`src/api/disputes.ts`)
-
-```typescript
-import { disputesAPI } from '@/api/disputes';
-
-// Get all disputes (paginated)
-const disputes = await disputesAPI.getAll(1, 10);
-
-// Get single dispute
-const dispute = await disputesAPI.getOne('dispute-id');
-
-// Create dispute
-const newDispute = await disputesAPI.create({
-  title: 'Property Damage Claim',
-  description: 'Walls damaged during occupancy',
-  agreementId: 'agreement-id'
-});
-
-// Add message to dispute
-const updated = await disputesAPI.addMessage(
-  'dispute-id',
-  'I disagree with this claim.'
-);
-
-// Get my disputes
-const myDisputes = await disputesAPI.getMyDisputes();
-
-// Resolve dispute
-const resolved = await disputesAPI.resolve('dispute-id');
-```
-
-**Endpoints:**
-- `GET /disputes` - Get all disputes (paginated)
-- `GET /disputes/:id` - Get single dispute
-- `POST /disputes` - Create dispute
-- `PATCH /disputes/:id` - Update dispute
-- `POST /disputes/:id/message` - Add message
-- `GET /disputes/my` - Get user's disputes
-- `POST /disputes/:id/resolve` - Resolve dispute
-
----
-
-### 6. Reviews API (`src/api/reviews.ts`)
-
-```typescript
-import { reviewsAPI } from '@/api/reviews';
-
-// Get all reviews (paginated)
-const reviews = await reviewsAPI.getAll(1, 10);
-
-// Get single review
-const review = await reviewsAPI.getById('review-id');
-
-// Create review
-const newReview = await reviewsAPI.create({
-  rating: 5,
-  comment: 'Excellent landlord! Highly recommended.',
-  targetUserId: 'user-id',
-  agreementId: 'agreement-id'
-});
-
-// Get reviews written by user
-const written = await reviewsAPI.getByUser('user-id');
-
-// Get reviews for user
-const received = await reviewsAPI.getForUser('user-id');
-```
-
-**Endpoints:**
-- `GET /reviews` - Get all reviews (paginated)
-- `GET /reviews/:id` - Get single review
-- `POST /reviews` - Create review
-- `GET /reviews/user/:id` - Get reviews by user
-- `GET /reviews/for/:id` - Get reviews for user
-
----
-
-### 7. Users API (`src/api/users.ts`)
-
-```typescript
-import { usersAPI } from '@/api/users';
-
-// Get user by ID
-const user = await usersAPI.getById('user-id');
-
-// Update user
-const updated = await usersAPI.update('user-id', {
-  name: 'New Name',
-  email: 'newemail@example.com'
-});
-
-// Get user profile
-const profile = await usersAPI.getProfile('user-id');
-
-// Get user's trust score
-const trustScore = await usersAPI.getTrustScore('user-id');
-
-// Update profile
-const updatedProfile = await usersAPI.updateProfile('user-id', {
-  name: 'Updated Name'
-});
-```
-
-**Endpoints:**
-- `GET /users/:id` - Get user
-- `PATCH /users/:id` - Update user
-- `GET /users/:id/profile` - Get user profile
-- `GET /users/:id/trust-score` - Get trust score
-- `PATCH /users/:id/profile` - Update profile
-
----
-
-### 8. Admin API (`src/api/admin.ts`)
-
-```typescript
-import { adminAPI } from '@/api/admin';
-
-// User Management
-const users = await adminAPI.getAllUsers(1, 20);
-const user = await adminAPI.getUserById('user-id');
-await adminAPI.suspendUser('user-id');
-await adminAPI.activateUser('user-id');
-
-// Listing Moderation
-const listings = await adminAPI.getAllListings(1, 20);
-const flagged = await adminAPI.getFlaggedListings();
-await adminAPI.flagListing('listing-id', 'Fraudulent listing');
-await adminAPI.approveListings('listing-id');
-await adminAPI.rejectListing('listing-id', 'Low quality images');
-await adminAPI.removeListings('listing-id');
-
-// Dispute Management
-const disputes = await adminAPI.getAllDisputes(1, 20);
-
-// Trust Scores
-const score = await adminAPI.getTrustScore('user-id');
-await adminAPI.updateTrustScore('user-id', 85);
-
-// Dashboard
-const stats = await adminAPI.getStats();
-```
-
-**Endpoints:**
-- `GET /admin/users` - Get all users (paginated)
-- `GET /admin/users/:id` - Get user
-- `PATCH /admin/users/:id/suspend` - Suspend user
-- `PATCH /admin/users/:id/activate` - Activate user
-- `GET /admin/listings` - Get all listings (paginated)
-- `GET /admin/listings/flagged` - Get flagged listings
-- `PATCH /admin/listings/:id/flag` - Flag listing
-- `PATCH /admin/listings/:id/approve` - Approve listing
-- `PATCH /admin/listings/:id/reject` - Reject listing
-- `DELETE /admin/listings/:id` - Remove listing
-- `GET /admin/disputes` - Get disputes (paginated)
-- `GET /admin/trust-scores/:id` - Get trust score
-- `PATCH /admin/trust-scores/:id` - Update trust score
-- `GET /admin/stats` - Get dashboard statistics
-
-## Token Management
-
-The API client automatically:
-1. Attaches `accessToken` from localStorage to all requests as `Authorization: Bearer <token>`
-2. Intercepts 401 responses and attempts to refresh using `refreshToken`
-3. Removes tokens and redirects to login on auth failure
-
-Access tokens are stored with key: `accessToken`
-Refresh tokens are stored with key: `refreshToken`
-
-## Error Handling
-
-```typescript
+`VITE_API_URL` remains a fallback for existing local setups. Do not commit
+`.env.local` or credentials.
+
+## Client behavior
+
+- Adds the persisted access token as a bearer token.
+- Normalizes HTTP, validation, timeout, and network failures to `ApiError`.
+- On an eligible 401, sends one single-flight request to `POST /auth/refresh`,
+  rotates the in-memory refresh token, and retries the failed request once.
+- Clears the local session and navigates to `/login` if refresh fails.
+- Calls `GET /auth/me` during app startup before rendering protected routes.
+- Uses `withCredentials` for backend compatibility; the current backend returns
+  access and refresh tokens in the response body, not an HttpOnly cookie.
+
+The refresh token intentionally stays in memory. As a result, a full reload
+cannot refresh an expired access token; the user will need to sign in again.
+Changing this requires a coordinated backend cookie/session contract.
+
+## Feature modules and verified routes
+
+Import from `src/api/` (or its central `src/api/index.ts` export) rather than
+creating feature-specific Axios instances.
+
+| API module | Backend routes used |
+| --- | --- |
+| `auth.ts` | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`; `GET /auth/me` |
+| `listings.ts` | `GET /listings`, `/listings/:id`, `/listings/landlord/my-listings`, `/listings/landlord/analytics`; `POST /listings`, `/listings/:id/view`, `/listings/:id/images/upload`; `PATCH /listings/:id`, `/listings/:id/availability`; `DELETE /listings/:id` |
+| `properties.ts` | `GET /properties`, `/properties/search`, `/properties/nearby`, `/properties/:id`, `/properties/:id/availability`, `/properties/:id/room-types`; property create/update/stats/view endpoints |
+| `favorites.ts` | `GET /favorites`, `/favorites/:listingId`; `POST` and `DELETE /favorites/:listingId` |
+| `savedSearches.ts` | `GET`, `POST /saved-searches`; `PATCH`, `DELETE /saved-searches/:id` |
+| `rentalRequests.ts` | `POST /properties/:id/rental-requests`; `GET /rental-requests/my`, `/received`; `PATCH /rental-requests/:id/{accept,reject,cancel}` |
+| `agreements.ts` | `GET /agreements/my`, `/agreements/:id`; `PATCH /agreements/:id/terminate` |
+| `bookings.ts` | `POST /bookings`; `GET /bookings/my`, `/bookings/:id`, `/properties/:id/bookings`; `PATCH /bookings/:id/cancel` |
+| `availability.ts` | `GET /properties/:id/availability`; `POST` and `DELETE /properties/:id/availability/block`; listing availability update |
+| `payments.ts` | `POST /payments`; `GET /payments`, `/payments/my`, `/payments/tenant/my-payments`, `/payments/agreement/:agreementId`, `/payments/:id`; provider verification, receipt, and refund routes |
+| `messages.ts` | Conversations, conversation messages, unread count, message notifications, and mark-read routes under `/messages` |
+| `notifications.ts` | `GET /notifications`; `PATCH /notifications/read-all` and `/notifications/:id/read` |
+| `reviews.ts` | `GET /reviews`, `/reviews/:id`, `/reviews/listing/:listingId`, `/properties/:id/reviews`, `/users/:id/reviews`; `POST /reviews`; `DELETE /reviews/:id` |
+| `users.ts` | `GET`, `PATCH /users/me`; public `GET /users/:id`; landlord-profile and trust-score routes |
+| `reports.ts` | User reports and admin report moderation routes |
+| `disputes.ts` | `POST /disputes`; `GET /disputes/my`, `/disputes/:id` |
+| `recommendations.ts` | `GET /recommendations` |
+| `admin.ts` | Admin user/listing/property/dispute moderation, verification, and dashboard routes |
+| `locations.ts` | Country/province/city/area lookup, search, and `GET /locations/:id` |
+
+`/listings` and `/properties` are separate backend resources with separate
+response shapes. Do not substitute one for the other. The listings create
+contract uses `rent`, `deposit`, and `propertyType`; the properties create
+contract uses `price`, `securityDeposit`, `type`, and `rentalMode`.
+
+## Workflow constraints from the backend
+
+- Registration accepts `fullName`, `email`, `phone`, and `password`; a role is
+  not selected by the registration endpoint.
+- An agreement is created by accepting a rental request. There is no standalone
+  agreement-create or sign route.
+- Payment initiation accepts a booking or agreement plus provider and optional
+  billing month. The server resolves payer and amount; never send a trusted
+  amount from the browser.
+- Booking dates are `checkIn` and `checkOut`; optional inventory identifiers
+  select a hotel room, room type, or hostel bed.
+- A review requires a completed booking or agreement, a listing, and a review
+  type. It cannot be submitted for an arbitrary user/listing pair.
+- The service layer deliberately does not expose client methods for routes
+  absent from the backend controller contract.
+
+## Error handling
+
+```ts
+import { ApiError } from '@/api/api-error';
 import { listingsAPI } from '@/api/listings';
 
 try {
-  const listing = await listingsAPI.getOne('invalid-id');
+  const listing = await listingsAPI.getOne('listing-id');
 } catch (error) {
-  if (error.response?.status === 404) {
-    console.error('Listing not found');
-  } else if (error.response?.status === 401) {
-    console.error('Unauthorized - please login');
+  if (error instanceof ApiError) {
+    // `status`, `code`, and validation `fieldErrors` are available when present.
+    showError(error.message);
   } else {
-    console.error('Error:', error.message);
+    throw error;
   }
 }
 ```
 
-## Types
+## Local development
 
-All responses are fully typed in `src/api/types.ts`. Key types:
+From the repository root:
 
-```typescript
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: 'TENANT' | 'LANDLORD' | 'ADMIN';
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Listing {
-  id: string;
-  title: string;
-  price: number;
-  bedrooms: number;
-  bathrooms: number;
-  // ... more fields
-}
-
-interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}
+```sh
+pnpm --filter web dev
+pnpm --filter web build
 ```
 
-## Testing Integration
-
-1. Ensure backend is running: `npm run dev` in `apps/backend/`
-2. Start frontend dev server: `npm run dev` in `apps/web/`
-3. Frontend loads from `http://localhost:5173`
-4. API requests go to `http://localhost:3000/api`
-5. Open browser DevTools → Network to inspect requests
-
-## Troubleshooting
-
-### CORS Errors
-Ensure backend has CORS enabled for `http://localhost:5173`
-
-### Token Issues
-- Check if `accessToken` is in localStorage
-- Verify backend returns tokens in auth responses
-- Check token format: should be JWT
-
-### 404 Errors
-- Verify backend endpoints match client routes
-- Check if database migrations ran: `npm run prisma:migrate` in backend
-
-### Connection Refused
-- Ensure backend is running on port 3000
-- Check `VITE_API_URL` in `.env.local`
+Run the NestJS backend on port `3000` (or update `VITE_API_BASE_URL`). The
+frontend dev server defaults to port `5173`.

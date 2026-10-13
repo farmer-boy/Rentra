@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { agreementsAPI } from '../../api/agreements';
+import { listingsAPI } from '../../api/listings';
+import { paymentsAPI } from '../../api/payments';
 import { useAuthStore } from '../../store/authStore';
 
 interface Agreement {
@@ -51,18 +53,18 @@ const IncomeReport = () => {
     let active = true;
     if (!user?.id) return () => { active = false; };
 
-    Promise.all([api.get('/agreements'), api.get('/payments'), api.get('/listings/landlord/my-listings')])
-      .then(([agreementResponse, paymentResponse, listingResponse]) => {
-        const receivedAgreements = responseList<Agreement>(agreementResponse.data?.data, 'agreement')
+    Promise.all([agreementsAPI.mine<Agreement>(), paymentsAPI.getAll<Payment>(), listingsAPI.getMyListings<Listing>()])
+      .then(([agreementRecords, paymentRecords, receivedListings]) => {
+        const receivedAgreements = responseList<Agreement>(agreementRecords, 'agreement')
           .filter((agreement) => agreement.landlordId === user.id);
-        const receivedPayments = responseList<Payment>(paymentResponse.data?.data, 'payment');
-        const receivedListings = responseList<Listing>(listingResponse.data?.data, 'property');
+        const receivedPayments = responseList<Payment>(paymentRecords, 'payment');
+        const listingRecords = responseList<Listing>(receivedListings, 'property');
         const ownedAgreementIds = new Set(receivedAgreements.map((agreement) => agreement.id));
         if (active) {
           setError('');
           setAgreements(receivedAgreements);
-          setListings(receivedListings);
-          setPayments(receivedPayments.filter((payment) => payment.agreementId && ownedAgreementIds.has(payment.agreementId) && payment.status === 'PAID'));
+          setListings(listingRecords);
+          setPayments(receivedPayments.filter((payment) => payment.agreementId && ownedAgreementIds.has(payment.agreementId) && (payment.status === 'SUCCESS' || payment.status === 'PAID')));
         }
       })
       .catch((cause: unknown) => { if (active) setError(errorMessage(cause)); })

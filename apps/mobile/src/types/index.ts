@@ -19,9 +19,28 @@ export type RentalDuration = 'DAILY' | 'NIGHTLY' | 'WEEKLY' | 'MONTHLY' | 'LONG_
 export type HostelGenderPolicy = 'MALE' | 'FEMALE' | 'MIXED';
 export type LocationLevel = 'COUNTRY' | 'PROVINCE' | 'CITY' | 'AREA' | 'BLOCK_SECTOR';
 export type ListingStatus = 'PENDING' | 'APPROVED' | 'ACTIVE' | 'INACTIVE';
-export type AgreementStatus = 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'TERMINATED';
-export type PaymentStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
+export type AgreementStatus =
+  | 'DRAFT'
+  | 'PENDING'
+  | 'ACTIVE'
+  | 'ENDED'
+  | 'EXPIRED'
+  | 'TERMINATED'
+  | 'CANCELLED';
+export type PaymentStatus =
+  | 'PENDING'
+  | 'PROCESSING'
+  | 'SUCCESS'
+  | 'FAILED'
+  | 'REFUNDED';
 export type PaymentMethod = 'CARD' | 'BANK_TRANSFER' | 'EASYPAISA' | 'JAZZCASH';
+export type PaymentProviderType =
+  | 'JAZZCASH'
+  | 'EASYPAISA'
+  | 'CARD'
+  | 'BANK_TRANSFER'
+  | 'OTHER'
+  | 'LEGACY';
 export type DisputeStatus = 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
 
 export interface User {
@@ -121,10 +140,12 @@ export interface Agreement {
   listingId: string;
   tenantId: string;
   landlordId: string;
-  rent: number;
-  deposit: number;
+  monthlyRent: number;
+  securityDeposit: number | null;
   startDate: string;
-  endDate: string;
+  endDate: string | null;
+  paymentDueDay: number;
+  rules: string | null;
   pdfUrl?: string;
   status: AgreementStatus;
   createdAt: string;
@@ -133,14 +154,17 @@ export interface Agreement {
 
 export interface Payment {
   id: string;
-  agreementId: string;
-  tenantId: string;
+  bookingId: string | null;
+  agreementId: string | null;
+  userId: string;
   amount: number;
-  method: PaymentMethod;
+  currency: string;
+  provider: PaymentProviderType;
   status: PaymentStatus;
-  transactionId?: string;
-  receiptUrl?: string;
-  month: string;
+  transactionId: string | null;
+  paidAt: string | null;
+  billingMonth: string | null;
+  dueAt: string | null;
   createdAt: string;
 }
 

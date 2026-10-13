@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Home, Mail } from 'lucide-react';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { agreementsAPI } from '../../api/agreements';
+import { listingsAPI } from '../../api/listings';
 import { useAuthStore } from '../../store/authStore';
 
 interface Agreement {
@@ -10,7 +11,7 @@ interface Agreement {
   listingId: string;
   tenantId: string;
   tenant?: { fullName?: string; email?: string };
-  rent: number;
+  monthlyRent: number;
   startDate: string;
   endDate: string | null;
   status: string;
@@ -44,14 +45,14 @@ const MyTenants = () => {
     let active = true;
     if (!user?.id) return () => { active = false; };
 
-    Promise.all([api.get('/agreements'), api.get('/listings/landlord/my-listings')])
-      .then(([agreementResponse, listingResponse]) => {
-        const receivedAgreements = responseList<Agreement>(agreementResponse.data?.data, 'agreement');
-        const receivedListings = responseList<Listing>(listingResponse.data?.data, 'property');
+    Promise.all([agreementsAPI.mine<Agreement>(), listingsAPI.getMyListings<Listing>()])
+      .then(([receivedAgreements, receivedListings]) => {
+        const agreementRecords = responseList<Agreement>(receivedAgreements, 'agreement');
+        const listingRecords = responseList<Listing>(receivedListings, 'property');
         if (active) {
           setError('');
-          setAgreements(receivedAgreements.filter((agreement) => agreement.landlordId === user.id && agreement.status === 'ACTIVE'));
-          setListings(receivedListings);
+          setAgreements(agreementRecords.filter((agreement) => agreement.landlordId === user.id && agreement.status === 'ACTIVE'));
+          setListings(listingRecords);
         }
       })
       .catch((cause: unknown) => { if (active) setError(errorMessage(cause)); })
@@ -93,7 +94,7 @@ const MyTenants = () => {
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
                   <div><p className="text-gray-500 dark:text-gray-400">Email</p><p className="mt-1 flex items-center gap-2 font-medium text-gray-900 dark:text-white">{agreement.tenant?.email ? <><Mail size={14} className="text-blue-500" /><a href={`mailto:${agreement.tenant.email}`} className="hover:underline">{agreement.tenant.email}</a></> : 'Not provided'}</p></div>
-                  <div><p className="text-gray-500 dark:text-gray-400">Monthly rent</p><p className="mt-1 font-semibold text-gray-900 dark:text-white">PKR {agreement.rent.toLocaleString()}</p></div>
+                  <div><p className="text-gray-500 dark:text-gray-400">Monthly rent</p><p className="mt-1 font-semibold text-gray-900 dark:text-white">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
                   <div><p className="text-gray-500 dark:text-gray-400">Agreement dates</p><p className="mt-1 font-medium text-gray-900 dark:text-white">{new Date(agreement.startDate).toLocaleDateString()} – {agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'No end date set'}</p></div>
                 </div>
               </Card>

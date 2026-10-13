@@ -7,8 +7,11 @@ interface Props {
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, isInitialized, user } = useAuthStore();
 
+  if (!isInitialized) {
+    return <div role="status" className="p-6 text-center">Restoring your session…</div>;
+  }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   const userRoles = Array.isArray(user?.roles)

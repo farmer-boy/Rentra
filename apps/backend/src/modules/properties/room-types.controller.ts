@@ -21,7 +21,11 @@ export class RoomTypesController {
   constructor(private readonly roomTypesService: RoomTypesService) {}
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a room type and its units' })
+  @ApiOperation({
+    summary: 'Update a room type and synchronize its room inventory',
+    description:
+      'Capacity and price changes propagate to all units. Inventory cannot be reduced below active bookings or capacity below guests in an active booking.',
+  })
   update(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -31,7 +35,9 @@ export class RoomTypesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a room type without active bookings' })
+  @ApiOperation({
+    summary: 'Delete a room type and its units when no active bookings exist',
+  })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.roomTypesService.remove(id, user.sub);
   }

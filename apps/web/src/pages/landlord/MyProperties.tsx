@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MapPin, Pause, Play, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
 import Card from '../../components/ui/Card';
 
 type Listing = { id: string; title: string; area: string; city: string; rent: number; bedrooms: number; bathrooms: number; sqft: number; status: string; availability: string; publicationStatus: string };
@@ -11,11 +11,11 @@ export default function MyProperties() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  useEffect(() => { api.get('/listings/landlord/my-listings').then((response) => setListings(response.data.data ?? [])).catch((requestError) => setError(requestError.response?.data?.message || 'Properties could not be loaded.')).finally(() => setLoading(false)); }, []);
+  useEffect(() => { listingsAPI.getMyListings<Listing>().then(setListings).catch((requestError) => setError(requestError.response?.data?.message || 'Properties could not be loaded.')).finally(() => setLoading(false)); }, []);
   const toggleAvailability = async (listing: Listing) => {
     const availability = listing.availability === 'RENTED' ? 'AVAILABLE' : 'RENTED';
     try {
-      await api.patch(`/listings/${listing.id}/availability`, { availability });
+      await listingsAPI.setAvailability(listing.id, availability);
       setListings((items) => items.map((item) => item.id === listing.id ? { ...item, availability } : item));
       setError('');
     } catch (requestError: any) {

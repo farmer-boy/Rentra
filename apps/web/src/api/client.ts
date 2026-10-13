@@ -1,66 +1,124 @@
-import axios from 'axios';
+import axios, {
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+} from 'axios';
+import { ApiError, toApiError } from './api-error';
+
+const apiBaseURL =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  'http://localhost:3000/api';
+const timeout = Number(import.meta.env.VITE_API_TIMEOUT_MS) || 15000;
+let refreshTokenInMemory: string | null = null;
+let refreshRequest: Promise<string> | null = null;
+
+type RetryableRequest = InternalAxiosRequestConfig & { _retry?: boolean };
+
+export const setRefreshToken = (token: string | null) => {
+  refreshTokenInMemory = token;
+};
+
+export const getRefreshToken = () => refreshTokenInMemory;
+
+export const clearStoredSession = () => {
+  refreshTokenInMemory = null;
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('user');
+  }
+};
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: apiBaseURL,
+  timeout,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
 
-// Attach token to every request
+const isAuthEndpoint = (url = '') =>
+  /\/auth\/(login|register|refresh|logout)(?:$|\?)/.test(url);
+
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token =
+    typeof localStorage !== 'undefined'
+      ? localStorage.getItem('accessToken')
+      : null;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    config.headers.set('Content-Type', false);
   }
   return config;
 });
 
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    const originalRequest = error.config;
+const refreshAccessToken = async () => {
+  if (!refreshTokenInMemory) {
+    throw new ApiError({
+      status: 401,
+      message: 'Your session has expired. Please sign in again.',
+    });
+  }
+  if (!refreshRequest) {
+    refreshRequest = axios
+      .post(
+        `${apiBaseURL.replace(/\/$/, '')}/auth/refresh`,
+        { refreshToken: refreshTokenInMemory },
+        { timeout, withCredentials: true },
+      )
+      .then((response) => {
+        const { accessToken, refreshToken } = response.data as {
+          accessToken: string;
+          refreshToken: string;
+        };
+        if (!accessToken || !refreshToken) {
+          throw new ApiError({
+            status: 502,
+            message: 'The authentication server returned an invalid token response.',
+          });
+        }
+        refreshTokenInMemory = refreshToken;
+        localStorage.setItem('accessToken', accessToken);
+        return accessToken;
+      })
+      .finally(() => {
+        refreshRequest = null;
+      });
+  }
+  return refreshRequest;
+};
 
-    // If 401 and have refresh token, try to refresh
+api.interceptors.response.use(
+  (response) => response,
+  async (error: unknown) => {
+    if (!axios.isAxiosError(error)) {
+      return Promise.reject(error);
+    }
+    const request = error.config as RetryableRequest | undefined;
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry &&
-      localStorage.getItem('refreshToken')
+      request &&
+      !request._retry &&
+      !isAuthEndpoint(request.url)
     ) {
-      originalRequest._retry = true;
-
+      request._retry = true;
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        const response = await axios.post(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:3000/api'}/auth/refresh`,
-          { refreshToken }
-        );
-
-        const { accessToken, refreshToken: rotatedRefreshToken } = response.data;
-        localStorage.setItem('accessToken', accessToken);
-        if (rotatedRefreshToken) {
-          localStorage.setItem('refreshToken', rotatedRefreshToken);
+        const accessToken = await refreshAccessToken();
+        request.headers.Authorization = `Bearer ${accessToken}`;
+        return await api(request);
+      } catch (refreshError) {
+        clearStoredSession();
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('rentra:auth-expired'));
+          if (window.location.pathname !== '/login') {
+            window.location.assign('/login');
+          }
         }
-
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return api(originalRequest);
-      } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+        return Promise.reject(toApiError(refreshError));
       }
     }
-
-    // For other 401 errors, redirect to login
-    if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-
-    return Promise.reject(error);
-  }
+    return Promise.reject(toApiError(error as AxiosError));
+  },
 );
 
 export default api;
