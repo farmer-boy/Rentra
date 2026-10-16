@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/ThemeContext';
-import { User, Settings, LogOut, HelpCircle, MoreHorizontal, Moon, Sun, ArrowLeftRight } from 'lucide-react';
+import { useTheme } from '../../context/useTheme';
+import { User, Settings, LogOut, HelpCircle, Home, Moon, Sun, ArrowLeftRight } from 'lucide-react';
 
 interface ProfileDropdownProps {
   isOpen: boolean;
@@ -162,13 +162,13 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
 
       {/* Settings & Privacy */}
       <button
-        onClick={() => handleNavigate('/settings')}
+        onClick={() => handleNavigate('/settings?section=data-privacy')}
         className={`${
           isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
         } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
       >
         <Settings size={14} className="flex-shrink-0" />
-        Settings & Privacy
+        Privacy settings
       </button>
 
       {/* Help */}
@@ -208,14 +208,15 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
         )}
       </button>
 
-      {/* More Options */}
+      {/* Explore */}
       <button
+        onClick={() => handleNavigate('/')}
         className={`${
           isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
         } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
       >
-        <MoreHorizontal size={14} className="flex-shrink-0" />
-        More
+        <Home size={14} className="flex-shrink-0" />
+        Explore Rentra
       </button>
 
       {/* Switch Account */}
@@ -249,5 +250,4 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
 };
 
 export default ProfileDropdown;
-
 

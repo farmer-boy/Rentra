@@ -30,6 +30,7 @@ import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { UpdateHostelBedStatusDto } from './dto/update-hostel-bed-status.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../properties/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
 import { UploadService } from './upload.service';
@@ -93,9 +94,13 @@ export class ListingsController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'View a property' })
-  async getListingById(@Param('id') id: string) {
-    const listing = await this.listingsService.findById(id);
+  async getListingById(
+    @Param('id') id: string,
+    @CurrentUser() user?: JwtPayload,
+  ) {
+    const listing = await this.listingsService.findPublicById(id, user?.sub);
     return {
       message: 'Listing details',
       data: listing,

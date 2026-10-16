@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { MessageCircle, Star } from 'lucide-react';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
+import { reviewsAPI } from '../../api/reviews';
 import Card from '../../components/ui/Card';
 import { useAuthStore } from '../../store/authStore';
+import { getApiErrorMessage } from '../../api/api-error';
 
 interface Listing { id: string; title: string }
 interface Review { id: string; rating: number; comment: string; createdAt: string; user?: { fullName: string } }
@@ -18,15 +20,14 @@ const LandlordReviews = () => {
     if (!user?.id) { setError('Sign in to view reviews.'); setLoading(false); return; }
     const load = async () => {
       try {
-        const { data: listingsResponse } = await api.get('/listings/landlord/my-listings');
-        const listings: Listing[] = listingsResponse.data ?? [];
+        const listings = await listingsAPI.getMyListings<Listing>();
         const reviewGroups = await Promise.all(listings.map(async (listing) => {
-          const { data } = await api.get(`/reviews/listing/${listing.id}`);
-          return ((data.data ?? []) as Review[]).map((review) => ({ ...review, property: listing.title }));
+          const summary = await reviewsAPI.getListingSummary(listing.id);
+          return summary.data.map((review) => ({ ...review, property: listing.title })) as DisplayReview[];
         }));
         setReviews(reviewGroups.flat());
-      } catch (requestError: any) {
-        setError(requestError.response?.data?.message || 'Reviews could not be loaded.');
+      } catch (requestError: unknown) {
+        setError(getApiErrorMessage(requestError, 'Reviews could not be loaded.'));
       } finally { setLoading(false); }
     };
     void load();

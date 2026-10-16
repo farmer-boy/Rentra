@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Bell, CheckCheck } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import { notificationsAPI } from '../../api/notifications';
+import { useTheme } from '../../context/useTheme';
+import { ApiError } from '../../api/api-error';
+import {
+  useMarkAllNotificationsRead,
+  useMarkNotificationRead,
+  useNotifications,
+} from '../../hooks/useRentraQueries';
 
 interface Notification {
   id: string;
@@ -14,56 +18,22 @@ interface Notification {
 
 export default function NotificationsPage() {
   const { isDark } = useTheme();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [savingId, setSavingId] = useState<string | null>(null);
-  const [markingAll, setMarkingAll] = useState(false);
-  const [error, setError] = useState('');
-
-  const loadNotifications = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      setNotifications(await notificationsAPI.list());
-    } catch (requestError: unknown) {
-      const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;
-      setError(typeof message === 'string' ? message : 'Notifications could not be loaded.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadNotifications();
-  }, [loadNotifications]);
-
-  const markRead = async (id: string) => {
-    setSavingId(id);
-    setError('');
-    try {
-      await notificationsAPI.markRead(id);
-      setNotifications((items) => items.map((item) => item.id === id ? { ...item, isRead: true } : item));
-    } catch (requestError: unknown) {
-      const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;
-      setError(typeof message === 'string' ? message : 'Notification could not be updated.');
-    } finally {
-      setSavingId(null);
-    }
-  };
-
-  const markAllRead = async () => {
-    setMarkingAll(true);
-    setError('');
-    try {
-      await notificationsAPI.markAllRead();
-      setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
-    } catch (requestError: unknown) {
-      const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;
-      setError(typeof message === 'string' ? message : 'Notifications could not be updated.');
-    } finally {
-      setMarkingAll(false);
-    }
-  };
+  const notificationsQuery = useNotifications();
+  const markReadMutation = useMarkNotificationRead();
+  const markAllMutation = useMarkAllNotificationsRead();
+  const notifications = (notificationsQuery.data ?? []) as Notification[];
+  const loading = notificationsQuery.isPending;
+  const savingId = markReadMutation.isPending ? markReadMutation.variables : null;
+  const markingAll = markAllMutation.isPending;
+  const errorCause = notificationsQuery.error ?? markReadMutation.error ?? markAllMutation.error;
+  const error = errorCause instanceof ApiError
+    ? errorCause.message
+    : errorCause
+      ? 'Notifications could not be updated.'
+      : '';
+  const loadNotifications = () => notificationsQuery.refetch();
+  const markRead = (id: string) => markReadMutation.mutate(id);
+  const markAllRead = () => markAllMutation.mutate();
 
   const unreadCount = notifications.filter((notification) => !notification.isRead).length;
   const mutedText = isDark ? 'text-gray-400' : 'text-gray-600';
@@ -80,7 +50,7 @@ export default function NotificationsPage() {
         {unreadCount > 0 && (
           <button
             type="button"
-            onClick={() => void markAllRead()}
+            onClick={markAllRead}
             disabled={markingAll}
             className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60"
           >
@@ -131,7 +101,7 @@ export default function NotificationsPage() {
               {!notification.isRead && (
                 <button
                   type="button"
-                  onClick={() => void markRead(notification.id)}
+                  onClick={() => markRead(notification.id)}
                   disabled={savingId === notification.id}
                   className={`shrink-0 text-xs font-semibold ${isDark ? 'text-green-300 hover:text-green-200' : 'text-green-700 hover:text-green-800'} disabled:opacity-60`}
                 >

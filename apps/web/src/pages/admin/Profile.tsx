@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { usersAPI } from '../../api/users';
 import { useAuthStore } from '../../store/authStore';
 
 interface Profile {
@@ -21,15 +21,15 @@ export default function AdminProfile() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/users/me')
-      .then((response) => {
-        setProfile(response.data);
+    usersAPI.getMe()
+      .then((data) => {
+        setProfile(data);
         updateUser({
-          fullName: response.data.fullName,
-          email: response.data.email,
-          phone: response.data.phone ?? '',
-          trustScore: response.data.trustScore,
-          isVerified: response.data.isVerified,
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone ?? '',
+          trustScore: data.trustScore,
+          isVerified: data.isVerified,
         });
       })
       .catch((requestError) => setError(requestError.response?.data?.message || 'Your profile could not be loaded.'))

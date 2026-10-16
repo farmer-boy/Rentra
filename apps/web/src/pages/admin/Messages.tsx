@@ -1,45 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useTheme } from '../../context/useTheme';
 import { Mail, Trash2, ArrowLeft } from 'lucide-react';
-import api from '../../api/client';
-
-interface ContactMessage {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  message: string;
-  status: string;
-  read: boolean;
-  createdAt: string;
-}
+import { ApiError } from '../../api/api-error';
+import { contactsAPI, type ContactMessage } from '../../api/contacts';
+import { useContactMessages } from '../../hooks/useContactMessages';
 
 export default function AdminMessagesPage() {
   const { isDark } = useTheme();
-  const [localMessages, setLocalMessages] = useState<ContactMessage[]>([]);
+  const queryClient = useQueryClient();
+  const {
+    messages: localMessages,
+    loading,
+    error: queryError,
+    refetchMessages,
+  } = useContactMessages();
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const refetchMessages = useCallback(async () => {
-    try {
-      const { data } = await api.get('/contact/messages');
-      const messages = Array.isArray(data.data) ? data.data : [];
-      setLocalMessages(messages);
-      setError('');
-    } catch (requestError: any) {
-      setError(requestError.response?.data?.message || 'Contact messages could not be loaded.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refetchMessages();
-    const interval = setInterval(() => void refetchMessages(), 5000);
-    return () => clearInterval(interval);
-  }, [refetchMessages]);
   const unreadCount = localMessages.filter((message) => !message.read).length;
+  const loadError = error || (queryError instanceof ApiError
+    ? queryError.message
+    : queryError
+      ? 'Contact messages could not be loaded.'
+      : '');
 
   const handleOpenMessage = async (message: ContactMessage) => {
     setSelectedMessage(message);
@@ -47,14 +31,15 @@ export default function AdminMessagesPage() {
     // If message is unread, mark it as read immediately (auto-seen like WhatsApp)
     if (!message.read) {
       try {
-        await api.patch(`/contact/message/${message.id}/read`);
+        await contactsAPI.markRead(message.id);
 
-        // Update local state
-        setLocalMessages((items) => items.map(msg => msg.id === message.id ? { ...msg, read: true } : msg));
+        queryClient.setQueryData<ContactMessage[]>(['contactMessages'], (items) =>
+          items?.map((item) => item.id === message.id ? { ...item, read: true } : item),
+        );
         setSelectedMessage({ ...message, read: true });
         void refetchMessages();
-      } catch (requestError: any) {
-        setError(requestError.response?.data?.message || 'Message could not be marked as read.');
+      } catch (requestError: unknown) {
+        setError(requestError instanceof ApiError ? requestError.message : 'Message could not be marked as read.');
       }
     }
   };
@@ -63,14 +48,16 @@ export default function AdminMessagesPage() {
     if (!confirm('Are you sure you want to delete this message?')) return;
 
     try {
-      await api.delete(`/contact/message/${id}`);
-      setLocalMessages((items) => items.filter(msg => msg.id !== id));
+      await contactsAPI.remove(id);
+      queryClient.setQueryData<ContactMessage[]>(['contactMessages'], (items) =>
+        items?.filter((message) => message.id !== id),
+      );
       if (selectedMessage?.id === id) {
         setSelectedMessage(null);
       }
       void refetchMessages();
-    } catch (requestError: any) {
-      setError(requestError.response?.data?.message || 'Message could not be deleted.');
+    } catch (requestError: unknown) {
+      setError(requestError instanceof ApiError ? requestError.message : 'Message could not be deleted.');
     }
   };
 
@@ -109,8 +96,8 @@ export default function AdminMessagesPage() {
 
         {loading ? (
           <p className="px-4 text-sm text-gray-500">Loading messages...</p>
-        ) : error && localMessages.length === 0 ? (
-          <p role="alert" className="px-4 text-sm text-red-600">{error}</p>
+        ) : loadError && localMessages.length === 0 ? (
+          <p role="alert" className="px-4 text-sm text-red-600">{loadError}</p>
         ) : localMessages.length === 0 ? (
           <div
             className="rounded-lg p-6 sm:p-4 lg:p-8 text-center mx-2 sm:mx-1 lg:mx-0"

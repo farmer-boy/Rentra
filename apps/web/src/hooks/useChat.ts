@@ -16,15 +16,15 @@ interface Message {
   };
 }
 
-interface Conversation {
+export interface Conversation {
   id: string;
   participant1Id: string;
   participant2Id: string;
   lastMessageAt: string;
   createdAt: string;
-  participant1: { id: string; fullName: string; email: string };
-  participant2: { id: string; fullName: string; email: string };
-  otherParticipant: { id: string; fullName: string; email: string };
+  participant1: { id: string; fullName: string; email?: string };
+  participant2: { id: string; fullName: string; email?: string };
+  otherParticipant: { id: string; fullName: string; email?: string };
   lastMessage?: Message;
   listing?: { id: string; title: string; city: string; area: string } | null;
 }
@@ -38,10 +38,10 @@ interface Notification {
   data?: { conversationId?: string; listingId?: string };
 }
 
-export const useChat = () => {
+export const useChat = (initialConversation?: Conversation) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [currentConversation, setCurrentConversation] =
-    useState<Conversation | null>(null);
+    useState<Conversation | null>(initialConversation ?? null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -71,10 +71,17 @@ export const useChat = () => {
     async (otherUserId: string, listingId?: string) => {
       try {
         setLoading(true);
-        const conversation = await messagesAPI.getOrCreateConversation(
+        const conversationRecord = await messagesAPI.getOrCreateConversation(
           otherUserId,
           listingId,
         );
+        const conversation: Conversation = {
+          ...conversationRecord,
+          otherParticipant:
+            conversationRecord.participant1Id === otherUserId
+              ? conversationRecord.participant1
+              : conversationRecord.participant2,
+        };
         setCurrentConversation(conversation);
         await fetchMessages(conversation.id);
         return conversation;

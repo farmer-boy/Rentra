@@ -25,7 +25,7 @@ export interface RegisterRequest {
   password: string;
   fullName: string;
   phone: string;
-  cnic: string;
+  cnic?: string;
   role?: 'TENANT' | 'LANDLORD' | 'ADMIN';
   roles?: Array<'TENANT' | 'LANDLORD' | 'ADMIN'>;
 }

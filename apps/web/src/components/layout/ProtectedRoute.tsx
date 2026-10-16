@@ -1,9 +1,10 @@
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import type { User } from '../../api/types';
 
 interface Props {
   children: React.ReactNode;
-  allowedRoles?: string[];
+  allowedRoles?: Array<NonNullable<User['role']>>;
 }
 
 export default function ProtectedRoute({ children, allowedRoles }: Props) {
@@ -14,13 +15,13 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
   }
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
-  const userRoles = Array.isArray(user?.roles)
+  const userRoles: Array<NonNullable<User['role']>> = Array.isArray(user?.roles)
     ? user.roles
     : user?.role
       ? [user.role]
       : [];
 
-  if (allowedRoles && user && !allowedRoles.some((role) => userRoles.includes(role as any))) {
+  if (allowedRoles && user && !allowedRoles.some((role) => userRoles.includes(role))) {
     if (userRoles.includes('ADMIN')) return <Navigate to="/admin" replace />;
     if (userRoles.includes('LANDLORD')) return <Navigate to="/landlord" replace />;
     return <Navigate to="/tenant" replace />;

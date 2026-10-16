@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { ClipboardList, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { rentalRequestsAPI } from '../../api/rentalRequests';
 import Card from '../../components/ui/Card';
+import { toApiError } from '../../api/api-error';
 
 interface RentalRequest {
   id: string;
@@ -10,13 +12,12 @@ interface RentalRequest {
   moveInDate?: string | null;
   durationMonths?: number | null;
   message?: string | null;
-  property?: { title?: string; area?: string; city?: string; price?: number } | null;
-  listing?: { title?: string; area?: string; city?: string; rent?: number } | null;
+  property?: { id?: string; title?: string; area?: string; city?: string; price?: number } | null;
+  listing?: { id?: string; title?: string; area?: string; city?: string; rent?: number } | null;
+  agreements?: Array<{ id: string; status: string; startDate: string; endDate?: string | null }>;
 }
 
-const getErrorMessage = (error: unknown) =>
-  (error as { response?: { data?: { message?: string } } })?.response?.data?.message
-    ?? 'Rental requests could not be loaded. Please try again.';
+const getErrorMessage = (error: unknown) => toApiError(error).message;
 
 export default function TenantRentalRequests() {
   const [requests, setRequests] = useState<RentalRequest[]>([]);
@@ -69,11 +70,17 @@ export default function TenantRentalRequests() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <h2 className="font-semibold">{title}</h2>
+                    {request.listing?.id && <Link to={`/listings/${request.listing.id}`} className="mt-1 inline-block text-xs font-semibold text-emerald-700 underline">View listing</Link>}
                     {location && <p className="mt-1 flex items-center gap-1 text-sm text-gray-500"><MapPin size={14} />{location}</p>}
                     <p className="mt-2 text-sm text-gray-600">Sent {new Date(request.createdAt).toLocaleDateString()} · {request.status.replaceAll('_', ' ')}</p>
                     {request.moveInDate && <p className="mt-1 text-sm text-gray-500">Requested move-in: {new Date(request.moveInDate).toLocaleDateString()}</p>}
                     {request.durationMonths != null && <p className="mt-1 text-sm text-gray-500">Duration: {request.durationMonths} months</p>}
                     {request.message && <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600">{request.message}</p>}
+                    {request.agreements?.map((agreement) => (
+                      <Link key={agreement.id} to="/tenant/agreement" className="mt-3 inline-block rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">
+                        View {agreement.status.toLowerCase()} agreement
+                      </Link>
+                    ))}
                   </div>
                   {request.status === 'PENDING' && <button disabled={cancellingId !== null} onClick={() => void cancelRequest(request.id)} className="rounded border px-3 py-2 text-sm font-medium text-red-600 disabled:opacity-50">{cancellingId === request.id ? 'Cancelling…' : 'Cancel request'}</button>}
                 </div>

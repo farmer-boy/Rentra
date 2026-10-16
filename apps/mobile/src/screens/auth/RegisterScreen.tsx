@@ -8,7 +8,6 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Picker,
   StatusBar,
 } from 'react-native';
 import { CustomTextInput } from '../../components/CustomTextInput';
@@ -29,7 +28,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
     cnic: '',
     password: '',
     confirmPassword: '',
-    role: 'TENANT' as Role,
+    role: 'TENANT' as Exclude<Role, 'ADMIN'>,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -62,8 +61,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
 
     if (!form.password) {
       newErrors.password = 'Password is required';
-    } else if (form.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (form.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
     }
 
     if (!form.confirmPassword) {
@@ -184,7 +183,15 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
             label="CNIC"
             placeholder="Enter your CNIC number"
             value={form.cnic}
-            onChangeText={(text) => setForm({ ...form, cnic: text })}
+            onChangeText={(text) => {
+              const digits = text.replace(/\D/g, '').slice(0, 13);
+              const cnic = [
+                digits.slice(0, 5),
+                digits.slice(5, 12),
+                digits.slice(12, 13),
+              ].filter(Boolean).join('-');
+              setForm({ ...form, cnic });
+            }}
             error={errors.cnic}
             keyboardType="numeric"
             editable={!loading}
@@ -193,15 +200,26 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) =>
           {/* Role Selector */}
           <View style={styles.roleContainer}>
             <Text style={styles.label}>I am a</Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                selectedValue={form.role}
-                onValueChange={(value) => setForm({ ...form, role: value })}
-                enabled={!loading}
-              >
-                <Picker.Item label="Tenant (Looking for rental)" value="TENANT" />
-                <Picker.Item label="Landlord (Renting out property)" value="LANDLORD" />
-              </Picker>
+            <View style={styles.roleOptions}>
+              {([
+                ['TENANT', 'Tenant', 'Looking for a rental'],
+                ['LANDLORD', 'Landlord', 'Renting out a property'],
+              ] as const).map(([role, title, description]) => (
+                <TouchableOpacity
+                  key={role}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: form.role === role, disabled: loading }}
+                  disabled={loading}
+                  onPress={() => setForm({ ...form, role })}
+                  style={[
+                    styles.roleOption,
+                    form.role === role && styles.selectedRoleOption,
+                  ]}
+                >
+                  <Text style={styles.roleOptionTitle}>{title}</Text>
+                  <Text style={styles.roleOptionDescription}>{description}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
 
@@ -320,12 +338,29 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 8,
   },
-  pickerWrapper: {
+  roleOptions: {
+    gap: 8,
+  },
+  roleOption: {
     borderWidth: 1,
     borderColor: '#ddd',
     borderRadius: 8,
     backgroundColor: '#fff',
-    overflow: 'hidden',
+    padding: 12,
+  },
+  selectedRoleOption: {
+    borderColor: '#667eea',
+    backgroundColor: '#f2f4ff',
+  },
+  roleOptionTitle: {
+    color: '#1a1a2e',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  roleOptionDescription: {
+    color: '#666',
+    fontSize: 12,
+    marginTop: 3,
   },
   registerButton: {
     marginTop: 8,

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { Bot, Lightbulb, Star, FileText, CreditCard, Home } from 'lucide-react';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
+import { usersAPI } from '../../api/users';
 
 interface Listing {
   id: string;
@@ -35,11 +36,12 @@ export default function TenantDashboard() {
 
   useEffect(() => {
     let active = true;
-    api.get<{ data?: Listing[]; pagination?: { total?: number } }>('/listings', { params: { page: 1, limit: 5 } })
-      .then(({ data }) => {
+    listingsAPI.getAll<Listing>({ page: 1, limit: 5 })
+      .then((data) => {
         if (active) {
           setListings(Array.isArray(data.data) ? data.data : []);
-          setListingTotal(typeof data.pagination?.total === 'number' ? data.pagination.total : null);
+          const pagination = data.pagination as { total?: number } | undefined;
+          setListingTotal(typeof pagination?.total === 'number' ? pagination.total : null);
         }
       })
       .catch(() => {
@@ -48,8 +50,8 @@ export default function TenantDashboard() {
       .finally(() => {
         if (active) setListingsLoading(false);
       });
-    api.get<Profile>('/users/me')
-      .then(({ data }) => {
+    usersAPI.getMe()
+      .then((data) => {
         if (active) setProfile(data);
       })
       .catch(() => {
@@ -82,7 +84,7 @@ export default function TenantDashboard() {
 
       <div className="mb-4">
         <div className={`text-xs font-bold mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-widest`}>Quick Access</div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-1.5 md:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 md:gap-2">
           {quickActions.map((action) => (
             <button
               key={action.label}
@@ -96,7 +98,7 @@ export default function TenantDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-3 mb-4">
         <StatCard label="PUBLISHED LISTINGS" value={listingsLoading ? '…' : listingsError ? 'Unavailable' : listingTotal ?? '—'} />
         <StatCard label="FAKE DETECTED" value="—" change={unavailable} color="text-red-600" />
         <StatCard label="AGREEMENTS SIGNED" value="—" change={unavailable} color="text-green-600" />

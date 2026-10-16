@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
-import api from '../../api/client';
+import { useTheme } from '../../context/useTheme';
+import { contactsAPI } from '../../api/contacts';
+import { getApiErrorMessage } from '../../api/api-error';
 
 export default function Contact() {
   const { isDark } = useTheme();
@@ -17,7 +18,7 @@ export default function Contact() {
     setError('');
 
     try {
-      await api.post('/contact/message', formData);
+      await contactsAPI.create(formData);
 
       setSubmitted(true);
       setFormData({ name: '', email: '', phone: '', message: '' });
@@ -27,8 +28,7 @@ export default function Contact() {
         setSubmitted(false);
       }, 5000);
     } catch (err) {
-      const requestError = err as { response?: { data?: { message?: string } } };
-      setError(requestError.response?.data?.message || 'Failed to send message. Please try again.');
+      setError(getApiErrorMessage(err, 'Failed to send message. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -40,17 +40,16 @@ export default function Contact() {
       <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition ${isDark ? 'bg-[#0f0f0f]/40 border-white/5' : 'bg-white/40 border-gray-400/30'} border-b`}>
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition group">
-            <img src="/logo.jpg" alt="Renova Logo" className="w-10 h-10 rounded-lg object-cover shadow-lg group-hover:shadow-green-500/50 transition" style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}} />
+            <img src="/logo.jpg" alt="Rentra logo" className="w-10 h-10 rounded-lg object-cover shadow-lg group-hover:shadow-green-500/50 transition" style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}} />
             <div>
-              <div className="text-xl font-bold text-green-500">Renova</div>
-              <div className="text-[10px] text-green-400/70 font-semibold tracking-wider">AI RENTAL</div>
+              <div className="text-xl font-bold text-green-500">Rentra</div>
+              <div className="text-[10px] text-green-400/70 font-semibold tracking-wider">RENT WITH CLARITY</div>
             </div>
           </Link>
           <div className="hidden md:flex gap-8 items-center">
-            <a href="/#features" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Features</a>
+            <a href="/#trust" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Why Rentra</a>
             <a href="/#how-it-works" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>How It Works</a>
-            <a href="/#pricing" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Pricing</a>
-            <a href="/#faq" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>FAQ</a>
+            <a href="/#homes" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Browse homes</a>
             <Link to="/contact" className={`text-sm font-semibold text-green-400`}>Contact</Link>
           </div>
           <div className="flex gap-3">
@@ -170,14 +169,14 @@ export default function Contact() {
       <footer className={`border-t py-12 px-4 ${isDark ? 'border-white/10 bg-[#0a0a0a]' : 'border-gray-400 bg-gray-50'}`}>
         <div className="max-w-6xl mx-auto grid md:grid-cols-5 gap-8 mb-8 text-sm">
           <div>
-            <h4 className="font-bold mb-4">Renova</h4>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Transparent Renting, Powered by AI</p>
+            <h4 className="font-bold mb-4">Rentra</h4>
+            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>A clearer rental journey for tenants and landlords.</p>
           </div>
           <div>
             <h4 className="font-bold mb-4">Platform</h4>
             <ul className={`space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              <li><a href="/#features" className="hover:text-green-500">Features</a></li>
-              <li><a href="/#pricing" className="hover:text-green-500">Pricing</a></li>
+              <li><a href="/#trust" className="hover:text-green-500">Why Rentra</a></li>
+              <li><a href="/#homes" className="hover:text-green-500">Browse homes</a></li>
               <li><a href="/#how-it-works" className="hover:text-green-500">How It Works</a></li>
             </ul>
           </div>
@@ -185,15 +184,13 @@ export default function Contact() {
             <h4 className="font-bold mb-4">Support</h4>
             <ul className={`space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               <li><Link to="/contact" className="hover:text-green-500">Contact</Link></li>
-              <li><a href="/#faq" className="hover:text-green-500">FAQ</a></li>
-              <li><a href="#" className="hover:text-green-500">Help Center</a></li>
+              <li><Link to="/help" className="hover:text-green-500">Help Center</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold mb-4">Legal</h4>
             <ul className={`space-y-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              <li><a href="#" className="hover:text-green-500">Privacy</a></li>
-              <li><a href="#" className="hover:text-green-500">Terms</a></li>
+              <li className="text-xs">Privacy policy and terms are not published yet.</li>
             </ul>
           </div>
           <div>
@@ -202,11 +199,9 @@ export default function Contact() {
           </div>
         </div>
         <div className={`border-t pt-8 text-center text-sm ${isDark ? 'border-white/10 text-gray-400' : 'border-gray-400 text-gray-600'}`}>
-          <p>© 2026 Renova. All rights reserved. Made with ❤️ in Pakistan.</p>
+          <p>© {new Date().getFullYear()} Rentra. Made with care in Pakistan.</p>
         </div>
       </footer>
     </div>
   );
 }
-
-

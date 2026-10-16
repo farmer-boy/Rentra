@@ -48,13 +48,14 @@ export interface User {
   email: string;
   phone: string;
   fullName: string;
-  cnic: string;
+  cnic?: string;
   role: Role;
+  roles?: Role[];
   trustScore: number;
   isVerified: boolean;
   isSuspended: boolean;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   locationId?: string;
   location?: {
     id: string;
@@ -84,7 +85,7 @@ export interface RegisterRequest {
   phone: string;
   cnic: string;
   password: string;
-  role: Role;
+  role: Exclude<Role, 'ADMIN'>;
 }
 
 export interface AuthResponse {

@@ -14,9 +14,58 @@ export interface AdminListFilters {
   to?: string;
 }
 
+export interface AdminDisputesResponse<T = Dispute> {
+  data: T[];
+  totalCount: number;
+  pagination: {
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export type AdminUserRecord = Pick<
+  User,
+  'id' | 'email' | 'fullName' | 'phone' | 'roles' | 'isSuspended' | 'createdAt' | 'updatedAt'
+> & {
+  isSuspended: boolean;
+  trustScore: number;
+  emailVerifiedAt: string | null;
+  phoneVerifiedAt: string | null;
+  verificationSubmissions: Array<{ status: string }>;
+};
+
+export interface AdminListingRecord {
+  id: string;
+  propertyId: string;
+  title: string;
+  type: string;
+  status: string;
+  publicationStatus: string;
+  rent: number | string;
+  city: string;
+  createdAt: string;
+  landlord: { id: string; fullName: string };
+  property: { verificationStatus: string };
+}
+
+export interface AdminPropertyRecord {
+  id: string;
+  title: string;
+  propertyType: string;
+  status: string;
+  verificationStatus: string;
+  city: string;
+  price: number | string;
+  createdAt: string;
+  owner: { id: string; fullName: string };
+  hotel: { id: string; starRating: number } | null;
+  hostel: { id: string; genderPolicy: string } | null;
+}
+
 export const adminAPI = {
   // User Management
-  getAllUsers: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<User>> => {
+  getAllUsers: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<AdminUserRecord>> => {
     const response = await api.get('/admin/users', { params: filters });
     return response.data;
   },
@@ -42,12 +91,12 @@ export const adminAPI = {
     (await api.patch(`/admin/landlord-profiles/${id}/verify`)).data,
 
   // Listing Moderation
-  getAllListings: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<Listing>> => {
+  getAllListings: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<AdminListingRecord>> => {
     const response = await api.get('/admin/listings', { params: filters });
     return response.data;
   },
 
-  getProperties: async (filters: AdminListFilters = {}) => {
+  getProperties: async (filters: AdminListFilters = {}): Promise<PaginatedResponse<AdminPropertyRecord>> => {
     const response = await api.get('/admin/properties', { params: filters });
     return response.data;
   },
@@ -60,10 +109,13 @@ export const adminAPI = {
     (await api.patch(`/admin/listings/${id}/verify`)).data,
 
   // Disputes
-  getAllDisputes: async (page = 1, limit = 20): Promise<PaginatedResponse<Dispute>> => {
+  getAllDisputes: async (page = 1, limit = 20): Promise<AdminDisputesResponse> => {
     const response = await api.get('/admin/disputes', { params: { page, limit } });
     return response.data;
   },
+
+  resolveDispute: async (id: string, resolution: string) =>
+    (await api.patch(`/admin/disputes/${id}/resolve`, { resolution })).data,
 
   getDashboardStats: async () => {
     const response = await api.get('/admin/dashboard/stats');

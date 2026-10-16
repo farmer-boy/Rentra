@@ -25,12 +25,15 @@ export class UsersService {
     fullName: string;
     email: string;
     phone: string;
+    cnic?: string;
     password: string;
+    role?: Role.TENANT | Role.LANDLORD;
   }) {
+    const { role = Role.TENANT, ...accountData } = data;
     return this.prisma.user.create({
       data: {
-        ...data,
-        roles: [Role.TENANT],
+        ...accountData,
+        roles: [role],
       },
     });
   }

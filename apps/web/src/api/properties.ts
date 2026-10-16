@@ -10,6 +10,7 @@ export interface PropertyRecord {
   bedrooms: number;
   status: string;
   verificationStatus: string;
+  listings?: Array<{ id: string; status?: string; publicationStatus?: string }>;
   [key: string]: unknown;
 }
 
@@ -45,10 +46,10 @@ export const propertiesAPI = {
     (await api.post<PropertyRecord>('/properties', body)).data,
   list: async (params: Record<string, unknown> = {}) =>
     (await api.get<{ items: PropertyRecord[]; pagination: unknown }>('/properties', { params })).data,
-  details: async (id: string) =>
-    (await api.get<PropertyRecord>(`/properties/${id}`)).data,
-  update: async (id: string, body: Partial<CreatePropertyInput>) =>
-    (await api.patch<PropertyRecord>(`/properties/${id}`, body)).data,
+  details: async <T = PropertyRecord>(id: string) =>
+    (await api.get<T>(`/properties/${id}`)).data,
+  update: async <T = PropertyRecord>(id: string, body: Partial<CreatePropertyInput>) =>
+    (await api.patch<T>(`/properties/${id}`, body)).data,
   expire: async (id: string) =>
     (await api.delete<{ id: string; status: string }>(`/properties/${id}`)).data,
   stats: async (id: string, params?: Record<string, unknown>) =>

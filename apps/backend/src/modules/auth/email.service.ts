@@ -4,7 +4,7 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class EmailService {
   async sendVerificationEmail(email: string, token: string) {
-    const verificationUrl = `${this.apiBaseUrl()}/auth/verify-email?token=${encodeURIComponent(token)}`;
+    const verificationUrl = `${this.frontendBaseUrl()}/verify-email?token=${encodeURIComponent(token)}`;
 
     await this.transporter().sendMail({
       from: this.sender(),
@@ -19,7 +19,7 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, token: string) {
-    const resetUrl = `${this.apiBaseUrl()}/auth/reset-password?token=${encodeURIComponent(token)}`;
+    const resetUrl = `${this.frontendBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
 
     await this.transporter().sendMail({
       to: email,
@@ -56,15 +56,15 @@ export class EmailService {
     return user;
   }
 
-  private apiBaseUrl() {
+  private frontendBaseUrl() {
     const baseUrl =
-      process.env.API_PUBLIC_URL ??
+      process.env.FRONTEND_URL ??
       (process.env.NODE_ENV === 'production'
         ? undefined
-        : 'http://localhost:3000/api');
+        : 'http://localhost:5173');
     if (!baseUrl || !/^https?:\/\//i.test(baseUrl)) {
       throw new ServiceUnavailableException(
-        'API_PUBLIC_URL must be configured for verification emails',
+        'FRONTEND_URL must be configured for authentication emails',
       );
     }
     return baseUrl.replace(/\/+$/, '');

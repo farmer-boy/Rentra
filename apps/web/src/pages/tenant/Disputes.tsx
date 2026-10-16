@@ -1,27 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
-import api from '../../api/client';
-
-interface Dispute {
-  id: string;
-  tenantId: string;
-  title: string;
-  description: string;
-  status: string;
-  agreementId: string;
-  createdAt: string;
-  agreement?: {
-    landlord?: { fullName: string };
-  };
-}
+import { disputesAPI, type DisputeRecord } from '../../api/disputes';
 
 export default function Disputes() {
   const { user } = useAuthStore();
   const { isDark } = useTheme();
-  const [disputes, setDisputes] = useState<Dispute[]>([]);
+  const [disputes, setDisputes] = useState<DisputeRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -30,10 +17,9 @@ export default function Disputes() {
     if (!user?.id) {
       return () => { active = false; };
     }
-    api.get<{ data?: Dispute[] }>('/disputes')
-      .then(({ data }) => {
-        const records = Array.isArray(data.data) ? data.data : [];
-        if (active) setDisputes(records.filter((dispute) => dispute.tenantId === user.id));
+    disputesAPI.mine()
+      .then((response) => {
+        if (active) setDisputes(response.data);
       })
       .catch(() => {
         if (active) setError(true);
@@ -70,13 +56,13 @@ export default function Disputes() {
             {disputes.map((dispute) => (
               <div key={dispute.id} className={`p-4 border-l-4 rounded-lg ${statusVariant(dispute.status) === 'red' ? 'border-red-500' : statusVariant(dispute.status) === 'green' ? 'border-green-500' : 'border-yellow-500'} ${isDark ? 'bg-[#1f1f1f]' : 'bg-gray-50'}`}>
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                  <span className={`text-[12px] font-bold ${isDark ? 'text-white' : 'text-black'}`}>{dispute.title}</span>
+                  <span className={`text-[12px] font-bold ${isDark ? 'text-white' : 'text-black'}`}>{dispute.reason || dispute.type.replaceAll('_', ' ')}</span>
                   <Pill variant={statusVariant(dispute.status)}>{dispute.status}</Pill>
                 </div>
                 <p className={`text-[11px] mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{dispute.description}</p>
                 <div className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  {dispute.agreement?.landlord?.fullName ? `Landlord: ${dispute.agreement.landlord.fullName} · ` : ''}
-                  Agreement {dispute.agreementId} · Filed {new Date(dispute.createdAt).toLocaleDateString()}
+                  {dispute.agreementId ? `Agreement ${dispute.agreementId} · ` : ''}
+                  Filed {new Date(dispute.createdAt).toLocaleDateString()}
                 </div>
               </div>
             ))}

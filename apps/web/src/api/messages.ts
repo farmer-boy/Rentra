@@ -5,10 +5,29 @@ export interface CreateMessageInput {
   attachmentUrl?: string;
 }
 
+export interface ConversationParticipant {
+  id: string;
+  fullName: string;
+  email?: string;
+}
+
+export interface ConversationRecord {
+  id: string;
+  participant1Id: string;
+  participant2Id: string;
+  lastMessageAt: string;
+  createdAt: string;
+  participant1: ConversationParticipant;
+  participant2: ConversationParticipant;
+  listing?: { id: string; title: string; city: string; area: string } | null;
+  property?: { id: string; title: string; city: string; area: string } | null;
+  booking?: { id: string; startDate: string; endDate: string; status: string } | null;
+}
+
 export const messagesAPI = {
   conversations: async () => (await api.get('/messages/conversations')).data,
   getOrCreateConversation: async (otherUserId: string, listingId?: string) =>
-    (await api.post(`/messages/conversation/${otherUserId}`, {}, { params: { listingId } })).data,
+    (await api.post<ConversationRecord>(`/messages/conversation/${otherUserId}`, {}, { params: { listingId } })).data,
   messages: async (conversationId: string, limit = 50, offset = 0) =>
     (await api.get(`/messages/conversation/${conversationId}`, { params: { limit, offset } })).data,
   send: async (conversationId: string, body: CreateMessageInput) =>

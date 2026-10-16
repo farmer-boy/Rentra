@@ -1,42 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Card from '../../components/ui/Card';
 import { FileText } from 'lucide-react';
-import { adminAPI } from '../../api/admin';
-
-interface AdminListing {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: string;
-  city?: string;
-  rent?: number;
-  landlord?: { id: string; fullName?: string; email?: string };
-}
-
-function normalizeListings(response: unknown): AdminListing[] {
-  if (Array.isArray(response)) return response as AdminListing[];
-  if (response && typeof response === 'object' && 'items' in response && Array.isArray(response.items)) {
-    return response.items as AdminListing[];
-  }
-  return [];
-}
+import { adminAPI, type AdminListingRecord } from '../../api/admin';
 
 const AdminListings = () => {
-  const [listings, setListings] = useState<AdminListing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    let active = true;
-    adminAPI.getAllListings().then((response) => {
-      if (active) setListings(normalizeListings(response));
-    }).catch(() => {
-      if (active) setError('Could not load listings. Please try again later.');
-    }).finally(() => {
-      if (active) setLoading(false);
-    });
-    return () => { active = false; };
-  }, []);
+  const [page, setPage] = useState(1);
+  const { data, isFetching, isError } = useQuery({
+    queryKey: ['admin', 'listings', { page, limit: 20 }],
+    queryFn: () => adminAPI.getAllListings({ page, limit: 20 }),
+  });
+  const listings: AdminListingRecord[] = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 0;
+  const error = isError ? 'Could not load listings. Please try again later.' : '';
 
   const published = listings.filter((listing) => listing.status === 'PUBLISHED').length;
   const pending = listings.filter((listing) => listing.status === 'PENDING').length;
@@ -56,7 +33,7 @@ const AdminListings = () => {
     }
   };
 
-  const statValue = (value: number) => loading || error ? '—' : value;
+  const statValue = (value: number) => isFetching || error ? '—' : value;
 
   return (
     <div className="space-y-6">
@@ -65,22 +42,22 @@ const AdminListings = () => {
         <p className="text-gray-600 dark:text-gray-400">Manage and moderate all property listings</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Published</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">Published on page</p>
           <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{statValue(published)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Pending</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">Pending on page</p>
           <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{statValue(pending)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Unpublished</p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">Unpublished on page</p>
           <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">{statValue(unpublished)}</p>
         </Card>
         <Card className="p-4 text-center">
           <p className="text-gray-600 dark:text-gray-400 text-sm">Total</p>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{statValue(listings.length)}</p>
+          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{statValue(total)}</p>
         </Card>
       </div>
 
@@ -98,7 +75,7 @@ const AdminListings = () => {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {isFetching && listings.length === 0 ? (
                 <tr><td colSpan={5} className="py-8 text-center text-gray-500">Loading listings...</td></tr>
               ) : listings.length === 0 ? (
                 <tr><td colSpan={5} className="py-8 text-center text-gray-500">{error ? 'Listing records are unavailable.' : 'No listings found.'}</td></tr>
@@ -115,10 +92,10 @@ const AdminListings = () => {
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{listing.landlord?.fullName || listing.landlord?.email || '—'}</td>
+                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{listing.landlord.fullName}</td>
                   <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{listing.city || '—'}</td>
                   <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white">
-                    {typeof listing.rent === 'number' ? `Rs ${listing.rent.toLocaleString()}` : '—'}
+                    {Number.isFinite(Number(listing.rent)) ? `Rs ${Number(listing.rent).toLocaleString()}` : '—'}
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(listing.status)}`}>
@@ -129,6 +106,29 @@ const AdminListings = () => {
               ))}
             </tbody>
           </table>
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Page {page} of {Math.max(totalPages, 1)}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50 dark:border-gray-700"
+              onClick={() => setPage((current) => Math.max(current - 1, 1))}
+              disabled={page <= 1 || isFetching}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              className="rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50 dark:border-gray-700"
+              onClick={() => setPage((current) => Math.min(current + 1, totalPages))}
+              disabled={page >= totalPages || isFetching}
+            >
+              Next
+            </button>
+          </div>
         </div>
       </Card>
     </div>

@@ -3,6 +3,16 @@ import type { CreateListingRequest, Listing } from './types';
 
 export type CreateListingInput = CreateListingRequest;
 
+export interface ListingPage<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export const listingsAPI = {
   getAll: async <T = Listing>(params: Record<string, unknown> = {}) =>
     (
@@ -35,6 +45,16 @@ export const listingsAPI = {
     return response.data.data;
   },
 
+  getMyListingsPage: async <T = Listing>(
+    params: Record<string, unknown> = {},
+  ): Promise<ListingPage<T>> => {
+    const response = await api.get<ListingPage<T>>(
+      '/listings/landlord/my-listings',
+      { params },
+    );
+    return response.data;
+  },
+
   getLandlordAnalytics: async () => {
     const response = await api.get('/listings/landlord/analytics');
     return response.data;
@@ -42,6 +62,8 @@ export const listingsAPI = {
 
   setAvailability: async (id: string, availability: 'AVAILABLE' | 'RENTED') =>
     (await api.patch(`/listings/${id}/availability`, { availability })).data,
+  setAmenities: async (id: string, amenities: string[]) =>
+    (await api.put(`/listings/${id}/amenities`, { amenities })).data,
   publish: async <T = Listing>(id: string) =>
     (await api.patch<{ data: T }>(`/listings/${id}/publish`)).data.data,
   unpublish: async <T = Listing>(id: string) =>

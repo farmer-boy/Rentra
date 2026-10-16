@@ -1,48 +1,53 @@
 import { Outlet } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import Navbar from './Navbar';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [sidebarOpen]);
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg)', scrollbarGutter: 'stable' }}>
-      {/* Navbar at Top */}
+    <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg)', scrollbarGutter: 'stable' }}>
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-      
-      {/* Sidebar and Content */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Sidebar - Desktop View (Always Expanded on iPad+) */}
-        <div className="hidden md:flex md:flex-shrink-0 h-full z-40" style={{ width: 'fit-content' }}>
-          <AdminSidebar 
-            onNavigate={() => setSidebarOpen(false)} 
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
+        <div className="z-40 hidden h-full shrink-0 md:flex" style={{ width: 'fit-content' }}>
+          <AdminSidebar
+            onNavigate={() => setSidebarOpen(false)}
             isMobileOpen={false}
             isDesktopView={true}
           />
         </div>
 
-        {/* Mobile Sidebar Overlay - Full width when open */}
         {sidebarOpen && (
-          <>
-            <div className="md:hidden flex-shrink-0 w-56 h-full z-40">
-              <AdminSidebar 
-                onNavigate={() => setSidebarOpen(false)} 
+          <div id="mobile-navigation" className="fixed inset-0 z-50 md:hidden">
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              className="absolute inset-0 bg-black/55"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <aside className="absolute inset-y-0 left-0 z-10 w-[min(14rem,85vw)] shadow-2xl">
+              <AdminSidebar
+                onNavigate={() => setSidebarOpen(false)}
                 isMobileOpen={true}
                 isDesktopView={false}
               />
-            </div>
-            <div 
-              className="absolute inset-0 bg-black/40 md:hidden z-30"
-              onClick={() => setSidebarOpen(false)}
-            />
-          </>
+            </aside>
+          </div>
         )}
 
-        {/* Page Content - Smooth without jumping */}
-        <div className="flex-1 overflow-y-auto p-3 md:p-4 transition-all duration-300" style={{ backgroundColor: 'var(--bg)', scrollbarGutter: 'stable' }}>
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 transition-all duration-300 sm:p-4 lg:p-6" style={{ backgroundColor: 'var(--bg)', scrollbarGutter: 'stable' }}>
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

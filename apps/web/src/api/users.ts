@@ -1,11 +1,21 @@
 import api from './client';
 import type { User, TrustScore } from './types';
 
-export const usersAPI = {
-  getMe: async (): Promise<User> => (await api.get<User>('/users/me')).data,
+export interface CurrentUserProfile extends User {
+  verificationStatus: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  identityVerificationStatus: string;
+  bio: string | null;
+  avatarUrl: string | null;
+}
 
-  updateMe: async (data: Partial<User>): Promise<User> =>
-    (await api.patch<User>('/users/me', data)).data,
+export const usersAPI = {
+  getMe: async (): Promise<CurrentUserProfile> =>
+    (await api.get<CurrentUserProfile>('/users/me')).data,
+
+  updateMe: async (data: Partial<User>): Promise<CurrentUserProfile> =>
+    (await api.patch<CurrentUserProfile>('/users/me', data)).data,
 
   getById: async (id: string): Promise<User> => {
     const response = await api.get(`/users/${id}`);

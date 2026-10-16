@@ -1,19 +1,28 @@
 import { useEffect, useState } from 'react';
 import { ChevronRight, Monitor, Moon, Sun } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/ThemeContext';
-import api from '../../api/client';
+import { useTheme } from '../../context/useTheme';
+import { usersAPI } from '../../api/users';
+import { getApiErrorMessage } from '../../api/api-error';
 
 type MenuSection = 'account-preferences' | 'sign-in-security' | 'data-privacy' | 'notifications';
 type AccountSubMenu = 'profile-info' | 'display' | 'general' | 'syncing' | 'account-management';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
-  const { user, token, login } = useAuthStore();
+  const [searchParams] = useSearchParams();
+  const { user, updateUser } = useAuthStore();
   const { themeMode, setThemeMode, isDark } = useTheme();
 
-  const [activeSection, setActiveSection] = useState<MenuSection>('account-preferences');
+  const [activeSection, setActiveSection] = useState<MenuSection>(() => {
+    const section = searchParams.get('section');
+    return section === 'sign-in-security' ||
+      section === 'data-privacy' ||
+      section === 'notifications'
+      ? section
+      : 'account-preferences';
+  });
   const [activeSubMenu, setActiveSubMenu] = useState<AccountSubMenu>('profile-info');
   const [themeDisplayMode, setThemeDisplayMode] = useState<'device' | 'dark' | 'light'>(themeMode);
   
@@ -29,9 +38,9 @@ export default function SettingsPage() {
   const [profileMessage, setProfileMessage] = useState('');
 
   useEffect(() => {
-    api.get('/users/me').then(({ data }) => {
+    usersAPI.getMe().then((data) => {
       setProfileData({ fullName: data.fullName ?? '', email: data.email ?? '', phone: data.phone ?? '' });
-    }).catch((requestError) => setProfileError(requestError.response?.data?.message || 'Your account information could not be loaded.'))
+    }).catch((requestError: unknown) => setProfileError(getApiErrorMessage(requestError, 'Your account information could not be loaded.')))
       .finally(() => setProfileLoading(false));
   }, []);
 
@@ -40,11 +49,11 @@ export default function SettingsPage() {
     setProfileError('');
     setProfileMessage('');
     try {
-      const { data } = await api.patch('/users/me', profileData);
-      if (user && token) login({ ...user, ...data }, token);
+      const data = await usersAPI.updateMe(profileData);
+      if (user) updateUser(data);
       setProfileMessage('Profile updated.');
-    } catch (requestError: any) {
-      setProfileError(requestError.response?.data?.message || 'Your profile could not be saved.');
+    } catch (requestError: unknown) {
+      setProfileError(getApiErrorMessage(requestError, 'Your profile could not be saved.'));
     } finally {
       setProfileSaving(false);
     }
@@ -119,7 +128,7 @@ export default function SettingsPage() {
           <div className="space-y-4 md:space-y-6">
             <div>
               <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-2 md:mb-4`}>Display Settings</h3>
-              <p className={`text-[10px] md:text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-3 md:mb-4`}>Choose how your Renova experience looks on this device</p>
+              <p className={`text-[10px] md:text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-3 md:mb-4`}>Choose how your Rentra experience looks on this device</p>
 
               <div className="space-y-2 md:space-y-3">
                 <label className={`flex items-center p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors group`}>
@@ -228,7 +237,7 @@ export default function SettingsPage() {
             <div className="w-6 h-6 rounded overflow-hidden flex items-center justify-center" style={{ backgroundColor: 'var(--surface2)' }}>
               <img 
                 src="/logo.jpg" 
-                alt="Renova Logo" 
+                alt="Rentra logo"
                 className="w-full h-full object-contain" 
                 style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}}
               />
@@ -254,8 +263,8 @@ export default function SettingsPage() {
 
           <div className="flex flex-col md:flex-row gap-3 md:gap-6">
             {/* Left Sidebar */}
-            <div className="hidden md:block md:w-64 flex-shrink-0">
-              <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden sticky top-[100px] text-[11px] md:text-[12px]`}>
+            <div className="w-full flex-shrink-0 md:w-64">
+              <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden md:sticky md:top-[100px] text-[11px] md:text-[12px]`}>
                 <button
                   onClick={() => { setActiveSection('account-preferences'); setActiveSubMenu('profile-info'); }}
                   className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'account-preferences' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}
@@ -323,6 +332,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-
-

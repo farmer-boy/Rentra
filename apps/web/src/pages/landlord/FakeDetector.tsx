@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Home, ShieldAlert } from 'lucide-react';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { listingsAPI } from '../../api/listings';
 import { useAuthStore } from '../../store/authStore';
 
 interface Listing {
@@ -29,12 +29,12 @@ const LandlordFakeDetector = () => {
     let active = true;
     if (!user?.id) return () => { active = false; };
 
-    api.get('/listings/landlord/my-listings')
-      .then((response) => {
-        if (!Array.isArray(response.data?.data)) throw new Error('The server returned invalid property data.');
+    listingsAPI.getMyListings<Listing>()
+      .then((results) => {
+        if (!Array.isArray(results)) throw new Error('The server returned invalid property data.');
         if (active) {
           setError('');
-          setListings(response.data.data as Listing[]);
+          setListings(results);
         }
       })
       .catch((cause: unknown) => { if (active) setError(errorMessage(cause)); })

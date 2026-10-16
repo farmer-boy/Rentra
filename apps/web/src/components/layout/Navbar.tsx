@@ -79,7 +79,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         onClick={onMenuClick}
         className="flex-shrink-0 p-2 transition-colors rounded-lg md:hidden"
         style={{ color: 'var(--text2)' }}
-        title="Menu"
+        title={sidebarOpen ? 'Close menu' : 'Open menu'}
+        aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        aria-expanded={sidebarOpen}
       >
         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -101,7 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
         <div className="flex items-center justify-center w-6 h-6 overflow-hidden rounded" style={{ backgroundColor: 'var(--surface2)' }}>
           <img 
             src="/logo.jpg" 
-            alt="Renova Logo" 
+            alt="Rentra logo"
             className="object-contain w-full h-full" 
             style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}}
           />
@@ -196,6 +198,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
             className="relative flex-shrink-0 p-1 transition-colors rounded-lg"
             style={{ color: 'var(--text)' }}
             title={user?.fullName}
+            aria-label="Open profile menu"
+            aria-expanded={profileOpen}
           >
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold"
               style={{ 
@@ -244,7 +248,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
               {/* Privacy Option */}
               <button 
                 onClick={() => {
-                  navigate('/privacy');
+                  navigate('/settings?section=data-privacy');
                   setProfileOpen(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"

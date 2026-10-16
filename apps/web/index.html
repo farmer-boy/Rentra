@@ -4,13 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Renova - Transparent Rental Platform</title>
+    <meta name="theme-color" content="#f7f9f7" />
+    <meta name="description" content="Find verified rental homes, connect with landlords, and manage your rental journey with Rentra." />
+    <title>Rentra - Better renting starts here</title>
     <script>
-      // Apply theme on initial load before React renders
-      (function() {
-        const savedTheme = localStorage.getItem('themeMode') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      (() => {
+        let savedTheme = 'light';
+        try {
+          const preference = localStorage.getItem('themeMode');
+          if (preference === 'light' || preference === 'dark' || preference === 'device') {
+            savedTheme = preference;
+          }
+        } catch {
+          // Keep the default theme when browser storage is unavailable.
+        }
+
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const isDark = savedTheme === 'dark' || (savedTheme === 'device' && prefersDark);
+        document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', isDark);
       })();
     </script>
   </head>

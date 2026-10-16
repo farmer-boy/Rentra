@@ -16,12 +16,21 @@ type RetryableRequest = InternalAxiosRequestConfig & { _retry?: boolean };
 
 export const setRefreshToken = (token: string | null) => {
   refreshTokenInMemory = token;
+  if (typeof sessionStorage !== 'undefined') {
+    if (token) sessionStorage.setItem('refreshToken', token);
+    else sessionStorage.removeItem('refreshToken');
+  }
 };
 
-export const getRefreshToken = () => refreshTokenInMemory;
+export const getRefreshToken = () => {
+  if (refreshTokenInMemory) return refreshTokenInMemory;
+  if (typeof sessionStorage === 'undefined') return null;
+  refreshTokenInMemory = sessionStorage.getItem('refreshToken');
+  return refreshTokenInMemory;
+};
 
 export const clearStoredSession = () => {
-  refreshTokenInMemory = null;
+  setRefreshToken(null);
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
@@ -32,11 +41,10 @@ const api = axios.create({
   baseURL: apiBaseURL,
   timeout,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true,
 });
 
 const isAuthEndpoint = (url = '') =>
-  /\/auth\/(login|register|refresh|logout)(?:$|\?)/.test(url);
+  /\/auth\/(login|register|refresh|logout|forgot-password|reset-password|verify-email)(?:$|\?)/.test(url);
 
 api.interceptors.request.use((config) => {
   const token =
@@ -53,7 +61,8 @@ api.interceptors.request.use((config) => {
 });
 
 const refreshAccessToken = async () => {
-  if (!refreshTokenInMemory) {
+  const currentRefreshToken = getRefreshToken();
+  if (!currentRefreshToken) {
     throw new ApiError({
       status: 401,
       message: 'Your session has expired. Please sign in again.',
@@ -63,8 +72,8 @@ const refreshAccessToken = async () => {
     refreshRequest = axios
       .post(
         `${apiBaseURL.replace(/\/$/, '')}/auth/refresh`,
-        { refreshToken: refreshTokenInMemory },
-        { timeout, withCredentials: true },
+        { refreshToken: currentRefreshToken },
+        { timeout },
       )
       .then((response) => {
         const { accessToken, refreshToken } = response.data as {
@@ -77,8 +86,15 @@ const refreshAccessToken = async () => {
             message: 'The authentication server returned an invalid token response.',
           });
         }
-        refreshTokenInMemory = refreshToken;
+        setRefreshToken(refreshToken);
         localStorage.setItem('accessToken', accessToken);
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('rentra:token-refreshed', {
+              detail: { accessToken },
+            }),
+          );
+        }
         return accessToken;
       })
       .finally(() => {

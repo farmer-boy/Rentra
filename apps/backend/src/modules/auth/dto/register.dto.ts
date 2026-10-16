@@ -2,9 +2,11 @@ import {
   IsEmail,
   IsNotEmpty,
   IsString,
+  IsIn,
   MinLength,
   MaxLength,
   Matches,
+  IsOptional,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
@@ -33,9 +35,31 @@ export class RegisterDto {
   @Matches(/^\+?[0-9\s()-]+$/)
   phone!: string;
 
+  @ApiProperty({
+    example: '35202-1234567-1',
+    required: false,
+    description:
+      'Optional CNIC; can also be added during identity verification.',
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{5}-\d{7}-\d{1}$/, {
+    message: 'CNIC must be in format XXXXX-XXXXXXX-X',
+  })
+  cnic?: string;
+
   @ApiProperty({ example: 'RentraPass123', minLength: 8 })
   @IsString()
   @MinLength(8)
   @MaxLength(72)
   password!: string;
+
+  @ApiProperty({
+    enum: ['TENANT', 'LANDLORD'],
+    default: 'TENANT',
+    required: false,
+  })
+  @IsOptional()
+  @IsIn(['TENANT', 'LANDLORD'])
+  role?: 'TENANT' | 'LANDLORD';
 }

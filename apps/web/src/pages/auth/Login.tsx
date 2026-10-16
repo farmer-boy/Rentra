@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../../api/auth';
+import { getApiErrorMessage } from '../../api/api-error';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -50,6 +51,7 @@ const loginStyles = `
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark } = useTheme();
   const { login } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
@@ -70,13 +72,18 @@ export default function Login() {
           ? [data.user.role]
           : ['TENANT'];
 
-      if (roles.includes('ADMIN')) navigate('/admin');
+      const requestedReturnTo = (location.state as { from?: unknown } | null)?.from;
+      const returnTo = typeof requestedReturnTo === 'string' &&
+        requestedReturnTo.startsWith('/') &&
+        !requestedReturnTo.startsWith('//')
+        ? requestedReturnTo
+        : undefined;
+      if (returnTo) navigate(returnTo);
+      else if (roles.includes('ADMIN')) navigate('/admin');
       else if (roles.includes('LANDLORD')) navigate('/landlord');
       else navigate('/tenant');
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || err.message || 'Login failed. Please try again.';
-      console.error('Login error:', err);
-      toast.error(errorMsg);
+    } catch (requestError: unknown) {
+      toast.error(getApiErrorMessage(requestError, 'Login failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -95,7 +102,7 @@ export default function Login() {
             title="Go to home"
           >
             <div className={`w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50 border border-gray-200'}`}>
-              <img src="/logo.jpg" alt="Renova" className="w-full h-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
+              <img src="/logo.jpg" alt="Rentra" className="w-full h-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
             </div>
           </button>
           <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
@@ -111,15 +118,15 @@ export default function Login() {
           {/* Username/Email Field */}
           <div>
             <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Username or Email Address
+              Email Address
             </label>
             <input
               type="email"
               value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })}
-              autoComplete="off"
+              autoComplete="email"
               placeholder=""
-              title="Enter your email or username"
+              title="Enter your email address"
               className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm font-normal ${
                 isDark
                   ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
@@ -147,7 +154,7 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 value={form.password}
                 onChange={e => setForm({ ...form, password: e.target.value })}
-                autoComplete="off"
+                autoComplete="current-password"
                 placeholder=""
                 title="Enter your password"
                 className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm font-normal ${
@@ -180,7 +187,7 @@ export default function Login() {
         {/* Sign Up Link */}
         <p className={`text-center text-sm mt-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
           New to Rentra?{' '}
-          <Link to="/register" className="font-semibold text-emerald-500 hover:text-emerald-600 transition-colors">
+          <Link to="/register" state={location.state} className="font-semibold text-emerald-500 hover:text-emerald-600 transition-colors">
             Create an account
           </Link>
         </p>
@@ -188,4 +195,3 @@ export default function Login() {
     </div>
   );
 }
-

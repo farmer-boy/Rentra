@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import { adminAPI } from '../../api/admin';

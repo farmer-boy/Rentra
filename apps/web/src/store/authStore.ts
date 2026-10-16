@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { User, AuthState } from '../types';
 import { clearStoredSession } from '../api/client';
 import { authAPI } from '../api/auth';
+import { ApiError } from '../api/api-error';
 
 const getPersistedUser = (): User | null => {
   try {
@@ -20,6 +21,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
       clearStoredSession();
       set({ user: null, token: null, isAuthenticated: false });
     });
+    window.addEventListener('rentra:token-refreshed', (event) => {
+      const customEvent = event as CustomEvent<{ accessToken: string }>;
+      set({ token: customEvent.detail.accessToken });
+    });
   }
 
   return {
@@ -32,6 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       localStorage.setItem('accessToken', token);
       localStorage.setItem('user', JSON.stringify(user));
       set({ user, token, isAuthenticated: true });
+      window.dispatchEvent(new Event('rentra:session-changed'));
     },
 
     updateUser: (updates) =>
@@ -43,9 +49,15 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }),
 
     logout: () => {
-      void authAPI.logout().catch(() => undefined);
+      void authAPI.logout().catch((error: unknown) => {
+        console.warn(
+          'Could not revoke the remote Rentra session.',
+          error instanceof ApiError ? error.message : 'The request failed.',
+        );
+      });
       clearStoredSession();
       set({ user: null, token: null, isAuthenticated: false });
+      window.dispatchEvent(new Event('rentra:session-cleared'));
     },
 
     initialize: async () => {
@@ -72,7 +84,10 @@ export const useAuthStore = create<AuthState>((set, get) => {
               isInitialized: true,
             });
           } catch (error) {
-            console.error('Could not restore the Rentra session.', error);
+            console.warn(
+              'Could not restore the Rentra session.',
+              error instanceof ApiError ? error.message : 'The request failed.',
+            );
             set({ isInitialized: true });
           }
         })().finally(() => {

@@ -1,10 +1,14 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { Send, Search, X } from "lucide-react";
+import { ArrowLeft, Send, Search, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
-import { useChat } from "../../hooks/useChat";
+import { useChat, type Conversation } from "../../hooks/useChat";
+import { toApiError } from "../../api/api-error";
 
 export default function ChatPage() {
+  const location = useLocation();
   const token = useAuthStore((state) => state.token) || "";
+  const incomingConversation = (location.state as { conversation?: Conversation } | null)?.conversation;
 
   const {
     conversations,
@@ -19,7 +23,7 @@ export default function ChatPage() {
     fetchNotifications,
     fetchUnreadCount,
     loading: chatLoading,
-  } = useChat();
+  } = useChat(incomingConversation);
   const { user: authUser } = useAuthStore();
 
   const [messageInput, setMessageInput] = useState("");
@@ -36,8 +40,8 @@ export default function ChatPage() {
     try {
       await fetchConversations();
       setConversationError("");
-    } catch (error: any) {
-      setConversationError(error.response?.data?.message || "Conversations could not be loaded.");
+    } catch (error: unknown) {
+      setConversationError(toApiError(error).message || "Conversations could not be loaded.");
     } finally {
       setConversationLoading(false);
     }
@@ -98,7 +102,7 @@ export default function ChatPage() {
     }
   };
 
-  const handleSelectConversation = async (conversation: any) => {
+  const handleSelectConversation = async (conversation: Conversation) => {
     setCurrentConversation(conversation);
   };
 
@@ -109,10 +113,13 @@ export default function ChatPage() {
   );
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: "var(--bg)" }}>
+    <div
+      className="flex h-[calc(100dvh-5rem)] min-h-[24rem] w-full min-w-0 overflow-hidden sm:h-[calc(100dvh-5.5rem)] lg:h-[calc(100dvh-6.5rem)]"
+      style={{ backgroundColor: "var(--bg)" }}
+    >
       {/* Conversations List */}
       <div
-        className="w-80 border-r flex flex-col"
+        className={`${currentConversation ? "hidden lg:flex" : "flex"} w-full shrink-0 flex-col border-r lg:w-80`}
         style={{
           borderColor: "var(--border)",
           backgroundColor: "var(--surface)",
@@ -180,12 +187,12 @@ export default function ChatPage() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <h3
-                    className="font-semibold text-sm"
+                    className="min-w-0 truncate font-semibold text-sm"
                     style={{ color: "var(--text)" }}
                   >
                     {conv.otherParticipant?.fullName}
                   </h3>
-                  <span className="text-xs" style={{ color: "var(--text2)" }}>
+                  <span className="shrink-0 text-xs" style={{ color: "var(--text2)" }}>
                     {new Date(conv.lastMessageAt).toLocaleDateString()}
                   </span>
                 </div>
@@ -210,7 +217,7 @@ export default function ChatPage() {
       </div>
 
       {/* Chat Window */}
-      <div className="flex-1 flex flex-col">
+      <div className={`${currentConversation ? "flex" : "hidden lg:flex"} min-w-0 flex-1 flex-col`}>
         {currentConversation ? (
           <>
             {/* Chat Header */}
@@ -218,18 +225,18 @@ export default function ChatPage() {
               className="p-4 border-b flex items-center justify-between"
               style={{ borderColor: "var(--border)" }}
             >
-              <div>
+              <div className="min-w-0">
                 <h2
-                  className="text-lg font-semibold"
+                  className="truncate text-lg font-semibold"
                   style={{ color: "var(--text)" }}
                 >
                   {currentConversation.otherParticipant?.fullName}
                 </h2>
-                <p className="text-xs" style={{ color: "var(--text2)" }}>
+                <p className="truncate text-xs" style={{ color: "var(--text2)" }}>
                   {currentConversation.otherParticipant?.email}
                 </p>
                 {currentConversation.listing && (
-                  <p className="text-xs text-emerald-600">
+                  <p className="truncate text-xs text-emerald-600">
                     {currentConversation.listing.title} ·{" "}
                     {currentConversation.listing.area},{" "}
                     {currentConversation.listing.city}
@@ -240,8 +247,11 @@ export default function ChatPage() {
                 onClick={() => setCurrentConversation(null)}
                 className="p-2 rounded-lg hover:opacity-70"
                 style={{ backgroundColor: "var(--surface2)" }}
+                aria-label="Back to conversations"
+                title="Back to conversations"
               >
-                <X size={20} style={{ color: "var(--text2)" }} />
+                <ArrowLeft className="lg:hidden" size={20} style={{ color: "var(--text2)" }} />
+                <X className="hidden lg:block" size={20} style={{ color: "var(--text2)" }} />
               </button>
             </div>
 
@@ -304,7 +314,7 @@ export default function ChatPage() {
                 onChange={(e) => setMessageInput(e.target.value)}
                 placeholder="Type a message..."
                 disabled={isLoading}
-                className="flex-1 px-4 py-2 rounded-lg border text-sm disabled:opacity-50"
+                className="min-w-0 flex-1 px-4 py-2 rounded-lg border text-sm disabled:opacity-50"
                 style={{
                   backgroundColor: "var(--surface2)",
                   borderColor: "var(--border)",
@@ -316,7 +326,7 @@ export default function ChatPage() {
                 value={attachmentUrl}
                 onChange={(e) => setAttachmentUrl(e.target.value)}
                 placeholder="Image URL"
-                className="w-32 px-2 py-2 rounded-lg border text-xs"
+                className="w-24 shrink-0 px-2 py-2 rounded-lg border text-xs sm:w-32"
                 style={{
                   backgroundColor: "var(--surface2)",
                   borderColor: "var(--border)",

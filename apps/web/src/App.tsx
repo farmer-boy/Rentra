@@ -1,14 +1,17 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, CheckCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays } from 'lucide-react';
+import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, CheckCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays, ShieldCheck } from 'lucide-react';
 
 // Context
-import { ThemeProvider, useTheme } from './context/ThemeContext';
+import { ThemeProvider } from './context/ThemeContext';
+import { useTheme } from './context/useTheme';
 
 // Auth
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import PasswordRecovery from './pages/auth/PasswordRecovery';
+import VerifyEmail from './pages/auth/VerifyEmail';
 import HomePage from './pages/home/HomePage';
 import Contact from './pages/contact/Contact';
 
@@ -53,6 +56,9 @@ import LandlordMaintenanceRequests from './pages/landlord/MaintenanceRequests';
 import LandlordFakeDetector from './pages/landlord/FakeDetector';
 import LandlordTrustScores from './pages/landlord/TrustScores';
 import LandlordReviews from './pages/landlord/Reviews';
+import LandlordBookings from './pages/landlord/Bookings';
+import LandlordAvailability from './pages/landlord/Availability';
+import LandlordVerification from './pages/landlord/Verification';
 import ChatPage from './pages/messages/ChatPage';
 
 // Admin Pages
@@ -67,6 +73,19 @@ import VerificationQueue from './pages/admin/VerificationQueue';
 import NotificationsPage from './pages/notifications/NotificationsPage';
 import { useAuthStore } from './store/authStore';
 
+function NotFoundPage() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[var(--bg)] px-5 text-center text-[var(--text)]">
+      <div className="max-w-md">
+        <p className="text-sm font-semibold uppercase tracking-widest text-[var(--green-soft)]">404 · Page not found</p>
+        <h1 className="mt-3 text-3xl font-semibold">We couldn't find that page.</h1>
+        <p className="mt-3 text-sm leading-6 text-[var(--text2)]">The link may be outdated, or the address may have been typed incorrectly.</p>
+        <Link to="/" className="mt-6 inline-flex rounded-xl bg-[var(--green)] px-5 py-3 text-sm font-semibold text-white hover:bg-[var(--green-hover)]">Go to Rentra home</Link>
+      </div>
+    </main>
+  );
+}
+
 // Nav configs
 const tenantNavSections = [
   {
@@ -74,6 +93,7 @@ const tenantNavSections = [
     items: [
       { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/tenant' },
       { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings' },
+      { icon: <Plus size={16} />, label: 'Post a Property', path: '/tenant/post' },
       { icon: <Heart size={16} />, label: 'Saved Listings', path: '/tenant/saved' },
       { icon: <Bookmark size={16} />, label: 'Saved Searches', path: '/tenant/saved-searches' },
       { icon: <MessageCircle size={16} />, label: 'Messages', path: '/tenant/messages' },
@@ -108,6 +128,8 @@ const landlordNavSections = [
       { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/landlord' },
       { icon: <Home size={16} />, label: 'My Properties', path: '/landlord/properties' },
       { icon: <Plus size={16} />, label: 'Post Property', path: '/landlord/post' },
+      { icon: <CalendarDays size={16} />, label: 'Bookings', path: '/landlord/bookings' },
+      { icon: <CalendarDays size={16} />, label: 'Availability', path: '/landlord/availability' },
       { icon: <MessageCircle size={16} />, label: 'Messages', path: '/landlord/messages' },
       { icon: <Bell size={16} />, label: 'Notifications', path: '/landlord/notifications' },
     ],
@@ -131,6 +153,7 @@ const landlordNavSections = [
     title: 'ACCOUNT',
     items: [
       { icon: <User size={16} />, label: 'Profile', path: '/landlord/profile' },
+      { icon: <ShieldCheck size={16} />, label: 'Verification', path: '/landlord/verification' },
       { icon: <Eye size={16} />, label: 'Tenant Trust Scores', path: '/landlord/trust' },
       { icon: <Star size={16} />, label: 'Reviews', path: '/landlord/reviews' },
       { icon: <Settings size={16} />, label: 'Settings', path: '/landlord/settings' },
@@ -170,9 +193,16 @@ function AppContent() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/listings" element={<BrowseListings />} />
+        <Route path="/listings/:id" element={<ListingDetails />} />
+        <Route path="/favorites" element={<SavedListings />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<PasswordRecovery />} />
+        <Route path="/reset-password" element={<PasswordRecovery />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/help" element={<Contact />} />
 
         {/* Shared - Settings */}
         <Route path="/settings" element={
@@ -195,7 +225,7 @@ function AppContent() {
           <Route path="rental-requests" element={<TenantRentalRequests />} />
           <Route path="bookings" element={<TenantBookings />} />
           <Route path="messages" element={<ChatPage />} />
-          <Route path="notifications" element={<AdminResourcePage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="post" element={<PostProperty />} />
           <Route path="detector" element={<AIDetector />} />
           <Route path="estimator" element={<RentEstimator />} />
@@ -218,6 +248,9 @@ function AppContent() {
           <Route index element={<LandlordDashboard />} />
           <Route path="properties" element={<MyProperties />} />
           <Route path="post" element={<LandlordPostProperty />} />
+          <Route path="bookings" element={<LandlordBookings />} />
+          <Route path="availability" element={<LandlordAvailability />} />
+          <Route path="verification" element={<LandlordVerification />} />
           <Route path="messages" element={<ChatPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="tenants" element={<MyTenants />} />
@@ -270,6 +303,7 @@ function AppContent() {
           <Route path="profile" element={<AdminProfile />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

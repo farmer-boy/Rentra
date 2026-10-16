@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { AlertCircle, Star } from 'lucide-react';
-import api from '../../api/client';
+import { rentalRequestsAPI } from '../../api/rentalRequests';
+import { usersAPI } from '../../api/users';
 import Card from '../../components/ui/Card';
+import { getApiErrorMessage } from '../../api/api-error';
 
 interface RentalRequest {
   id: string;
@@ -20,15 +22,14 @@ const LandlordTrustScores = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const { data } = await api.get('/rental-requests/received');
-        const requests: RentalRequest[] = Array.isArray(data) ? data : data.data ?? [];
+        const requests = await rentalRequestsAPI.received<RentalRequest>();
         const enriched = await Promise.all(requests.map(async (request) => {
-          const { data: profile } = await api.get(`/users/${request.tenant.id}`);
+          const profile = await usersAPI.getById(request.tenant.id) as { trustScore?: number };
           return { ...request, trustScore: profile.trustScore ?? null };
         }));
         setApplicants(enriched);
-      } catch (requestError: any) {
-        setError(requestError.response?.data?.message || 'Tenant trust scores could not be loaded.');
+      } catch (requestError: unknown) {
+        setError(getApiErrorMessage(requestError, 'Tenant trust scores could not be loaded.'));
       } finally { setLoading(false); }
     };
     void load();

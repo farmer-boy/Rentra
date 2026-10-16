@@ -1,4 +1,4 @@
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 
 export default function MaintenanceRequests() {

@@ -2,24 +2,23 @@ import { useEffect, useState } from 'react';
 import Card from '../../components/ui/Card';
 import { Scale } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
-import api from '../../api/client';
+import type { DisputeRecord } from '../../api/disputes';
 
-interface AdminDispute {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  createdAt: string;
+interface AdminDispute extends DisputeRecord {
+  createdBy?: { id: string; fullName: string };
   agreement?: {
-    tenant?: { id: string; email?: string; fullName?: string };
-    listing?: { id: string; title?: string; city?: string };
+    listing?: { title?: string };
+  };
+  booking?: {
+    listing?: { title?: string };
+    property?: { title?: string };
   };
 }
 
 function normalizeDisputes(response: unknown): AdminDispute[] {
   if (Array.isArray(response)) return response as AdminDispute[];
-  if (response && typeof response === 'object' && 'items' in response && Array.isArray(response.items)) {
-    return response.items as AdminDispute[];
+  if (response && typeof response === 'object' && 'data' in response && Array.isArray(response.data)) {
+    return response.data as AdminDispute[];
   }
   return [];
 }
@@ -43,14 +42,18 @@ const AdminAllDisputes = () => {
   }, []);
 
   const open = disputes.filter((dispute) => dispute.status === 'OPEN').length;
-  const inProgress = disputes.filter((dispute) => dispute.status === 'IN_PROGRESS').length;
+  const inProgress = disputes.filter((dispute) => (
+    ['MEDIATION', 'UNDER_REVIEW', 'AWAITING_INFORMATION'].includes(dispute.status)
+  )).length;
   const resolved = disputes.filter((dispute) => ['RESOLVED', 'CLOSED'].includes(dispute.status)).length;
 
   const statusColor = (status: string) => {
     switch (status) {
       case 'OPEN':
         return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
-      case 'IN_PROGRESS':
+      case 'MEDIATION':
+      case 'UNDER_REVIEW':
+      case 'AWAITING_INFORMATION':
         return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
       case 'RESOLVED':
       case 'CLOSED':
@@ -66,7 +69,7 @@ const AdminAllDisputes = () => {
     if (!resolution?.trim()) return;
     setActionId(dispute.id);
     try {
-      await api.patch(`/admin/disputes/${dispute.id}/resolve`, { resolution });
+      await adminAPI.resolveDispute(dispute.id, resolution);
       setDisputes((current) => current.map((item) => (
         item.id === dispute.id ? { ...item, status: 'RESOLVED' } : item
       )));
@@ -84,7 +87,7 @@ const AdminAllDisputes = () => {
         <p className="text-gray-600 dark:text-gray-400">Review and mediate disputes between tenants and landlords</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
         <Card className="p-4 text-center">
           <p className="text-gray-600 dark:text-gray-400 text-sm">Total Disputes</p>
           <p className="text-3xl font-bold text-gray-600 dark:text-gray-400 mt-2">{statValue(disputes.length)}</p>
@@ -117,13 +120,12 @@ const AdminAllDisputes = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Scale size={18} className="text-blue-500" />
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{dispute.title}</h3>
+                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{dispute.reason || dispute.type.replaceAll('_', ' ')}</h3>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                      {dispute.agreement?.tenant?.fullName || dispute.agreement?.tenant?.email || 'Tenant unavailable'}
+                      {dispute.createdBy?.fullName || 'Reporter unavailable'}
                       {' · '}
-                      {dispute.agreement?.listing?.title || 'Property unavailable'}
-                      {dispute.agreement?.listing?.city ? `, ${dispute.agreement.listing.city}` : ''}
+                      {dispute.agreement?.listing?.title || dispute.booking?.listing?.title || dispute.booking?.property?.title || 'Property unavailable'}
                     </p>
                     <p className="text-gray-700 dark:text-gray-300">{dispute.description}</p>
                   </div>

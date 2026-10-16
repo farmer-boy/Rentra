@@ -14,6 +14,7 @@ import * as bcrypt from 'bcryptjs';
 import { EmailService } from './email.service';
 import { createHash, randomBytes } from 'crypto';
 import { TrustScoreService } from '../trust-score/trust-score.service';
+import { Role as UserRole } from '../users/dto/create-user.dto';
 
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -41,6 +42,15 @@ export class AuthService {
       throw new ConflictException('This phone number is already registered');
     }
 
+    if (dto.cnic) {
+      const existingCnic = await this.prisma.user.findUnique({
+        where: { cnic: dto.cnic },
+      });
+      if (existingCnic) {
+        throw new ConflictException('This CNIC is already registered');
+      }
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 12);
     let user: User;
     try {
@@ -48,7 +58,9 @@ export class AuthService {
         fullName: dto.fullName,
         email: dto.email,
         phone: dto.phone,
+        cnic: dto.cnic,
         password: hashedPassword,
+        role: dto.role === 'LANDLORD' ? UserRole.LANDLORD : UserRole.TENANT,
       });
     } catch (error) {
       if (
@@ -56,7 +68,7 @@ export class AuthService {
         error.code === 'P2002'
       ) {
         throw new ConflictException(
-          'An account already exists with this email or phone',
+          'An account already exists with this email, phone, or CNIC',
         );
       }
       throw error;
@@ -265,13 +277,28 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await this.prisma.user.update({
-      where: { id: resetToken.userId },
-      data: { password: hashedPassword },
-    });
-
-    await this.prisma.resetPasswordToken.delete({
-      where: { token },
+    await this.prisma.$transaction(async (transaction) => {
+      const consumed = await transaction.resetPasswordToken.deleteMany({
+        where: {
+          token,
+          userId: resetToken.userId,
+          expiresAt: { gt: new Date() },
+        },
+      });
+      if (consumed.count !== 1) {
+        throw new BadRequestException('Reset token has already been used');
+      }
+      await transaction.user.update({
+        where: { id: resetToken.userId },
+        data: { password: hashedPassword },
+      });
+      await transaction.resetPasswordToken.deleteMany({
+        where: { userId: resetToken.userId },
+      });
+      await transaction.refreshToken.updateMany({
+        where: { userId: resetToken.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
     });
 
     return { message: 'Password reset successfully' };

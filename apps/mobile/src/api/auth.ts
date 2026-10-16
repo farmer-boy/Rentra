@@ -11,6 +11,15 @@ if (Platform.OS !== 'web') {
   }
 }
 
+const normalizeUser = (user: User): User => {
+  const roles = user.roles ?? [user.role ?? 'TENANT'];
+  return {
+    ...user,
+    roles,
+    role: user.role ?? roles[0] ?? 'TENANT',
+  };
+};
+
 const setToken = async (token: string): Promise<void> => {
   try {
     if (Platform.OS === 'web') {
@@ -25,7 +34,7 @@ const setToken = async (token: string): Promise<void> => {
 
 export const authAPI = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await api.post('/auth/register', {
+    const response = await api.post<AuthResponse>('/auth/register', {
       fullName: data.username, // Backend expects fullName, mobile has username
       email: data.email,
       phone: data.phone,
@@ -38,22 +47,22 @@ export const authAPI = {
       await setToken(response.data.accessToken);
     }
     
-    return response.data;
+    return { ...response.data, user: normalizeUser(response.data.user) };
   },
 
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', data);
+    const response = await api.post<AuthResponse>('/auth/login', data);
     
     if (response.data.accessToken) {
       await setToken(response.data.accessToken);
     }
     
-    return response.data;
+    return { ...response.data, user: normalizeUser(response.data.user) };
   },
 
   getMe: async (): Promise<User> => {
-    const response = await api.get('/auth/me');
-    return response.data;
+    const response = await api.get<User>('/auth/me');
+    return normalizeUser(response.data);
   },
 
   logout: async () => {

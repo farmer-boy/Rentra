@@ -1,28 +1,158 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Heart, MapPin } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { favoritesAPI } from '../../api/favorites';
+import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import Card from '../../components/ui/Card';
+import { ApiError } from '../../api/api-error';
+import type { FavoriteRecord } from '../../api/favorites';
+import { useFavorites, useRemoveFavorite } from '../../hooks/useRentraQueries';
+import { useAuthStore } from '../../store/authStore';
 
-type Favorite = { id: string; title: string; area: string; city: string; rent: number; bedrooms: number; bathrooms: number; sqft: number; images?: Array<{ url: string }>; landlord?: { trustScore?: number } };
+interface FavoriteListing extends FavoriteRecord {
+  title?: string;
+  area?: string | null;
+  city?: string | null;
+  rent?: number;
+  price?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  sqft?: number;
+  squareFeet?: number;
+  areaSizeSqft?: number;
+  rentalDuration?: string;
+  rentalMode?: string;
+  type?: string;
+  propertyType?: string;
+  images?: Array<{ url: string }>;
+  landlord?: { trustScore?: number };
+  owner?: { trustScore?: number };
+}
+
+const formatDuration = (duration?: string) =>
+  (duration ?? 'MONTHLY').toLowerCase().replaceAll('_', ' ');
 
 export default function SavedListings() {
   const navigate = useNavigate();
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-  const loadFavorites = useCallback(async () => {
-    setLoading(true);
-    setHasError(false);
+  const { isAuthenticated } = useAuthStore();
+  const favoritesQuery = useFavorites(isAuthenticated);
+  const removeFavorite = useRemoveFavorite();
+
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto max-w-2xl py-10">
+        <Card className="p-8 text-center">
+          <Heart className="mx-auto mb-3 text-rose-500" size={30} />
+          <h1 className="text-xl font-bold">Your saved homes, all in one place</h1>
+          <p className="mt-2 text-sm text-gray-500">
+            Sign in to save listings and pick up where you left off.
+          </p>
+          <div className="mt-5 flex justify-center gap-3">
+            <button
+              onClick={() => navigate('/login', { state: { from: '/favorites' } })}
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+            >
+              Log in
+            </button>
+            <Link to="/register" state={{ from: '/favorites' }} className="rounded-lg border px-4 py-2 text-sm font-semibold">
+              Create account
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const favorites = (favoritesQuery.data ?? []) as FavoriteListing[];
+  const remove = async (favorite: FavoriteListing) => {
     try {
-      setFavorites(await favoritesAPI.list<Favorite>());
-    } catch {
-      setHasError(true);
-    } finally {
-      setLoading(false);
+      await removeFavorite.mutateAsync(favorite.id);
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Could not remove this saved home. Please try again.';
+      toast.error(message);
     }
-  }, []);
-  useEffect(() => { void loadFavorites(); }, [loadFavorites]);
-  const remove = async (id: string) => { await favoritesAPI.remove(id); setFavorites((items) => items.filter((item) => item.id !== id)); };
-  return <div className="space-y-5"><header><h1 className="text-xl font-extrabold">My Favorites</h1><p className="text-sm text-gray-500">Properties you saved for later.</p></header>{loading ? <Card><p className="py-10 text-center text-sm text-gray-500">Loading your favorites…</p></Card> : hasError ? <Card><div className="py-10 text-center" role="alert"><p className="text-sm text-gray-700">We couldn’t load your favorites. Please check your connection and try again.</p><button onClick={() => void loadFavorites()} className="mt-3 text-sm font-semibold text-emerald-600">Retry</button></div></Card> : favorites.length === 0 ? <Card><div className="py-10 text-center"><Heart className="mx-auto mb-3 text-rose-500" size={30} /><p className="text-sm text-gray-500">You have not saved any properties yet.</p><button onClick={() => navigate('/tenant/listings')} className="mt-3 text-sm font-semibold text-emerald-600">Browse properties</button></div></Card> : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{favorites.map((favorite) => <Card key={favorite.id}><button onClick={() => navigate(`/tenant/listings/${favorite.id}`)} className="w-full text-left"><div className="h-40 overflow-hidden rounded-lg bg-gray-100">{favorite.images?.[0]?.url && <img src={favorite.images[0].url} alt={favorite.title} className="h-full w-full object-cover" />}</div><h2 className="mt-3 font-bold">{favorite.title}</h2><p className="mt-1 flex items-center gap-1 text-xs text-gray-500"><MapPin size={13} /> {favorite.area}, {favorite.city}</p><p className="mt-2 font-bold text-emerald-600">Rs. {favorite.rent.toLocaleString()} / month</p><p className="mt-1 text-xs text-gray-500">{favorite.bedrooms} beds · {favorite.bathrooms} baths · {favorite.sqft} sqft</p></button><div className="mt-3 flex items-center justify-between border-t pt-3"><span className="text-xs text-amber-600">Trust: {favorite.landlord?.trustScore ?? '—'}/100</span><button onClick={() => void remove(favorite.id)} className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600"><Heart size={14} fill="currentColor" /> Unsave</button></div></Card>)}</div>}</div>;
+  };
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-5">
+      <header>
+        <h1 className="text-xl font-extrabold">My Favorites</h1>
+        <p className="text-sm text-gray-500">Homes saved from the live Rentra listings.</p>
+      </header>
+      {favoritesQuery.isPending ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading saved homes">
+          {[0, 1, 2].map((item) => <Card key={item} className="h-64"><div className="h-full animate-pulse bg-gray-50" /></Card>)}
+        </div>
+      ) : favoritesQuery.isError ? (
+        <Card className="p-6">
+          <p role="alert" className="text-sm text-red-600">
+            {favoritesQuery.error instanceof ApiError
+              ? favoritesQuery.error.message
+              : 'We could not load your favorites.'}
+          </p>
+          <button onClick={() => void favoritesQuery.refetch()} className="mt-3 text-sm font-semibold text-emerald-700">
+            Try again
+          </button>
+        </Card>
+      ) : favorites.length === 0 ? (
+        <Card className="p-8 text-center">
+          <Heart className="mx-auto mb-3 text-rose-500" size={30} />
+          <p className="text-sm text-gray-500">No saved homes yet.</p>
+          <Link to="/listings" className="mt-3 inline-block text-sm font-semibold text-emerald-700">
+            Browse current listings
+          </Link>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {favorites.map((favorite) => {
+            const price = favorite.rent ?? favorite.price;
+            const areaSize = favorite.sqft ?? favorite.squareFeet ?? favorite.areaSizeSqft;
+            return (
+              <Card key={favorite.id} className="overflow-hidden">
+                <Link to={`/listings/${favorite.id}`} className="block">
+                  <div className="h-48 overflow-hidden bg-gray-100">
+                    {favorite.images?.[0]?.url ? (
+                      <img src={favorite.images[0].url} alt={favorite.title ?? 'Saved home'} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-sm text-gray-500">No property image</div>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h2 className="font-bold">{favorite.title ?? 'Saved property'}</h2>
+                    <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
+                      <MapPin size={13} /> {[favorite.area, favorite.city].filter(Boolean).join(', ') || 'Location not provided'}
+                    </p>
+                    {price !== undefined && (
+                      <p className="mt-3 font-bold text-emerald-700">
+                        Rs. {price.toLocaleString()} / {formatDuration(favorite.rentalDuration ?? favorite.rentalMode)}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500">
+                      {favorite.bedrooms ?? 0} beds · {favorite.bathrooms ?? 0} baths
+                      {areaSize ? ` · ${areaSize.toLocaleString()} sqft` : ''}
+                    </p>
+                    <p className="mt-2 text-xs text-gray-500">
+                      {(favorite.type ?? favorite.propertyType ?? 'Property').replaceAll('_', ' ')}
+                    </p>
+                  </div>
+                </Link>
+                <div className="flex items-center justify-between border-t px-4 py-3">
+                  <span className="text-xs text-gray-500">
+                    Trust score: {favorite.landlord?.trustScore ?? favorite.owner?.trustScore ?? 'Not available'}
+                  </span>
+                  <button
+                    disabled={removeFavorite.isPending}
+                    onClick={() => void remove(favorite)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600 disabled:opacity-50"
+                  >
+                    <Heart size={14} fill="currentColor" /> Remove
+                  </button>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
 }

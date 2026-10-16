@@ -32,11 +32,12 @@ interface AdminSidebarProps {
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ 
   onNavigate, 
+  isMobileOpen = false,
   isDesktopView = false
 }) => {
   const location = useLocation();
   const { unreadCount } = useContactMessages();
-  const [isExpanded, setIsExpanded] = useState(isDesktopView);
+  const [isExpanded, setIsExpanded] = useState(isDesktopView || isMobileOpen);
   const [menuOpen, setMenuOpen] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const [expandOnHover, setExpandOnHover] = useState(false);

@@ -21,6 +21,9 @@ export class ApiError extends Error {
   }
 }
 
+export const getApiErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof ApiError ? error.message : fallback;
+
 const validationFieldErrors = (message: unknown): ApiFieldErrors | undefined => {
   if (!Array.isArray(message)) return undefined;
   const fields: ApiFieldErrors = {};
@@ -42,6 +45,21 @@ const validationFieldErrors = (message: unknown): ApiFieldErrors | undefined => 
   return Object.keys(fields).length ? fields : undefined;
 };
 
+const validationMessages = (message: unknown): string[] => {
+  if (!Array.isArray(message)) return [];
+  return message.flatMap((issue) => {
+    if (!issue || typeof issue !== 'object') return [];
+    if ('constraints' in issue && issue.constraints && typeof issue.constraints === 'object') {
+      return Object.values(issue.constraints as Record<string, unknown>).filter(
+        (value): value is string => typeof value === 'string',
+      );
+    }
+    return 'property' in issue && typeof issue.property === 'string'
+      ? [`${issue.property} is invalid`]
+      : [];
+  });
+};
+
 export const toApiError = (error: unknown): ApiError => {
   if (error instanceof ApiError) return error;
   if (error instanceof Error && !axios.isAxiosError(error)) {
@@ -56,11 +74,13 @@ export const toApiError = (error: unknown): ApiError => {
     | { message?: unknown; error?: string; code?: string }
     | undefined;
   const backendMessage = data?.message;
+  const validationErrors = validationMessages(backendMessage);
   const message =
     typeof backendMessage === 'string'
       ? backendMessage
       : Array.isArray(backendMessage)
-        ? backendMessage.filter((item) => typeof item === 'string').join(', ')
+        ? validationErrors.join(', ') ||
+          'Some submitted fields are invalid. Check the form and try again.'
         : error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT'
           ? 'The request timed out. Please try again.'
           : !error.response

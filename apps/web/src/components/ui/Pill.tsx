@@ -1,4 +1,4 @@
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 
 interface PillProps {
   variant: 'green' | 'red' | 'yellow' | 'blue';

@@ -1,0 +1,13 @@
+Create a polished, responsive homepage frontend demo for “Rentra”, a Pakistan-focused rental marketplace that connects tenants and landlords. The site should feel warm, trustworthy, modern, calm, and easy to use. Use an ivory/off-white background, deep forest-green accents, dark charcoal text, soft sage surfaces, rounded cards, subtle borders and shadows, generous whitespace, and a clean sans-serif font. Make the design mobile-friendly and accessible.
+
+Build a public landing page with these sections:
+
+1. Sticky header with Rentra wordmark, navigation links “Find a home”, “How it works”, and “Why Rentra”, plus “Log in” and a prominent “Get started” button. On mobile, collapse navigation behind a menu button.
+2. Hero section with the headline “A place to call home. A rental you can trust.”, short supporting copy, a location search field for city/area, a green “Search homes” button, quick location chips for Lahore, Islamabad, Karachi, and Furnished, and a lifestyle property photo.
+3. A small floating notification preview in the hero showing examples like “Listing verified” and “Application update”. Clearly show the notification bell with an unread dot. This is a visual explanation of where app notifications appear.
+4. Featured rental property cards with large photos, save-heart buttons, verification/value badges, neighborhood, title, monthly PKR rent, and bedroom count. Use plausible example listings for Lahore, Islamabad, and Karachi. Clearly treat them as demo content.
+5. A trust/features section highlighting verified listings, one rental workspace for applications/agreements/payments/maintenance, helpful notifications, and trust/reviews for both sides.
+6. A three-step “From search to settled” section: find a place, connect and agree, stay on top of payments/maintenance/updates.
+7. A strong green call-to-action banner and a minimal footer.
+
+Use realistic Pakistan-specific text and prices in PKR. Make the search, location chips, save buttons, navigation anchors, and notification preview interactive where practical. Keep this as a standalone frontend demo with mock data; do not require an API, backend, login, or database. Avoid making unsupported claims that listings are actually verified; label sample content as demo. Deliver a complete standalone HTML file (with embedded CSS and JavaScript) that can be opened directly in a browser.

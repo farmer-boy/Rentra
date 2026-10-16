@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { agreementsAPI } from '../../api/agreements';

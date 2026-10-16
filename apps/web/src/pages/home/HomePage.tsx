@@ -1,332 +1,102 @@
 import { useState } from 'react';
-import { ArrowRight, ChevronDown, CheckCircle2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useTheme } from '../../context/ThemeContext';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, BedDouble, Bell, Building2, ChevronRight, Home, MapPin, Menu, Search, ShieldCheck, Sparkles, Star, X } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { listingsAPI } from '../../api/listings';
+import { locationsAPI } from '../../api/locations';
+import { useAuthStore } from '../../store/authStore';
 
-export default function HomePage() {
-  const { isDark } = useTheme();
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  return (
-    <div className={`min-h-screen ${isDark ? 'bg-[#0f0f0f] text-white' : 'bg-white text-black'}`}>
-      {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-md transition ${isDark ? 'bg-[#0f0f0f]/40 border-white/5' : 'bg-white/40 border-gray-400/30'} border-b`}>
-        <div className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl">
-          <Link to="/" className="flex items-center gap-3 transition hover:opacity-80 group">
-            <img src="/logo.jpg" alt="Renova Logo" className="object-cover w-10 h-10 transition rounded-lg shadow-lg group-hover:shadow-green-500/50" style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}} />
-            <div>
-              <div className="text-xl font-bold text-green-500">Renova</div>
-              <div className="text-[10px] text-green-400/70 font-semibold tracking-wider">AI RENTAL</div>
-            </div>
-          </Link>
-          <div className="items-center hidden gap-8 md:flex">
-            <a href="#features" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Features</a>
-            <a href="#how-it-works" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>How It Works</a>
-            <a href="#pricing" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Pricing</a>
-            <a href="#faq" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>FAQ</a>
-            <Link to="/contact" className={`text-sm font-medium hover:text-green-400 transition ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Contact</Link>
-          </div>
-          <div className="flex gap-3">
-            <Link to="/login" className={`px-4 py-2 text-sm font-medium rounded-lg transition backdrop-blur ${isDark ? 'bg-white/10 hover:bg-white/20 text-white border border-white/10' : 'bg-black/10 hover:bg-black/20 text-black border border-black/10'}`}>Login</Link>
-            <Link to="/register" className="px-4 py-2 text-sm font-semibold text-black transition bg-green-500 rounded-lg shadow-lg hover:bg-green-400 hover:shadow-green-500/50">Get Started</Link>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="relative max-w-3xl px-4 pt-20 pb-12 mx-auto overflow-hidden text-center">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 -z-10">
-          <div className={`absolute top-20 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-3xl opacity-30 ${isDark ? 'bg-green-500' : 'bg-green-400'} animate-pulse`}></div>
-        </div>
-
-        <h1 className="mb-4 text-3xl font-extrabold leading-tight text-transparent md:text-5xl bg-gradient-to-r from-green-400 via-green-500 to-green-400 bg-clip-text">
-          Find and Manage <br /> Rental Properties
-        </h1>
-        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-5 max-w-2xl mx-auto leading-relaxed`}>
-          Browse rental properties, connect with landlords, and manage your rental journey in one place.
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link to="/register" className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-black transition duration-300 transform rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl hover:shadow-green-500/50 hover:scale-105">
-            Find a Home <ArrowRight size={16} />
-          </Link>
-          <button className={`px-6 py-2 backdrop-blur-xl rounded-lg font-semibold text-sm transition duration-300 transform hover:scale-105 ${isDark ? 'bg-white/10 border border-white/20 hover:bg-white/20 text-white' : 'bg-black/10 border border-black/20 hover:bg-black/20 text-black'}`}>
-            📌 List Your Property
-          </button>
-        </div>
-      </section>
-
-      {/* Problems Section */}
-      <section id="problems" className="max-w-5xl px-4 py-12 mx-auto">
-        <h2 className="mb-3 text-2xl font-bold text-center">Why Renova?</h2>
-        <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-          Pakistan's rental market faces critical challenges. We're here to solve them.
-        </p>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            { icon: '🖼️', title: 'Fake Listings', desc: 'Unverified properties and photoshopped images waste time and money' },
-            { icon: '📄', title: 'No Written Agreements', desc: 'Most rentals lack formal documentation, leading to disputes' },
-            { icon: '🔍', title: 'No Tenant Verification', desc: 'Landlords have no way to verify tenant reliability' },
-            { icon: '💰', title: 'No Payment Proof', desc: 'Cash payments with no records create conflicts' },
-            { icon: '⚖️', title: 'No Dispute Resolution', desc: 'Disagreements escalate to costly legal battles' },
-            { icon: '🚫', title: 'Market Opacity', desc: 'No standardized pricing or transparent market data' },
-          ].map((item, i) => (
-            <div key={i} className={`p-4 border-l-4 border-red-500 rounded ${isDark ? 'bg-[#1a2332]' : 'bg-gray-50'}`}>
-              <div className="mb-1 text-2xl">{item.icon}</div>
-              <h3 className="mb-1 text-sm font-bold">{item.title}</h3>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section id="features" className="relative max-w-5xl px-4 py-12 mx-auto">
-        <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">Powerful Features</h2>
-        <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-          Everything you need for safe, transparent renting.
-        </p>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            { icon: '🤖', title: 'AI Fake Listing Detector', desc: 'Our AI analyzes images and details to instantly flag suspicious listings' },
-            { icon: '⭐', title: 'Bidirectional Trust Scores', desc: 'Transparent trust ratings for both tenants and landlords' },
-            { icon: '📋', title: 'Digital Rent Agreements', desc: 'Generate legally compliant, digitally signed agreements in seconds' },
-            { icon: '💵', title: 'AI Fair Rent Estimator', desc: 'Machine learning-powered rent suggestions based on market trends' },
-            { icon: '📱', title: 'JazzCash & EasyPaisa Payments', desc: 'Secure, instant rent payments via Pakistan\'s leading mobile wallets' },
-            { icon: '🛡️', title: 'In-App Dispute Resolution', desc: 'AI-mediated disputes resolved in days, not months' },
-          ].map((item, i) => (
-            <div key={i} className={`p-5 rounded-2xl backdrop-blur-xl border transition duration-300 transform hover:scale-105 hover:shadow-2xl group ${isDark ? 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-green-500/50' : 'bg-black/5 border-black/10 hover:bg-black/10 hover:border-green-500/50'}`}>
-              <div className="mb-2 text-3xl transition duration-300 group-hover:scale-110">{item.icon}</div>
-              <h3 className="mb-1 text-sm font-bold text-green-400 group-hover:text-green-300">{item.title}</h3>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className={`py-12 px-4 ${isDark ? 'bg-[#1a2332]' : 'bg-gray-50'}`}>
-        <div className="max-w-5xl mx-auto">
-          <h2 className="mb-3 text-2xl font-bold text-center">How It Works</h2>
-          <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-            Simple, transparent steps for tenants and landlords.
-          </p>
-          
-          <div className="grid gap-10 md:grid-cols-2">
-            <div>
-              <h3 className="mb-6 text-lg font-bold text-green-500">For Tenants</h3>
-              {[
-                { num: '1', title: 'Search & Apply', desc: 'Browse AI-verified listings and apply' },
-                { num: '2', title: 'Sign Agreement', desc: 'Review and digitally sign rent agreement' },
-                { num: '3', title: 'Pay Safely', desc: 'Pay rent via JazzCash/EasyPaisa' },
-              ].map((step, i) => (
-                <div key={i} className="flex gap-3 mb-5">
-                  <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 text-sm font-bold text-black bg-green-500 rounded-full">{step.num}</div>
-                  <div>
-                    <h4 className="font-bold mb-0.5 text-sm">{step.title}</h4>
-                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div>
-              <h3 className="mb-6 text-lg font-bold text-green-500">For Landlords</h3>
-              {[
-                { num: '1', title: 'Post Property', desc: 'List your property with AI pricing' },
-                { num: '2', title: 'Verify Tenant', desc: 'Screen applicants with trust scores' },
-                { num: '3', title: 'Collect Rent', desc: 'Receive instant digital payments' },
-              ].map((step, i) => (
-                <div key={i} className="flex gap-3 mb-5">
-                  <div className="flex items-center justify-center flex-shrink-0 w-8 h-8 text-sm font-bold text-black bg-green-500 rounded-full">{step.num}</div>
-                  <div>
-                    <h4 className="font-bold mb-0.5 text-sm">{step.title}</h4>
-                    <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{step.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section id="pricing" className="max-w-5xl px-4 py-12 mx-auto">
-        <h2 className="mb-3 text-2xl font-bold text-center">Simple, Transparent Pricing</h2>
-        <p className={`text-center mb-10 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
-          Choose the plan that fits your needs.
-        </p>
-        <div className="grid gap-5 md:grid-cols-3">
-          {[
-            { name: 'Free', period: 'For Tenants', price: 'Free', features: ['Browse all listings', 'View trust scores', 'Apply to properties', 'View AI recommendations'] },
-            { name: 'Basic', period: 'For Landlords', price: 'Rs. 500', subprice: '/month', featured: true, features: ['Post up to 3 listings', 'AI pricing suggestions', 'Tenant screening', 'Digital agreements'] },
-            { name: 'Pro', period: 'For Landlords', price: 'Rs. 1,200', subprice: '/month', features: ['Unlimited listings', 'Priority support 24/7', 'Advanced analytics', 'Dispute resolution access'] },
-          ].map((plan, i) => (
-            <div key={i} className={`p-5 border rounded-lg relative ${plan.featured ? `border-green-500 ring-2 ring-green-500/20 ${isDark ? 'bg-[#1a2332]' : 'bg-green-50'}` : `${isDark ? 'border-[#2d3e52]' : 'border-gray-400'}`}`}>
-              {plan.featured && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-500 text-black px-2 py-0.5 rounded-full text-xs font-bold">POPULAR</div>}
-              <h3 className="text-lg font-bold mb-0.5">{plan.name}</h3>
-              <p className={`text-xs mb-3 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{plan.period}</p>
-              <div className="mb-4">
-                <span className="text-2xl font-bold text-green-500">{plan.price}</span>
-                {plan.subprice && <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{plan.subprice}</span>}
-              </div>
-              <ul className="mb-4 space-y-2">
-                {plan.features.map((feat, j) => (
-                  <li key={j} className="flex items-center gap-2 text-xs">
-                    <CheckCircle2 size={14} className="text-green-500" />
-                    {feat}
-                  </li>
-                ))}
-              </ul>
-              <button className={`w-full py-2 rounded-lg font-semibold transition ${plan.featured ? 'bg-green-500 text-black hover:bg-green-600' : `${isDark ? 'border border-[#2d3e52] hover:bg-[#1a2332]' : 'border border-gray-200 hover:bg-gray-50'}`}`}>
-                {plan.featured ? 'Start Free Trial' : 'Get Started'}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ Section */}
-      <section id="faq" className="relative max-w-2xl px-4 py-12 mx-auto">
-        <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">FAQ</h2>
-        <p className={`text-center mb-8 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-          Answers to common questions about Renova.
-        </p>
-        <div className="space-y-2">
-          {[
-            { q: 'Is Renova free?', a: 'Renova is free for tenants. Landlords pay Rs. 500/month (Basic) or Rs. 1,200/month (Pro).' },
-            { q: 'How does AI detect fake listings?', a: 'Our AI analyzes images for manipulation, cross-references property details, and checks location accuracy in real-time.' },
-            { q: 'Are digital agreements legally valid in Pakistan?', a: 'Yes. Our agreements comply with Pakistan\'s Information Technology Act (2007) and are legally binding.' },
-            { q: 'Which payment methods are supported?', a: 'We support JazzCash and EasyPaisa for instant, secure payments without needing a bank account.' },
-            { q: 'How is my trust score calculated?', a: 'Your trust score is based on payment history, property care, communication, and dispute resolution record.' },
-            { q: 'What happens in a dispute?', a: 'Disputes are mediated by our AI system with expert arbitrators. Resolution typically takes 3-5 days.' },
-          ].map((item, i) => (
-            <div key={i} className={`border rounded-lg overflow-hidden backdrop-blur-xl transition duration-300 ${isDark ? 'border-white/10 hover:bg-white/5' : 'border-black/10 hover:bg-black/5'}`}>
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className={`w-full p-3 text-left flex justify-between items-center font-semibold text-sm hover:text-green-400 transition`}
-              >
-                {item.q}
-                <ChevronDown size={16} className={`transition duration-300 ${openFaq === i ? 'rotate-180 text-green-500' : 'text-green-400'}`} />
-              </button>
-              {openFaq === i && (
-                <div className={`p-3 border-t text-xs ${isDark ? 'border-white/10 bg-white/5 text-gray-300' : 'border-black/10 bg-black/5'}`}>
-                  {item.a}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Contact CTA */}
-      <section id="contact" className={`py-12 px-4 rounded-2xl max-w-3xl mx-auto mb-12 backdrop-blur-xl relative overflow-hidden ${isDark ? 'bg-gradient-to-r from-green-500/10 to-transparent border border-white/10' : 'bg-gradient-to-r from-green-400/10 to-transparent border border-black/10'}`}>
-        <div className="absolute inset-0 -z-10">
-          <div className={`absolute -bottom-20 -left-20 w-96 h-96 rounded-full blur-3xl opacity-30 ${isDark ? 'bg-green-500' : 'bg-green-400'}`}></div>
-        </div>
-
-        <h2 className="mb-3 text-2xl font-bold text-center text-transparent bg-gradient-to-r from-green-400 to-green-500 bg-clip-text">Ready to Rent Safely?</h2>
-        <p className={`text-center mb-8 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-          Create an account to browse properties or manage your rentals.
-        </p>
-        
-        <div className="grid gap-6 mb-8 md:grid-cols-2">
-          {/* Quick Contact */}
-          <div className="space-y-3">
-            <h3 className="mb-4 text-sm font-bold">Quick Contact Info</h3>
-            <div className="flex items-center gap-2">
-              <span className="text-lg text-green-500">📧</span>
-              <div>
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Email</p>
-                <a href="mailto:subssems336@gmail.com" className="text-sm font-semibold transition hover:text-green-500">subssems336@gmail.com</a>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg text-green-500">📱</span>
-              <div>
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Phone</p>
-                <a href="tel:+923064141188" className="text-sm font-semibold transition hover:text-green-500">+92-306-4141188</a>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg text-green-500">📍</span>
-              <div>
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Address</p>
-                <p className="text-sm font-semibold">p/o khot mehtab khan khot rada kishan</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-lg text-green-500">⏰</span>
-              <div>
-                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Hours</p>
-                <p className="text-sm font-semibold">24/7 Available</p>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col justify-center gap-3">
-            <Link to="/register" className="px-6 py-2 text-sm font-bold text-center text-black transition bg-green-500 rounded-lg hover:bg-green-600">
-              Get Started Free
-            </Link>
-            <Link to="/contact" className={`px-6 py-2 rounded-lg font-semibold text-sm transition border text-center ${isDark ? 'border-white/20 hover:bg-white/5' : 'border-gray-200 hover:bg-gray-50 text-gray-800'}`}>
-              📧 Send a Message
-            </Link>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            Or follow us on social media for updates and support
-          </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className={`border-t py-8 px-4 ${isDark ? 'border-white/10 bg-[#0a0a0a]' : 'border-gray-400 bg-gray-50'}`}>
-        <div className="grid max-w-5xl gap-6 mx-auto mb-6 text-xs md:grid-cols-5">
-          <div>
-            <h4 className="mb-2 text-sm font-bold">Renova</h4>
-            <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Transparent Renting, Powered by AI</p>
-          </div>
-          <div>
-            <h4 className="mb-2 text-sm font-bold">Platform</h4>
-            <ul className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              <li><a href="#features" className="hover:text-green-500">Features</a></li>
-              <li><a href="#pricing" className="hover:text-green-500">Pricing</a></li>
-              <li><a href="#how-it-works" className="hover:text-green-500">How It Works</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="mb-2 text-sm font-bold">Support</h4>
-            <ul className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              <li><a href="#contact" className="hover:text-green-500">Contact</a></li>
-              <li><a href="#faq" className="hover:text-green-500">FAQ</a></li>
-              <li><a href="#" className="hover:text-green-500">Help Center</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="mb-2 text-sm font-bold">Legal</h4>
-            <ul className={`space-y-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              <li><a href="#" className="hover:text-green-500">Privacy</a></li>
-              <li><a href="#" className="hover:text-green-500">Terms</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="mb-2 text-sm font-bold">Follow Us</h4>
-            <div className="flex gap-3 text-sm">
-              <a href="#" className="hover:text-green-500">f</a>
-              <a href="#" className="hover:text-green-500">📷</a>
-              <a href="#" className="hover:text-green-500">𝕏</a>
-            </div>
-          </div>
-        </div>
-        <div className={`border-t pt-6 text-center text-xs ${isDark ? 'border-white/10 text-gray-400' : 'border-gray-400 text-gray-600'}`}>
-          <p>© 2026 Renova. All rights reserved. Made with ❤️ in Pakistan.</p>
-        </div>
-      </footer>
-    </div>
-  );
+interface FeaturedListing {
+  id: string;
+  title: string;
+  area: string;
+  city: string;
+  rent: number;
+  bedrooms: number;
+  rentalDuration: string;
+  images?: Array<{ url: string }>;
 }
 
+export default function HomePage() {
+  const [city, setCity] = useState('');
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuthStore();
+  const roles = user?.roles ?? (user?.role ? [user.role] : []);
+  const homePath = roles.includes('LANDLORD') ? '/landlord' : '/tenant';
+  const featuredListings = useQuery({
+    queryKey: ['listings', 'home-featured'],
+    queryFn: () => listingsAPI.getAll<FeaturedListing>({ limit: 3 }),
+  });
+  const cityQuery = useQuery({
+    queryKey: ['locations', 'cities'],
+    queryFn: () => locationsAPI.cities(),
+  });
+  const browseTo = `/listings${city ? `?city=${encodeURIComponent(city)}` : ''}`;
 
+  return (
+    <main className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+      <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 lg:px-8">
+          <Link to="/" className="flex items-center gap-2.5" aria-label="Rentra home">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--green)] text-white"><Home size={20} /></span>
+            <span className="text-[22px] font-bold tracking-tight">rentra<span className="text-[var(--green-soft)]">.</span></span>
+          </Link>
+          <nav className="hidden items-center gap-8 text-sm font-medium text-[var(--text2)] md:flex">
+            <a href="#homes" className="transition hover:text-[var(--green)]">Find a home</a>
+            <a href="#how-it-works" className="transition hover:text-[var(--green)]">How it works</a>
+            <a href="#trust" className="transition hover:text-[var(--green)]">Why Rentra</a>
+          </nav>
+          <div className="hidden items-center gap-3 md:flex">
+            {isAuthenticated ? <>
+              <Link to="/favorites" className="rounded-full px-3 py-2.5 text-sm font-semibold text-[var(--text2)] hover:bg-[var(--surface2)]">Favorites</Link>
+              <Link to={homePath} className="rounded-full px-3 py-2.5 text-sm font-semibold text-[var(--text2)] hover:bg-[var(--surface2)]">My Rentra</Link>
+              <button onClick={logout} className="rounded-full border border-[var(--border2)] px-4 py-2.5 text-sm font-semibold text-[var(--text2)]">Log out</button>
+            </> : <>
+              <Link to="/favorites" className="rounded-full px-3 py-2.5 text-sm font-semibold text-[var(--text2)] hover:bg-[var(--surface2)]">Favorites</Link>
+              <Link to="/login" className="rounded-full px-4 py-2.5 text-sm font-semibold text-[var(--text2)] hover:bg-[var(--surface2)]">Log in</Link>
+              <Link to="/register" className="rounded-full bg-[var(--green)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--green-hover)]">Get started <ArrowRight className="ml-1 inline" size={15} /></Link>
+            </>}
+          </div>
+          <button className="rounded-lg p-2 text-[var(--text2)] transition hover:bg-[var(--surface2)] md:hidden" onClick={() => setMobileMenu(!mobileMenu)} aria-label={mobileMenu ? 'Close menu' : 'Open menu'} aria-expanded={mobileMenu}>{mobileMenu ? <X /> : <Menu />}</button>
+        </div>
+        {mobileMenu && <div className="grid gap-1 border-t border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-[var(--text)] md:hidden"><a className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" href="#homes" onClick={() => setMobileMenu(false)}>Find a home</a><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/favorites" onClick={() => setMobileMenu(false)}>Favorites</Link>{isAuthenticated ? <><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to={homePath} onClick={() => setMobileMenu(false)}>My Rentra</Link><button className="rounded-lg px-3 py-2 text-left hover:bg-[var(--surface2)]" onClick={() => { logout(); setMobileMenu(false); }}>Log out</button></> : <><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/login" onClick={() => setMobileMenu(false)}>Log in</Link><Link className="rounded-lg bg-[var(--green)] px-3 py-2 text-white" to="/register" onClick={() => setMobileMenu(false)}>Create account</Link></>}</div>}
+      </header>
+
+      <section className="relative isolate overflow-hidden">
+        <div className="absolute inset-0 -z-20 bg-[var(--green-dim)]" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[var(--green-dim)] via-[var(--green-dim)]/95 to-[var(--green-dim)]/30 lg:to-transparent" />
+        <div className="absolute inset-y-0 right-0 -z-20 hidden w-[56%] bg-cover bg-center lg:block" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90')" }} />
+        <div className="mx-auto grid min-h-[590px] max-w-7xl items-center px-5 py-16 lg:grid-cols-[1fr_0.85fr] lg:px-8 lg:py-20">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border2)] bg-[var(--surface)]/75 px-3.5 py-2 text-xs font-semibold text-[var(--green)]"><Sparkles size={14} /> Pakistan ka smarter rental platform</span>
+            <h1 className="mt-6 text-[42px] font-semibold leading-[1.08] tracking-[-0.045em] sm:text-6xl">A place to call home.<br /><span className="text-[var(--green-soft)]">A rental you can trust.</span></h1>
+            <p className="mt-5 max-w-lg text-base leading-7 text-[var(--text2)] sm:text-lg">Find verified places, connect directly with landlords, and keep your whole renting journey in one simple place.</p>
+            <form onSubmit={(event) => { event.preventDefault(); navigate(browseTo); }} className="mt-8 flex max-w-[620px] flex-col gap-2 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-2 shadow-[var(--shadow)] sm:flex-row sm:items-center">
+              <label className="flex min-h-12 flex-1 items-center gap-3 px-3"><MapPin size={19} className="shrink-0 text-[var(--green-soft)]" /><span className="min-w-0 flex-1"><span className="block text-[10px] font-semibold uppercase tracking-wider text-[var(--text3)]">Location</span><input value={city} onChange={(event) => setCity(event.target.value)} placeholder="City, area or neighbourhood" className="w-full bg-transparent text-sm font-medium text-[var(--text)] outline-none placeholder:font-normal placeholder:text-[var(--text3)]" /></span></label>
+              <button className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--green)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--green-hover)]"><Search size={17} /> Search homes</button>
+            </form>
+            {!!cityQuery.data?.length && <div className="mt-5 flex flex-wrap gap-2 text-xs text-[var(--text2)]"><span className="mr-1 self-center">Explore cities:</span>{cityQuery.data.slice(0, 5).map((item) => <button key={item.id} onClick={() => setCity(item.name)} className="rounded-full border border-[var(--border2)] bg-[var(--surface)]/65 px-3 py-1.5 transition hover:border-[var(--green-soft)] hover:text-[var(--green)]">{item.name}</button>)}</div>}
+            <div className="mt-8 text-sm text-[var(--text2)]"><strong className="text-[var(--text)]">Rent with clarity.</strong> Move in with confidence.</div>
+          </div>
+          <div className="hidden justify-end lg:flex"><div className="w-[275px] rounded-2xl border border-[var(--border)] bg-[var(--surface)]/90 p-5"><Building2 className="text-[var(--green)]" size={28} /><p className="mt-4 text-xs text-[var(--text3)]">Browse homes that are</p><p className="mt-1 text-lg font-semibold">currently listed on Rentra</p><Link to="/listings" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--green)]">Explore listings <ArrowRight size={15} /></Link></div></div>
+        </div>
+      </section>
+
+      <section id="homes" className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-20">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--green-soft)]">A good place to start</p><h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-[38px]">Homes worth coming home to</h2><p className="mt-2 text-sm text-[var(--text3)]">Published listings currently available on Rentra.</p></div><Link to="/listings" className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--green)] hover:gap-2">See all homes <ArrowRight size={16} /></Link></div>
+        {featuredListings.isPending ? <p className="mt-8 text-sm text-[var(--text3)]">Loading current listings...</p> : featuredListings.isError ? <div role="alert" className="mt-8 text-sm text-[var(--red)]">Current listings could not be loaded. <button onClick={() => void featuredListings.refetch()} className="underline">Retry</button></div> : featuredListings.data?.data.length ? <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{featuredListings.data.data.map((listing) => <Link key={listing.id} to={`/listings/${listing.id}`} className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] transition hover:-translate-y-1"><div className="h-56 overflow-hidden bg-[var(--surface2)]">{listing.images?.[0]?.url ? <img src={listing.images[0].url} alt={listing.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="flex h-full items-center justify-center text-sm text-[var(--text3)]">No property image</div>}</div><div className="p-4"><p className="flex items-center gap-1 text-xs text-[var(--text3)]"><MapPin size={13} />{[listing.area, listing.city].filter(Boolean).join(', ')}</p><h3 className="mt-2 font-semibold">{listing.title}</h3><div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3"><p><strong className="text-lg text-[var(--green)]">Rs. {listing.rent.toLocaleString()}</strong><span className="text-xs text-[var(--text3)]"> / {listing.rentalDuration.toLowerCase().replace('_', ' ')}</span></p><span className="flex items-center gap-1 text-xs text-[var(--text2)]"><BedDouble size={14} />{listing.bedrooms}</span></div></div></Link>)}</div> : <p className="mt-8 text-sm text-[var(--text3)]">There are no published listings to show right now.</p>}
+      </section>
+
+      <section id="trust" className="border-y border-[var(--border)] bg-[var(--surface2)]">
+        <div className="mx-auto grid max-w-7xl gap-10 px-5 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:px-8 lg:py-20"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--green-soft)]">Renting, with the guesswork removed</p><h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-[38px]">The details matter.<br />We help you feel sure.</h2><p className="mt-4 max-w-md text-sm leading-6 text-[var(--text2)]">From the first viewing to the monthly rent, Rentra keeps the important things clear for both tenants and landlords.</p><Link to="/register" className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--green)] px-5 py-3 text-sm font-semibold text-white hover:bg-[var(--green-hover)]">Explore Rentra <ArrowRight size={16} /></Link></div><div className="grid gap-3 sm:grid-cols-2">{[{ icon: <ShieldCheck />, title: 'Verified listings', body: 'Review and verification tools help build confidence in a property.' }, { icon: <Building2 />, title: 'One rental workspace', body: 'Applications, agreements, payments and maintenance, all together.' }, { icon: <Bell />, title: 'Helpful updates', body: 'See messages, application changes and reminders in one place.' }, { icon: <Star />, title: 'Trust on both sides', body: 'Profiles and reviews help tenants and landlords make informed choices.' }].map((item) => <div key={item.title} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5"><span className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--green-dim)] text-[var(--green-soft)]">{item.icon}</span><h3 className="mt-4 text-sm font-semibold">{item.title}</h3><p className="mt-1.5 text-xs leading-5 text-[var(--text3)]">{item.body}</p></div>)}</div></div>
+      </section>
+
+      <section id="how-it-works" className="mx-auto max-w-7xl px-5 py-16 lg:px-8 lg:py-20"><div className="text-center"><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--green-soft)]">Simple by design</p><h2 className="mt-2 text-3xl font-semibold tracking-tight">From search to settled</h2><p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[var(--text3)]">A straightforward flow that works for people looking for a home and people listing one.</p></div><div className="mt-10 grid gap-4 md:grid-cols-3">{[{ n:'01', title:'Find the right place', text:'Search by city and area, explore listings, and save the homes you like.' },{ n:'02', title:'Connect and agree', text:'Send a rental request, message the landlord, and manage your agreement.' },{ n:'03', title:'Stay on top of it', text:'Follow payments, maintenance and updates from your own dashboard.' }].map((item) => <div key={item.n} className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6"><span className="text-xs font-bold tracking-widest text-[var(--green-soft)]">{item.n}</span><h3 className="mt-4 text-lg font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-[var(--text3)]">{item.text}</p><ChevronRight className="mt-5 text-[var(--green-soft)]" size={19} /></div>)}</div></section>
+
+      <section className="px-5 pb-16"><div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-3xl bg-[var(--green)] px-6 py-10 text-white sm:flex-row sm:items-center sm:justify-between sm:px-10"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/80">Your next chapter starts here</p><h2 className="mt-2 text-2xl font-semibold sm:text-3xl">Ready to find a place that feels right?</h2><p className="mt-2 text-sm text-white/85">Join Rentra and make renting a little easier.</p></div><Link to="/register" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[var(--green)] hover:bg-[var(--surface2)]">Create your account <ArrowRight size={16} /></Link></div></section>
+
+      <footer className="border-t border-[var(--border)] px-5 py-6"><div className="mx-auto flex max-w-7xl flex-col gap-3 text-xs text-[var(--text3)] sm:flex-row sm:items-center sm:justify-between"><span>© {new Date().getFullYear()} Rentra · Better renting starts here.</span><span className="flex gap-5"><Link to="/contact" className="hover:text-[var(--green)]">Contact</Link><Link to="/login" className="hover:text-[var(--green)]">Log in</Link></span></div></footer>
+    </main>
+  );
+}

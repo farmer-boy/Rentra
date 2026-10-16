@@ -3,9 +3,11 @@
 The API uses `emailVerifiedAt` and `phoneVerifiedAt` for contact verification.
 Email confirmation uses the existing account email token flow; a logged-in user
 can request another link with `POST /api/auth/verify-email/request`.
-`API_PUBLIC_URL` must point to the externally reachable API base, including
-`/api`, in production. Local development defaults to
-`http://localhost:3000/api`.
+Verification emails link to the web app's `/verify-email` page. Configure
+`FRONTEND_URL` as the externally reachable web app origin in production. Local
+development defaults to `http://localhost:5173`. The page requires an explicit
+user click before it consumes the single-use token, preventing email link
+scanners from verifying the account unexpectedly.
 
 Phone confirmation sends a six-digit, ten-minute code through Twilio. Configure
 `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`. Phone values

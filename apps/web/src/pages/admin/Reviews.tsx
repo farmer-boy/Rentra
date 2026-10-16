@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
-import api from '../../api/client';
+import { useTheme } from '../../context/useTheme';
+import { reviewsAPI } from '../../api/reviews';
 
 interface Review {
   id: string;
@@ -21,8 +21,8 @@ export default function AdminReviews() {
     setLoading(true);
     setError('');
     try {
-      const { data } = await api.get<{ data: Review[] }>('/reviews');
-      setReviews(data.data);
+      const records = await reviewsAPI.getAll();
+      setReviews(records as Review[]);
     } catch (requestError: unknown) {
       const message = (requestError as { response?: { data?: { message?: string } } }).response?.data?.message;
       setError(typeof message === 'string' ? message : 'Reviews could not be loaded.');

@@ -123,7 +123,6 @@ export const RootNavigator = () => {
       <Stack.Navigator 
         screenOptions={{ 
           headerShown: false,
-          animationEnabled: true,
           gestureEnabled: true,
         }}
       >
@@ -131,41 +130,26 @@ export const RootNavigator = () => {
           <Stack.Screen
             name="AuthStack"
             component={AuthStack}
-            options={{
-              animationEnabled: true,
-            }}
           />
         ) : user?.role === 'TENANT' ? (
           <Stack.Screen
             name="TenantStack"
             component={TenantStack}
-            options={{
-              animationEnabled: true,
-            }}
           />
         ) : user?.role === 'LANDLORD' ? (
           <Stack.Screen
             name="LandlordStack"
             component={LandlordStack}
-            options={{
-              animationEnabled: true,
-            }}
           />
         ) : user?.role === 'ADMIN' ? (
           <Stack.Screen
             name="AdminStack"
             component={AdminStack}
-            options={{
-              animationEnabled: true,
-            }}
           />
         ) : (
           <Stack.Screen
             name="AuthStack"
             component={AuthStack}
-            options={{
-              animationEnabled: true,
-            }}
           />
         )}
       </Stack.Navigator>

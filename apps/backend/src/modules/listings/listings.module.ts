@@ -5,11 +5,13 @@ import { UploadService } from './upload.service';
 import { PrismaModule } from '../../common/prisma/prisma.module';
 import { LocationsModule } from '../locations/locations.module';
 import { AuditModule } from '../audit/audit.module';
+import { AuthModule } from '../auth/auth.module';
+import { OptionalJwtAuthGuard } from '../properties/guards/optional-jwt-auth.guard';
 
 @Module({
-  imports: [PrismaModule, LocationsModule, AuditModule],
+  imports: [PrismaModule, LocationsModule, AuditModule, AuthModule],
   controllers: [ListingsController],
-  providers: [ListingsService, UploadService],
+  providers: [ListingsService, UploadService, OptionalJwtAuthGuard],
   exports: [ListingsService, UploadService],
 })
 export class ListingsModule {}

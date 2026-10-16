@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { paymentsAPI } from '../../api/payments';
@@ -82,7 +82,7 @@ export default function Payments() {
           </div>
         )}
         <p className={`text-[11px] text-center mt-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-          This view lists recorded payments only. Payment initiation requires agreement details.
+          Payment records and statuses come from the backend. Online payment initiation is unavailable because no payment provider adapter is configured on the backend.
         </p>
       </Card>
     </div>

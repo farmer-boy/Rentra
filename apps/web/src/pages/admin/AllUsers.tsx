@@ -1,21 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import Card from '../../components/ui/Card';
 import { Users, UserCheck, Ban, Shield, Mail, Phone } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
-import type { PaginatedResponse, User as ApiUser } from '../../api/types';
 import { useLocation } from 'react-router-dom';
 
-type AdminUser = Pick<ApiUser, 'id' | 'email' | 'fullName' | 'phone' | 'roles' | 'isSuspended' | 'createdAt'> & {
-  emailVerifiedAt?: string | null;
-  phoneVerifiedAt?: string | null;
-};
-
 const AdminAllUsers = () => {
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const location = useLocation();
@@ -23,56 +14,37 @@ const AdminAllUsers = () => {
   const routeStatus = location.pathname.endsWith('/banned') ? 'SUSPENDED' : '';
   const verificationStatus = location.pathname.endsWith('/verified') ? 'APPROVED' : '';
 
-  const loadUsers = useCallback(() => {
-    setLoading(true);
-    setError('');
-    adminAPI.getAllUsers({
+  const filters = {
       page,
       limit: 20,
       ...(search && { search }),
       ...((routeStatus || query) && { status: routeStatus || query }),
       ...(role && { role }),
       ...(verificationStatus && { verificationStatus }),
-    })
-      .then((response: PaginatedResponse<ApiUser>) => {
-        setUsers(response.items as AdminUser[]);
-        setTotal(response.total);
-      })
-      .catch(() => setError('Could not load users. Please try again later.'))
-      .finally(() => setLoading(false));
-  }, [page, query, role, routeStatus, search, verificationStatus]);
+  };
+  const queryClient = useQueryClient();
+  const usersQuery = useQuery({
+    queryKey: ['admin', 'users', filters],
+    queryFn: () => adminAPI.getAllUsers(filters),
+  });
+  const moderationMutation = useMutation({
+    mutationFn: ({ id, reason, suspended }: { id: string; reason: string; suspended: boolean }) =>
+      suspended ? adminAPI.activateUser(id, reason) : adminAPI.suspendUser(id, reason),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
+  });
+  const users = usersQuery.data?.items ?? [];
+  const total = usersQuery.data?.total ?? 0;
+  const loading = usersQuery.isFetching;
+  const error = usersQuery.isError
+    ? 'Could not load users. Please try again later.'
+    : moderationMutation.isError
+      ? 'The moderation action could not be completed.'
+      : '';
 
-  useEffect(() => {
-    let active = true;
-    adminAPI.getAllUsers({
-      page,
-      limit: 20,
-      ...(search && { search }),
-      ...((routeStatus || query) && { status: routeStatus || query }),
-      ...(role && { role }),
-      ...(verificationStatus && { verificationStatus }),
-    })
-      .then((response: PaginatedResponse<ApiUser>) => {
-        if (!active) return;
-        setUsers(response.items as AdminUser[]);
-        setTotal(response.total);
-        setError('');
-      })
-      .catch(() => { if (active) setError('Could not load users. Please try again later.'); })
-      .finally(() => { if (active) setLoading(false); });
-    return () => { active = false; };
-  }, [page, query, role, routeStatus, search, verificationStatus]);
-
-  const moderateUser = async (user: AdminUser) => {
+  const moderateUser = (user: (typeof users)[number]) => {
     const reason = window.prompt(user.isSuspended ? 'Reason for reinstating this user:' : 'Reason for suspending this user:');
     if (!reason?.trim()) return;
-    try {
-      if (user.isSuspended) await adminAPI.activateUser(user.id, reason);
-      else await adminAPI.suspendUser(user.id, reason);
-      loadUsers();
-    } catch {
-      setError('The moderation action could not be completed.');
-    }
+    moderationMutation.mutate({ id: user.id, reason, suspended: user.isSuspended });
   };
 
   const getRoleColor = (role: string) => {
@@ -103,7 +75,7 @@ const AdminAllUsers = () => {
         <p className="text-gray-600 dark:text-gray-400">Manage platform users and permissions</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
         <Card className="p-4 text-center">
           <Users size={24} className="mx-auto mb-2 text-blue-500" />
           <p className="text-gray-600 dark:text-gray-400 text-sm">Total Users</p>
@@ -130,7 +102,7 @@ const AdminAllUsers = () => {
         {error && <p role="alert" className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
         <form
           className="mb-4 flex flex-col sm:flex-row gap-2"
-          onSubmit={(event) => { event.preventDefault(); setPage(1); loadUsers(); }}
+          onSubmit={(event) => { event.preventDefault(); setPage(1); }}
         >
           <input
             className="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm"

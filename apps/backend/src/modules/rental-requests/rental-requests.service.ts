@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -12,16 +13,12 @@ import {
   RentalRequestStatus,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { NotificationsService } from '../notifications/notifications.service';
 import { AcceptRentalRequestDto } from './dto/accept-rental-request.dto';
 import { CreateRentalRequestDto } from './dto/create-rental-request.dto';
 
 @Injectable()
 export class RentalRequestsService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly notificationsService: NotificationsService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(
     tenantId: string,
@@ -63,29 +60,45 @@ export class RentalRequestsService {
       throw new BadRequestException('moveInDate must be a valid date');
     }
 
-    const request = await this.prisma.rentalRequest.create({
-      data: {
-        tenantId,
-        landlordId: property.ownerId,
-        propertyId,
-        listingId: property.listings[0]?.id,
-        moveInDate,
-        durationMonths: dto.duration,
-        occupants: dto.occupants ?? 1,
-        message: dto.message?.trim(),
-        status: RentalRequestStatus.PENDING,
-      },
-      include: this.requestInclude(),
-    });
+    try {
+      return await this.prisma.$transaction(async (transaction) => {
+        const request = await transaction.rentalRequest.create({
+          data: {
+            tenantId,
+            landlordId: property.ownerId,
+            propertyId,
+            listingId: property.listings[0]?.id,
+            moveInDate,
+            durationMonths: dto.duration,
+            occupants: dto.occupants ?? 1,
+            message: dto.message?.trim(),
+            status: RentalRequestStatus.PENDING,
+          },
+          include: this.requestInclude(),
+        });
 
-    await this.notificationsService.create({
-      userId: property.ownerId,
-      type: NotificationType.RENTAL_REQUEST,
-      title: 'New rental request',
-      message: 'A tenant sent a rental request for your property',
-      data: { rentalRequestId: request.id, propertyId },
-    });
-    return request;
+        await transaction.notification.create({
+          data: {
+            userId: property.ownerId,
+            type: NotificationType.RENTAL_REQUEST,
+            title: 'New rental request',
+            message: 'A tenant sent a rental request for your property',
+            data: { rentalRequestId: request.id, propertyId },
+          },
+        });
+        return request;
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'A rental request for this listing has already been submitted',
+        );
+      }
+      throw error;
+    }
   }
 
   myRequests(tenantId: string) {
@@ -191,8 +204,20 @@ export class RentalRequestsService {
 
     const result = await this.prisma.$transaction(async (transaction) => {
       await transaction.$queryRaw(
-        Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${requestId}))`,
+        Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${request.propertyId}))`,
       );
+      const activeAgreement = await transaction.agreement.findFirst({
+        where: {
+          propertyId: request.propertyId,
+          status: AgreementStatus.ACTIVE,
+        },
+        select: { id: true },
+      });
+      if (activeAgreement) {
+        throw new ConflictException(
+          'This property already has an active rental agreement',
+        );
+      }
       const transition = await transaction.rentalRequest.updateMany({
         where: {
           id: requestId,
@@ -229,6 +254,34 @@ export class RentalRequestsService {
         },
         data: { status: RentalRequestStatus.REJECTED },
       });
+      await transaction.notification.createMany({
+        data: [
+          {
+            userId: request.tenantId,
+            type: NotificationType.RENTAL_REQUEST_ACCEPTED,
+            title: 'Rental request accepted',
+            message:
+              'Your rental request was accepted and an agreement was created',
+            data: {
+              rentalRequestId: request.id,
+              agreementId: agreement.id,
+              propertyId: request.propertyId,
+            },
+          },
+          {
+            userId: landlordId,
+            type: NotificationType.RENTAL_REQUEST_ACCEPTED,
+            title: 'Agreement created',
+            message:
+              'An agreement was created from the accepted rental request',
+            data: {
+              rentalRequestId: request.id,
+              agreementId: agreement.id,
+              propertyId: request.propertyId,
+            },
+          },
+        ],
+      });
       const accepted = await transaction.rentalRequest.findUniqueOrThrow({
         where: { id: requestId },
         include: this.requestInclude(),
@@ -236,31 +289,6 @@ export class RentalRequestsService {
       return { accepted, agreement };
     });
 
-    await Promise.all([
-      this.notificationsService.create({
-        userId: request.tenantId,
-        type: NotificationType.RENTAL_REQUEST_ACCEPTED,
-        title: 'Rental request accepted',
-        message:
-          'Your rental request was accepted and an agreement was created',
-        data: {
-          rentalRequestId: request.id,
-          agreementId: result.agreement.id,
-          propertyId: request.propertyId,
-        },
-      }),
-      this.notificationsService.create({
-        userId: landlordId,
-        type: NotificationType.RENTAL_REQUEST_ACCEPTED,
-        title: 'Agreement created',
-        message: 'An agreement was created from the accepted rental request',
-        data: {
-          rentalRequestId: request.id,
-          agreementId: result.agreement.id,
-          propertyId: request.propertyId,
-        },
-      }),
-    ]);
     return result;
   }
 
@@ -268,28 +296,31 @@ export class RentalRequestsService {
     const request = await this.getOwnedRequest(requestId, landlordId);
     if (request.status !== RentalRequestStatus.PENDING)
       throw new BadRequestException('Only pending requests can be rejected');
-    const transition = await this.prisma.rentalRequest.updateMany({
-      where: {
-        id: requestId,
-        landlordId,
-        status: RentalRequestStatus.PENDING,
-      },
-      data: { status: RentalRequestStatus.REJECTED },
+    return this.prisma.$transaction(async (transaction) => {
+      const transition = await transaction.rentalRequest.updateMany({
+        where: {
+          id: requestId,
+          landlordId,
+          status: RentalRequestStatus.PENDING,
+        },
+        data: { status: RentalRequestStatus.REJECTED },
+      });
+      if (transition.count !== 1)
+        throw new BadRequestException('Only pending requests can be rejected');
+      await transaction.notification.create({
+        data: {
+          userId: request.tenantId,
+          type: NotificationType.RENTAL_REQUEST_REJECTED,
+          title: 'Rental request rejected',
+          message: 'Your rental request was rejected by the property owner',
+          data: { rentalRequestId: requestId, propertyId: request.propertyId },
+        },
+      });
+      return transaction.rentalRequest.findUniqueOrThrow({
+        where: { id: requestId },
+        include: this.requestInclude(),
+      });
     });
-    if (transition.count !== 1)
-      throw new BadRequestException('Only pending requests can be rejected');
-    const updated = await this.prisma.rentalRequest.findUniqueOrThrow({
-      where: { id: requestId },
-      include: this.requestInclude(),
-    });
-    await this.notificationsService.create({
-      userId: request.tenantId,
-      type: NotificationType.RENTAL_REQUEST_REJECTED,
-      title: 'Rental request rejected',
-      message: 'Your rental request was rejected by the property owner',
-      data: { rentalRequestId: requestId, propertyId: request.propertyId },
-    });
-    return updated;
   }
 
   async cancel(requestId: string, tenantId: string) {

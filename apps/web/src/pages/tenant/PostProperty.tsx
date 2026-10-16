@@ -1,355 +1,68 @@
 import { useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import Card from '../../components/ui/Card';
-
-interface PostPropertyForm {
-  propertyType: string;
-  country: string;
-  province: string;
-  city: string;
-  area: string;
-  blockSector: string;
-  address: string;
-  monthlyRent: string;
-  securityDeposit: string;
-  bedrooms: string;
-  areaSize: string;
-  description: string;
-  photos: File[];
-}
+import { ApiError } from '../../api/api-error';
+import { usersAPI } from '../../api/users';
+import { useAuthStore } from '../../store/authStore';
+import type { Role } from '../../types';
 
 export default function TenantPostProperty() {
-  const { isDark } = useTheme();
-  const [formData, setFormData] = useState<PostPropertyForm>({
-    propertyType: '',
-    country: '',
-    province: '',
-    city: '',
-    area: '',
-    blockSector: '',
-    address: '',
-    monthlyRent: '',
-    securityDeposit: '',
-    bedrooms: '',
-    areaSize: '',
-    description: '',
-    photos: [],
-  });
+  const navigate = useNavigate();
+  const { user, updateUser } = useAuthStore();
+  const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+  const enableLandlordAccount = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      try {
+        await usersAPI.getLandlordProfile();
+      } catch (error) {
+        if (!(error instanceof ApiError) || error.status !== 404) throw error;
+        await usersAPI.createLandlordProfile({ displayName: user.fullName });
+      }
+
+      const roles: Role[] = user.roles?.length
+        ? user.roles
+        : user.role
+          ? [user.role]
+          : (['TENANT'] as Role[]);
+      updateUser({
+        role: 'LANDLORD',
+        roles: [...new Set<Role>([...roles, 'LANDLORD'])],
+      });
+      navigate('/landlord/post');
+    } catch (error) {
+      toast.error(
+        error instanceof ApiError
+          ? error.message
+          : 'Could not set up your landlord account. Please try again.',
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
-      <div className="mb-6">
-        <h1 className={`text-lg font-bold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          Post Your Property
+    <div className="mx-auto max-w-2xl">
+      <Card className="p-6 md:p-8">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Post a property
         </h1>
-        <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          Enter property details. Property submission is not available from this screen yet.
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          Set up your landlord profile to manage and publish your rental
+          property. Your tenant account and rental features will stay available.
         </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
-          <Card>
-            <h2 className={`text-base font-bold mb-5 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Property Details
-            </h2>
-
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Country</label>
-                    <input name="country" value={formData.country} onChange={handleInputChange} className="w-full px-3 py-2 text-sm rounded-lg border" />
-                  </div>
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Province</label>
-                    <input name="province" value={formData.province} onChange={handleInputChange} className="w-full px-3 py-2 text-sm rounded-lg border" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Property Type
-                    </label>
-                    <select
-                      aria-label="Property Type"
-                      name="propertyType"
-                      value={formData.propertyType}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
-                      }`}
-                    >
-                      <option value="">Select</option>
-                      <option value="HOUSE">House</option>
-                      <option value="APARTMENT">Apartment</option>
-                      <option value="FLAT">Flat</option>
-                      <option value="PORTION">Portion</option>
-                      <option value="ROOM">Room</option>
-                      <option value="HOSTEL">Hostel</option>
-                      <option value="HOTEL">Hotel</option>
-                      <option value="GUEST_HOUSE">Guest House</option>
-                      <option value="STUDIO">Studio</option>
-                      <option value="FARMHOUSE">Farmhouse</option>
-                      <option value="PG">PG / Paying Guest</option>
-                      <option value="SHARED_ROOM">Shared Room</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      City
-                    </label>
-                    <input aria-label="City" name="city" value={formData.city} onChange={handleInputChange} placeholder="Enter city" className="w-full px-3 py-2 text-sm rounded-lg border" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Area / Mohalla
-                  </label>
-                  <input aria-label="Area / Mohalla" name="area" value={formData.area} onChange={handleInputChange} placeholder="Enter area or mohalla" className="w-full px-3 py-2 text-sm rounded-lg border" />
-                </div>
-
-                <div>
-                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Block / Sector</label>
-                  <input name="blockSector" value={formData.blockSector} onChange={handleInputChange} placeholder="e.g. Block H" className="w-full px-3 py-2 text-sm rounded-lg border" />
-                </div>
-
-                <div>
-                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Complete Address
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="Street number, house number..."
-                    className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                      isDark
-                        ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                        : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
-                    }`}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Monthly Rent (Rs)
-                    </label>
-                    <input
-                      type="number"
-                      name="monthlyRent"
-                      value={formData.monthlyRent}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 25000"
-                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
-                      }`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Security Deposit (Rs)
-                    </label>
-                    <input
-                      type="number"
-                      name="securityDeposit"
-                      value={formData.securityDeposit}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 50000"
-                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Bedrooms
-                    </label>
-                    <select
-                      aria-label="Number of Bedrooms"
-                      name="bedrooms"
-                      value={formData.bedrooms}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 text-white focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-400 text-gray-900 focus:border-green-500 focus:ring-green-500/20'
-                      }`}
-                    >
-                      <option value="">Select</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4+</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Area (SQFT)
-                    </label>
-                    <input
-                      type="number"
-                      name="areaSize"
-                      value={formData.areaSize}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 800"
-                      className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm transition-all duration-300 ${
-                        isDark
-                          ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                          : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
-                      }`}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="Detailed description about property..."
-                    rows={3}
-                    className={`w-full px-3 py-2 text-sm rounded-lg border backdrop-blur-sm resize-none transition-all duration-300 ${
-                      isDark
-                        ? 'bg-white/5 border-white/10 text-white placeholder-gray-500 focus:border-green-400 focus:ring-green-500/30'
-                        : 'bg-white/50 border-gray-400 text-gray-900 placeholder-gray-400 focus:border-green-500 focus:ring-green-500/20'
-                    }`}
-                  />
-                </div>
-
-                <button type="button" disabled className="w-full py-2 text-sm rounded-lg font-semibold bg-gray-300 text-gray-500 cursor-not-allowed">
-                  Property submission unavailable
-                </button>
-              </div>
-            </Card>
-          </div>
-
-          <div>
-            <Card>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">🤖</span>
-                <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Submission status
-                </h3>
-              </div>
-
-              <p className={`text-xs mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                This form is not connected to a property submission or verification API.
-              </p>
-
-              <div className="space-y-3">
-                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
-                }`}>
-                  <div className="flex items-start gap-2">
-                    <span className="text-xl">📸</span>
-                    <div>
-                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Photo verification
-                      </p>
-                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        No verification service is available from this screen.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
-                }`}>
-                  <div className="flex items-start gap-2">
-                    <span className="text-xl">💰</span>
-                    <div>
-                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Rent estimate
-                      </p>
-                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        No rent-estimation service is available.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
-                }`}>
-                  <div className="flex items-start gap-2">
-                    <span className="text-xl">👤</span>
-                    <div>
-                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Account review
-                      </p>
-                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        No automated account checks are available.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`p-3 rounded-lg border backdrop-blur-sm ${
-                  isDark
-                    ? 'bg-white/5 border-white/10'
-                    : 'bg-white/30 border-gray-400/50'
-                }`}>
-                  <div className="flex items-start gap-2">
-                    <span className="text-xl">✍️</span>
-                    <div>
-                      <p className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        Description review
-                      </p>
-                      <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                        No automated description checks are available.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`mt-4 p-3 rounded-lg border ${
-                isDark
-                  ? 'bg-green-500/10 border-green-500/40 text-green-300'
-                  : 'bg-green-50/80 border-green-200/60 text-green-800'
-              }`}>
-                <p className="text-xs font-semibold flex items-start gap-2">
-                  <span>✅</span>
-                  <span>Submitting this form is currently unavailable.</span>
-                </p>
-              </div>
-            </Card>
-          </div>
-        </div>
-    </>
+        <button
+          type="button"
+          onClick={() => void enableLandlordAccount()}
+          disabled={loading}
+          className="mt-6 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? 'Setting up your account…' : 'Continue to property details'}
+        </button>
+      </Card>
+    </div>
   );
 }

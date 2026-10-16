@@ -20,15 +20,19 @@ VITE_API_TIMEOUT_MS=15000
 - Adds the persisted access token as a bearer token.
 - Normalizes HTTP, validation, timeout, and network failures to `ApiError`.
 - On an eligible 401, sends one single-flight request to `POST /auth/refresh`,
-  rotates the in-memory refresh token, and retries the failed request once.
+  rotates the refresh token, and retries the failed request once. The refresh
+  token is kept in memory and `sessionStorage`, so it survives reloads in the
+  same browser tab but is cleared when that tab's session ends.
 - Clears the local session and navigates to `/login` if refresh fails.
 - Calls `GET /auth/me` during app startup before rendering protected routes.
-- Uses `withCredentials` for backend compatibility; the current backend returns
-  access and refresh tokens in the response body, not an HttpOnly cookie.
+- Does not send credentialed cookies. The current backend returns access and
+  refresh tokens in response bodies and accepts bearer access tokens; it does
+  not issue an HttpOnly refresh cookie.
 
-The refresh token intentionally stays in memory. As a result, a full reload
-cannot refresh an expired access token; the user will need to sign in again.
-Changing this requires a coordinated backend cookie/session contract.
+The backend currently returns refresh tokens in the response body rather than
+setting an HttpOnly cookie. Keeping the token in `sessionStorage` allows a
+reload in the same tab to refresh, but JavaScript can still access it; an
+HttpOnly cookie-based design would require coordinated backend and CSRF work.
 
 ## Feature modules and verified routes
 
@@ -37,10 +41,10 @@ creating feature-specific Axios instances.
 
 | API module | Backend routes used |
 | --- | --- |
-| `auth.ts` | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`; `GET /auth/me` |
+| `auth.ts` | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`; `GET /auth/me`, `/auth/verify-email` |
 | `listings.ts` | `GET /listings`, `/listings/:id`, `/listings/landlord/my-listings`, `/listings/landlord/analytics`; `POST /listings`, `/listings/:id/view`, `/listings/:id/images/upload`; `PATCH /listings/:id`, `/listings/:id/availability`; `DELETE /listings/:id` |
 | `properties.ts` | `GET /properties`, `/properties/search`, `/properties/nearby`, `/properties/:id`, `/properties/:id/availability`, `/properties/:id/room-types`; property create/update/stats/view endpoints |
-| `favorites.ts` | `GET /favorites`, `/favorites/:listingId`; `POST` and `DELETE /favorites/:listingId` |
+| `favorites.ts` | Authenticated `GET /favorites`, `/favorites/:listingId`; `POST` and `DELETE /favorites/:listingId` |
 | `savedSearches.ts` | `GET`, `POST /saved-searches`; `PATCH`, `DELETE /saved-searches/:id` |
 | `rentalRequests.ts` | `POST /properties/:id/rental-requests`; `GET /rental-requests/my`, `/received`; `PATCH /rental-requests/:id/{accept,reject,cancel}` |
 | `agreements.ts` | `GET /agreements/my`, `/agreements/:id`; `PATCH /agreements/:id/terminate` |
@@ -55,7 +59,8 @@ creating feature-specific Axios instances.
 | `disputes.ts` | `POST /disputes`; `GET /disputes/my`, `/disputes/:id` |
 | `recommendations.ts` | `GET /recommendations` |
 | `admin.ts` | Admin user/listing/property/dispute moderation, verification, and dashboard routes |
-| `locations.ts` | Country/province/city/area lookup, search, and `GET /locations/:id` |
+| `locations.ts` | Country/province/city/area lookup (including `GET /locations/cities`), search, and `GET /locations/:id` |
+| `contacts.ts` | `POST /contact/message`; admin-only `GET /contact/messages`, `GET /contact/message/:id`, `PATCH /contact/message/:id/read`, and `DELETE /contact/message/:id` |
 
 `/listings` and `/properties` are separate backend resources with separate
 response shapes. Do not substitute one for the other. The listings create
@@ -64,19 +69,69 @@ contract uses `price`, `securityDeposit`, `type`, and `rentalMode`.
 
 ## Workflow constraints from the backend
 
-- Registration accepts `fullName`, `email`, `phone`, and `password`; a role is
-  not selected by the registration endpoint.
+- Guests can browse the published marketplace through `/listings` and
+  `/listings/:id`; the `/favorites` page offers sign-in rather than querying
+  protected favorite data for guests. Favorite, chat, rental-request, and
+  booking actions require authentication. Login and registration return to the
+  listing page when started from one of those actions.
+- Landlord property submission uses `POST /properties`, which creates the
+  Property and its linked marketplace Listing. Rental requests and bookings
+  use the linked Property ID; older Listing-only records without `propertyId`
+  cannot use those actions and the detail page explains that limitation.
+- Listing filters and pagination are sent to `GET /listings` using the query
+  names and enum values accepted by `ListingQueryDto`; the URL reflects the
+  current search so it can be bookmarked or shared.
+- Short-term booking first reads `GET /properties/:id/availability` for the
+  chosen dates and selected inventory unit (when applicable), then submits
+  `POST /bookings`. Hotel and guest-house listings use available room units;
+  hostel listings use beds whose server-provided status is `AVAILABLE`.
+  Availability and final pricing are revalidated by the backend when the
+  booking is created.
+- Registration accepts `fullName`, `email`, `phone`, `password`, and optional
+  CNIC. CNIC is validated and stored where supplied; a role is not selected by
+  the registration endpoint and new accounts start as tenants.
+- Password recovery uses `POST /auth/forgot-password` and
+  `POST /auth/reset-password`. Reset emails open the web app at
+  `/reset-password?token=...`; configure `FRONTEND_URL` to the public web
+  origin so emailed reset links return to the application.
+- Verification emails open the web app at `/verify-email?token=...`. The page
+  waits for an explicit click before calling `GET /auth/verify-email`, so
+  automated email-link scanners do not consume the single-use token.
 - An agreement is created by accepting a rental request. There is no standalone
   agreement-create or sign route.
 - Payment initiation accepts a booking or agreement plus provider and optional
   billing month. The server resolves payer and amount; never send a trusted
-  amount from the browser.
+  amount from the browser. The current `PaymentsModule` has no provider
+  adapters configured, so the UI shows payment history but cannot start an
+  online payment until a backend provider is wired.
 - Booking dates are `checkIn` and `checkOut`; optional inventory identifiers
   select a hotel room, room type, or hostel bed.
+- Listing maps and detail maps are rendered only when backend coordinates are
+  present. Search sorting uses the supported `sortBy` (`createdAt`, `rent`,
+  `sqft`, `title`) and `sortOrder` (`asc`, `desc`) values. The home page's city
+  shortcuts are loaded from `GET /locations/cities` rather than hardcoded.
 - A review requires a completed booking or agreement, a listing, and a review
-  type. It cannot be submitted for an arbitrary user/listing pair.
+  type. It cannot be submitted for an arbitrary user/listing pair. The tenant
+  review screen offers submission only for completed bookings; the backend
+  remains authoritative for eligibility and duplicate prevention.
+- Chat and contact-message polling use REST endpoints; no WebSocket transport is
+  implemented by these integrations.
 - The service layer deliberately does not expose client methods for routes
   absent from the backend controller contract.
+
+## Server state and authorization
+
+TanStack Query is already installed and is configured with a 30-second stale
+window and one retry for transient errors. Property search/details, booking
+lists, user/listing reviews, notifications, favorites, and admin contact
+messages use query caching; successful mutations update or invalidate the
+corresponding keys. Form values and display-only state remain local React
+state.
+
+NestJS allows requests from local development origins such as
+`http://localhost:5173` and other localhost ports. Production frontend origins
+must be explicitly allowed by backend CORS configuration. Credentialed browser
+requests are not required for the current body-token auth contract.
 
 ## Error handling
 
@@ -103,6 +158,7 @@ From the repository root:
 ```sh
 pnpm --filter web dev
 pnpm --filter web build
+pnpm --filter @rentra/backend start:dev
 ```
 
 Run the NestJS backend on port `3000` (or update `VITE_API_BASE_URL`). The

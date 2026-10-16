@@ -1,7 +1,9 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react';
 import { Bookmark, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { savedSearchesAPI, type SavedSearchRecord } from '../../api/savedSearches';
 import Card from '../../components/ui/Card';
+import { toApiError } from '../../api/api-error';
 
 type SavedSearch = SavedSearchRecord;
 
@@ -11,9 +13,7 @@ interface SearchFilters extends Record<string, unknown> {
   maxPrice?: number;
 }
 
-const getErrorMessage = (error: unknown) =>
-  (error as { response?: { data?: { message?: string } } })?.response?.data?.message
-    ?? 'Saved searches could not be loaded. Please try again.';
+const getErrorMessage = (error: unknown) => toApiError(error).message;
 
 export default function SavedSearches() {
   const [searches, setSearches] = useState<SavedSearch[]>([]);
@@ -120,8 +120,14 @@ export default function SavedSearches() {
                 typeof filters.minPrice === 'number' && `from PKR ${filters.minPrice.toLocaleString()}`,
                 typeof filters.maxPrice === 'number' && `up to PKR ${filters.maxPrice.toLocaleString()}`,
               ].filter(Boolean).join(' · ');
+              const appliedFilters = new URLSearchParams();
+              if (typeof filters.city === 'string' && filters.city) appliedFilters.set('city', filters.city);
+              if (typeof filters.minPrice === 'number') appliedFilters.set('minRent', String(filters.minPrice));
+              if (typeof filters.maxPrice === 'number') appliedFilters.set('maxRent', String(filters.maxPrice));
+              const searchQuery = appliedFilters.toString();
+              const searchUrl = `/listings${searchQuery ? `?${searchQuery}` : ''}`;
               return <Card key={search.id} className="flex items-center justify-between gap-4 p-4">
-                <div><h2 className="font-semibold">{search.name}</h2><p className="mt-1 text-sm text-gray-500">{summary || 'No filters applied'} · Saved {new Date(search.createdAt).toLocaleDateString()}</p></div>
+                <div><h2 className="font-semibold">{search.name}</h2><p className="mt-1 text-sm text-gray-500">{summary || 'No filters applied'} · Saved {new Date(search.createdAt).toLocaleDateString()}</p><Link to={searchUrl} className="mt-2 inline-block text-sm font-semibold text-emerald-700 underline">Apply search</Link></div>
                 <button aria-label={`Delete ${search.name}`} onClick={() => void deleteSearch(search.id)} className="rounded p-2 text-red-600 hover:bg-red-50"><Trash2 size={18} /></button>
               </Card>;
             })}</div>}

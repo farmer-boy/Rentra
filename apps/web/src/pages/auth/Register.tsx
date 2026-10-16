@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../../api/auth';
+import { getApiErrorMessage } from '../../api/api-error';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
@@ -164,18 +165,27 @@ function getPakistanMobileDigits(value: string) {
   return digits.slice(0, 10);
 }
 
+function getPasswordStrengthColor(strength: number) {
+  if (strength < 30) return '#ef4444';
+  if (strength < 60) return '#f59e0b';
+  return '#10b981';
+}
+
+type RegistrationForm = {
+  username: string;
+  email: string;
+  phone: string;
+  cnic: string;
+  password: string;
+  confirmPassword: string;
+};
+
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isDark } = useTheme();
   const { login } = useAuthStore();
-  const [form, setForm] = useState<{
-    username: string;
-    email: string;
-    phone: string;
-    cnic: string;
-    password: string;
-    confirmPassword: string;
-  }>({
+  const [form, setForm] = useState<RegistrationForm>({
     username: '',
     email: '',
     phone: '',
@@ -199,12 +209,6 @@ export default function Register() {
     return Math.min(strength, 100);
   };
 
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength < 30) return '#ef4444';
-    if (passwordStrength < 60) return '#f59e0b';
-    return '#10b981';
-  };
-
   const handlePasswordChange = (value: string) => {
     setForm({ ...form, password: value });
     setPasswordStrength(calculatePasswordStrength(value));
@@ -213,7 +217,7 @@ export default function Register() {
   useEffect(() => {
     if (strengthBarRef.current) {
       strengthBarRef.current.style.width = `${passwordStrength}%`;
-      strengthBarRef.current.style.backgroundColor = getPasswordStrengthColor();
+      strengthBarRef.current.style.backgroundColor = getPasswordStrengthColor(passwordStrength);
     }
   }, [passwordStrength]);
 
@@ -274,20 +278,25 @@ export default function Register() {
           ? [data.user.role]
           : ['TENANT'];
 
-      if (roles.includes('ADMIN')) navigate('/admin');
+      const requestedReturnTo = (location.state as { from?: unknown } | null)?.from;
+      const returnTo = typeof requestedReturnTo === 'string' &&
+        requestedReturnTo.startsWith('/') &&
+        !requestedReturnTo.startsWith('//')
+        ? requestedReturnTo
+        : undefined;
+      if (returnTo) navigate(returnTo);
+      else if (roles.includes('ADMIN')) navigate('/admin');
       else if (roles.includes('LANDLORD')) navigate('/landlord');
       else navigate('/tenant');
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
-      console.error('Registration error:', err);
-      toast.error(errorMsg);
+    } catch (requestError: unknown) {
+      toast.error(getApiErrorMessage(requestError, 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }
   };
 
   const field = (
-    key: string,
+    key: 'username' | 'email',
     label: string,
     type = 'text',
     placeholder = '',
@@ -300,27 +309,20 @@ export default function Register() {
       <div className="relative">
         <input
           type={type}
-          name={`temp_${Math.random().toString(36).substring(7)}`}
+          name={key}
           autoComplete="off"
-          value={(form as any)[key]}
-          onChange={e => {
-            if (key === 'password') {
-              handlePasswordChange(e.target.value);
-            } else {
-              setForm({ ...form, [key]: e.target.value });
-            }
-          }}
+          value={form[key]}
+          onChange={(event) => setForm({ ...form, [key]: event.target.value })}
           placeholder={placeholder}
           spellCheck="false"
           autoCorrect="off"
           autoCapitalize="off"
           data-lpignore="true"
           data-form-type="other"
-          data-1p-ignore={true as any}
-          data-bitwarden-ignore={true as any}
+          data-1p-ignore="true"
+          data-bitwarden-ignore="true"
           onFocus={(e) => {
             e.currentTarget.setAttribute('autocomplete', 'off');
-            e.currentTarget.value = e.currentTarget.value;
           }}
           onInput={(e) => {
             e.currentTarget.setAttribute('autocomplete', 'off');
@@ -347,7 +349,7 @@ export default function Register() {
           <div className="left-content">
             <h1>Create your account to explore premium rental properties</h1>
             <p>
-              Find, list, and manage properties with ease using Renova's transparent rental platform. 
+              Find, list, and manage properties with ease using Rentra's transparent rental platform.
               Your journey to seamless property management starts here.
             </p>
           </div>
@@ -359,7 +361,7 @@ export default function Register() {
           <div className="absolute top-6 right-6">
             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} text-right`}>
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold transition-colors text-emerald-500 hover:text-emerald-600">
+              <Link to="/login" state={location.state} className="font-semibold transition-colors text-emerald-500 hover:text-emerald-600">
                 Sign in
               </Link>
             </p>
@@ -374,9 +376,9 @@ export default function Register() {
                 title="Go to home"
               >
                 <div className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50 border border-gray-200'}`}>
-                  <img src="/logo.jpg" alt="Renova" className="object-contain w-full h-full" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
+                  <img src="/logo.jpg" alt="Rentra" className="object-contain w-full h-full" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
                 </div>
-                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Renova</h2>
+                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Rentra</h2>
               </button>
               <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 Join Pakistan's transparent rental platform
@@ -474,8 +476,8 @@ export default function Register() {
                     autoCapitalize="off"
                     data-lpignore="true"
                     data-form-type="other"
-                    data-1p-ignore={true as any}
-                    data-bitwarden-ignore={true as any}
+                    data-1p-ignore="true"
+                    data-bitwarden-ignore="true"
                     onFocus={(e) => {
                       e.currentTarget.setAttribute('autocomplete', 'off');
                     }}
@@ -525,8 +527,8 @@ export default function Register() {
                     autoCapitalize="off"
                     data-lpignore="true"
                     data-form-type="other"
-                    data-1p-ignore={true as any}
-                    data-bitwarden-ignore={true as any}
+                    data-1p-ignore="true"
+                    data-bitwarden-ignore="true"
                     onFocus={(e) => {
                       e.currentTarget.setAttribute('autocomplete', 'off');
                     }}

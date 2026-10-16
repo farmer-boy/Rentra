@@ -173,11 +173,16 @@ pnpm --filter mobile start
 
 Then use the Expo terminal controls to open an emulator or device. A physical phone cannot usually reach the computer's `localhost`; configure the API base URL to the computer's LAN address for device testing.
 
-The `mobile` package uses React Native 0.76 and React 18.3. Check Expo's compatibility guidance before changing those versions.
+The mobile package versions should stay aligned with its Expo SDK. Run
+`pnpm --filter mobile exec expo install --check` after dependency changes and
+`pnpm --filter mobile build` to type-check the app.
 
 ## 8. Run the AI service
 
-The AI service lives under `packages/ai-service`. Its Python dependencies are listed in `requirements.txt`; inspect its README or application entry point for its specific startup command. Configure `AI_SERVICE_URL` to the address where it is running.
+The AI service lives under `packages/ai-service`; its current FastAPI app exposes
+only `/health`. Python dependencies are listed in `requirements.txt`. AI
+detector, rent-estimator, and trust-score router endpoints are not implemented
+and must not be treated as available APIs.
 
 ## 9. How a web API request works
 

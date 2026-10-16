@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { usersAPI } from '../../api/users';
 import { useAuthStore } from '../../store/authStore';
+import { getApiErrorMessage } from '../../api/api-error';
 
 interface ProfileData {
   id: string;
@@ -25,24 +26,24 @@ export default function LandlordProfile() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    api.get('/users/me').then(({ data }) => {
+    usersAPI.getMe().then((data) => {
       setProfile(data);
       setForm({ fullName: data.fullName ?? '', email: data.email ?? '', phone: data.phone ?? '' });
       updateUser({ id: data.id, fullName: data.fullName, email: data.email, phone: data.phone ?? '', trustScore: data.trustScore, isVerified: data.isVerified });
-    }).catch((requestError) => setError(requestError.response?.data?.message || 'Your profile could not be loaded.'))
+    }).catch((requestError: unknown) => setError(getApiErrorMessage(requestError, 'Your profile could not be loaded.')))
       .finally(() => setLoading(false));
   }, [updateUser]);
 
   const saveProfile = async () => {
     setSaving(true); setError(''); setSaved(false);
     try {
-      const { data } = await api.patch('/users/me', form);
+      const data = await usersAPI.updateMe(form);
       setProfile((current) => current ? { ...current, ...data } : current);
       setForm({ fullName: data.fullName ?? '', email: data.email ?? '', phone: data.phone ?? '' });
       updateUser({ id: data.id, fullName: data.fullName, email: data.email, phone: data.phone ?? '', trustScore: data.trustScore, isVerified: data.isVerified });
       setSaved(true);
-    } catch (requestError: any) {
-      setError(requestError.response?.data?.message || 'Your profile could not be saved.');
+    } catch (requestError: unknown) {
+      setError(getApiErrorMessage(requestError, 'Your profile could not be saved.'));
     } finally { setSaving(false); }
   };
   const inputClass = `w-full border rounded-lg px-3 py-2 text-sm ${isDark ? 'bg-[#0f0f0f] border-white/10 text-white' : 'bg-white border-gray-200 text-black'}`;

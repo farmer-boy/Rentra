@@ -279,6 +279,21 @@ export class ListingsService {
     return this.withRentraVerified(listing);
   }
 
+  async findPublicById(id: string, viewerId?: string) {
+    const listing = await this.prisma.listing.findUnique({
+      where: { id },
+      include: this.listingInclude(),
+    });
+    if (
+      !listing ||
+      (listing.publicationStatus !== ListingPublicationStatus.PUBLISHED &&
+        listing.landlordId !== viewerId)
+    ) {
+      throw new NotFoundException('Listing not found');
+    }
+    return this.withRentraVerified(listing);
+  }
+
   async recordView(listingId: string, sessionId?: string) {
     const listing = await this.prisma.listing.findUnique({
       where: { id: listingId },
@@ -601,13 +616,13 @@ export class ListingsService {
         select: {
           id: true,
           fullName: true,
-          email: true,
-          phone: true,
           isVerified: true,
           trustScore: true,
         },
       },
-      property: { select: { verificationStatus: true } },
+      property: {
+        select: { id: true, status: true, verificationStatus: true },
+      },
       images: { orderBy: { sortOrder: 'asc' as const } },
       amenities: { include: { amenity: true } },
       location: {

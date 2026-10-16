@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, DollarSign, Users } from 'lucide-react';
-import api from '../../api/client';
+import { adminAPI } from '../../api/admin';
 import Card from '../../components/ui/Card';
 
 interface PlatformStats {
@@ -29,8 +29,8 @@ const AdminPlatformAnalytics = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    api.get('/admin/dashboard/stats')
-      .then((response) => setStats(response.data))
+    adminAPI.getDashboardStats()
+      .then((response) => setStats(response))
       .catch((requestError) => setError(requestError.response?.data?.message || 'Platform analytics could not be loaded.'))
       .finally(() => setLoading(false));
   }, []);

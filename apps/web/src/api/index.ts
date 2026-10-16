@@ -7,6 +7,7 @@ export { agreementsAPI } from './agreements';
 export { paymentsAPI } from './payments';
 export { disputesAPI } from './disputes';
 export type { CreateDisputeInput } from './disputes';
+export type { DisputeRecord, DisputeListResponse } from './disputes';
 export { reviewsAPI } from './reviews';
 export { usersAPI } from './users';
 export { adminAPI } from './admin';
@@ -24,6 +25,7 @@ export { availabilityAPI } from './availability';
 export { reportsAPI } from './reports';
 export { verificationAPI } from './verification';
 export { recommendationsAPI } from './recommendations';
+export { contactsAPI } from './contacts';
 
 // Export types
 export type {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -23,48 +23,54 @@ export default function DashboardLayout({ navSections }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true); // Desktop expand/collapse
 
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [sidebarOpen]);
+
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: 'var(--bg)' }}>
-      {/* Navbar at Top */}
+    <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg)' }}>
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
-      
-      {/* Sidebar and Content */}
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Sidebar Wrapper - Fixed width with smooth transition */}
+
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <div className={`
-          hidden md:flex flex-shrink-0 transition-all duration-300 ease-in-out
+          hidden shrink-0 transition-[width] duration-300 ease-in-out md:flex
           ${sidebarExpanded ? 'w-56' : 'w-16'}
         `}>
-          <Sidebar 
-            navSections={navSections} 
+          <Sidebar
+            navSections={navSections}
             onNavigate={() => setSidebarOpen(false)}
             isExpanded={sidebarExpanded}
             setIsExpanded={setSidebarExpanded}
           />
         </div>
 
-        {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
-          <>
-            <div className="md:hidden flex-shrink-0 w-56">
-              <Sidebar 
-                navSections={navSections} 
+          <div id="mobile-navigation" className="fixed inset-0 z-50 md:hidden">
+            <button
+              type="button"
+              aria-label="Close navigation menu"
+              className="absolute inset-0 bg-black/55"
+              onClick={() => setSidebarOpen(false)}
+            />
+            <aside className="absolute inset-y-0 left-0 z-10 w-[min(18rem,85vw)] shadow-2xl">
+              <Sidebar
+                navSections={navSections}
                 onNavigate={() => setSidebarOpen(false)}
                 isExpanded={true}
                 setIsExpanded={() => {}}
               />
-            </div>
-            <div 
-              className="absolute inset-0 bg-black/40 z-30 md:hidden"
-              onClick={() => setSidebarOpen(false)}
-            />
-          </>
+            </aside>
+          </div>
         )}
-        
-        {/* Page Content - Smooth expansion without jumping */}
-        <div className="flex-1 overflow-y-auto p-3 md:p-4 transition-all duration-300" style={{ backgroundColor: 'var(--bg)' }}>
+
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 transition-all duration-300 sm:p-4 lg:p-6" style={{ backgroundColor: 'var(--bg)' }}>
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

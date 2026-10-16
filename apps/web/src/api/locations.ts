@@ -12,8 +12,10 @@ export const locationsAPI = {
   countries: async () => (await api.get<LocationNode[]>('/locations/countries')).data,
   provinces: async (countryId: string) =>
     (await api.get<LocationNode[]>('/locations/provinces', { params: { countryId } })).data,
-  cities: async (provinceId: string) =>
-    (await api.get<LocationNode[]>('/locations/cities', { params: { provinceId } })).data,
+  cities: async (provinceId?: string) =>
+    (await api.get<LocationNode[]>('/locations/cities', {
+      params: provinceId ? { provinceId } : undefined,
+    })).data,
   areas: async (cityId: string) =>
     (await api.get<LocationNode[]>('/locations/areas', { params: { cityId } })).data,
   search: async (q: string, params: Record<string, unknown> = {}) =>

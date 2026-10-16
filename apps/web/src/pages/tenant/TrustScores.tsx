@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
-import api from '../../api/client';
+import { usersAPI } from '../../api/users';
 
 interface Profile {
   trustScore: number | null;
@@ -15,8 +15,8 @@ export default function TrustScores() {
 
   useEffect(() => {
     let active = true;
-    api.get<Profile>('/users/me')
-      .then(({ data }) => {
+    usersAPI.getMe()
+      .then((data) => {
         if (active) setProfile(data);
       })
       .catch(() => {
