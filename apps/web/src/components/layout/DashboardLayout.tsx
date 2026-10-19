@@ -1,19 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import Sidebar, { type NavSection } from './Sidebar';
 import Navbar from './Navbar';
-
-interface NavItem {
-  icon: React.ReactNode;
-  label: string;
-  path: string;
-  badge?: number;
-}
-
-interface NavSection {
-  title: string;
-  items: NavItem[];
-}
 
 interface DashboardLayoutProps {
   navSections: NavSection[];
@@ -54,7 +42,7 @@ export default function DashboardLayout({ navSections }: DashboardLayoutProps) {
             <button
               type="button"
               aria-label="Close navigation menu"
-              className="absolute inset-0 bg-black/55"
+              className="absolute inset-0 bg-overlay/55"
               onClick={() => setSidebarOpen(false)}
             />
             <aside className="absolute inset-y-0 left-0 z-10 w-[min(18rem,85vw)] shadow-2xl">
@@ -62,7 +50,6 @@ export default function DashboardLayout({ navSections }: DashboardLayoutProps) {
                 navSections={navSections}
                 onNavigate={() => setSidebarOpen(false)}
                 isExpanded={true}
-                setIsExpanded={() => {}}
               />
             </aside>
           </div>

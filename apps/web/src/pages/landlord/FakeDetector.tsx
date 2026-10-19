@@ -48,40 +48,40 @@ const LandlordFakeDetector = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Fake Detector</h1>
-        <p className="text-gray-600 dark:text-gray-300">Fraud scan results for your listings</p>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 ">Fake Detector</h1>
+        <p className="text-gray-600 ">Fraud scan results for your listings</p>
       </div>
       <Card className="p-4">
         <div className="flex items-start gap-3">
           <ShieldAlert size={20} className="mt-1 shrink-0 text-amber-600" />
-          <p className="text-sm text-gray-700 dark:text-gray-300">
+          <p className="text-sm text-gray-700 ">
             Live fraud scanning and scan-result APIs are not available. Listing scores, risk labels, verification claims, and scan actions cannot be shown as current results.
           </p>
         </div>
       </Card>
       {!user?.id ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : loading ? (
-        <Card className="p-5"><p className="text-sm text-gray-600 dark:text-gray-300">Loading your properties…</p></Card>
+        <Card className="p-5"><p className="text-sm text-gray-600 ">Loading your properties…</p></Card>
       ) : loadError ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : listings.length === 0 ? (
-        <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">No properties are currently available to list, and no scan results are available.</Card>
+        <Card className="p-6 text-sm text-gray-600 ">No properties are currently available to list, and no scan results are available.</Card>
       ) : (
         <div className="space-y-4">
-          <h2 className="font-semibold text-gray-900 dark:text-white">Your properties</h2>
+          <h2 className="font-semibold text-gray-900 ">Your properties</h2>
           {listings.map((listing) => (
             <Card key={listing.id} className="flex flex-wrap items-center justify-between gap-4 p-4">
               <div className="flex items-center gap-3">
                 <Home size={18} className="text-gray-500" />
                 <div>
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{listing.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{[listing.area, listing.city].filter(Boolean).join(', ') || 'Location not provided'}</p>
+                  <h3 className="font-semibold text-gray-900 ">{listing.title}</h3>
+                  <p className="text-sm text-gray-600 ">{[listing.area, listing.city].filter(Boolean).join(', ') || 'Location not provided'}</p>
                 </div>
               </div>
               <div className="text-sm">
-                <p className="font-semibold text-gray-900 dark:text-white">PKR {listing.rent.toLocaleString()} · {listing.rentalDuration.replace(/_/g, ' ')}</p>
-                <p className="text-gray-500 dark:text-gray-400">{listing.status.replace(/_/g, ' ')} · No scan data</p>
+                <p className="font-semibold text-gray-900 ">PKR {listing.rent.toLocaleString()} · {listing.rentalDuration.replace(/_/g, ' ')}</p>
+                <p className="text-gray-500 ">{listing.status.replace(/_/g, ' ')} · No scan data</p>
               </div>
             </Card>
           ))}

@@ -48,7 +48,7 @@ export default function SavedListings() {
           <div className="mt-5 flex justify-center gap-3">
             <button
               onClick={() => navigate('/login', { state: { from: '/favorites' } })}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white"
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast"
             >
               Log in
             </button>

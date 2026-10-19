@@ -135,7 +135,7 @@ export default function ChatPage() {
               Messages
             </h1>
             {notifications.some((notification) => !notification.isRead) && (
-              <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+              <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-contrast">
                 New
               </span>
             )}

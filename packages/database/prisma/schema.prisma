@@ -325,6 +325,7 @@ model User {
   tenantAgreements        Agreement[]              @relation("TenantAgreements")
   landlordAgreements      Agreement[]              @relation("LandlordAgreements")
   payments                Payment[]
+  boostOrders             BoostOrder[]
   disputesCreated         Dispute[]                @relation("DisputeCreator")
   disputesAssigned        Dispute[]                @relation("AssignedDisputes")
   conversationsAsUser1    Conversation[]           @relation("User1")
@@ -890,6 +891,46 @@ model Payment {
   @@index([userId, status])
   @@index([agreementId, status])
   @@index([bookingId, status])
+}
+
+enum BoostOrderStatus {
+  PENDING_PAYMENT
+  PAID
+  CANCELLED
+  FAILED
+}
+
+model BoostOrder {
+  id             String           @id @default(cuid())
+  userId         String
+  status         BoostOrderStatus @default(PENDING_PAYMENT)
+  subtotal       Int
+  total          Int
+  currency       String           @default("PKR")
+  idempotencyKey String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items BoostOrderItem[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@index([userId, status])
+}
+
+model BoostOrderItem {
+  id          String @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String
+  quantity    Int
+  unitPrice   Int
+  lineTotal   Int
+
+  order BoostOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
 }
 
 model PaymentWebhookEvent {

@@ -82,24 +82,24 @@ const PendingApplications = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Pending Applications</h1>
-        <p className="text-gray-600 dark:text-gray-300">Review rental requests submitted for your properties and track their server-reported status.</p>
-        {!loading && !loadError && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">{requests.filter((request) => request.status === 'PENDING').length} pending request(s)</p>}
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 ">Pending Applications</h1>
+        <p className="text-gray-600 ">Review rental requests submitted for your properties and track their server-reported status.</p>
+        {!loading && !loadError && <p className="mt-2 text-sm text-gray-500 ">{requests.filter((request) => request.status === 'PENDING').length} pending request(s)</p>}
       </div>
       {!user?.id ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : loading ? (
-        <Card className="p-5"><p className="text-sm text-gray-600 dark:text-gray-300">Loading rental requests…</p></Card>
+        <Card className="p-5"><p className="text-sm text-gray-600 ">Loading rental requests…</p></Card>
       ) : loadError ? (
-        <Card className="flex items-center justify-between gap-3 p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card>
+        <Card className="flex items-center justify-between gap-3 p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card>
       ) : (
         <>
-          {actionError && <Card className="p-4"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{actionError}</p></Card>}
+          {actionError && <Card className="p-4"><p role="alert" className="text-sm text-red-700 ">{actionError}</p></Card>}
           <div className="flex flex-wrap gap-2">
-            {['PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'ALL'].map((status) => <button type="button" key={status} aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusFilter === status ? 'bg-emerald-600 text-white' : 'border bg-white dark:bg-gray-900'}`}>{status === 'ALL' ? 'All statuses' : status}</button>)}
+            {['PENDING', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'ALL'].map((status) => <button type="button" key={status} aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusFilter === status ? 'bg-emerald-600 text-primary-contrast' : 'border bg-surface '}`}>{status === 'ALL' ? 'All statuses' : status}</button>)}
           </div>
           {visibleRequests.length === 0 ? (
-            <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">{statusFilter === 'PENDING' ? 'There are no pending rental requests for your properties.' : 'No requests match this status.'}</Card>
+            <Card className="p-6 text-sm text-gray-600 ">{statusFilter === 'PENDING' ? 'There are no pending rental requests for your properties.' : 'No requests match this status.'}</Card>
           ) : visibleRequests.map((request) => {
             const title = request.property?.title || request.listing?.title;
             const location = [request.property?.area, request.property?.city].filter(Boolean).join(', ');
@@ -111,19 +111,19 @@ const PendingApplications = () => {
                     <div className="flex items-start gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700"><User size={20} /></div>
                       <div>
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{request.tenant?.fullName || 'Applicant details unavailable'}</h2>
-                        {request.tenant?.email && <p className="text-sm text-gray-600 dark:text-gray-400">{request.tenant.email}</p>}
-                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Requested {new Date(request.createdAt).toLocaleDateString()}</p>
+                        <h2 className="text-lg font-semibold text-gray-900 ">{request.tenant?.fullName || 'Applicant details unavailable'}</h2>
+                        {request.tenant?.email && <p className="text-sm text-gray-600 ">{request.tenant.email}</p>}
+                        <p className="mt-1 text-xs text-gray-500 ">Requested {new Date(request.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="mt-4 space-y-2 text-sm">
-                      <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300"><MapPin size={14} />{title || `Property ${request.id}`}{location && ` · ${location}`}</p>
-                      {amount !== undefined && <p className="flex items-center gap-2 text-gray-700 dark:text-gray-300"><Home size={14} />Rent listed at PKR {amount.toLocaleString()}</p>}
-                      {request.moveInDate && <p className="text-gray-600 dark:text-gray-400">Requested move-in: {new Date(request.moveInDate).toLocaleDateString()}</p>}
-                      {request.durationMonths != null && <p className="text-gray-600 dark:text-gray-400">Requested duration: {request.durationMonths} months</p>}
-                      {request.occupants != null && <p className="text-gray-600 dark:text-gray-400">Occupants: {request.occupants}</p>}
-                      {(request.property?.securityDeposit ?? request.listing?.deposit) != null && <p className="text-gray-600 dark:text-gray-400">Listed deposit: PKR {(request.property?.securityDeposit ?? request.listing?.deposit)?.toLocaleString()}</p>}
-                      {request.message && <p className="mt-3 whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-gray-700 dark:bg-gray-800 dark:text-gray-300">{request.message}</p>}
+                      <p className="flex items-center gap-2 text-gray-700 "><MapPin size={14} />{title || `Property ${request.id}`}{location && ` · ${location}`}</p>
+                      {amount !== undefined && <p className="flex items-center gap-2 text-gray-700 "><Home size={14} />Rent listed at PKR {amount.toLocaleString()}</p>}
+                      {request.moveInDate && <p className="text-gray-600 ">Requested move-in: {new Date(request.moveInDate).toLocaleDateString()}</p>}
+                      {request.durationMonths != null && <p className="text-gray-600 ">Requested duration: {request.durationMonths} months</p>}
+                      {request.occupants != null && <p className="text-gray-600 ">Occupants: {request.occupants}</p>}
+                      {(request.property?.securityDeposit ?? request.listing?.deposit) != null && <p className="text-gray-600 ">Listed deposit: PKR {(request.property?.securityDeposit ?? request.listing?.deposit)?.toLocaleString()}</p>}
+                      {request.message && <p className="mt-3 whitespace-pre-wrap rounded-lg bg-gray-50 p-3 text-gray-700  ">{request.message}</p>}
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-2">

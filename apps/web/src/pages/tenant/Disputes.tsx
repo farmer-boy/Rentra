@@ -1,13 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { disputesAPI, type DisputeRecord } from '../../api/disputes';
 
 export default function Disputes() {
   const { user } = useAuthStore();
-  const { isDark } = useTheme();
   const [disputes, setDisputes] = useState<DisputeRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -39,12 +37,12 @@ export default function Disputes() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Disputes ⚠️</h2>
-        <p className={`text-[13px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Disputes associated with your tenant account</p>
+        <h2 className={`text-xl font-extrabold tracking-tight mb-1 text-text`}>Disputes ⚠️</h2>
+        <p className={`text-[13px] text-text-muted`}>Disputes associated with your tenant account</p>
       </div>
 
       <Card>
-        <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>My Disputes</div>
+        <div className={`text-[13px] font-bold mb-4 text-text`}>My Disputes</div>
         {loading ? (
           <p className="py-6 text-center text-[12px] text-gray-500">Loading disputes…</p>
         ) : error || !user?.id ? (
@@ -54,13 +52,13 @@ export default function Disputes() {
         ) : (
           <div className="space-y-3">
             {disputes.map((dispute) => (
-              <div key={dispute.id} className={`p-4 border-l-4 rounded-lg ${statusVariant(dispute.status) === 'red' ? 'border-red-500' : statusVariant(dispute.status) === 'green' ? 'border-green-500' : 'border-yellow-500'} ${isDark ? 'bg-[#1f1f1f]' : 'bg-gray-50'}`}>
+              <div key={dispute.id} className={`p-4 border-l-4 rounded-lg ${statusVariant(dispute.status) === 'red' ? 'border-red-500' : statusVariant(dispute.status) === 'green' ? 'border-green-500' : 'border-yellow-500'} bg-surface-2`}>
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                  <span className={`text-[12px] font-bold ${isDark ? 'text-white' : 'text-black'}`}>{dispute.reason || dispute.type.replaceAll('_', ' ')}</span>
+                  <span className={`text-[12px] font-bold text-text`}>{dispute.reason || dispute.type.replaceAll('_', ' ')}</span>
                   <Pill variant={statusVariant(dispute.status)}>{dispute.status}</Pill>
                 </div>
-                <p className={`text-[11px] mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{dispute.description}</p>
-                <div className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p className={`text-[11px] mb-2 text-text-muted`}>{dispute.description}</p>
+                <div className={`text-[11px] text-text-muted`}>
                   {dispute.agreementId ? `Agreement ${dispute.agreementId} · ` : ''}
                   Filed {new Date(dispute.createdAt).toLocaleDateString()}
                 </div>
@@ -68,7 +66,7 @@ export default function Disputes() {
             ))}
           </div>
         )}
-        <p className={`text-[11px] text-center mt-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+        <p className={`text-[11px] text-center mt-4 text-text-muted`}>
           Dispute messages and evidence management are not provided by the available backend API.
         </p>
       </Card>

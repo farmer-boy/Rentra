@@ -32,7 +32,7 @@ const AdminLayout = () => {
             <button
               type="button"
               aria-label="Close navigation menu"
-              className="absolute inset-0 bg-black/55"
+              className="absolute inset-0 bg-overlay/55"
               onClick={() => setSidebarOpen(false)}
             />
             <aside className="absolute inset-y-0 left-0 z-10 w-[min(14rem,85vw)] shadow-2xl">

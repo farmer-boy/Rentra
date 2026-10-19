@@ -138,10 +138,10 @@ export default function LandlordDashboard() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div><h1 className="text-2xl font-extrabold">Host Dashboard</h1><p className="mt-1 text-sm text-gray-500">A live overview of your Rentra properties and tenancy activity.</p></div>
-        <div className="flex gap-2"><button type="button" onClick={() => setReload((value) => value + 1)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold"><RefreshCw size={15} />Refresh</button><button type="button" onClick={() => navigate('/landlord/post')} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white"><Plus size={16} />Add property</button></div>
+        <div className="flex gap-2"><button type="button" onClick={() => setReload((value) => value + 1)} className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold"><RefreshCw size={15} />Refresh</button><button type="button" onClick={() => navigate('/landlord/post')} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-primary-contrast"><Plus size={16} />Add property</button></div>
       </header>
 
-      {loading ? <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="h-24 animate-pulse rounded-xl bg-gray-200 dark:bg-gray-800" />)}</div> : error ? <Card className="flex flex-wrap items-center justify-between gap-3 p-5"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card> : data && (
+      {loading ? <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="h-24 animate-pulse rounded-xl bg-gray-200 " />)}</div> : error ? <Card className="flex flex-wrap items-center justify-between gap-3 p-5"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card> : data && (
         <>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             <StatCard label="PROPERTIES" value={listings.length} color="text-gray-800" />
@@ -162,7 +162,7 @@ export default function LandlordDashboard() {
                 <div><p className="text-sm font-semibold">{listing.title}</p><p className="text-xs text-gray-500">{[listing.area, listing.city].filter(Boolean).join(', ')}</p></div>
                 <div className="text-right"><p className="text-sm font-bold text-emerald-700">PKR {listing.rent.toLocaleString()}</p><p className="text-[10px] text-gray-500">{(listing.property?.status ?? listing.status).replaceAll('_', ' ')} · {listing.publicationStatus.replaceAll('_', ' ')}</p></div>
               </button>)}</div>}
-              <div className="mt-4 grid grid-cols-2 gap-3 text-sm"><p className="rounded-lg bg-indigo-50 p-3 dark:bg-indigo-950/40"><strong>{data.analytics.favorites}</strong><br /><span className="text-xs text-gray-500">Favorites</span></p><p className="rounded-lg bg-amber-50 p-3 dark:bg-amber-950/40"><strong>{data.analytics.requests}</strong><br /><span className="text-xs text-gray-500">All rental requests</span></p></div>
+              <div className="mt-4 grid grid-cols-2 gap-3 text-sm"><p className="rounded-lg bg-indigo-50 p-3 "><strong>{data.analytics.favorites}</strong><br /><span className="text-xs text-gray-500">Favorites</span></p><p className="rounded-lg bg-amber-50 p-3 "><strong>{data.analytics.requests}</strong><br /><span className="text-xs text-gray-500">All rental requests</span></p></div>
             </Card>
             <Card className="p-5">
               <h2 className="mb-3 font-bold">Host tools</h2>

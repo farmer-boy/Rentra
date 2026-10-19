@@ -68,26 +68,26 @@ export default function VerificationQueue() {
   return (
     <section className="space-y-5">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Verification Queue</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-gray-900 ">Verification Queue</h1>
+        <p className="mt-1 text-sm text-gray-600 ">
           Review submitted evidence. Property approval is determined by the verification workflow.
         </p>
       </header>
-      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 ">{error}</p>}
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4">
         <Card className="p-0">
           {loading ? <p className="p-5 text-sm text-gray-500">Loading submissions...</p> : items.length === 0 ? (
             <p className="p-5 text-sm text-gray-500">No pending verification submissions.</p>
           ) : (
-            <ul className="divide-y divide-gray-100 dark:divide-gray-800">
+            <ul className="divide-y divide-gray-100 ">
               {items.map((item) => (
                 <li key={item.id}>
                   <button
                     type="button"
                     onClick={() => void selectSubmission(item.id)}
-                    className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-800/40"
+                    className="w-full p-4 text-left hover:bg-gray-50 "
                   >
-                    <span className="block font-semibold text-gray-900 dark:text-white">{item.kind} · {item.user?.fullName ?? item.property?.title ?? item.id}</span>
+                    <span className="block font-semibold text-gray-900 ">{item.kind} · {item.user?.fullName ?? item.property?.title ?? item.id}</span>
                     <span className="mt-1 block text-xs text-gray-500">{item.status} · {new Date(item.submittedAt).toLocaleString()}</span>
                   </button>
                 </li>
@@ -101,7 +101,7 @@ export default function VerificationQueue() {
           ) : (
             <div className="space-y-4">
               <div>
-                <h2 className="font-bold text-gray-900 dark:text-white">{selected.kind} verification</h2>
+                <h2 className="font-bold text-gray-900 ">{selected.kind} verification</h2>
                 <p className="break-all text-xs text-gray-500">{selected.id}</p>
               </div>
               {selected.user && (
@@ -116,7 +116,7 @@ export default function VerificationQueue() {
               {selected.details !== undefined && (
                 <div>
                   <h3 className="mb-1 text-sm font-semibold">Submitted details</h3>
-                  <pre className="max-h-64 overflow-auto rounded-lg bg-gray-100 dark:bg-gray-900 p-3 text-xs whitespace-pre-wrap">{JSON.stringify(selected.details, null, 2)}</pre>
+                  <pre className="max-h-64 overflow-auto rounded-lg bg-gray-100  p-3 text-xs whitespace-pre-wrap">{JSON.stringify(selected.details, null, 2)}</pre>
                 </div>
               )}
               {!!selected.evidenceUrls?.length && (
@@ -128,9 +128,9 @@ export default function VerificationQueue() {
                 </div>
               )}
               {selected.status === 'PENDING' && (
-                <div className="flex flex-wrap gap-2 border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <button type="button" onClick={() => void reviewSubmission('APPROVED')} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white">Approve</button>
-                  <button type="button" onClick={() => void reviewSubmission('REJECTED')} className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-white">Reject</button>
+                <div className="flex flex-wrap gap-2 border-t border-gray-200  pt-4">
+                  <button type="button" onClick={() => void reviewSubmission('APPROVED')} className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-primary-contrast">Approve</button>
+                  <button type="button" onClick={() => void reviewSubmission('REJECTED')} className="rounded-lg bg-red-700 px-4 py-2 text-sm font-semibold text-primary-contrast">Reject</button>
                 </div>
               )}
             </div>

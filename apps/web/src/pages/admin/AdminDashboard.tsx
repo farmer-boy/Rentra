@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/useTheme';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import { adminAPI } from '../../api/admin';
@@ -52,7 +51,6 @@ function unwrap<T>(value: unknown): T {
 }
 
 export default function AdminDashboard() {
-  const { isDark } = useTheme();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activity, setActivity] = useState<DashboardActivity | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -94,8 +92,8 @@ export default function AdminDashboard() {
   return (
     <div>
       <div className="mb-3">
-        <h2 className={`text-lg font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>Admin Dashboard 🛡️</h2>
-        <p className={`text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-400'}`}>Platform moderation, users, and analytics</p>
+        <h2 className={`text-lg font-extrabold tracking-tight text-text`}>Admin Dashboard 🛡️</h2>
+        <p className={`text-[11px] text-text-muted`}>Platform moderation, users, and analytics</p>
       </div>
 
       {statsError && <p role="alert" className="mb-3 text-sm text-red-600">{statsError}</p>}
@@ -121,11 +119,11 @@ export default function AdminDashboard() {
           </p>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-sm">
-              <thead><tr className="border-b border-gray-200 dark:border-gray-700 text-left">
+              <thead><tr className="border-b border-gray-200  text-left">
                 <th className="py-2">Month</th><th>New users</th><th>Properties</th><th>Bookings</th><th>Gross payments</th>
               </tr></thead>
               <tbody>{stats.trends.map((trend) => (
-                <tr key={trend.month} className="border-b border-gray-100 dark:border-gray-800">
+                <tr key={trend.month} className="border-b border-gray-100 ">
                   <td className="py-2">{trend.month}</td>
                   <td>{trend.newUsers}</td>
                   <td>{trend.properties}</td>
@@ -140,14 +138,14 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         <Card>
-          <div className={`text-[11px] font-bold mb-3 ${isDark ? 'text-white' : 'text-black'}`}>Recent Listings</div>
+          <div className={`text-[11px] font-bold mb-3 text-text`}>Recent Listings</div>
           {activityError && <p role="alert" className="mb-2 text-xs text-red-600">{activityError}</p>}
           <div className="overflow-x-auto">
             <table className="w-full min-w-max">
               <thead>
                 <tr>
                   {['Listing', 'Landlord', 'Added'].map((heading) => (
-                    <th key={heading} className={`text-left text-[9px] font-mono ${isDark ? 'text-gray-700 border-white/10' : 'text-gray-500 border-gray-200'} tracking-widest pb-2 border-b`}>{heading}</th>
+                    <th key={heading} className={`text-left text-[9px] font-mono text-text-muted border-border tracking-widest pb-2 border-b`}>{heading}</th>
                   ))}
                 </tr>
               </thead>

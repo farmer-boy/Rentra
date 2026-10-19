@@ -8,52 +8,6 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
 const registerStyles = `
-  /* Prevent Chrome autofill styling */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px #0f0f0f inset !important;
-    -webkit-text-fill-color: white !important;
-    caret-color: white !important;
-    transition: background-color 5000s ease-in-out 0s !important;
-  }
-  
-  /* Light mode autofill */
-  :root:not([data-theme="dark"]) input:-webkit-autofill,
-  :root:not([data-theme="dark"]) input:-webkit-autofill:hover,
-  :root:not([data-theme="dark"]) input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    -webkit-text-fill-color: #0d0d0d !important;
-    caret-color: #0d0d0d !important;
-  }
-  
-  /* Prevent autofill background change */
-  input:-webkit-autofill::first-line {
-    font-family: inherit;
-  }
-  
-  /* Additional autofill blocking */
-  input[type="email"]:-webkit-autofill,
-  input[type="password"]:-webkit-autofill {
-    -webkit-text-fill-color: white !important;
-    -webkit-box-shadow: 0 0 0px 1000px #0f0f0f inset !important;
-    caret-color: white !important;
-  }
-  
-  :root:not([data-theme="dark"]) input[type="email"]:-webkit-autofill,
-  :root:not([data-theme="dark"]) input[type="password"]:-webkit-autofill {
-    -webkit-text-fill-color: #0d0d0d !important;
-    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-    caret-color: #0d0d0d !important;
-  }
-  
-  /* Hide autofill dropdown */
-  input::-webkit-contacts-auto-fill-button,
-  input::-webkit-credentials-auto-fill-button {
-    display: none !important;
-  }
-  
-  /* Smooth transitions */
   .split-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -73,11 +27,10 @@ const registerStyles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('/logo.jpg');
+    background-image: url('https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed;
-    filter: brightness(0.9) drop-shadow(0 0 10px rgba(0, 0, 0, 0.2));
+    background-attachment: scroll;
   }
   
   .left-section::after {
@@ -87,7 +40,7 @@ const registerStyles = `
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+    background: linear-gradient(135deg, rgb(18 19 18 / 0.62), rgb(38 36 33 / 0.34));
     z-index: 5;
   }
   
@@ -108,7 +61,7 @@ const registerStyles = `
     position: relative;
     z-index: 20;
     text-align: center;
-    color: white;
+    color: rgb(var(--rentra-white));
     padding: 40px;
     max-width: 450px;
   }
@@ -137,7 +90,7 @@ const registerStyles = `
   /* Password strength indicator */
   .password-strength {
     height: 4px;
-    background: #e5e7eb;
+    background: var(--border);
     border-radius: 2px;
     overflow: hidden;
     margin-top: 4px;
@@ -166,9 +119,9 @@ function getPakistanMobileDigits(value: string) {
 }
 
 function getPasswordStrengthColor(strength: number) {
-  if (strength < 30) return '#ef4444';
-  if (strength < 60) return '#f59e0b';
-  return '#10b981';
+  if (strength < 30) return 'rgb(var(--rentra-danger))';
+  if (strength < 60) return 'rgb(var(--rentra-warning))';
+  return 'rgb(var(--rentra-primary))';
 }
 
 type RegistrationForm = {
@@ -303,7 +256,7 @@ export default function Register() {
     icon?: React.ReactNode
   ) => (
     <div>
-      <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+      <label className="mb-2 block text-sm font-semibold text-text">
         {label}
       </label>
       <div className="relative">
@@ -327,11 +280,7 @@ export default function Register() {
           onInput={(e) => {
             e.currentTarget.setAttribute('autocomplete', 'off');
           }}
-          className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm ${
-            isDark
-              ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-              : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-          } outline-none`}
+          className="w-full rounded-lg border-2 border-border bg-surface px-4 py-3 text-sm text-text outline-none transition-all placeholder:text-text-subtle focus:border-primary focus:ring-2 focus:ring-primary/20"
           required
         />
         {icon && <div className="absolute text-gray-400 right-3 top-12">{icon}</div>}
@@ -340,7 +289,7 @@ export default function Register() {
   );
 
   return (
-    <div className={`${isDark ? 'bg-[#0a0a0a]' : 'bg-white'} min-h-screen`}>
+    <div className="min-h-screen bg-bg">
       <style>{registerStyles}</style>
       
       <div className="split-container">
@@ -356,12 +305,12 @@ export default function Register() {
         </div>
 
         {/* Right Section - Form */}
-        <div className={`right-section ${isDark ? 'bg-[#1a1a1a]' : 'bg-white'} relative`}>
+        <div className="right-section relative bg-surface">
           {/* Sign In Link - Top Right Corner */}
           <div className="absolute top-6 right-6">
-            <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'} text-right`}>
+            <p className="text-right text-sm text-text-muted">
               Already have an account?{' '}
-              <Link to="/login" state={location.state} className="font-semibold transition-colors text-emerald-500 hover:text-emerald-600">
+              <Link to="/login" state={location.state} className="font-semibold text-primary transition-colors hover:text-primary-hover">
                 Sign in
               </Link>
             </p>
@@ -375,12 +324,12 @@ export default function Register() {
                 className="flex items-center gap-3 mb-4 transition-opacity hover:opacity-80"
                 title="Go to home"
               >
-                <div className={`w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50 border border-gray-200'}`}>
-                  <img src="/logo.jpg" alt="Rentra" className="object-contain w-full h-full" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface2">
+                  <img src="/logo.jpg" alt="Rentra" className="h-full w-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgb(var(--rentra-shadow) / 15%))'}} />
                 </div>
-                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Rentra</h2>
+                <h2 className="text-2xl font-bold text-text">Rentra</h2>
               </button>
-              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className="text-sm text-text-muted">
                 Join Pakistan's transparent rental platform
               </p>
             </div>
@@ -399,17 +348,11 @@ export default function Register() {
               {/* Phone and CNIC in Grid */}
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
                 <div>
-                  <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  <label className="mb-2 block text-sm font-semibold text-text">
                     Phone Number
                   </label>
-                  <div className={`flex w-full overflow-hidden rounded-lg border-2 transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 ${
-                    isDark
-                      ? 'bg-[#0f0f0f] border-white/10 text-white'
-                      : 'bg-white border-gray-200 text-gray-900'
-                  }`}>
-                    <span className={`flex items-center border-r px-3 text-sm ${
-                      isDark ? 'border-white/10 text-gray-400' : 'border-gray-200 text-gray-500'
-                    }`}>
+                  <div className="flex w-full overflow-hidden rounded-lg border-2 border-border bg-surface text-text transition-all focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20">
+                            <span className="flex items-center border-r border-border px-3 text-sm text-text-muted">
                       +92
                     </span>
                     <input
@@ -421,18 +364,18 @@ export default function Register() {
                       onChange={e => setForm({ ...form, phone: getPakistanMobileDigits(e.target.value) })}
                       placeholder="300 1234567"
                       aria-label="Pakistani mobile number"
-                      className="w-full min-w-0 bg-transparent px-3 py-3 text-sm outline-none placeholder-gray-500"
+                      className="w-full min-w-0 bg-transparent px-3 py-3 text-sm text-text outline-none placeholder:text-text-subtle"
                       required
                     />
                   </div>
-                  <p className={`mt-1 text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                  <p className="mt-1 text-xs text-text-subtle">
                     Enter 0300... or +92 300...; the country code is added automatically.
                   </p>
                 </div>
                 
                 {/* CNIC with Auto Formatting */}
                 <div>
-                  <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  <label className="mb-2 block text-sm font-semibold text-text">
                     CNIC Number
                   </label>
                   <input
@@ -448,11 +391,7 @@ export default function Register() {
                     autoCapitalize="off"
                     data-lpignore="true"
                     data-form-type="other"
-                    className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm ${
-                      isDark
-                        ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                    } outline-none`}
+                    className="w-full rounded-lg border-2 border-border bg-surface px-4 py-3 text-sm text-text outline-none transition-all placeholder:text-text-subtle focus:border-primary focus:ring-2 focus:ring-primary/20"
                     required
                   />
                 </div>
@@ -460,7 +399,7 @@ export default function Register() {
 
               {/* Password */}
               <div>
-                <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                <label className="mb-2 block text-sm font-semibold text-text">
                   Password
                 </label>
                 <div className="relative">
@@ -484,17 +423,13 @@ export default function Register() {
                     onInput={(e) => {
                       e.currentTarget.setAttribute('autocomplete', 'off');
                     }}
-                    className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm ${
-                      isDark
-                        ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                    } outline-none`}
+                    className="w-full rounded-lg border-2 border-border bg-surface px-4 py-3 pr-12 text-sm text-text outline-none transition-all placeholder:text-text-subtle focus:border-primary focus:ring-2 focus:ring-primary/20"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className={`absolute right-3 top-3.5 ${isDark ? 'text-gray-500' : 'text-gray-400'} hover:${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+                    className="absolute right-3 top-3.5 text-text-subtle hover:text-text"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -511,7 +446,7 @@ export default function Register() {
 
               {/* Confirm Password */}
               <div>
-                <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                <label className="mb-2 block text-sm font-semibold text-text">
                   Confirm Password
                 </label>
                 <div className="relative">
@@ -535,17 +470,13 @@ export default function Register() {
                     onInput={(e) => {
                       e.currentTarget.setAttribute('autocomplete', 'off');
                     }}
-                    className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm ${
-                      isDark
-                        ? 'bg-[#0f0f0f] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                        : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                    } outline-none`}
+                    className="w-full rounded-lg border-2 border-border bg-surface px-4 py-3 pr-12 text-sm text-text outline-none transition-all placeholder:text-text-subtle focus:border-primary focus:ring-2 focus:ring-primary/20"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className={`absolute right-3 top-3.5 ${isDark ? 'text-gray-500' : 'text-gray-400'} hover:${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+                    className="absolute right-3 top-3.5 text-text-subtle hover:text-text"
                   >
                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -556,7 +487,7 @@ export default function Register() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 mt-6 text-base font-bold text-white transition-all rounded-lg shadow-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-emerald-500/30"
+                className="mt-6 w-full rounded-lg bg-primary py-3 text-base font-bold text-primary-contrast shadow-lg transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading ? 'Creating account...' : 'Create Account'}
               </button>

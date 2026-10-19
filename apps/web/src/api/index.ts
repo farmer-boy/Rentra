@@ -24,6 +24,8 @@ export { bookingsAPI } from './bookings';
 export { availabilityAPI } from './availability';
 export { reportsAPI } from './reports';
 export { verificationAPI } from './verification';
+export { boostAPI } from './boost';
+export type { BoostOrder, BoostOrderItem, BoostProduct } from './boost';
 export { recommendationsAPI } from './recommendations';
 export { contactsAPI } from './contacts';
 

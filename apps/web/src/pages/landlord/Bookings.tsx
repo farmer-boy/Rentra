@@ -87,10 +87,10 @@ export default function LandlordBookings() {
       </header>
       <div className="flex flex-wrap gap-2" aria-label="Booking status filters">
         {['ALL', 'UPCOMING', 'CURRENT', 'COMPLETED', 'CANCELLED'].map((value) => (
-          <button key={value} type="button" onClick={() => setFilter(value)} aria-pressed={filter === value} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${filter === value ? 'bg-emerald-600 text-white' : 'border bg-white dark:bg-gray-900'}`}>{value.replaceAll('_', ' ')}</button>
+          <button key={value} type="button" onClick={() => setFilter(value)} aria-pressed={filter === value} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${filter === value ? 'bg-emerald-600 text-primary-contrast' : 'border bg-surface '}`}>{value.replaceAll('_', ' ')}</button>
         ))}
       </div>
-      {loading ? <Card className="p-5"><p className="text-sm text-gray-500">Loading property bookings…</p></Card> : error ? <Card className="space-y-3 p-5"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card> : bookings.length === 0 ? <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">No short-term bookings are recorded for these properties yet.</Card> : filtered.length === 0 ? <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">No bookings match this status filter.</Card> : (
+      {loading ? <Card className="p-5"><p className="text-sm text-gray-500">Loading property bookings…</p></Card> : error ? <Card className="space-y-3 p-5"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card> : bookings.length === 0 ? <Card className="p-6 text-sm text-gray-600 ">No short-term bookings are recorded for these properties yet.</Card> : filtered.length === 0 ? <Card className="p-6 text-sm text-gray-600 ">No bookings match this status filter.</Card> : (
         <div className="space-y-3">
           {filtered.map((booking) => {
             const property = booking.property ?? booking.listing;
@@ -102,7 +102,7 @@ export default function LandlordBookings() {
                   {location && <p className="mt-1 text-sm text-gray-500">{location}</p>}
                   <p className="mt-2 text-sm">Guest: <strong>{booking.tenant?.fullName ?? 'Guest details unavailable'}</strong></p>
                 </div>
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800 dark:bg-blue-950 dark:text-blue-200">{booking.status.replaceAll('_', ' ')}</span>
+                <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-800  ">{booking.status.replaceAll('_', ' ')}</span>
               </div>
               <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
                 <p className="flex items-center gap-2"><CalendarDays size={15} />Check-in: {dateLabel(booking.startDate)}</p>

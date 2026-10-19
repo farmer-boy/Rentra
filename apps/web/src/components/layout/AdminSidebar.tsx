@@ -14,15 +14,20 @@ import {
   User,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
   Settings2,
 } from 'lucide-react';
 
-interface SidebarItem {
+interface SidebarItemBase {
   label: string;
-  path: string;
   icon: React.ReactNode;
   badge?: number;
 }
+
+type SidebarItem = SidebarItemBase & (
+  | { path: string; children?: never }
+  | { path?: never; children: SidebarItem[] }
+);
 
 interface AdminSidebarProps {
   onNavigate?: () => void;
@@ -41,12 +46,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const [expandOnHover, setExpandOnHover] = useState(false);
+  const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  const isActive = (path: string) => path === '/admin'
-    ? location.pathname === path
-    : location.pathname === path || location.pathname.startsWith(`${path}/`);
+  const isActive = (path: string) => location.pathname === path;
 
   // Handle hover expand/collapse
   const handleSidebarMouseEnter = () => {
@@ -109,27 +113,198 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
 
   const sections: SidebarItem[] = [
     { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
-    { label: 'Properties & Listings', path: '/admin/listings', icon: <FileText size={20} /> },
-    { label: 'Properties', path: '/admin/properties', icon: <FileText size={20} /> },
-    { label: 'Hotels', path: '/admin/hotels', icon: <FileText size={20} /> },
-    { label: 'Hostels', path: '/admin/hostels', icon: <FileText size={20} /> },
-    { label: 'All Users', path: '/admin/users', icon: <Users size={20} /> },
-    { label: 'Hosts', path: '/admin/hosts', icon: <Users size={20} /> },
-    { label: 'Verification Queue', path: '/admin/verification', icon: <Settings2 size={20} /> },
-    { label: 'Bookings', path: '/admin/bookings', icon: <FileText size={20} /> },
-    { label: 'Rental Requests', path: '/admin/rental-requests', icon: <FileText size={20} /> },
-    { label: 'Agreements', path: '/admin/agreements', icon: <FileText size={20} /> },
-    { label: 'Payments', path: '/admin/payments', icon: <FileText size={20} /> },
-    { label: 'Reports', path: '/admin/reports', icon: <FileText size={20} /> },
-    { label: 'All Disputes', path: '/admin/disputes', icon: <Scale size={20} /> },
-    { label: 'Messages', path: '/admin/messages', icon: <Mail size={20} />, badge: unreadCount || undefined },
-    { label: 'Reviews', path: '/admin/reviews', icon: <Star size={20} /> },
-    { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={20} /> },
-    { label: 'Audit Log', path: '/admin/audit', icon: <FileText size={20} /> },
-    { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={20} /> },
-    { label: 'Profile', path: '/admin/profile', icon: <User size={20} /> },
-    { label: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
+    {
+      label: 'Listings & Properties',
+      icon: <FileText size={20} />,
+      children: [
+        { label: 'Listings', path: '/admin/listings', icon: <FileText size={18} /> },
+        { label: 'Properties', path: '/admin/properties', icon: <FileText size={18} /> },
+        { label: 'Hosts', path: '/admin/hosts', icon: <Users size={18} /> },
+        { label: 'Hotels', path: '/admin/hotels', icon: <FileText size={18} /> },
+        { label: 'Hostels', path: '/admin/hostels', icon: <FileText size={18} /> },
+      ],
+    },
+    {
+      label: 'Users',
+      icon: <Users size={20} />,
+      children: [
+        { label: 'All Users', path: '/admin/users', icon: <Users size={18} /> },
+        {
+          label: 'By Role',
+          icon: <Users size={18} />,
+          children: [
+            { label: 'Tenants', path: '/admin/users/tenants', icon: <User size={16} /> },
+            { label: 'Landlords', path: '/admin/users/landlords', icon: <User size={16} /> },
+          ],
+        },
+        {
+          label: 'Account Status',
+          icon: <Settings2 size={18} />,
+          children: [
+            { label: 'Verified', path: '/admin/users/verified', icon: <Settings2 size={16} /> },
+            { label: 'Banned', path: '/admin/users/banned', icon: <Settings2 size={16} /> },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'Operations',
+      icon: <Settings2 size={20} />,
+      children: [
+        { label: 'Reported Items', path: '/admin/reported', icon: <FileText size={18} /> },
+        { label: 'Approvals', path: '/admin/approvals', icon: <Settings2 size={18} /> },
+        { label: 'Verification Queue', path: '/admin/verification', icon: <Settings2 size={18} /> },
+        { label: 'Bookings', path: '/admin/bookings', icon: <FileText size={18} /> },
+        { label: 'Rental Requests', path: '/admin/rental-requests', icon: <FileText size={18} /> },
+        { label: 'Agreements', path: '/admin/agreements', icon: <FileText size={18} /> },
+        { label: 'Payments', path: '/admin/payments', icon: <FileText size={18} /> },
+        { label: 'Reports', path: '/admin/reports', icon: <FileText size={18} /> },
+      ],
+    },
+    {
+      label: 'Disputes',
+      icon: <Scale size={20} />,
+      children: [
+        { label: 'All Disputes', path: '/admin/disputes', icon: <Scale size={18} /> },
+        { label: 'Open', path: '/admin/disputes/open', icon: <Scale size={18} /> },
+        { label: 'Resolved', path: '/admin/disputes/resolved', icon: <Scale size={18} /> },
+      ],
+    },
+    {
+      label: 'Communication',
+      icon: <Mail size={20} />,
+      children: [
+        { label: 'Messages', path: '/admin/messages', icon: <Mail size={18} />, badge: unreadCount || undefined },
+        { label: 'Reviews', path: '/admin/reviews', icon: <Star size={18} /> },
+        { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={18} /> },
+      ],
+    },
+    {
+      label: 'Platform',
+      icon: <BarChart3 size={20} />,
+      children: [
+        { label: 'Audit Log', path: '/admin/audit', icon: <FileText size={18} /> },
+        { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} /> },
+      ],
+    },
+    {
+      label: 'Account',
+      icon: <User size={20} />,
+      children: [
+        { label: 'Profile', path: '/admin/profile', icon: <User size={18} /> },
+        { label: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> },
+      ],
+    },
   ];
+
+  useEffect(() => {
+    const nextOpen: Record<string, boolean> = {};
+    const openAncestors = (items: SidebarItem[], ancestors: string[] = []) => {
+      items.forEach((item) => {
+        const nextAncestors = item.children?.length ? [...ancestors, item.label] : ancestors;
+        if (item.path && isActive(item.path)) ancestors.forEach((ancestor) => { nextOpen[ancestor] = true; });
+        if (item.children) openAncestors(item.children, nextAncestors);
+      });
+    };
+    openAncestors(sections);
+    setOpenItems(nextOpen);
+  }, [location.pathname]);
+
+  const renderItems = (items: SidebarItem[], depth = 0, visible = true): React.ReactNode => items.map((item) => {
+    const key = item.path || item.label;
+    const hasChildren = Boolean(item.children?.length);
+    const expanded = Boolean(openItems[key]);
+    const active = item.path ? isActive(item.path) : false;
+    const childActive = Boolean(item.children?.some((child) => (
+      (child.path ? isActive(child.path) : false) ||
+      (child.children ? child.children.some((nested) => nested.path ? isActive(nested.path) : false) : false)
+    )));
+    const highlighted = active || childActive;
+    const paddingLeft = isExpanded && depth > 0 ? `${8 + depth * 14}px` : undefined;
+
+    return (
+      <div key={key} className={`relative group w-full ${isExpanded ? '' : 'flex justify-center'}`}>
+        {hasChildren ? (
+          <button
+            type="button"
+            aria-expanded={expanded}
+            tabIndex={visible ? undefined : -1}
+            onClick={() => {
+              if (!isExpanded) setIsExpanded(true);
+              setOpenItems((current) => {
+                const next = { ...current };
+                items.forEach((sibling) => {
+                  if (sibling.children?.length) next[sibling.path || sibling.label] = false;
+                });
+                next[key] = !current[key];
+                return next;
+              });
+            }}
+            className={`flex items-center rounded-lg transition-all duration-200 ${
+              isExpanded ? 'w-full gap-2 px-2 py-2' : 'h-8 w-8 justify-center'
+            }`}
+            style={{
+              paddingLeft,
+              color: highlighted ? 'var(--green)' : 'var(--text2)',
+              backgroundColor: highlighted ? 'var(--surface2)' : 'transparent',
+            }}
+          >
+            <span className="relative flex flex-shrink-0 items-center justify-center">{item.icon}</span>
+            {isExpanded && (
+              <>
+                <span className="flex-1 truncate text-left text-sm font-medium">{item.label}</span>
+                {item.badge ? <span className="rounded-full bg-red-500 px-1 text-[9px] text-danger-contrast">{item.badge}</span> : null}
+                {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </>
+            )}
+          </button>
+        ) : item.path ? (
+          <Link
+            to={item.path}
+            onClick={() => handleNavigationClick()}
+            tabIndex={visible ? undefined : -1}
+            className={`flex items-center rounded-lg transition-all duration-200 ${
+              isExpanded ? 'w-full gap-2 px-2 py-2' : 'h-8 w-8 justify-center'
+            }`}
+            style={{
+              paddingLeft,
+              color: active ? 'var(--green)' : 'var(--text2)',
+              backgroundColor: active ? 'var(--surface2)' : 'transparent',
+            }}
+            title={isExpanded ? undefined : item.label}
+          >
+            <span className="relative flex flex-shrink-0 items-center justify-center">
+              {item.icon}
+              {item.badge ? <span className="absolute -right-1 -top-1 rounded-full bg-red-500 px-0.5 text-[9px] leading-none text-danger-contrast">{item.badge}</span> : null}
+            </span>
+            {isExpanded && <span className="flex-1 truncate text-sm font-medium">{item.label}</span>}
+          </Link>
+        ) : null}
+        {!isExpanded && (
+          <div
+            className="pointer-events-none invisible absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded border px-2 py-1 text-[11px] font-medium group-hover:visible"
+            style={{ backgroundColor: 'var(--surface2)', color: 'var(--text)', borderColor: 'var(--border)' }}
+          >
+            {item.label}
+          </div>
+        )}
+        {hasChildren && isExpanded && (
+          <div
+            aria-hidden={!expanded}
+            className={`grid transition-[grid-template-rows,opacity] duration-200 ease-in-out ${
+              expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+            }`}
+          >
+            <div className="min-h-0 overflow-hidden">
+              <div className="mt-1 space-y-1 border-l py-1" style={{ borderColor: 'var(--border)' }}>
+                {renderItems(item.children || [], depth + 1, visible && expanded)}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  });
 
   return (
     <div
@@ -144,55 +319,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       }}
     >
       {/* Navigation Items */}
-      <div className={`flex-1 overflow-y-auto flex flex-col items-center ${isExpanded ? 'py-3 px-2 items-start' : 'py-2 px-0'}`}>
+      <div className={`flex-1 overflow-y-auto ${isExpanded ? 'px-2 py-3' : 'px-0 py-2'}`}>
         <div className={`w-full ${isExpanded ? 'space-y-1' : 'space-y-3'}`}>
-          {sections.map((item) => {
-            const active = isActive(item.path);
-            return (
-              <div key={item.path} className={`relative group w-full ${isExpanded ? '' : 'flex justify-center'}`}>
-                <Link
-                  to={item.path}
-                  onClick={() => handleNavigationClick()}
-                  className={`flex items-center rounded-lg transition-all ${isExpanded ? 'px-2 py-2 gap-2 w-full' : 'justify-center h-8 w-8'}`}
-                  style={{
-                    color: active ? 'var(--green)' : 'var(--text2)',
-                    backgroundColor: active ? 'var(--surface2)' : 'transparent'
-                  }}
-                  title={isExpanded ? '' : item.label}
-                >
-                  <span className="flex-shrink-0 flex items-center justify-center relative">
-                    {item.icon}
-                    {/* Badge - Small dot in corner */}
-                    {item.badge && (
-                      <span className="absolute -top-1 -right-1 text-[9px] bg-red-500 text-white px-0.5 rounded-full font-bold leading-none">
-                        {item.badge}
-                      </span>
-                    )}
-                  </span>
-
-                  {/* Label - Visible only when expanded */}
-                  {isExpanded && (
-                    <span className="text-sm font-medium flex-1 truncate">{item.label}</span>
-                  )}
-                </Link>
-
-                {/* Tooltip on hover - appears instantly when not expanded */}
-                {!isExpanded && (
-                  <div 
-                    className="absolute left-full ml-2 px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap invisible group-hover:visible pointer-events-none z-50"
-                    style={{
-                      backgroundColor: 'var(--surface2)',
-                      color: 'var(--text)',
-                      border: '1px solid var(--border)',
-                      top: '50%',
-                      transform: 'translateY(-50%)'
-                    }}>
-                    {item.label}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {renderItems(sections)}
         </div>
       </div>
 

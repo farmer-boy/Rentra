@@ -13,7 +13,7 @@ export default function SettingsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, updateUser } = useAuthStore();
-  const { themeMode, setThemeMode, isDark } = useTheme();
+  const { themeMode, setThemeMode } = useTheme();
 
   const [activeSection, setActiveSection] = useState<MenuSection>(() => {
     const section = searchParams.get('section');
@@ -77,45 +77,45 @@ export default function SettingsPage() {
         return (
           <div className="space-y-4 md:space-y-6">
             <div>
-              <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Profile Information</h3>
+              <h3 className={`text-xs md:text-sm font-semibold text-text mb-3 md:mb-4`}>Profile Information</h3>
               <div className="space-y-3 md:space-y-4">
                 <div>
-                  <label className={`text-[11px] md:text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-1 md:mb-2 block`}>Full Name</label>
+                  <label className={`text-[11px] md:text-[12px] text-text-muted mb-1 md:mb-2 block`}>Full Name</label>
                   <input
                     type="text"
                     value={profileData.fullName}
                     onChange={(e) => setProfileData({ ...profileData, fullName: e.target.value })}
                     placeholder="Enter your full name"
                     aria-label="Full Name"
-                    className={`w-full px-2 md:px-3 py-1.5 md:py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'} border rounded-lg text-[11px] md:text-[12px] focus:outline-none ${isDark ? 'focus:border-green-500' : 'focus:border-green-400'}`}
+                    className={`w-full px-2 md:px-3 py-1.5 md:py-2 bg-surface border-border text-text placeholder:text-muted border rounded-lg text-[11px] md:text-[12px] focus:outline-none focus:border-primary`}
                   />
                 </div>
                 <div>
-                  <label className={`text-[11px] md:text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-1 md:mb-2 block`}>Email Address</label>
+                  <label className={`text-[11px] md:text-[12px] text-text-muted mb-1 md:mb-2 block`}>Email Address</label>
                   <input
                     type="email"
                     value={profileData.email}
                     onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
                     placeholder="your@email.com"
                     aria-label="Email Address"
-                    className={`w-full px-2 md:px-3 py-1.5 md:py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'} border rounded-lg text-[11px] md:text-[12px] focus:outline-none ${isDark ? 'focus:border-green-500' : 'focus:border-green-400'}`}
+                    className={`w-full px-2 md:px-3 py-1.5 md:py-2 bg-surface border-border text-text placeholder:text-muted border rounded-lg text-[11px] md:text-[12px] focus:outline-none focus:border-primary`}
                   />
                 </div>
                 <div>
-                  <label className={`text-[11px] md:text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-1 md:mb-2 block`}>Phone Number</label>
+                  <label className={`text-[11px] md:text-[12px] text-text-muted mb-1 md:mb-2 block`}>Phone Number</label>
                   <input
                     type="tel"
                     value={profileData.phone}
                     onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                     placeholder="+92 300 0000000"
                     aria-label="Phone Number"
-                    className={`w-full px-2 md:px-3 py-1.5 md:py-2 ${isDark ? 'bg-[#1f1f1f] border-white/10 text-white placeholder-gray-500' : 'bg-gray-50 border-gray-400 text-black placeholder-gray-500'} border rounded-lg text-[11px] md:text-[12px] focus:outline-none ${isDark ? 'focus:border-green-500' : 'focus:border-green-400'}`}
+                    className={`w-full px-2 md:px-3 py-1.5 md:py-2 bg-surface border-border text-text placeholder:text-muted border rounded-lg text-[11px] md:text-[12px] focus:outline-none focus:border-primary`}
                   />
                 </div>
               </div>
             </div>
             {profileLoading && <p className="text-xs text-gray-500">Loading account information...</p>}
-            <button onClick={() => void saveProfile()} disabled={profileSaving || profileLoading} className="px-3 md:px-4 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 text-black text-[11px] md:text-[12px] font-semibold rounded-lg transition-colors disabled:opacity-50">
+            <button onClick={() => void saveProfile()} disabled={profileSaving || profileLoading} className="px-3 md:px-4 py-1.5 md:py-2 bg-green-500 hover:bg-green-600 text-primary-contrast  text-[11px] md:text-[12px] font-semibold rounded-lg transition-colors disabled:opacity-50">
               {profileSaving ? 'Saving...' : 'Save Changes'}
             </button>
             {profileError && <p role="alert" className="text-xs text-red-600">{profileError}</p>}
@@ -127,11 +127,11 @@ export default function SettingsPage() {
         return (
           <div className="space-y-4 md:space-y-6">
             <div>
-              <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-2 md:mb-4`}>Display Settings</h3>
-              <p className={`text-[10px] md:text-[12px] ${isDark ? 'text-gray-300' : 'text-gray-600'} mb-3 md:mb-4`}>Choose how your Rentra experience looks on this device</p>
+              <h3 className={`text-xs md:text-sm font-semibold text-text mb-2 md:mb-4`}>Display Settings</h3>
+              <p className={`text-[10px] md:text-[12px] text-text-muted mb-3 md:mb-4`}>Choose how your Rentra experience looks on this device</p>
 
               <div className="space-y-2 md:space-y-3">
-                <label className={`flex items-center p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors group`}>
+                <label className={`flex items-center p-2 md:p-3 border-border hover:bg-surface border rounded-lg cursor-pointer transition-colors group`}>
                   <input
                     type="radio"
                     name="theme"
@@ -142,16 +142,16 @@ export default function SettingsPage() {
                   />
                   <div className="ml-2 md:ml-3 flex-1">
                     <div className="flex items-center gap-2">
-                      <Monitor size={14} className={isDark ? 'text-gray-700 group-hover:text-gray-300' : 'text-gray-500 group-hover:text-gray-700'} />
-                      <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Device Settings</span>
+                      <Monitor size={14} className={'text-text-muted group-hover:text-text'} />
+                      <span className={`text-[10px] md:text-[12px] font-medium text-text`}>Device Settings</span>
                     </div>
-                    <p className={`text-[9px] md:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-500'} mt-1`}>
+                    <p className={`text-[9px] md:text-[11px] text-text-muted mt-1`}>
                       Use the mode that's already selected in this device's settings
                     </p>
                   </div>
                 </label>
 
-                <label className={`flex items-center p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors group`}>
+                <label className={`flex items-center p-2 md:p-3 border-border hover:bg-surface border rounded-lg cursor-pointer transition-colors group`}>
                   <input
                     type="radio"
                     name="theme"
@@ -162,13 +162,13 @@ export default function SettingsPage() {
                   />
                   <div className="ml-2 md:ml-3 flex-1">
                     <div className="flex items-center gap-2">
-                      <Moon size={14} className={isDark ? 'text-gray-700 group-hover:text-gray-300' : 'text-gray-500 group-hover:text-gray-700'} />
-                      <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Dark Mode</span>
+                      <Moon size={14} className={'text-text-muted group-hover:text-text'} />
+                      <span className={`text-[10px] md:text-[12px] font-medium text-text`}>Dark Mode</span>
                     </div>
                   </div>
                 </label>
 
-                <label className={`flex items-center p-2 md:p-3 ${isDark ? 'border-white/10 hover:bg-[#1f1f1f]' : 'border-gray-400 hover:bg-gray-50'} border rounded-lg cursor-pointer transition-colors group`}>
+                <label className={`flex items-center p-2 md:p-3 border-border hover:bg-surface border rounded-lg cursor-pointer transition-colors group`}>
                   <input
                     type="radio"
                     name="theme"
@@ -179,8 +179,8 @@ export default function SettingsPage() {
                   />
                   <div className="ml-2 md:ml-3 flex-1">
                     <div className="flex items-center gap-2">
-                      <Sun size={14} className={isDark ? 'text-gray-700 group-hover:text-gray-300' : 'text-gray-500 group-hover:text-gray-700'} />
-                      <span className={`text-[10px] md:text-[12px] font-medium ${isDark ? 'text-white' : 'text-black'}`}>Light Mode</span>
+                      <Sun size={14} className={'text-text-muted group-hover:text-text'} />
+                      <span className={`text-[10px] md:text-[12px] font-medium text-text`}>Light Mode</span>
                     </div>
                   </div>
                 </label>
@@ -193,8 +193,8 @@ export default function SettingsPage() {
         return (
           <div className="space-y-4 md:space-y-6">
             <div>
-              <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>General Preferences</h3>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>General account preferences are not currently supported by the settings API.</p>
+              <h3 className={`text-xs md:text-sm font-semibold text-text mb-3 md:mb-4`}>General Preferences</h3>
+              <p className={`text-xs text-text-muted`}>General account preferences are not currently supported by the settings API.</p>
             </div>
           </div>
         );
@@ -203,8 +203,8 @@ export default function SettingsPage() {
         return (
           <div className="space-y-4 md:space-y-6">
             <div>
-              <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Syncing Options</h3>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Cross-device syncing and preference backup are not currently supported by the settings API.</p>
+              <h3 className={`text-xs md:text-sm font-semibold text-text mb-3 md:mb-4`}>Syncing Options</h3>
+              <p className={`text-xs text-text-muted`}>Cross-device syncing and preference backup are not currently supported by the settings API.</p>
             </div>
           </div>
         );
@@ -213,8 +213,8 @@ export default function SettingsPage() {
         return (
           <div className="space-y-4 md:space-y-6">
             <div>
-              <h3 className={`text-xs md:text-sm font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Account Management</h3>
-              <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Data export and account deactivation/deletion are not currently supported by the available account APIs.</p>
+              <h3 className={`text-xs md:text-sm font-semibold text-text mb-3 md:mb-4`}>Account Management</h3>
+              <p className={`text-xs text-text-muted`}>Data export and account deactivation/deletion are not currently supported by the available account APIs.</p>
             </div>
           </div>
         );
@@ -225,9 +225,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-[#0f0f0f]' : 'bg-white'}`}>
+    <div className="min-h-screen bg-bg text-text">
       {/* Navbar */}
-      <nav className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} border-b sticky top-0 z-50`}>
+      <nav className="bg-surface border-border border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-3 md:px-6 h-16 flex items-center justify-between">
           <button
             onClick={handleBackToHome}
@@ -239,16 +239,16 @@ export default function SettingsPage() {
                 src="/logo.jpg" 
                 alt="Rentra logo"
                 className="w-full h-full object-contain" 
-                style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}}
+                style={{filter: 'drop-shadow(0 4px 6px rgb(var(--rentra-shadow) / 10%)) drop-shadow(0 0 8px rgb(var(--rentra-shadow) / 5%))'}}
               />
             </div>
           </button>
 
           <div className="flex items-center gap-3">
-            <div className={`${isDark ? 'bg-green-500/10 border-green-500' : 'bg-green-50 border-green-300'} w-8 h-8 rounded-full border flex items-center justify-center text-[11px] font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
+            <div className={`bg-primary-soft border-primary w-8 h-8 rounded-full border flex items-center justify-center text-[11px] font-bold text-primary`}>
               {initials}
             </div>
-            <span className={`text-[12px] font-semibold ${isDark ? 'text-white' : 'text-black'}`}>{user?.fullName}</span>
+            <span className={`text-[12px] font-semibold text-text`}>{user?.fullName}</span>
           </div>
         </div>
       </nav>
@@ -257,41 +257,41 @@ export default function SettingsPage() {
       <div className="pt-3 md:pt-6">
         <div className="max-w-6xl mx-auto px-3 md:px-6">
           <div className="mb-4 md:mb-8">
-            <h1 className={`text-xl md:text-3xl font-bold ${isDark ? 'text-white' : 'text-black'} mb-1 md:mb-2`}>Settings</h1>
-            <p className={`text-[11px] md:text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Manage your account preferences and security settings</p>
+            <h1 className={`text-xl md:text-3xl font-bold text-text mb-1 md:mb-2`}>Settings</h1>
+            <p className={`text-[11px] md:text-sm text-text-muted`}>Manage your account preferences and security settings</p>
           </div>
 
           <div className="flex flex-col md:flex-row gap-3 md:gap-6">
             {/* Left Sidebar */}
             <div className="w-full flex-shrink-0 md:w-64">
-              <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden md:sticky md:top-[100px] text-[11px] md:text-[12px]`}>
+              <div className="bg-surface border-border rounded-lg border overflow-hidden md:sticky md:top-[100px] text-[11px] md:text-[12px]">
                 <button
                   onClick={() => { setActiveSection('account-preferences'); setActiveSubMenu('profile-info'); }}
-                  className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'account-preferences' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}
+                  className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'account-preferences' ? 'bg-primary-soft text-primary border-primary/50' : 'text-text-muted hover:bg-surface-2 border-border'}`}
                 >
                   ACCOUNT PREFERENCES
                 </button>
 
                 {activeSection === 'account-preferences' && (
-                  <div className={isDark ? 'bg-[#0f0f0f] border-white/7' : 'bg-white border-gray-200'}>
+                  <div className="bg-bg border-border">
                     {[{ id: 'profile-info', label: 'Profile Information' }, { id: 'display', label: 'Display' }, { id: 'general', label: 'General Preferences' }, { id: 'syncing', label: 'Syncing Options' }, { id: 'account-management', label: 'Account Management' }].map((item) => (
-                      <button key={item.id} onClick={() => setActiveSubMenu(item.id as AccountSubMenu)} className={`w-full text-left px-3 md:px-6 py-2 md:py-2.5 text-[9px] md:text-[11px] flex items-center justify-between transition-colors ${activeSubMenu === item.id ? isDark ? 'bg-green-500/10 text-green-400 font-medium' : 'bg-green-50 text-green-700 font-medium' : isDark ? 'text-gray-300 hover:bg-[#1f1f1f]' : 'text-gray-700 hover:bg-gray-50'}`}>
+                      <button key={item.id} onClick={() => setActiveSubMenu(item.id as AccountSubMenu)} className={`w-full text-left px-3 md:px-6 py-2 md:py-2.5 text-[9px] md:text-[11px] flex items-center justify-between transition-colors ${activeSubMenu === item.id ? 'bg-primary-soft text-primary font-medium' : 'text-text-muted hover:bg-surface-2'}`}>
                         {item.label}
-                        {activeSubMenu === item.id && <ChevronRight size={12} className={isDark ? 'text-green-500' : 'text-green-600'} />}
+                        {activeSubMenu === item.id && <ChevronRight size={12} className={'text-primary'} />}
                       </button>
                     ))}
                   </div>
                 )}
 
-                <button onClick={() => setActiveSection('sign-in-security')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'sign-in-security' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}>
+                <button onClick={() => setActiveSection('sign-in-security')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'sign-in-security' ? 'bg-primary-soft text-primary border-primary/50' : 'text-text-muted hover:bg-surface-2 border-border'}`}>
                   SIGN IN & SECURITY
                 </button>
 
-                <button onClick={() => setActiveSection('data-privacy')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'data-privacy' ? isDark ? 'bg-green-500/10 text-green-400 border-green-500/50' : 'bg-green-50 text-green-700 border-green-500' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f] border-white/7' : 'text-gray-600 hover:bg-gray-50 border-gray-200'}`}>
+                <button onClick={() => setActiveSection('data-privacy')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'data-privacy' ? 'bg-primary-soft text-primary border-primary/50' : 'text-text-muted hover:bg-surface-2 border-border'}`}>
                   DATA PRIVACY
                 </button>
 
-                <button onClick={() => setActiveSection('notifications')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors ${activeSection === 'notifications' ? isDark ? 'bg-green-500/10 text-green-400' : 'bg-green-50 text-green-700' : isDark ? 'text-gray-700 hover:bg-[#1f1f1f]' : 'text-gray-600 hover:bg-gray-100'}`}>
+                <button onClick={() => setActiveSection('notifications')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors ${activeSection === 'notifications' ? 'bg-primary-soft text-primary' : 'text-text-muted hover:bg-surface-2'}`}>
                   NOTIFICATIONS
                 </button>
               </div>
@@ -300,29 +300,29 @@ export default function SettingsPage() {
             {/* Right Content */}
             <div className="flex-1 w-full">
               {activeSection === 'account-preferences' && (
-                <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
+                <div className="bg-surface border-border rounded-lg border p-3 md:p-8">
                   {renderAccountPreferencesContent()}
                 </div>
               )}
 
               {activeSection === 'sign-in-security' && (
-                <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
-                  <h3 className={`text-sm md:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Sign In & Security</h3>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Password changes and two-factor authentication are not available through the current account APIs.</p>
+                <div className="bg-surface border-border rounded-lg border p-3 md:p-8">
+                  <h3 className={`text-sm md:text-lg font-semibold text-text mb-3 md:mb-4`}>Sign In & Security</h3>
+                  <p className={`text-xs text-text-muted`}>Password changes and two-factor authentication are not available through the current account APIs.</p>
                 </div>
               )}
 
               {activeSection === 'data-privacy' && (
-                <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
-                  <h3 className={`text-sm md:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Data Privacy</h3>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Usage analytics and privacy preference controls are not currently supported by the settings API.</p>
+                <div className="bg-surface border-border rounded-lg border p-3 md:p-8">
+                  <h3 className={`text-sm md:text-lg font-semibold text-text mb-3 md:mb-4`}>Data Privacy</h3>
+                  <p className={`text-xs text-text-muted`}>Usage analytics and privacy preference controls are not currently supported by the settings API.</p>
                 </div>
               )}
 
               {activeSection === 'notifications' && (
-                <div className={`${isDark ? 'bg-[#171717] border-white/7' : 'bg-white border-gray-400'} rounded-lg border p-3 md:p-8`}>
-                  <h3 className={`text-sm md:text-lg font-semibold ${isDark ? 'text-white' : 'text-black'} mb-3 md:mb-4`}>Notifications</h3>
-                  <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Notification preferences are not currently supported by the settings API.</p>
+                <div className="bg-surface border-border rounded-lg border p-3 md:p-8">
+                  <h3 className={`text-sm md:text-lg font-semibold text-text mb-3 md:mb-4`}>Notifications</h3>
+                  <p className={`text-xs text-text-muted`}>Notification preferences are not currently supported by the settings API.</p>
                 </div>
               )}
             </div>

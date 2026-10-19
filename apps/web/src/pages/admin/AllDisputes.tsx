@@ -50,16 +50,16 @@ const AdminAllDisputes = () => {
   const statusColor = (status: string) => {
     switch (status) {
       case 'OPEN':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400';
+        return 'bg-red-100  text-red-700 ';
       case 'MEDIATION':
       case 'UNDER_REVIEW':
       case 'AWAITING_INFORMATION':
-        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400';
+        return 'bg-yellow-100  text-yellow-700 ';
       case 'RESOLVED':
       case 'CLOSED':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+        return 'bg-green-100  text-green-700 ';
       default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400';
+        return 'bg-gray-100  text-gray-700 ';
     }
   };
   const statValue = (value: number) => loading || error ? '—' : value;
@@ -83,30 +83,30 @@ const AdminAllDisputes = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">All Disputes</h1>
-        <p className="text-gray-600 dark:text-gray-400">Review and mediate disputes between tenants and landlords</p>
+        <h1 className="text-3xl font-bold text-gray-900  mb-2">All Disputes</h1>
+        <p className="text-gray-600 ">Review and mediate disputes between tenants and landlords</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Total Disputes</p>
-          <p className="text-3xl font-bold text-gray-600 dark:text-gray-400 mt-2">{statValue(disputes.length)}</p>
+          <p className="text-gray-600  text-sm">Total Disputes</p>
+          <p className="text-3xl font-bold text-gray-600  mt-2">{statValue(disputes.length)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Open</p>
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">{statValue(open)}</p>
+          <p className="text-gray-600  text-sm">Open</p>
+          <p className="text-3xl font-bold text-red-600  mt-2">{statValue(open)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">In Progress</p>
-          <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{statValue(inProgress)}</p>
+          <p className="text-gray-600  text-sm">In Progress</p>
+          <p className="text-3xl font-bold text-yellow-600  mt-2">{statValue(inProgress)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Resolved</p>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{statValue(resolved)}</p>
+          <p className="text-gray-600  text-sm">Resolved</p>
+          <p className="text-3xl font-bold text-green-600  mt-2">{statValue(resolved)}</p>
         </Card>
       </div>
 
-      {error && <p role="alert" className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600 ">{error}</p>}
       {loading ? (
         <Card className="p-6"><p className="text-center text-gray-500">Loading disputes...</p></Card>
       ) : disputes.length === 0 ? (
@@ -120,21 +120,21 @@ const AdminAllDisputes = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <Scale size={18} className="text-blue-500" />
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{dispute.reason || dispute.type.replaceAll('_', ' ')}</h3>
+                      <h3 className="font-semibold text-lg text-gray-900 ">{dispute.reason || dispute.type.replaceAll('_', ' ')}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    <p className="text-sm text-gray-600  mb-3">
                       {dispute.createdBy?.fullName || 'Reporter unavailable'}
                       {' · '}
                       {dispute.agreement?.listing?.title || dispute.booking?.listing?.title || dispute.booking?.property?.title || 'Property unavailable'}
                     </p>
-                    <p className="text-gray-700 dark:text-gray-300">{dispute.description}</p>
+                    <p className="text-gray-700 ">{dispute.description}</p>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor(dispute.status)}`}>
                     {dispute.status.replaceAll('_', ' ')}
                   </span>
                 </div>
-                <div className="flex items-center justify-between pt-3 border-t border-gray-400 dark:border-gray-700">
-                  <p className="text-xs text-gray-500 dark:text-gray-500">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-400 ">
+                  <p className="text-xs text-gray-500 ">
                     Filed {dispute.createdAt ? new Date(dispute.createdAt).toLocaleDateString() : 'date unavailable'}
                   </p>
                   {!['RESOLVED', 'REJECTED', 'CLOSED'].includes(dispute.status) && (
@@ -142,7 +142,7 @@ const AdminAllDisputes = () => {
                       type="button"
                       disabled={actionId === dispute.id}
                       onClick={() => void resolveDispute(dispute)}
-                      className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50"
+                      className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-primary-contrast disabled:opacity-50"
                     >
                       {actionId === dispute.id ? 'Saving...' : 'Resolve'}
                     </button>

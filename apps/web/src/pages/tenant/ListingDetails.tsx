@@ -228,7 +228,7 @@ export default function ListingDetails() {
               ? <img src={gallery[selectedImage]} alt={listing.title} className="h-full w-full object-cover" />
               : <div className="flex h-full items-center justify-center text-gray-400">No property image</div>}
             {listing.isRentraVerified && (
-              <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700">
+              <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-emerald-700">
                 <ShieldCheck size={14} /> Rentra verified
               </span>
             )}
@@ -287,7 +287,7 @@ export default function ListingDetails() {
               ? <div className="mt-3 h-64 overflow-hidden rounded-xl border">
                 <MapContainer center={[listing.latitude, listing.longitude]} zoom={14} scrollWheelZoom={false} className="h-full w-full">
                   <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <CircleMarker center={[listing.latitude, listing.longitude]} radius={8} pathOptions={{ color: '#176b4d' }} />
+                  <CircleMarker center={[listing.latitude, listing.longitude]} radius={8} pathOptions={{ color: 'rgb(var(--rentra-primary))' }} />
                 </MapContainer>
               </div>
               : <p className="mt-2 text-xs text-gray-500">Map location has not been provided for this listing.</p>}
@@ -362,7 +362,7 @@ export default function ListingDetails() {
                   </select>
                 </label>}
                 {usesHostelInventory && hostelBedOptions.length === 0 && <p className="text-xs text-amber-700">No available hostel beds are currently listed.</p>}
-                <button disabled={actionPending || roomTypesQuery.isPending || (usesHotelInventory && (roomTypesQuery.isError || hotelRoomOptions.length === 0)) || (usesHostelInventory && hostelBedOptions.length === 0)} onClick={() => void submitBooking()} className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                <button disabled={actionPending || roomTypesQuery.isPending || (usesHotelInventory && (roomTypesQuery.isError || hotelRoomOptions.length === 0)) || (usesHostelInventory && hostelBedOptions.length === 0)} onClick={() => void submitBooking()} className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">
                   {actionPending ? 'Checking availability...' : 'Check availability and request booking'}
                 </button>
                 <p className="text-xs leading-5 text-gray-500">The backend rechecks the selected dates, inventory, and price. A booking request is not a completed or paid reservation. Online payment is not currently configured.</p>
@@ -372,11 +372,11 @@ export default function ListingDetails() {
                 <label className="block text-xs">Duration (months)<input type="number" min={1} value={duration} onChange={(event) => setDuration(Number(event.target.value))} className="mt-1 w-full rounded-lg border p-2 text-sm" /></label>
                 <label className="block text-xs">Occupants<input type="number" min={1} value={guests} onChange={(event) => setGuests(Number(event.target.value))} className="mt-1 w-full rounded-lg border p-2 text-sm" /></label>
                 <label className="block text-xs">Message (optional)<textarea maxLength={2000} value={requestMessage} onChange={(event) => setRequestMessage(event.target.value)} className="mt-1 w-full rounded-lg border p-2 text-sm" /></label>
-                <button disabled={actionPending} onClick={() => void submitRentalRequest()} className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">{actionPending ? 'Sending request...' : 'Send rental request'}</button>
+                <button disabled={actionPending} onClick={() => void submitRentalRequest()} className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">{actionPending ? 'Sending request...' : 'Send rental request'}</button>
               </>}
             </div>
           ) : listing.propertyId && !isAuthenticated ? (
-            <button onClick={() => navigate('/login', { state: { from: `${location.pathname}${location.search}` } })} className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Sign in to rent or book</button>
+            <button onClick={() => navigate('/login', { state: { from: `${location.pathname}${location.search}` } })} className="w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-primary-contrast">Sign in to rent or book</button>
           ) : !listing.propertyId ? (
             <p className="text-xs text-gray-500">Online rental requests and bookings are unavailable because this listing has no linked property record.</p>
           ) : <p className="text-xs text-gray-500">Rental requests and bookings are available to tenant accounts.</p>}

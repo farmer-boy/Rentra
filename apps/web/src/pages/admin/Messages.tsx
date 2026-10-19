@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTheme } from '../../context/useTheme';
 import { Mail, Trash2, ArrowLeft } from 'lucide-react';
 import { ApiError } from '../../api/api-error';
 import { contactsAPI, type ContactMessage } from '../../api/contacts';
 import { useContactMessages } from '../../hooks/useContactMessages';
 
 export default function AdminMessagesPage() {
-  const { isDark } = useTheme();
   const queryClient = useQueryClient();
   const {
     messages: localMessages,
@@ -86,10 +84,10 @@ export default function AdminMessagesPage() {
           : 'flex'
       } w-full sm:w-64 md:w-56 lg:w-80 flex-shrink-0 flex-col overflow-hidden`}>
         <div className="mb-3 lg:mb-4 flex-shrink-0 px-3 lg:px-4">
-          <h2 className={`text-base lg:text-lg font-extrabold tracking-tight flex items-center gap-2 ${isDark ? 'text-white' : 'text-black'}`}>
+          <h2 className={`text-base lg:text-lg font-extrabold tracking-tight flex items-center gap-2 text-text`}>
             <Mail size={18} className="lg:size-5" /> <span className="hidden sm:inline">Messages</span>
           </h2>
-          <p className={`text-[10px] lg:text-[11px] ${isDark ? 'text-gray-700' : 'text-gray-400'}`}>
+          <p className={`text-[10px] lg:text-[11px] text-text-muted`}>
             {unreadCount} unread • {localMessages.length} total
           </p>
         </div>
@@ -102,12 +100,12 @@ export default function AdminMessagesPage() {
           <div
             className="rounded-lg p-6 sm:p-4 lg:p-8 text-center mx-2 sm:mx-1 lg:mx-0"
             style={{
-              backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
-              border: `1px solid ${isDark ? '#333' : '#e0e0e0'}`,
+              backgroundColor: 'var(--surface2)',
+              border: '1px solid var(--border)',
             }}
           >
             <Mail size={32} className="mx-auto mb-2 lg:mb-3 opacity-40 lg:size-10" />
-            <p className={`text-xs lg:text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>No messages</p>
+            <p className={`text-xs lg:text-sm text-text-muted`}>No messages</p>
           </div>
         ) : (
           <div className="space-y-0.5 lg:space-y-1 overflow-y-auto flex-1 min-h-0 px-2 sm:px-1 lg:px-0">
@@ -117,50 +115,40 @@ export default function AdminMessagesPage() {
                 onClick={() => handleOpenMessage(message)}
                 className={`w-full text-left rounded-lg p-2 lg:p-3 border transition-all ${
                   selectedMessage?.id === message.id
-                    ? isDark
-                      ? 'bg-green-500/10 border-green-500/50'
-                      : 'bg-green-50 border-green-500/50'
+                    ? 'bg-primary-soft border-primary'
                     : 'hover:opacity-80 active:opacity-60'
                 }`}
                 style={{
                   backgroundColor:
                     selectedMessage?.id === message.id
-                      ? isDark
-                        ? '#0f3d0f'
-                        : '#f0fdf4'
+                      ? 'var(--accent-bg)'
                       : message.read
-                      ? isDark
-                        ? '#0f0f0f'
-                        : '#ffffff'
-                      : isDark
-                      ? '#1a1a1a'
-                      : '#f0fdf4',
+                      ? 'var(--surface)'
+                      : 'var(--accent-bg)',
                   borderColor:
                     selectedMessage?.id === message.id
-                      ? '#22c55e80'
+                      ? 'var(--accent-border)'
                       : message.read
-                      ? isDark
-                        ? '#333333'
-                        : '#e5e7eb'
-                      : '#22c55e50',
+                      ? 'var(--border)'
+                      : 'var(--accent-border)',
                 }}
               >
                 <div className="flex items-start justify-between gap-1.5 lg:gap-2">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 lg:gap-2 mb-0.5 lg:mb-1">
-                      <h3 className={`text-xs lg:text-sm ${!message.read ? 'font-bold' : 'font-semibold'} truncate ${isDark ? 'text-white' : 'text-black'}`}>
+                      <h3 className={`text-xs lg:text-sm ${!message.read ? 'font-bold' : 'font-semibold'} truncate text-text`}>
                         {message.name}
                       </h3>
                       {!message.read && (
-                        <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full flex-shrink-0" style={{ backgroundColor: '#22c55e' }}></span>
+                        <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full flex-shrink-0" style={{ backgroundColor: 'var(--green)' }}></span>
                       )}
                     </div>
                     {error && localMessages.length > 0 && <p role="alert" className="absolute top-2 right-2 z-[60] rounded bg-red-100 px-3 py-2 text-xs text-red-700">{error}</p>}
-                    <p className={`text-[9px] lg:text-[10px] line-clamp-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-[9px] lg:text-[10px] line-clamp-1 text-text-muted`}>
                       {message.message}
                     </p>
                   </div>
-                  <p className={`text-[9px] lg:text-[10px] whitespace-nowrap flex-shrink-0 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                  <p className={`text-[9px] lg:text-[10px] whitespace-nowrap flex-shrink-0 text-text-muted`}>
                     {formatDate(message.createdAt)}
                   </p>
                 </div>
@@ -181,16 +169,16 @@ export default function AdminMessagesPage() {
             selectedMessage ? 'flex' : 'hidden'
           } sm:flex flex-1 flex-col border rounded-lg overflow-hidden min-w-0 sm:rounded-lg sm:border sm:w-full md:w-auto fixed sm:static inset-0 sm:inset-auto z-50 sm:z-auto`}
           style={{
-            backgroundColor: isDark ? '#0f0f0f' : '#ffffff',
-            borderColor: isDark ? '#333' : '#e5e7eb',
+            backgroundColor: 'var(--surface)',
+            borderColor: 'var(--border)',
           }}
         >
           {/* Header */}
           <div
             className="flex items-center justify-between h-12 sm:h-14 px-3 sm:px-6 border-b flex-shrink-0"
             style={{
-              backgroundColor: isDark ? '#1a1a1a' : '#f9f9f9',
-              borderColor: isDark ? '#333' : '#e5e7eb',
+              backgroundColor: 'var(--surface2)',
+              borderColor: 'var(--border)',
             }}
           >
             <button
@@ -210,7 +198,7 @@ export default function AdminMessagesPage() {
                 setSelectedMessage(null);
               }}
               className="p-1.5 sm:p-2 rounded hover:bg-red-500/20 transition-colors flex-shrink-0"
-              style={{ color: '#ef4444' }}
+              style={{ color: 'var(--red)' }}
               title="Delete message"
             >
               <Trash2 size={16} className="sm:size-4" />
@@ -223,8 +211,8 @@ export default function AdminMessagesPage() {
             <div
               className="rounded-lg p-3 lg:p-4"
               style={{
-                backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
-                borderColor: isDark ? '#333' : '#e5e7eb',
+                backgroundColor: 'var(--surface2)',
+                borderColor: 'var(--border)',
                 border: '1px solid',
               }}
             >
@@ -236,12 +224,12 @@ export default function AdminMessagesPage() {
               </h4>
               <div className="space-y-1.5 lg:space-y-2 text-[11px] lg:text-[13px]">
                 <p style={{ color: 'var(--text2)' }}>
-                  📧 <a href={`mailto:${selectedMessage.email}`} style={{ color: '#22c55e' }} className="hover:underline truncate">
+                  📧 <a href={`mailto:${selectedMessage.email}`} style={{ color: 'var(--green)' }} className="hover:underline truncate">
                     {selectedMessage.email}
                   </a>
                 </p>
                 <p style={{ color: 'var(--text2)' }}>
-                  📱 <a href={`tel:${selectedMessage.phone}`} style={{ color: '#22c55e' }} className="hover:underline">
+                  📱 <a href={`tel:${selectedMessage.phone}`} style={{ color: 'var(--green)' }} className="hover:underline">
                     {selectedMessage.phone}
                   </a>
                 </p>
@@ -255,8 +243,8 @@ export default function AdminMessagesPage() {
             <div
               className="rounded-lg p-3 lg:p-4"
               style={{
-                backgroundColor: isDark ? '#1a1a1a' : '#f5f5f5',
-                borderColor: isDark ? '#333' : '#e5e7eb',
+                backgroundColor: 'var(--surface2)',
+                borderColor: 'var(--border)',
                 border: '1px solid',
               }}
             >

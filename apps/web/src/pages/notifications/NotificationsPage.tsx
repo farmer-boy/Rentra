@@ -1,5 +1,4 @@
 import { Bell, CheckCheck } from 'lucide-react';
-import { useTheme } from '../../context/useTheme';
 import { ApiError } from '../../api/api-error';
 import {
   useMarkAllNotificationsRead,
@@ -17,7 +16,6 @@ interface Notification {
 }
 
 export default function NotificationsPage() {
-  const { isDark } = useTheme();
   const notificationsQuery = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllMutation = useMarkAllNotificationsRead();
@@ -36,13 +34,13 @@ export default function NotificationsPage() {
   const markAllRead = () => markAllMutation.mutate();
 
   const unreadCount = notifications.filter((notification) => !notification.isRead).length;
-  const mutedText = isDark ? 'text-gray-400' : 'text-gray-600';
+  const mutedText = 'text-text-muted';
 
   return (
     <section>
       <header className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Notifications</h1>
+          <h1 className="text-xl font-bold text-text">Notifications</h1>
           <p className={`mt-1 text-sm ${mutedText}`}>
             {unreadCount ? `${unreadCount} unread` : 'Updates for your account'}
           </p>
@@ -52,7 +50,7 @@ export default function NotificationsPage() {
             type="button"
             onClick={markAllRead}
             disabled={markingAll}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-contrast bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60"
           >
             <CheckCheck size={16} />
             {markingAll ? 'Updating...' : 'Mark all read'}
@@ -72,9 +70,9 @@ export default function NotificationsPage() {
       {loading ? (
         <p className={`text-sm ${mutedText}`}>Loading notifications...</p>
       ) : notifications.length === 0 ? (
-        <div className={`p-8 text-center border rounded-xl ${isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'}`}>
+        <div className="rounded-xl border border-border bg-surface p-8 text-center">
           <Bell className={`mx-auto mb-3 ${mutedText}`} size={28} />
-          <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>You’re all caught up</p>
+          <p className="font-semibold text-text">You’re all caught up</p>
           <p className={`mt-1 text-sm ${mutedText}`}>New account updates will appear here.</p>
         </div>
       ) : (
@@ -82,15 +80,13 @@ export default function NotificationsPage() {
           {notifications.map((notification) => (
             <li
               key={notification.id}
-              className={`flex items-start justify-between gap-4 p-4 border rounded-xl ${
-                isDark
-                  ? notification.isRead ? 'border-white/10 bg-white/5' : 'border-green-500/30 bg-green-500/10'
-                  : notification.isRead ? 'border-gray-200 bg-white' : 'border-green-200 bg-green-50'
+              className={`flex items-start justify-between gap-4 rounded-xl border p-4 ${
+                notification.isRead ? 'border-border bg-surface' : 'border-primary/30 bg-primary-soft'
               }`}
             >
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{notification.title}</p>
+                  <p className="font-semibold text-text">{notification.title}</p>
                   {!notification.isRead && <span className="w-2 h-2 bg-green-500 rounded-full" aria-label="Unread" />}
                 </div>
                 <p className={`mt-1 text-sm ${mutedText}`}>{notification.message}</p>
@@ -103,7 +99,7 @@ export default function NotificationsPage() {
                   type="button"
                   onClick={() => markRead(notification.id)}
                   disabled={savingId === notification.id}
-                  className={`shrink-0 text-xs font-semibold ${isDark ? 'text-green-300 hover:text-green-200' : 'text-green-700 hover:text-green-800'} disabled:opacity-60`}
+                  className="shrink-0 text-xs font-semibold text-primary hover:text-primary-hover disabled:opacity-60"
                 >
                   {savingId === notification.id ? 'Saving...' : 'Mark read'}
                 </button>

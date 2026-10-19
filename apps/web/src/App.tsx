@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, CheckCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays, ShieldCheck, Zap } from 'lucide-react';
 
 // Context
 import { ThemeProvider } from './context/ThemeContext';
-import { useTheme } from './context/useTheme';
 
 // Auth
 import Login from './pages/auth/Login';
@@ -59,6 +58,7 @@ import LandlordReviews from './pages/landlord/Reviews';
 import LandlordBookings from './pages/landlord/Bookings';
 import LandlordAvailability from './pages/landlord/Availability';
 import LandlordVerification from './pages/landlord/Verification';
+import RentraBoost from './pages/landlord/RentraBoost';
 import ChatPage from './pages/messages/ChatPage';
 
 // Admin Pages
@@ -79,8 +79,8 @@ function NotFoundPage() {
       <div className="max-w-md">
         <p className="text-sm font-semibold uppercase tracking-widest text-[var(--green-soft)]">404 · Page not found</p>
         <h1 className="mt-3 text-3xl font-semibold">We couldn't find that page.</h1>
-        <p className="mt-3 text-sm leading-6 text-[var(--text2)]">The link may be outdated, or the address may have been typed incorrectly.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-xl bg-[var(--green)] px-5 py-3 text-sm font-semibold text-white hover:bg-[var(--green-hover)]">Go to Rentra home</Link>
+        <p className="mt-3 text-sm leading-6 text-text-muted">The link may be outdated, or the address may have been typed incorrectly.</p>
+        <Link to="/" className="mt-6 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-contrast hover:bg-primary-hover">Go to Rentra home</Link>
       </div>
     </main>
   );
@@ -92,31 +92,64 @@ const tenantNavSections = [
     title: 'MAIN',
     items: [
       { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/tenant' },
-      { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings' },
-      { icon: <Plus size={16} />, label: 'Post a Property', path: '/tenant/post' },
-      { icon: <Heart size={16} />, label: 'Saved Listings', path: '/tenant/saved' },
-      { icon: <Bookmark size={16} />, label: 'Saved Searches', path: '/tenant/saved-searches' },
-      { icon: <MessageCircle size={16} />, label: 'Messages', path: '/tenant/messages' },
-      { icon: <Bell size={16} />, label: 'Notifications', path: '/tenant/notifications' },
+      {
+        icon: <Home size={16} />,
+        label: 'Explore & Post',
+        children: [
+          { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings' },
+          { icon: <Heart size={16} />, label: 'Saved Listings', path: '/tenant/saved' },
+          { icon: <Bookmark size={16} />, label: 'Saved Searches', path: '/tenant/saved-searches' },
+          { icon: <Plus size={16} />, label: 'Post a Property', path: '/tenant/post' },
+        ],
+      },
+      {
+        icon: <MessageCircle size={16} />,
+        label: 'Communication',
+        children: [
+          { icon: <MessageCircle size={16} />, label: 'Messages', path: '/tenant/messages' },
+          { icon: <Bell size={16} />, label: 'Notifications', path: '/tenant/notifications' },
+        ],
+      },
+      {
+        icon: <Zap size={16} />,
+        label: 'Property Tools',
+        children: [
+          { icon: <Eye size={16} />, label: 'AI Listing Detector', path: '/tenant/detector' },
+          { icon: <TrendingUp size={16} />, label: 'Rent Estimator', path: '/tenant/estimator' },
+        ],
+      },
     ],
   },
   {
     title: 'MY TENANCY',
     items: [
-      { icon: <FileText size={16} />, label: 'My Agreements', path: '/tenant/agreement' },
-      { icon: <ClipboardList size={16} />, label: 'Rental Requests', path: '/tenant/rental-requests' },
-      { icon: <CalendarDays size={16} />, label: 'My Bookings', path: '/tenant/bookings' },
-      { icon: <CreditCard size={16} />, label: 'Payments', path: '/tenant/payments' },
-      { icon: <Scale size={16} />, label: 'Disputes', path: '/tenant/disputes' },
+      {
+        icon: <ClipboardList size={16} />,
+        label: 'Rental Management',
+        children: [
+          { icon: <ClipboardList size={16} />, label: 'Rental Requests', path: '/tenant/rental-requests' },
+          { icon: <CalendarDays size={16} />, label: 'My Bookings', path: '/tenant/bookings' },
+          { icon: <FileText size={16} />, label: 'My Agreements', path: '/tenant/agreement' },
+          { icon: <CreditCard size={16} />, label: 'Payments', path: '/tenant/payments' },
+          { icon: <Scale size={16} />, label: 'Disputes', path: '/tenant/disputes' },
+          { icon: <Settings size={16} />, label: 'Maintenance', path: '/tenant/maintenance' },
+        ],
+      },
     ],
   },
   {
     title: 'ACCOUNT',
     items: [
-      { icon: <User size={16} />, label: 'Profile', path: '/tenant/profile' },
-      { icon: <Star size={16} />, label: 'Trust Score', path: '/tenant/trust' },
-      { icon: <Star size={16} />, label: 'My Reviews & Ratings', path: '/tenant/reviews' },
-      { icon: <Settings size={16} />, label: 'Settings', path: '/tenant/settings' },
+      {
+        icon: <User size={16} />,
+        label: 'My Account',
+        children: [
+          { icon: <User size={16} />, label: 'Profile', path: '/tenant/profile' },
+          { icon: <ShieldCheck size={16} />, label: 'Trust Score', path: '/tenant/trust' },
+          { icon: <Star size={16} />, label: 'My Reviews & Ratings', path: '/tenant/reviews' },
+          { icon: <Settings size={16} />, label: 'Settings', path: '/tenant/settings' },
+        ],
+      },
     ],
   },
 ];
@@ -126,37 +159,72 @@ const landlordNavSections = [
     title: 'MAIN',
     items: [
       { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/landlord' },
-      { icon: <Home size={16} />, label: 'My Properties', path: '/landlord/properties' },
-      { icon: <Plus size={16} />, label: 'Post Property', path: '/landlord/post' },
-      { icon: <CalendarDays size={16} />, label: 'Bookings', path: '/landlord/bookings' },
-      { icon: <CalendarDays size={16} />, label: 'Availability', path: '/landlord/availability' },
-      { icon: <MessageCircle size={16} />, label: 'Messages', path: '/landlord/messages' },
-      { icon: <Bell size={16} />, label: 'Notifications', path: '/landlord/notifications' },
-    ],
-  },
-  {
-    title: 'TENANTS',
-    items: [
-      { icon: <Users size={16} />, label: 'My Tenants', path: '/landlord/tenants' },
-      { icon: <CheckCircle size={16} />, label: 'Pending Applications', path: '/landlord/applications' },
-      { icon: <FileText size={16} />, label: 'Agreements', path: '/landlord/agreements' },
+      { icon: <Zap size={16} />, label: 'Rentra Boost', path: '/landlord/boost' },
+      {
+        icon: <Home size={16} />,
+        label: 'Properties',
+        children: [
+          { icon: <Home size={16} />, label: 'My Properties', path: '/landlord/properties' },
+          { icon: <Plus size={16} />, label: 'Post Property', path: '/landlord/post' },
+        ],
+      },
+      {
+        icon: <CalendarDays size={16} />,
+        label: 'Rental Operations',
+        children: [
+          { icon: <CalendarDays size={16} />, label: 'Bookings', path: '/landlord/bookings' },
+          { icon: <CalendarDays size={16} />, label: 'Availability', path: '/landlord/availability' },
+          { icon: <ClipboardList size={16} />, label: 'Pending Applications', path: '/landlord/applications' },
+          { icon: <Users size={16} />, label: 'My Tenants', path: '/landlord/tenants' },
+          { icon: <FileText size={16} />, label: 'Agreements', path: '/landlord/agreements' },
+          { icon: <Settings size={16} />, label: 'Maintenance', path: '/landlord/maintenance' },
+        ],
+      },
+      {
+        icon: <MessageCircle size={16} />,
+        label: 'Communication',
+        children: [
+          { icon: <MessageCircle size={16} />, label: 'Messages', path: '/landlord/messages' },
+          { icon: <Bell size={16} />, label: 'Notifications', path: '/landlord/notifications' },
+        ],
+      },
+      {
+        icon: <Zap size={16} />,
+        label: 'Property Tools',
+        children: [
+          { icon: <TrendingUp size={16} />, label: 'Rent Estimator', path: '/landlord/estimator' },
+          { icon: <Eye size={16} />, label: 'Fake Listing Detector', path: '/landlord/detector' },
+        ],
+      },
     ],
   },
   {
     title: 'MONEY',
     items: [
-      { icon: <CreditCard size={16} />, label: 'Payments Received', path: '/landlord/payments' },
-      { icon: <TrendingUp size={16} />, label: 'Income Report', path: '/landlord/income' },
+      {
+        icon: <CreditCard size={16} />,
+        label: 'Finance',
+        children: [
+          { icon: <CreditCard size={16} />, label: 'Payments Received', path: '/landlord/payments' },
+          { icon: <TrendingUp size={16} />, label: 'Income Report', path: '/landlord/income' },
+        ],
+      },
     ],
   },
   {
     title: 'ACCOUNT',
     items: [
-      { icon: <User size={16} />, label: 'Profile', path: '/landlord/profile' },
-      { icon: <ShieldCheck size={16} />, label: 'Verification', path: '/landlord/verification' },
-      { icon: <Eye size={16} />, label: 'Tenant Trust Scores', path: '/landlord/trust' },
-      { icon: <Star size={16} />, label: 'Reviews', path: '/landlord/reviews' },
-      { icon: <Settings size={16} />, label: 'Settings', path: '/landlord/settings' },
+      {
+        icon: <User size={16} />,
+        label: 'My Account',
+        children: [
+          { icon: <User size={16} />, label: 'Profile', path: '/landlord/profile' },
+          { icon: <ShieldCheck size={16} />, label: 'Verification', path: '/landlord/verification' },
+          { icon: <Eye size={16} />, label: 'Tenant Trust Scores', path: '/landlord/trust' },
+          { icon: <Star size={16} />, label: 'Reviews', path: '/landlord/reviews' },
+          { icon: <Settings size={16} />, label: 'Settings', path: '/landlord/settings' },
+        ],
+      },
     ],
   },
 ];
@@ -170,7 +238,6 @@ export default function App() {
 }
 
 function AppContent() {
-  const { isDark } = useTheme();
   const initializeAuth = useAuthStore((state) => state.initialize);
 
   useEffect(() => {
@@ -183,9 +250,9 @@ function AppContent() {
         position="top-right"
         toastOptions={{
           style: {
-            background: isDark ? '#171717' : '#ffffff',
-            color: isDark ? '#f0f0f0' : '#000000',
-            border: isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.1)',
+            background: 'var(--surface)',
+            color: 'var(--text)',
+            border: '1px solid var(--border)',
             fontSize: '13px'
           },
         }}
@@ -248,6 +315,7 @@ function AppContent() {
           <Route index element={<LandlordDashboard />} />
           <Route path="properties" element={<MyProperties />} />
           <Route path="post" element={<LandlordPostProperty />} />
+          <Route path="boost" element={<RentraBoost />} />
           <Route path="bookings" element={<LandlordBookings />} />
           <Route path="availability" element={<LandlordAvailability />} />
           <Route path="verification" element={<LandlordVerification />} />

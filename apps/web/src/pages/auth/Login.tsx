@@ -3,56 +3,12 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../../api/auth';
 import { getApiErrorMessage } from '../../api/api-error';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/useTheme';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
-
-const loginStyles = `
-  /* Prevent Chrome autofill styling */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover,
-  input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px #1a1a1a inset !important;
-    -webkit-text-fill-color: white !important;
-    caret-color: white !important;
-    transition: background-color 5000s ease-in-out 0s !important;
-  }
-  
-  /* Light mode autofill */
-  :root:not([data-theme="dark"]) input:-webkit-autofill,
-  :root:not([data-theme="dark"]) input:-webkit-autofill:hover,
-  :root:not([data-theme="dark"]) input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0 1000px white inset !important;
-    -webkit-text-fill-color: #0d0d0d !important;
-    caret-color: #0d0d0d !important;
-  }
-  
-  /* Additional autofill blocking */
-  input[type="email"]:-webkit-autofill,
-  input[type="password"]:-webkit-autofill {
-    -webkit-text-fill-color: white !important;
-    -webkit-box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
-    caret-color: white !important;
-  }
-  
-  :root:not([data-theme="dark"]) input[type="email"]:-webkit-autofill,
-  :root:not([data-theme="dark"]) input[type="password"]:-webkit-autofill {
-    -webkit-text-fill-color: #0d0d0d !important;
-    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
-    caret-color: #0d0d0d !important;
-  }
-  
-  /* Hide autofill dropdown */
-  input::-webkit-contacts-auto-fill-button,
-  input::-webkit-credentials-auto-fill-button {
-    display: none !important;
-  }
-`;
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isDark } = useTheme();
   const { login } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
@@ -90,8 +46,7 @@ export default function Login() {
   };
 
   return (
-    <div className={`${isDark ? 'bg-[#0a0a0a]' : 'bg-white'} min-h-screen flex items-center justify-center p-4`}>
-      <style>{loginStyles}</style>
+    <div className="flex min-h-screen items-center justify-center bg-bg p-4">
       
       <div className="w-full max-w-md">
         {/* Logo and Header */}
@@ -101,14 +56,14 @@ export default function Login() {
             className="flex justify-center mb-4 mx-auto hover:opacity-80 transition-opacity"
             title="Go to home"
           >
-            <div className={`w-12 h-12 rounded-lg overflow-hidden flex items-center justify-center ${isDark ? 'bg-[#2a2a2a]' : 'bg-gray-50 border border-gray-200'}`}>
-              <img src="/logo.jpg" alt="Rentra" className="w-full h-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgba(0, 0, 0, 0.15))'}} />
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface">
+              <img src="/logo.jpg" alt="Rentra" className="h-full w-full object-contain" style={{filter: 'drop-shadow(0 8px 12px rgb(var(--rentra-shadow) / 15%))'}} />
             </div>
           </button>
-          <h1 className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} mb-2`}>
+          <h1 className="mb-2 text-3xl font-bold text-text">
             Sign in to Rentra
           </h1>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className="text-sm text-text-muted">
             Access your account to manage and explore rental properties.
           </p>
         </div>
@@ -117,7 +72,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
           {/* Username/Email Field */}
           <div>
-            <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+            <label className="mb-2 block text-sm font-semibold text-text">
               Email Address
             </label>
             <input
@@ -127,11 +82,7 @@ export default function Login() {
               autoComplete="email"
               placeholder=""
               title="Enter your email address"
-              className={`w-full px-4 py-3 rounded-lg border-2 transition-all text-sm font-normal ${
-                isDark
-                  ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-              } outline-none`}
+              className="w-full rounded-lg border-2 border-border bg-surface px-4 py-3 text-sm font-normal text-text outline-none transition-all placeholder:text-text-subtle focus:border-primary focus:ring-2 focus:ring-primary/20"
               required
             />
           </div>
@@ -139,12 +90,12 @@ export default function Login() {
           {/* Password Field with Forgot Password Link */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className={`block text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <label className="block text-sm font-semibold text-text">
                 Password
               </label>
               <Link
                 to="/forgot-password"
-                className="text-xs text-emerald-500 hover:text-emerald-600 font-semibold transition-colors"
+                className="text-xs font-semibold text-primary transition-colors hover:text-primary-hover"
               >
                 Forgot Password?
               </Link>
@@ -157,17 +108,13 @@ export default function Login() {
                 autoComplete="current-password"
                 placeholder=""
                 title="Enter your password"
-                className={`w-full px-4 py-3 pr-12 rounded-lg border-2 transition-all text-sm font-normal ${
-                  isDark
-                    ? 'bg-[#1a1a1a] border-white/10 text-white placeholder-[#666] focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                    : 'bg-white border-gray-200 text-gray-900 placeholder-gray-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20'
-                } outline-none`}
+                className="w-full rounded-lg border-2 border-border bg-surface px-4 py-3 pr-12 text-sm font-normal text-text outline-none transition-all placeholder:text-text-subtle focus:border-primary focus:ring-2 focus:ring-primary/20"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className={`absolute right-3 top-3.5 ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'} transition-colors`}
+                className="absolute right-3 top-3.5 text-text-subtle transition-colors hover:text-text"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -178,16 +125,16 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-lg font-bold text-white text-base bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-emerald-500/30 mt-6"
+            className="mt-6 w-full rounded-lg bg-primary py-3 text-base font-bold text-primary-contrast shadow-lg transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
         {/* Sign Up Link */}
-        <p className={`text-center text-sm mt-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        <p className="mt-6 text-center text-sm text-text-muted">
           New to Rentra?{' '}
-          <Link to="/register" state={location.state} className="font-semibold text-emerald-500 hover:text-emerald-600 transition-colors">
+          <Link to="/register" state={location.state} className="font-semibold text-primary transition-colors hover:text-primary-hover">
             Create an account
           </Link>
         </p>

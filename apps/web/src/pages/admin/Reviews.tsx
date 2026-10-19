@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Star } from 'lucide-react';
-import { useTheme } from '../../context/useTheme';
 import { reviewsAPI } from '../../api/reviews';
 
 interface Review {
@@ -12,7 +11,6 @@ interface Review {
 }
 
 export default function AdminReviews() {
-  const { isDark } = useTheme();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,12 +33,12 @@ export default function AdminReviews() {
     void loadReviews();
   }, [loadReviews]);
 
-  const mutedText = isDark ? 'text-gray-400' : 'text-gray-600';
+  const mutedText = 'text-text-muted';
 
   return (
     <section>
       <header className="mb-6">
-        <h1 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Reviews</h1>
+        <h1 className={`text-xl font-bold text-text`}>Reviews</h1>
         <p className={`mt-1 text-sm ${mutedText}`}>Reviews submitted on rental listings.</p>
       </header>
       {error && (
@@ -52,17 +50,17 @@ export default function AdminReviews() {
       {loading ? (
         <p className={`text-sm ${mutedText}`}>Loading reviews...</p>
       ) : reviews.length === 0 ? (
-        <div className={`p-8 text-center border rounded-xl ${isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'}`}>
+        <div className={`p-8 text-center border rounded-xl border-border bg-surface`}>
           <Star className={`mx-auto mb-3 ${mutedText}`} size={28} />
-          <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>No reviews yet</p>
+          <p className={`font-semibold text-text`}>No reviews yet</p>
           <p className={`mt-1 text-sm ${mutedText}`}>Submitted reviews will appear here.</p>
         </div>
       ) : (
         <ul className="space-y-3">
           {reviews.map((review) => (
-            <li key={review.id} className={`p-4 border rounded-xl ${isDark ? 'border-white/10 bg-white/5' : 'border-gray-200 bg-white'}`}>
+            <li key={review.id} className={`p-4 border rounded-xl border-border bg-surface`}>
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                <p className={`font-semibold text-text`}>
                   {review.user?.fullName || 'User'}
                 </p>
                 <span className="inline-flex items-center gap-1 text-sm font-semibold text-amber-500">

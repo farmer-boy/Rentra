@@ -112,48 +112,48 @@ const IncomeReport = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Income Report</h1>
-        <p className="text-gray-600 dark:text-gray-300">Rental income based on recorded paid transactions</p>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 ">Income Report</h1>
+        <p className="text-gray-600 ">Rental income based on recorded paid transactions</p>
       </div>
       {!user?.id ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : loading ? (
-        <Card className="p-5"><p className="text-sm text-gray-600 dark:text-gray-300">Loading income records…</p></Card>
+        <Card className="p-5"><p className="text-sm text-gray-600 ">Loading income records…</p></Card>
       ) : loadError ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : payments.length === 0 ? (
         <Card className="p-6">
-          <h2 className="font-semibold text-gray-900 dark:text-white">No recorded rental income</h2>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">There are no paid payment transactions linked to your agreements. Expected rent and collection-rate data are not provided by the backend.</p>
+          <h2 className="font-semibold text-gray-900 ">No recorded rental income</h2>
+          <p className="mt-1 text-sm text-gray-600 ">There are no paid payment transactions linked to your agreements. Expected rent and collection-rate data are not provided by the backend.</p>
         </Card>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <Card className="p-4"><p className="text-sm text-gray-600 dark:text-gray-400">Recorded this month</p><p className="mt-2 text-xl font-bold text-gray-900 dark:text-white">{currencyTotals(currentMonthPayments)}</p></Card>
-            <Card className="p-4"><p className="text-sm text-gray-600 dark:text-gray-400">All-time recorded income</p><p className="mt-2 text-xl font-bold text-green-700 dark:text-green-400">{currencyTotals(payments)}</p></Card>
-            <Card className="p-4"><p className="text-sm text-gray-600 dark:text-gray-400">Paid transactions</p><p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{payments.length}</p></Card>
+            <Card className="p-4"><p className="text-sm text-gray-600 ">Recorded this month</p><p className="mt-2 text-xl font-bold text-gray-900 ">{currencyTotals(currentMonthPayments)}</p></Card>
+            <Card className="p-4"><p className="text-sm text-gray-600 ">All-time recorded income</p><p className="mt-2 text-xl font-bold text-green-700 ">{currencyTotals(payments)}</p></Card>
+            <Card className="p-4"><p className="text-sm text-gray-600 ">Paid transactions</p><p className="mt-2 text-3xl font-bold text-gray-900 ">{payments.length}</p></Card>
           </div>
 
           <Card className="p-6">
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Monthly recorded income</h2>
-            <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">Transactions are grouped by their recorded payment date. No expected-rent amounts are available.</p>
+            <h2 className="mb-4 font-semibold text-gray-900 ">Monthly recorded income</h2>
+            <p className="mb-4 text-xs text-gray-500 ">Transactions are grouped by their recorded payment date. No expected-rent amounts are available.</p>
             <div className="space-y-3">
               {monthlyRows.map((row) => (
-                <div key={row.label} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3 last:border-0 dark:border-gray-700">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{row.label}</span>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">{row.payments.length ? currencyTotals(row.payments) : 'No paid transactions recorded'}</span>
+                <div key={row.label} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3 last:border-0 ">
+                  <span className="text-sm font-medium text-gray-700 ">{row.label}</span>
+                  <span className="text-sm font-semibold text-gray-900 ">{row.payments.length ? currencyTotals(row.payments) : 'No paid transactions recorded'}</span>
                 </div>
               ))}
             </div>
           </Card>
 
           <Card className="p-6">
-            <h2 className="mb-4 font-semibold text-gray-900 dark:text-white">Recorded income by property</h2>
+            <h2 className="mb-4 font-semibold text-gray-900 ">Recorded income by property</h2>
             <div className="space-y-3">
               {propertyRows.map((property) => (
-                <div key={property.listingId} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3 last:border-0 dark:border-gray-700">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{property.title}</span>
-                  <span className="font-semibold text-gray-900 dark:text-white">{currencyTotals(property.payments)}</span>
+                <div key={property.listingId} className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 pb-3 last:border-0 ">
+                  <span className="text-sm font-medium text-gray-700 ">{property.title}</span>
+                  <span className="font-semibold text-gray-900 ">{currencyTotals(property.payments)}</span>
                 </div>
               ))}
             </div>

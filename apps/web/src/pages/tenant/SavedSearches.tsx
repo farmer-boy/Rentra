@@ -104,7 +104,7 @@ export default function SavedSearches() {
             </label>
           </div>
           {actionError && <p role="alert" className="text-sm text-red-600">{actionError}</p>}
-          <button disabled={saving} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+          <button disabled={saving} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">
             {saving ? 'Saving…' : 'Save Search'}
           </button>
         </form>

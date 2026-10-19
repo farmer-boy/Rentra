@@ -136,20 +136,20 @@ export default function LandlordAvailability() {
         <>
           <Card className="grid gap-4 p-5 md:grid-cols-2">
             <label className="block text-sm font-semibold">Property
-              <select className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-gray-900" value={propertyId} onChange={(event) => setPropertyId(event.target.value)}>
+              <select className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm " value={propertyId} onChange={(event) => setPropertyId(event.target.value)}>
                 {properties.map((item) => <option key={item.propertyId} value={item.propertyId!}>{item.title}</option>)}
               </select>
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <label className="block text-sm font-semibold">Start date<input type="date" className="mt-1 w-full rounded-lg border bg-white px-2 py-2 text-sm dark:bg-gray-900" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
-              <label className="block text-sm font-semibold">End date (exclusive)<input type="date" className="mt-1 w-full rounded-lg border bg-white px-2 py-2 text-sm dark:bg-gray-900" value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
+              <label className="block text-sm font-semibold">Start date<input type="date" className="mt-1 w-full rounded-lg border bg-surface px-2 py-2 text-sm " value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label>
+              <label className="block text-sm font-semibold">End date (exclusive)<input type="date" className="mt-1 w-full rounded-lg border bg-surface px-2 py-2 text-sm " value={endDate} onChange={(event) => setEndDate(event.target.value)} /></label>
             </div>
             <div className="grid gap-3 sm:grid-cols-[1fr_2fr_auto] md:col-span-2">
               <label className="block text-sm font-semibold">Mark selected range
-                <select className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-gray-900" value={status} onChange={(event) => setStatus(event.target.value as 'BLOCKED' | 'MAINTENANCE')}><option value="BLOCKED">Blocked</option><option value="MAINTENANCE">Maintenance</option></select>
+                <select className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm " value={status} onChange={(event) => setStatus(event.target.value as 'BLOCKED' | 'MAINTENANCE')}><option value="BLOCKED">Blocked</option><option value="MAINTENANCE">Maintenance</option></select>
               </label>
-              <label className="block text-sm font-semibold">Reason (optional)<input className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-gray-900" maxLength={500} value={reason} onChange={(event) => setReason(event.target.value)} /></label>
-              <button type="button" disabled={saving || Boolean(dateRangeError) || !propertyId} onClick={() => void changeAvailability('block')} className="self-end rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? 'Saving…' : 'Block dates'}</button>
+              <label className="block text-sm font-semibold">Reason (optional)<input className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm " maxLength={500} value={reason} onChange={(event) => setReason(event.target.value)} /></label>
+              <button type="button" disabled={saving || Boolean(dateRangeError) || !propertyId} onClick={() => void changeAvailability('block')} className="self-end rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">{saving ? 'Saving…' : 'Block dates'}</button>
             </div>
             {dateRangeError && <p role="alert" className="text-sm text-amber-700 md:col-span-2">{dateRangeError}</p>}
           </Card>

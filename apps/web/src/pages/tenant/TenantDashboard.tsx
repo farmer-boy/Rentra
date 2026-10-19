@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '../../context/useTheme';
 import { useAuthStore } from '../../store/authStore';
 import { useNavigate } from 'react-router-dom';
 import StatCard from '../../components/ui/StatCard';
@@ -24,7 +23,6 @@ interface Profile {
 
 export default function TenantDashboard() {
   const { user } = useAuthStore();
-  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [listings, setListings] = useState<Listing[]>([]);
   const [listingTotal, setListingTotal] = useState<number | null>(null);
@@ -76,20 +74,20 @@ export default function TenantDashboard() {
   return (
     <div>
       <div className="mb-3">
-        <h1 className={`text-lg font-bold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
+        <h1 className={`text-lg font-bold tracking-tight text-text`}>
           Welcome back{user?.fullName ? `, ${user.fullName.split(' ')[0]}` : ''} 👋
         </h1>
-        <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'} mt-0.5`}>Pakistan's rental platform</p>
+        <p className={`text-xs text-text-muted mt-0.5`}>Pakistan's rental platform</p>
       </div>
 
       <div className="mb-4">
-        <div className={`text-xs font-bold mb-2 ${isDark ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-widest`}>Quick Access</div>
+        <div className={`text-xs font-bold mb-2 text-text-muted uppercase tracking-widest`}>Quick Access</div>
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-1.5 md:gap-2">
           {quickActions.map((action) => (
             <button
               key={action.label}
               onClick={() => navigate(action.path)}
-              className={`${action.color} p-2 rounded-lg hover:opacity-90 transition-all text-center flex flex-col items-center gap-1 ${isDark ? 'hover:bg-opacity-30' : 'hover:bg-opacity-25'}`}
+              className={`${action.color} p-2 rounded-lg hover:opacity-90 transition-all text-center flex flex-col items-center gap-1 hover:bg-opacity-25`}
             >
               {action.icon}
               <span className="text-[10px] font-semibold">{action.label}</span>
@@ -108,8 +106,8 @@ export default function TenantDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <Card>
           <div className="flex items-center justify-between mb-2">
-            <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-black'}`}>Recent Listings</span>
-            <button onClick={() => navigate('/tenant/listings')} className={`text-xs font-mono ${isDark ? 'text-gray-400 hover:text-green-500' : 'text-gray-500 hover:text-green-600'}`}>View All →</button>
+            <span className={`text-xs font-bold text-text`}>Recent Listings</span>
+            <button onClick={() => navigate('/tenant/listings')} className={`text-xs font-mono text-text-muted hover:text-primary-hover`}>View All →</button>
           </div>
           {listingsLoading ? (
             <p className="py-4 text-xs text-gray-500">Loading listings…</p>
@@ -123,15 +121,15 @@ export default function TenantDashboard() {
                 <thead>
                   <tr className="text-left">
                     {['Property', 'Area', 'Rent', 'Status'].map(h => (
-                      <th key={h} className={`text-xs font-mono ${isDark ? 'text-gray-400 border-white/10' : 'text-gray-500 border-gray-400'} tracking-widest pb-2 border-b`}>{h}</th>
+                      <th key={h} className={`text-xs font-mono text-text-muted border-border tracking-widest pb-2 border-b`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {listings.map((listing) => (
-                    <tr key={listing.id} className={`${isDark ? 'hover:bg-[#2a2a2a]' : 'hover:bg-gray-50'} transition-colors`}>
-                      <td className={`py-2 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{listing.title}</td>
-                      <td className={`py-2 text-xs ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{[listing.area, listing.city].filter(Boolean).join(', ') || '—'}</td>
+                    <tr key={listing.id} className="hover:bg-surface-2 transition-colors">
+                      <td className={`py-2 text-xs text-text-muted`}>{listing.title}</td>
+                      <td className={`py-2 text-xs text-text-muted`}>{[listing.area, listing.city].filter(Boolean).join(', ') || '—'}</td>
                       <td className="py-2 text-xs text-green-600">Rs {Number(listing.rent).toLocaleString()}</td>
                       <td className="py-2"><Pill variant={listing.publicationStatus === 'PUBLISHED' ? 'green' : 'yellow'}>{listing.publicationStatus}</Pill></td>
                     </tr>

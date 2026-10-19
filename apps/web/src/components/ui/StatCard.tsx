@@ -1,5 +1,3 @@
-import { useTheme } from '../../context/useTheme';
-
 interface StatCardProps {
   label: string;
   value: string | number;
@@ -9,11 +7,10 @@ interface StatCardProps {
 }
 
 export default function StatCard({ label, value, change, changeType, color }: StatCardProps) {
-  const { isDark } = useTheme();
   return (
-    <div className={`${isDark ? 'bg-[#1f1f1f] border-white/10 hover:border-white/20' : 'bg-white border-gray-200 hover:border-gray-300'} border rounded-xl p-4 transition-colors shadow-sm hover:shadow-md`}>
-      <div className={`text-[10px] font-mono ${isDark ? 'text-gray-400' : 'text-gray-500'} tracking-widest mb-2`}>{label}</div>
-      <div className={`text-3xl font-extrabold tracking-tight ${color || (isDark ? 'text-white' : 'text-gray-900')}`}>{value}</div>
+    <div className="rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors hover:border-border-strong hover:shadow-md">
+      <div className="mb-2 text-[10px] font-mono tracking-widest text-text-muted">{label}</div>
+      <div className={`text-3xl font-extrabold tracking-tight ${color || 'text-text'}`}>{value}</div>
       {change && (
         <div className={`text-[11px] mt-1 ${changeType === 'up' ? 'text-green-600' : 'text-red-600'}`}>
           {changeType === 'up' ? '↑' : '↓'} {change}

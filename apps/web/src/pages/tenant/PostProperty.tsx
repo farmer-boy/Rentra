@@ -47,10 +47,10 @@ export default function TenantPostProperty() {
   return (
     <div className="mx-auto max-w-2xl">
       <Card className="p-6 md:p-8">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+        <h1 className="text-2xl font-bold text-gray-900 ">
           Post a property
         </h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <p className="mt-2 text-sm text-gray-600 ">
           Set up your landlord profile to manage and publish your rental
           property. Your tenant account and rental features will stay available.
         </p>
@@ -58,7 +58,7 @@ export default function TenantPostProperty() {
           type="button"
           onClick={() => void enableLandlordAccount()}
           disabled={loading}
-          className="mt-6 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-6 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-primary-contrast transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Setting up your account…' : 'Continue to property details'}
         </button>

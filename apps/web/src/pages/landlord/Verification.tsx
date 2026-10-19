@@ -156,7 +156,7 @@ export default function LandlordVerification() {
     <div className="mx-auto max-w-4xl space-y-5">
       <header><h1 className="text-2xl font-extrabold">Host Verification</h1><p className="mt-1 text-sm text-gray-500">Review and submit verification through Rentra’s existing verification service.</p></header>
       {error && <Card className="flex flex-wrap items-center justify-between gap-3 p-4"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card>}
-      {notice && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800 dark:bg-green-950/40 dark:text-green-200">{notice}</p>}
+      {notice && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800  ">{notice}</p>}
       {loading ? <Card className="p-5 text-sm text-gray-500">Loading verification status…</Card> : profile && overview && (
         <>
           <Card className="space-y-3 p-5">
@@ -170,7 +170,7 @@ export default function LandlordVerification() {
                 <button type="button" disabled={saving} onClick={() => void sendPhoneCode()} className="rounded-lg border px-3 py-2 text-sm font-semibold disabled:opacity-50">{saving ? 'Please wait…' : 'Send phone code'}</button>
                 <label className="sr-only" htmlFor="phone-code">6-digit phone verification code</label>
                 <input id="phone-code" inputMode="numeric" maxLength={6} value={phoneCode} onChange={(event) => setPhoneCode(event.target.value.replace(/\D/g, ''))} placeholder="6-digit code" className="rounded-lg border px-3 py-2 text-sm" />
-                <button type="button" disabled={saving} onClick={() => void confirmPhoneCode()} className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50">Confirm phone</button>
+                <button type="button" disabled={saving} onClick={() => void confirmPhoneCode()} className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">Confirm phone</button>
               </div>
             )}
             {!profile.emailVerified && <p className="text-sm text-amber-700">Verify your email before submitting evidence. Email verification is handled through the existing account flow.</p>}
@@ -191,13 +191,13 @@ export default function LandlordVerification() {
               })}
             </div>
             <label className="block text-sm font-semibold">Secure evidence links <span className="font-normal text-gray-500">(HTTPS, one per line; at most 10)</span>
-              <textarea rows={3} value={evidence} onChange={(event) => setEvidence(event.target.value)} className="mt-1 w-full rounded-lg border px-3 py-2 text-sm dark:bg-gray-900" placeholder="https://…" />
+              <textarea rows={3} value={evidence} onChange={(event) => setEvidence(event.target.value)} className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm" placeholder="https://…" />
             </label>
             <div className="flex flex-wrap items-center gap-3">
               <label className="text-sm font-semibold">Submission type
-                <select value={kind} onChange={(event) => setKind(event.target.value as 'HOST' | 'IDENTITY')} className="ml-2 rounded-lg border px-3 py-2 text-sm dark:bg-gray-900"><option value="HOST">Host</option><option value="IDENTITY">Identity</option></select>
+                <select value={kind} onChange={(event) => setKind(event.target.value as 'HOST' | 'IDENTITY')} className="ml-2 rounded-lg border bg-surface px-3 py-2 text-sm"><option value="HOST">Host</option><option value="IDENTITY">Identity</option></select>
               </label>
-              <button type="button" disabled={saving || !profile.emailVerified || !profile.phoneVerified || latestSubmission(kind)?.status === 'PENDING' || latestSubmission(kind)?.status === 'APPROVED'} onClick={() => void submitUserVerification()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? 'Submitting…' : `Submit ${kind.toLowerCase()} verification`}</button>
+              <button type="button" disabled={saving || !profile.emailVerified || !profile.phoneVerified || latestSubmission(kind)?.status === 'PENDING' || latestSubmission(kind)?.status === 'APPROVED'} onClick={() => void submitUserVerification()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">{saving ? 'Submitting…' : `Submit ${kind.toLowerCase()} verification`}</button>
             </div>
           </Card>
 

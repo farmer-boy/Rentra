@@ -123,9 +123,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       `}</style>
       <div
         ref={dropdownRef}
-        className={`${
-          isDark ? 'bg-[#1f1f1f] border-white/5' : 'bg-white border-gray-200'
-        } fixed border rounded-lg shadow-lg py-1 z-[9999]`}
+        className="fixed z-[9999] rounded-lg border border-border bg-surface py-1 shadow-lg"
         style={{
           top: position.top ? `${position.top}px` : 'auto',
           bottom: position.bottom ? `${position.bottom}px` : 'auto',
@@ -140,11 +138,11 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
         }}
       >
       {/* User Info Section */}
-      <div className={`${isDark ? 'border-white/5' : 'border-gray-200'} px-4 py-3 border-b`}>
-        <div className={`text-[12px] font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div className="border-b border-border px-4 py-3">
+        <div className="text-[12px] font-semibold text-text">
           {user?.fullName}
         </div>
-        <div className={`text-[11px] ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
+        <div className="text-[11px] text-text-muted">
           {user?.email}
         </div>
       </div>
@@ -152,9 +150,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       {/* My Profile */}
       <button
         onClick={() => handleNavigate(getProfilePath())}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] font-medium flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] font-medium text-text transition-colors hover:bg-surface2"
       >
         <User size={14} className="flex-shrink-0" />
         My Profile
@@ -163,9 +159,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       {/* Settings & Privacy */}
       <button
         onClick={() => handleNavigate('/settings?section=data-privacy')}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] text-text transition-colors hover:bg-surface2"
       >
         <Settings size={14} className="flex-shrink-0" />
         Privacy settings
@@ -174,16 +168,14 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       {/* Help */}
       <button
         onClick={() => handleNavigate('/help')}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] text-text transition-colors hover:bg-surface2"
       >
         <HelpCircle size={14} className="flex-shrink-0" />
         Help
       </button>
 
       {/* Divider */}
-      <div className={`${isDark ? 'border-white/5' : 'border-gray-200'}`} style={{ borderTop: '1px solid currentColor', margin: '4px 0' }} />
+      <div className="border-t border-border" style={{ margin: '4px 0' }} />
 
       {/* Theme Toggle */}
       <button
@@ -191,9 +183,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
           toggleTheme();
           onClose();
         }}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] text-text transition-colors hover:bg-surface2"
       >
         {isDark ? (
           <>
@@ -211,9 +201,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       {/* Explore */}
       <button
         onClick={() => handleNavigate('/')}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] text-text transition-colors hover:bg-surface2"
       >
         <Home size={14} className="flex-shrink-0" />
         Explore Rentra
@@ -222,23 +210,19 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
       {/* Switch Account */}
       <button
         onClick={handleSwitchAccount}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] text-text transition-colors hover:bg-surface2"
       >
         <ArrowLeftRight size={14} className="flex-shrink-0" />
         Switch Account
       </button>
 
       {/* Divider */}
-      <div className={`${isDark ? 'border-white/5' : 'border-gray-200'}`} style={{ borderTop: '1px solid currentColor', margin: '4px 0' }} />
+      <div className="border-t border-border" style={{ margin: '4px 0' }} />
 
       {/* Sign Out */}
       <button
         onClick={handleLogout}
-        className={`${
-          isDark ? 'hover:bg-[#2a2a2a] text-white' : 'hover:bg-gray-50 text-gray-700'
-        } w-full text-left px-4 py-2 text-[12px] font-medium flex items-center gap-3 transition-colors`}
+        className="flex w-full items-center gap-3 px-4 py-2 text-left text-[12px] font-medium text-text transition-colors hover:bg-surface2"
       >
         <LogOut size={14} className="flex-shrink-0" />
         Sign Out
@@ -250,4 +234,3 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
 };
 
 export default ProfileDropdown;
-

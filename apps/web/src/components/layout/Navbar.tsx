@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthStore } from '../../store/authStore';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useContactMessages } from '../../hooks/useContactMessages';
-import { Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search } from 'lucide-react';
+import { Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart, ArrowLeftRight } from 'lucide-react';
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -11,12 +11,18 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false }) => {
   const { user, logout } = useAuthStore();
+  const location = useLocation();
   const navigate = useNavigate();
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { unreadCount } = useContactMessages();
+  const roles = user?.roles ?? (user?.role ? [user.role] : []);
+  const hasTenantAndLandlordRoles =
+    roles.includes('TENANT') && roles.includes('LANDLORD');
+  const isLandlordWorkspace = location.pathname.startsWith('/landlord');
+  const isTenantWorkspace = location.pathname.startsWith('/tenant');
 
   const initials = user?.fullName
     ?.split(' ')
@@ -32,7 +38,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   };
 
   const getRoleText = () => {
-    return user?.role === 'ADMIN' ? 'ADMIN' : user?.role === 'LANDLORD' ? 'LANDLORD' : 'TENANT';
+    if (isLandlordWorkspace) return 'LANDLORD';
+    if (isTenantWorkspace) return 'TENANT';
+    if (location.pathname.startsWith('/admin') || user?.role === 'ADMIN') return 'ADMIN';
+    return user?.role === 'LANDLORD' ? 'LANDLORD' : 'TENANT';
   };
 
   const handleLogout = () => {
@@ -42,9 +51,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/tenant/listings?search=${encodeURIComponent(searchQuery)}`);
-    }
+    const query = searchQuery.trim();
+    const listingsPath = isLandlordWorkspace
+      ? '/landlord/properties'
+      : '/listings';
+    navigate(query ? `${listingsPath}?search=${encodeURIComponent(query)}` : listingsPath);
   };
 
   // Close dropdown when clicking outside
@@ -90,11 +101,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
       <button 
         onClick={() => {
           if (!user) return; // Don't navigate if user not loaded
-          
-          const dashboardPath = 
-            user.role === 'ADMIN' ? '/admin' :
-            user.role === 'LANDLORD' ? '/landlord' :
-            '/tenant';
+          const dashboardPath = location.pathname.startsWith('/landlord')
+            ? '/landlord'
+            : location.pathname.startsWith('/tenant')
+              ? '/tenant'
+              : location.pathname.startsWith('/admin') || user.role === 'ADMIN'
+                ? '/admin'
+                : user.role === 'LANDLORD'
+                  ? '/landlord'
+                  : '/tenant';
           navigate(dashboardPath);
         }}
         className="flex items-center flex-shrink-0 gap-2 transition-opacity hover:opacity-80"
@@ -105,10 +120,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
             src="/logo.jpg" 
             alt="Rentra logo"
             className="object-contain w-full h-full" 
-            style={{filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1)) drop-shadow(0 0 8px rgba(0, 0, 0, 0.05))'}}
+            style={{filter: 'drop-shadow(0 4px 6px rgb(var(--rentra-shadow) / 10%)) drop-shadow(0 0 8px rgb(var(--rentra-shadow) / 5%))'}}
           />
         </div>
-        <div className="text-[7px] md:text-[8px] font-mono uppercase tracking-wider" style={{ color: 'var(--text2)' }}>
+        <div
+          className="rounded-md bg-surface2 px-2 py-1 text-[10px] font-extrabold uppercase leading-none tracking-wider text-text md:text-[11px]"
+        >
           {getRoleText()}
         </div>
       </button>
@@ -116,27 +133,49 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
       {/* Spacer */}
       <div className="flex-1"></div>
 
-      {/* Search Bar - Tenant Only */}
-      {user?.role === 'TENANT' && (
+      {/* Listing search for every signed-in role */}
+      {user && (
         <form 
           onSubmit={handleSearchSubmit}
-          className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg flex-shrink-0"
-          style={{ backgroundColor: 'var(--surface2)' }}
+          role="search"
+          className="hidden h-10 w-44 shrink-0 items-center gap-2 rounded-full border px-2 py-1 transition focus-within:ring-2 focus-within:ring-primary/20 md:flex lg:w-64"
+          style={{ backgroundColor: 'var(--surface2)', borderColor: 'var(--border)' }}
         >
-          <Search size={14} style={{ color: 'var(--text2)' }} />
+          <Search size={16} className="ml-1 shrink-0" style={{ color: 'var(--text3)' }} />
           <input
             type="text"
-            placeholder="Area, flat type, hostel..."
+            aria-label={isLandlordWorkspace ? 'Search your properties' : 'Search homes'}
+            placeholder={isLandlordWorkspace ? 'Search your properties...' : 'Search homes...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-transparent outline-none text-[12px] w-32"
+            className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-text-subtle"
             style={{ color: 'var(--text)' }}
           />
+          <button
+            type="submit"
+            className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-primary px-3 text-[11px] font-semibold text-primary-contrast transition-colors hover:bg-primary-hover"
+          >
+            <Search size={13} />
+            Search
+          </button>
         </form>
       )}
 
       {/* Action Items - Right Side */}
       <div className="flex items-center gap-1 md:gap-2">
+        {user && (
+          <button
+            type="button"
+            onClick={() => navigate(isLandlordWorkspace ? '/landlord/properties' : '/listings')}
+            className="rounded-lg p-2 transition-colors hover:bg-[var(--surface2)] md:hidden"
+            style={{ color: 'var(--text2)' }}
+            aria-label={isLandlordWorkspace ? 'Search your properties' : 'Search listings'}
+            title={isLandlordWorkspace ? 'Search your properties' : 'Search listings'}
+          >
+            <Search size={18} />
+          </button>
+        )}
+
         {/* Notifications - Icon with Tooltip */}
         <div className="relative group">
           <button 
@@ -170,7 +209,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
             <MessageCircle size={16} strokeWidth={1.5} />
             {messageCount > 0 && (
               <span className="absolute top-1 right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center" 
-                style={{ backgroundColor: 'var(--red)', color: 'white' }}>
+                style={{ backgroundColor: 'var(--red)', color: 'rgb(var(--rentra-danger-contrast))' }}>
                 {messageCount}
               </span>
             )}
@@ -231,6 +270,60 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
                   {user?.email}
                 </div>
               </div>
+
+              <button
+                onClick={() => {
+                  navigate('/listings');
+                  setProfileOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                style={{ color: 'var(--text2)' }}
+              >
+                <Search size={14} />
+                Browse listings
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate('/favorites');
+                  setProfileOpen(false);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                style={{ color: 'var(--text2)' }}
+              >
+                <Heart size={14} />
+                Saved homes
+              </button>
+
+              {hasTenantAndLandlordRoles && (
+                <>
+                  <div className="border-t" style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
+                  <button
+                    onClick={() => {
+                      navigate('/tenant');
+                      setProfileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                    style={{ color: 'var(--text2)' }}
+                  >
+                    <ArrowLeftRight size={14} />
+                    Tenant workspace
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/landlord');
+                      setProfileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                    style={{ color: 'var(--text2)' }}
+                  >
+                    <ArrowLeftRight size={14} />
+                    Landlord workspace
+                  </button>
+                </>
+              )}
+
+              <div className="border-t" style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
 
               {/* Settings Option */}
               <button 

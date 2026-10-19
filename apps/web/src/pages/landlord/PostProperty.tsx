@@ -104,7 +104,7 @@ const emptyForm = (): PropertyForm => ({
 });
 
 const inputClass =
-  'mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white';
+  'mt-1 w-full rounded-lg border border-gray-300 bg-surface px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20   ';
 
 const statusLabel = (status?: string) => status?.replaceAll('_', ' ') || 'Status unavailable';
 
@@ -408,23 +408,23 @@ export default function LandlordPostProperty() {
   };
 
   if (loading) {
-    return <Card className="p-6"><p className="text-sm text-gray-600 dark:text-gray-300">Loading property details…</p></Card>;
+    return <Card className="p-6"><p className="text-sm text-gray-600 ">Loading property details…</p></Card>;
   }
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 dark:text-white">{propertyId ? 'Edit Property' : 'Add a Property'}</h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+          <h1 className="text-2xl font-extrabold text-gray-900 ">{propertyId ? 'Edit Property' : 'Add a Property'}</h1>
+          <p className="mt-1 text-sm text-gray-600 ">
             Follow the steps to enter details, preview the listing, and submit eligible properties for verification.
           </p>
         </div>
         {!propertyId && <button type="button" onClick={saveDraft} className="rounded-lg border px-3 py-2 text-sm font-semibold">Save draft on this device</button>}
       </header>
 
-      {draftError && <p role="status" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">{draftError}</p>}
-      {submitError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-200">{submitError}</p>}
+      {draftError && <p role="status" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800  ">{draftError}</p>}
+      {submitError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700  ">{submitError}</p>}
       {propertyId && (
         <Card className="flex flex-wrap gap-x-6 gap-y-2 p-4 text-sm">
           <span>Property: <strong>{statusLabel(propertyStatus)}</strong></span>
@@ -438,7 +438,7 @@ export default function LandlordPostProperty() {
           {STEPS.map((label, index) => (
             <li key={label}>
               <button type="button" onClick={() => index < step && setStep(index)} aria-current={step === index ? 'step' : undefined}
-                className={`w-full rounded-lg px-2 py-2 text-left text-xs font-semibold ${step === index ? 'bg-emerald-600 text-white' : index < step ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-800'}`}>
+                className={`w-full rounded-lg px-2 py-2 text-left text-xs font-semibold ${step === index ? 'bg-emerald-600 text-primary-contrast' : index < step ? 'bg-emerald-50 text-emerald-800  ' : 'bg-gray-100 text-gray-500 '}`}>
                 <span className="mr-1">{index + 1}.</span>{label}
               </button>
             </li>
@@ -472,7 +472,7 @@ export default function LandlordPostProperty() {
       {step === 1 && (
         <Card className="space-y-4 p-5">
           <h2 className="text-lg font-bold">Location</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-300">Enter the property location. The backend resolves these names into Rentra’s location hierarchy; coordinates are optional and are not guessed.</p>
+          <p className="text-sm text-gray-600 ">Enter the property location. The backend resolves these names into Rentra’s location hierarchy; coordinates are optional and are not guessed.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             {([
               ['country', 'Country'],
@@ -541,26 +541,26 @@ export default function LandlordPostProperty() {
           <label className="block text-sm font-medium">Verification evidence links <span className="font-normal text-gray-500">(optional; HTTPS only, up to 10)</span>
             <textarea className={inputClass} rows={3} value={form.evidenceUrls} onChange={(event) => update('evidenceUrls', event.target.value)} placeholder="Paste one secure evidence URL per line" />
           </label>
-          {verificationStatus === 'PENDING' && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-200">A property verification submission is already pending. You can save changes, but cannot create a duplicate submission.</p>}
+          {verificationStatus === 'PENDING' && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800  ">A property verification submission is already pending. You can save changes, but cannot create a duplicate submission.</p>}
           <p className="text-xs text-gray-500">Verification requires verified email and phone. This form does not collect or store CNIC or identity-document contents.</p>
         </Card>
       )}
 
       {step === 4 && (
         <Card className="space-y-5 p-5">
-          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"><strong>Preview — not a published listing.</strong> The saved property and publication status are confirmed by the backend.</div>
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900   "><strong>Preview — not a published listing.</strong> The saved property and publication status are confirmed by the backend.</div>
           <div className="grid gap-5 md:grid-cols-2">
             <div>
-              {previewImages[0] ? <img src={previewImages[0]} alt={form.title || 'Property preview'} className="h-64 w-full rounded-xl object-cover" /> : <div className="flex h-64 items-center justify-center rounded-xl bg-gray-100 text-gray-500 dark:bg-gray-800"><ImagePlus /> <span className="ml-2">No photos added</span></div>}
+              {previewImages[0] ? <img src={previewImages[0]} alt={form.title || 'Property preview'} className="h-64 w-full rounded-xl object-cover" /> : <div className="flex h-64 items-center justify-center rounded-xl bg-gray-100 text-gray-500 "><ImagePlus /> <span className="ml-2">No photos added</span></div>}
               {previewImages.length > 1 && <div className="mt-2 grid grid-cols-4 gap-2">{previewImages.slice(1, 5).map((src, index) => <img key={`${src}-${index}`} src={src} alt={`Property preview ${index + 2}`} className="h-16 w-full rounded object-cover" />)}</div>}
             </div>
             <div className="space-y-3">
               <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">{PROPERTY_TYPES.find(([value]) => value === form.type)?.[1] ?? 'Property'}</p>
               <h2 className="text-2xl font-bold">{form.title || 'Untitled property'}</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300">{[form.area, form.city, form.province, form.country].filter(Boolean).join(', ')}</p>
+              <p className="text-sm text-gray-600 ">{[form.area, form.city, form.province, form.country].filter(Boolean).join(', ')}</p>
               <p className="text-xl font-extrabold text-emerald-700">PKR {Number(form.price || 0).toLocaleString()} <span className="text-sm font-medium">{statusLabel(form.rentalMode)}</span></p>
               <p className="text-sm">{form.bedrooms} bedroom(s) · {form.bathrooms} bathroom(s){form.areaSizeSqft ? ` · ${form.areaSizeSqft} sqft` : ''}</p>
-              <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">{form.description || 'No description provided.'}</p>
+              <p className="whitespace-pre-wrap text-sm text-gray-700 ">{form.description || 'No description provided.'}</p>
               {form.amenities.trim() && <p className="text-sm"><strong>Amenities:</strong> {form.amenities}</p>}
               {form.rules.trim() && <p className="whitespace-pre-wrap text-sm"><strong>Rules:</strong> {form.rules}</p>}
               {form.address && <p className="text-sm"><strong>Address:</strong> {form.address}</p>}
@@ -582,11 +582,11 @@ export default function LandlordPostProperty() {
               }
               setSubmitError('');
               setStep((current) => current + 1);
-            }} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Next<ArrowRight size={16} /></button>
+            }} className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast">Next<ArrowRight size={16} /></button>
           ) : (
             <>
               <button type="button" disabled={submitting} onClick={() => void saveProperty(false)} className="rounded-lg border px-4 py-2 text-sm font-semibold disabled:opacity-50">{submitting ? 'Saving…' : propertyId ? 'Save changes' : 'Create property'}</button>
-              <button type="button" disabled={submitting || verificationStatus === 'PENDING'} onClick={() => void saveProperty(true)} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{submitting ? 'Submitting…' : 'Save and submit for verification'}</button>
+              <button type="button" disabled={submitting || verificationStatus === 'PENDING'} onClick={() => void saveProperty(true)} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">{submitting ? 'Submitting…' : 'Save and submit for verification'}</button>
             </>
           )}
         </div>

@@ -322,8 +322,8 @@ export default function AdminResourcePage() {
   return (
     <section className="space-y-5">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{definition.title}</h1>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-gray-900 ">{definition.title}</h1>
+        <p className="mt-1 text-sm text-gray-600 ">
           Read-only administration view. Moderation and financial state changes remain in their audited workflows.
         </p>
       </header>
@@ -341,31 +341,31 @@ export default function AdminResourcePage() {
             <span className="sr-only">Search records</span>
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 py-2 pl-9 pr-3 text-sm text-gray-900 dark:text-white"
+              className="w-full rounded-lg border border-gray-300  bg-surface  py-2 pl-9 pr-3 text-sm text-gray-900 "
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={`Search ${definition.title.toLowerCase()}...`}
             />
           </label>
           <input
-            className="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-white"
+            className="rounded-lg border border-gray-300  bg-surface  px-3 py-2 text-sm text-gray-900 "
             value={status}
             onChange={(event) => setStatus(event.target.value)}
             placeholder="Exact status filter"
             aria-label="Exact status filter"
           />
-          <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white" type="submit">
+          <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-primary-contrast" type="submit">
             Search
           </button>
         </form>
       </Card>
 
       <Card className="p-0">
-        {error && <p role="alert" className="p-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p role="alert" className="p-4 text-sm text-red-600 ">{error}</p>}
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px]">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-200 ">
                 {definition.columns.map((column) => (
                   <th key={column.key} className="px-4 py-3 text-left text-xs font-semibold uppercase text-gray-500">
                     {column.label}
@@ -380,29 +380,29 @@ export default function AdminResourcePage() {
               ) : rows.length === 0 ? (
                 <tr><td className="p-6 text-center text-sm text-gray-500" colSpan={definition.columns.length + Number(showActions)}>No records found.</td></tr>
               ) : rows.map((row, index) => (
-                <tr key={String(row.id ?? index)} className="border-b border-gray-100 dark:border-gray-800">
+                <tr key={String(row.id ?? index)} className="border-b border-gray-100 ">
                   {definition.columns.map((column) => (
-                    <td key={column.key} className="max-w-xs truncate px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
+                    <td key={column.key} className="max-w-xs truncate px-4 py-3 text-sm text-gray-800 ">
                       {renderValue(getValue(row, column.key))}
                     </td>
                   ))}
                   {showActions && (
                     <td className="px-4 py-3">
                       {resourceKey === 'listings' && row.status !== 'UNPUBLISHED' && row.status !== 'REMOVED' && (
-                        <button type="button" onClick={() => void runAction(row, 'unpublish-listing')} className="mr-2 rounded border border-amber-500 px-2 py-1 text-xs text-amber-700 dark:text-amber-300">
+                        <button type="button" onClick={() => void runAction(row, 'unpublish-listing')} className="mr-2 rounded border border-amber-500 px-2 py-1 text-xs text-amber-700 ">
                           Unpublish
                         </button>
                       )}
                       {(resourceKey === 'reports' || resourceKey === 'reported') && ['OPEN', 'INVESTIGATING'].includes(String(row.status)) && (
                         <>
-                          <button type="button" onClick={() => void runAction(row, 'resolve-report')} className="mr-2 rounded border border-green-600 px-2 py-1 text-xs text-green-700 dark:text-green-300">Resolve</button>
+                          <button type="button" onClick={() => void runAction(row, 'resolve-report')} className="mr-2 rounded border border-green-600 px-2 py-1 text-xs text-green-700 ">Resolve</button>
                           <button type="button" onClick={() => void runAction(row, 'reject-report')} className="rounded border border-gray-400 px-2 py-1 text-xs">Reject</button>
                         </>
                       )}
                       {(resourceKey === 'reports' || resourceKey === 'reported') && row.status === 'RESOLVED' && row.violationConfirmed === true && (
                         <>
-                          {row.targetType === 'USER' && <button type="button" onClick={() => void runAction(row, 'suspend-reported-user')} className="mr-2 rounded border border-red-600 px-2 py-1 text-xs text-red-700 dark:text-red-300">Suspend user</button>}
-                          {['LISTING', 'PROPERTY'].includes(String(row.targetType)) && <button type="button" onClick={() => void runAction(row, 'remove-reported-listing')} className="rounded border border-red-600 px-2 py-1 text-xs text-red-700 dark:text-red-300">Remove listing</button>}
+                          {row.targetType === 'USER' && <button type="button" onClick={() => void runAction(row, 'suspend-reported-user')} className="mr-2 rounded border border-red-600 px-2 py-1 text-xs text-red-700 ">Suspend user</button>}
+                          {['LISTING', 'PROPERTY'].includes(String(row.targetType)) && <button type="button" onClick={() => void runAction(row, 'remove-reported-listing')} className="rounded border border-red-600 px-2 py-1 text-xs text-red-700 ">Remove listing</button>}
                         </>
                       )}
                     </td>
@@ -412,13 +412,13 @@ export default function AdminResourcePage() {
             </tbody>
           </table>
         </div>
-        <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-between border-t border-gray-200  px-4 py-3 text-sm text-gray-600 ">
           <span>{result?.total ?? 0} records</span>
           {result && result.totalPages > 1 && (
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="rounded border border-gray-300 dark:border-gray-700 px-3 py-1 disabled:opacity-40"
+                className="rounded border border-gray-300  px-3 py-1 disabled:opacity-40"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((current) => current - 1)}
               >
@@ -427,7 +427,7 @@ export default function AdminResourcePage() {
               <span>Page {result.page} of {result.totalPages}</span>
               <button
                 type="button"
-                className="rounded border border-gray-300 dark:border-gray-700 px-3 py-1 disabled:opacity-40"
+                className="rounded border border-gray-300  px-3 py-1 disabled:opacity-40"
                 disabled={page >= result.totalPages || loading}
                 onClick={() => setPage((current) => current + 1)}
               >

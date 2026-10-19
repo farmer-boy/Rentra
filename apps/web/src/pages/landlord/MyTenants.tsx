@@ -68,17 +68,17 @@ const MyTenants = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">My Tenants</h1>
-        <p className="text-gray-600 dark:text-gray-300">Tenants on your active agreements</p>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 ">My Tenants</h1>
+        <p className="text-gray-600 ">Tenants on your active agreements</p>
       </div>
       {!user?.id ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : loading ? (
-        <Card className="p-5"><p className="text-sm text-gray-600 dark:text-gray-300">Loading tenant records…</p></Card>
+        <Card className="p-5"><p className="text-sm text-gray-600 ">Loading tenant records…</p></Card>
       ) : loadError ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : agreements.length === 0 ? (
-        <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">No tenants are recorded on your active agreements.</Card>
+        <Card className="p-6 text-sm text-gray-600 ">No tenants are recorded on your active agreements.</Card>
       ) : (
         <div className="space-y-4">
           {agreements.map((agreement) => {
@@ -87,15 +87,15 @@ const MyTenants = () => {
               <Card key={agreement.id} className="p-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{agreement.tenant?.fullName || agreement.tenant?.email || 'Tenant details unavailable'}</h2>
-                    <p className="mt-1 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"><Home size={14} />{listing ? `${listing.title}${listing.area || listing.city ? ` · ${[listing.area, listing.city].filter(Boolean).join(', ')}` : ''}` : 'Property details unavailable'}</p>
+                    <h2 className="text-lg font-semibold text-gray-900 ">{agreement.tenant?.fullName || agreement.tenant?.email || 'Tenant details unavailable'}</h2>
+                    <p className="mt-1 flex items-center gap-2 text-sm text-gray-600 "><Home size={14} />{listing ? `${listing.title}${listing.area || listing.city ? ` · ${[listing.area, listing.city].filter(Boolean).join(', ')}` : ''}` : 'Property details unavailable'}</p>
                   </div>
                   <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Active agreement</span>
                 </div>
                 <div className="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-                  <div><p className="text-gray-500 dark:text-gray-400">Email</p><p className="mt-1 flex items-center gap-2 font-medium text-gray-900 dark:text-white">{agreement.tenant?.email ? <><Mail size={14} className="text-blue-500" /><a href={`mailto:${agreement.tenant.email}`} className="hover:underline">{agreement.tenant.email}</a></> : 'Not provided'}</p></div>
-                  <div><p className="text-gray-500 dark:text-gray-400">Monthly rent</p><p className="mt-1 font-semibold text-gray-900 dark:text-white">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
-                  <div><p className="text-gray-500 dark:text-gray-400">Agreement dates</p><p className="mt-1 font-medium text-gray-900 dark:text-white">{new Date(agreement.startDate).toLocaleDateString()} – {agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'No end date set'}</p></div>
+                  <div><p className="text-gray-500 ">Email</p><p className="mt-1 flex items-center gap-2 font-medium text-gray-900 ">{agreement.tenant?.email ? <><Mail size={14} className="text-blue-500" /><a href={`mailto:${agreement.tenant.email}`} className="hover:underline">{agreement.tenant.email}</a></> : 'Not provided'}</p></div>
+                  <div><p className="text-gray-500 ">Monthly rent</p><p className="mt-1 font-semibold text-gray-900 ">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
+                  <div><p className="text-gray-500 ">Agreement dates</p><p className="mt-1 font-medium text-gray-900 ">{new Date(agreement.startDate).toLocaleDateString()} – {agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'No end date set'}</p></div>
                 </div>
               </Card>
             );

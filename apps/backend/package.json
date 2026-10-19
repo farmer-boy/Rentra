@@ -10,7 +10,7 @@
     "start": "node dist/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "test": "node --require ./test/register-ts.cjs --test test/admin.service.spec.ts test/payments.service.spec.ts test/reviews.service.spec.ts test/trust-score.service.spec.ts test/reports.service.spec.ts test/disputes.service.spec.ts test/verification.service.spec.ts test/rental-requests.service.spec.ts",
+    "test": "node --require ./test/register-ts.cjs --test test/admin.service.spec.ts test/payments.service.spec.ts test/reviews.service.spec.ts test/trust-score.service.spec.ts test/reports.service.spec.ts test/disputes.service.spec.ts test/verification.service.spec.ts test/rental-requests.service.spec.ts test/boost.service.spec.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\"",
     "seed": "ts-node ../../packages/database/seed.ts",
     "admin:bootstrap": "ts-node scripts/promote-first-admin.ts"

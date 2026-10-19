@@ -22,14 +22,14 @@ const AdminListings = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'PUBLISHED':
-        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
+        return 'bg-green-100  text-green-800 ';
       case 'UNPUBLISHED':
       case 'REMOVED':
-        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
+        return 'bg-red-100  text-red-800 ';
       case 'PENDING':
-        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300';
+        return 'bg-yellow-100  text-yellow-800 ';
       default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300';
+        return 'bg-gray-100  text-gray-800 ';
     }
   };
 
@@ -38,40 +38,40 @@ const AdminListings = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">All Listings</h1>
-        <p className="text-gray-600 dark:text-gray-400">Manage and moderate all property listings</p>
+        <h1 className="text-3xl font-bold text-gray-900  mb-2">All Listings</h1>
+        <p className="text-gray-600 ">Manage and moderate all property listings</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Published on page</p>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{statValue(published)}</p>
+          <p className="text-gray-600  text-sm">Published on page</p>
+          <p className="text-3xl font-bold text-green-600  mt-2">{statValue(published)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Pending on page</p>
-          <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-2">{statValue(pending)}</p>
+          <p className="text-gray-600  text-sm">Pending on page</p>
+          <p className="text-3xl font-bold text-yellow-600  mt-2">{statValue(pending)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Unpublished on page</p>
-          <p className="text-3xl font-bold text-red-600 dark:text-red-400 mt-2">{statValue(unpublished)}</p>
+          <p className="text-gray-600  text-sm">Unpublished on page</p>
+          <p className="text-3xl font-bold text-red-600  mt-2">{statValue(unpublished)}</p>
         </Card>
         <Card className="p-4 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Total</p>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{statValue(total)}</p>
+          <p className="text-gray-600  text-sm">Total</p>
+          <p className="text-3xl font-bold text-blue-600  mt-2">{statValue(total)}</p>
         </Card>
       </div>
 
       <Card className="p-6">
-        {error && <p role="alert" className="mb-4 text-sm text-red-600 dark:text-red-400">{error}</p>}
+        {error && <p role="alert" className="mb-4 text-sm text-red-600 ">{error}</p>}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-400 dark:border-gray-700">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Title</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Landlord</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">City</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Price</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Status</th>
+              <tr className="border-b border-gray-400 ">
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Title</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Landlord</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">City</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Price</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -80,21 +80,21 @@ const AdminListings = () => {
               ) : listings.length === 0 ? (
                 <tr><td colSpan={5} className="py-8 text-center text-gray-500">{error ? 'Listing records are unavailable.' : 'No listings found.'}</td></tr>
               ) : listings.map((listing) => (
-                <tr key={listing.id} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition">
+                <tr key={listing.id} className="border-b border-gray-100  hover:bg-gray-50  transition">
                   <td className="py-3 px-4">
                     <div className="flex items-start gap-2">
                       <FileText size={16} className="text-gray-400 mt-1" />
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{listing.title}</p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="font-medium text-gray-900 ">{listing.title}</p>
+                        <p className="text-xs text-gray-500 ">
                           {listing.createdAt ? new Date(listing.createdAt).toLocaleDateString() : 'Date unavailable'}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{listing.landlord.fullName}</td>
-                  <td className="py-3 px-4 text-gray-700 dark:text-gray-300">{listing.city || '—'}</td>
-                  <td className="py-3 px-4 font-semibold text-gray-900 dark:text-white">
+                  <td className="py-3 px-4 text-gray-700 ">{listing.landlord.fullName}</td>
+                  <td className="py-3 px-4 text-gray-700 ">{listing.city || '—'}</td>
+                  <td className="py-3 px-4 font-semibold text-gray-900 ">
                     {Number.isFinite(Number(listing.rent)) ? `Rs ${Number(listing.rent).toLocaleString()}` : '—'}
                   </td>
                   <td className="py-3 px-4">
@@ -108,13 +108,13 @@ const AdminListings = () => {
           </table>
         </div>
         <div className="mt-4 flex items-center justify-between">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 ">
             Page {page} of {Math.max(totalPages, 1)}
           </p>
           <div className="flex gap-2">
             <button
               type="button"
-              className="rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50 "
               onClick={() => setPage((current) => Math.max(current - 1, 1))}
               disabled={page <= 1 || isFetching}
             >
@@ -122,7 +122,7 @@ const AdminListings = () => {
             </button>
             <button
               type="button"
-              className="rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50 dark:border-gray-700"
+              className="rounded border border-gray-300 px-3 py-2 text-sm disabled:opacity-50 "
               onClick={() => setPage((current) => Math.min(current + 1, totalPages))}
               disabled={page >= totalPages || isFetching}
             >

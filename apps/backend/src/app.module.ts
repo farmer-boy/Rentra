@@ -22,6 +22,7 @@ import { TrustScoreModule } from './modules/trust-score/trust-score.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
+import { BoostModule } from './modules/boost/boost.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { RecommendationsModule } from './modules/recommendations/recommendations
     ReportsModule,
     VerificationModule,
     RecommendationsModule,
+    BoostModule,
   ],
 })
 export class AppModule {}

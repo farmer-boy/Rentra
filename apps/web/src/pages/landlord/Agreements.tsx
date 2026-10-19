@@ -69,26 +69,26 @@ const LandlordAgreements = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Agreements</h1>
-        <p className="text-gray-600 dark:text-gray-300">Lease agreements recorded for your properties</p>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 ">Agreements</h1>
+        <p className="text-gray-600 ">Lease agreements recorded for your properties</p>
       </div>
 
       {!user?.id ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : loading ? (
-        <Card className="p-5"><p className="text-sm text-gray-600 dark:text-gray-300">Loading agreements…</p></Card>
+        <Card className="p-5"><p className="text-sm text-gray-600 ">Loading agreements…</p></Card>
       ) : loadError ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Card className="p-4 text-center"><p className="text-sm text-gray-600 dark:text-gray-400">Active</p><p className="mt-2 text-3xl font-bold text-green-600">{activeCount}</p></Card>
-            <Card className="p-4 text-center"><p className="text-sm text-gray-600 dark:text-gray-400">Pending</p><p className="mt-2 text-3xl font-bold text-amber-600">{pendingCount}</p></Card>
-            <Card className="p-4 text-center"><p className="text-sm text-gray-600 dark:text-gray-400">Total agreements</p><p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{ownedAgreements.length}</p></Card>
+            <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Active</p><p className="mt-2 text-3xl font-bold text-green-600">{activeCount}</p></Card>
+            <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Pending</p><p className="mt-2 text-3xl font-bold text-amber-600">{pendingCount}</p></Card>
+            <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Total agreements</p><p className="mt-2 text-3xl font-bold text-gray-900 ">{ownedAgreements.length}</p></Card>
           </div>
 
           {ownedAgreements.length === 0 ? (
-            <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">No agreements are recorded for your properties.</Card>
+            <Card className="p-6 text-sm text-gray-600 ">No agreements are recorded for your properties.</Card>
           ) : (
             <div className="space-y-4">
               {ownedAgreements.map((agreement) => (
@@ -97,9 +97,9 @@ const LandlordAgreements = () => {
                     <div className="flex items-start gap-3">
                       <FileText size={20} className="mt-1 text-blue-500" />
                       <div>
-                        <h2 className="font-semibold text-gray-900 dark:text-white">{agreement.tenant?.fullName || 'Tenant details unavailable'}</h2>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{listingNames.get(agreement.listingId) || 'Property details unavailable'}</p>
-                        {agreement.tenant?.email && <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{agreement.tenant.email}</p>}
+                        <h2 className="font-semibold text-gray-900 ">{agreement.tenant?.fullName || 'Tenant details unavailable'}</h2>
+                        <p className="text-sm text-gray-600 ">{listingNames.get(agreement.listingId) || 'Property details unavailable'}</p>
+                        {agreement.tenant?.email && <p className="mt-1 text-sm text-gray-500 ">{agreement.tenant.email}</p>}
                       </div>
                     </div>
                     <span className={`rounded px-2 py-1 text-xs font-semibold ${agreement.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : agreement.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'}`}>
@@ -107,9 +107,9 @@ const LandlordAgreements = () => {
                     </span>
                   </div>
                   <div className="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
-                    <div><p className="text-gray-500 dark:text-gray-400">Start date</p><p className="font-medium text-gray-900 dark:text-white">{new Date(agreement.startDate).toLocaleDateString()}</p></div>
-                    <div><p className="text-gray-500 dark:text-gray-400">End date</p><p className="font-medium text-gray-900 dark:text-white">{agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'Not specified'}</p></div>
-                    <div><p className="text-gray-500 dark:text-gray-400">Monthly rent</p><p className="font-medium text-gray-900 dark:text-white">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
+                    <div><p className="text-gray-500 ">Start date</p><p className="font-medium text-gray-900 ">{new Date(agreement.startDate).toLocaleDateString()}</p></div>
+                    <div><p className="text-gray-500 ">End date</p><p className="font-medium text-gray-900 ">{agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'Not specified'}</p></div>
+                    <div><p className="text-gray-500 ">Monthly rent</p><p className="font-medium text-gray-900 ">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
                   </div>
                   {agreement.pdfUrl && <a href={agreement.pdfUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:underline">View agreement document</a>}
                 </Card>

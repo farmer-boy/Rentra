@@ -52,7 +52,7 @@ export default function VerifyEmail() {
             role={status === 'error' ? 'alert' : 'status'}
             className={`mt-5 rounded-xl border p-3 text-sm ${
               status === 'error'
-                ? 'border-red-200 bg-red-50 text-red-700'
+                ? 'border-danger/30 bg-danger-soft text-danger'
                 : 'border-[var(--border)] bg-[var(--green-dim)] text-[var(--text)]'
             }`}
           >
@@ -64,7 +64,7 @@ export default function VerifyEmail() {
           <button
             type="button"
             onClick={() => void verify()}
-            className="mt-6 w-full rounded-xl bg-[var(--green)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--green-hover)]"
+            className="mt-6 w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-contrast transition hover:bg-primary-hover"
           >
             {status === 'error' ? 'Try verification again' : 'Verify email address'}
           </button>

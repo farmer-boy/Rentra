@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { agreementsAPI } from '../../api/agreements';
@@ -21,7 +20,6 @@ interface Agreement {
 
 export default function Agreements() {
   const { user } = useAuthStore();
-  const { isDark } = useTheme();
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -53,12 +51,12 @@ export default function Agreements() {
   return (
     <div>
       <div className="mb-6">
-        <h2 className={`text-xl font-extrabold tracking-tight mb-1 ${isDark ? 'text-white' : 'text-black'}`}>Rent Agreements 📄</h2>
-        <p className={`text-[13px] ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Agreements linked to your tenant account</p>
+        <h2 className={`text-xl font-extrabold tracking-tight mb-1 text-text`}>Rent Agreements 📄</h2>
+        <p className={`text-[13px] text-text-muted`}>Agreements linked to your tenant account</p>
       </div>
 
       <Card>
-        <div className={`text-[13px] font-bold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>My Agreements</div>
+        <div className={`text-[13px] font-bold mb-4 text-text`}>My Agreements</div>
         {loading ? (
           <p className="py-6 text-center text-[12px] text-gray-500">Loading agreements…</p>
         ) : error || !user?.id ? (
@@ -68,19 +66,19 @@ export default function Agreements() {
         ) : (
           <div className="space-y-3">
             {agreements.map((agreement) => (
-              <div key={agreement.id} className={`p-4 border rounded-lg ${isDark ? 'bg-[#1f1f1f] border-white/10' : 'bg-gray-50 border-gray-200'}`}>
+              <div key={agreement.id} className="p-4 border border-border rounded-lg bg-surface-2">
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
                   <div>
-                    <div className={`text-[13px] font-bold ${isDark ? 'text-white' : 'text-black'}`}>
+                    <div className={`text-[13px] font-bold text-text`}>
                       {agreement.landlord?.fullName || `Landlord ${agreement.landlordId}`}
                     </div>
-                    <div className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <div className={`text-[11px] text-text-muted`}>
                       Listing {agreement.listingId}
                     </div>
                   </div>
                   <Pill variant={statusVariant(agreement.status)}>{agreement.status}</Pill>
                 </div>
-                <div className={`grid grid-cols-2 gap-2 text-[11px] ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                <div className={`grid grid-cols-2 gap-2 text-[11px] text-text-muted`}>
                   <div>Rent: Rs {Number(agreement.monthlyRent).toLocaleString()}</div>
                   <div>Deposit: Rs {Number(agreement.securityDeposit ?? 0).toLocaleString()}</div>
                   <div>Start: {new Date(agreement.startDate).toLocaleDateString()}</div>
@@ -90,7 +88,7 @@ export default function Agreements() {
             ))}
           </div>
         )}
-        <p className={`text-[11px] text-center mt-4 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+        <p className={`text-[11px] text-center mt-4 text-text-muted`}>
           Agreement document contents and PDF downloads are not provided by the available backend API.
         </p>
       </Card>

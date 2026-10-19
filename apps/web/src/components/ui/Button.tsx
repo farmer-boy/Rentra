@@ -1,5 +1,3 @@
-import { useTheme } from '../../context/useTheme';
-
 interface ButtonProps {
   variant?: 'primary' | 'ghost' | 'danger';
   children: React.ReactNode;
@@ -10,21 +8,13 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-const lightStyles = {
-  primary: 'bg-green-600 text-white hover:bg-green-700 active:bg-green-800 shadow-sm hover:shadow-md',
-  ghost: 'bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-200 hover:border-gray-400 active:bg-gray-300',
-  danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm hover:shadow-md',
-};
-
-const darkStyles = {
-  primary: 'bg-green-500 text-black hover:bg-green-400',
-  ghost: 'bg-[#1f1f1f] text-gray-300 border border-white/10 hover:text-white hover:bg-[#2a2a2a]',
-  danger: 'bg-[#2a0000] text-red-400 border border-red-500/30 hover:bg-[#3a0000]',
+const styles = {
+  primary: 'bg-primary text-primary-contrast shadow-sm hover:bg-primary-hover hover:shadow-md',
+  ghost: 'border border-border bg-surface2 text-text hover:border-border-strong hover:bg-surface3',
+  danger: 'border border-danger/30 bg-danger text-danger-contrast shadow-sm hover:bg-red-700 hover:shadow-md',
 };
 
 export default function Button({ variant = 'primary', children, onClick, type = 'button', disabled, className = '', fullWidth }: ButtonProps) {
-  const { isDark } = useTheme();
-  const styles = isDark ? darkStyles : lightStyles;
   return (
     <button
       type={type}
@@ -36,4 +26,3 @@ export default function Button({ variant = 'primary', children, onClick, type = 
     </button>
   );
 }
-

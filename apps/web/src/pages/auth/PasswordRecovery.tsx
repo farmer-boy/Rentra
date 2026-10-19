@@ -88,7 +88,7 @@ export default function PasswordRecovery() {
           </div>
         )}
         {error && (
-          <div role="alert" className="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <div role="alert" className="mt-5 rounded-xl border border-danger/30 bg-danger-soft p-3 text-sm text-danger">
             {error}
           </div>
         )}
@@ -103,11 +103,11 @@ export default function PasswordRecovery() {
                 autoComplete="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-xl border px-3.5 py-3 text-sm"
+                className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm text-text placeholder:text-text-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 placeholder="you@example.com"
               />
             </label>
-            <button type="submit" disabled={submitting} className="w-full rounded-xl bg-[var(--green)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--green-hover)] disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-contrast transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">
               {submitting ? 'Sending link…' : 'Send reset link'}
             </button>
           </form>
@@ -124,7 +124,7 @@ export default function PasswordRecovery() {
                 autoComplete="new-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border px-3.5 py-3 text-sm"
+                className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm text-text placeholder:text-text-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </label>
             <label className="block space-y-2 text-sm font-medium">
@@ -136,10 +136,10 @@ export default function PasswordRecovery() {
                 autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
-                className="w-full rounded-xl border px-3.5 py-3 text-sm"
+                className="w-full rounded-xl border border-border bg-surface px-3.5 py-3 text-sm text-text placeholder:text-text-subtle focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </label>
-            <button type="submit" disabled={submitting} className="w-full rounded-xl bg-[var(--green)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[var(--green-hover)] disabled:cursor-not-allowed disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-contrast transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60">
               {submitting ? 'Updating password…' : 'Update password'}
             </button>
           </form>

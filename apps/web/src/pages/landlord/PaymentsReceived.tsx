@@ -92,27 +92,27 @@ const PaymentsReceived = () => {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Payments Received</h1>
-        <p className="text-gray-600 dark:text-gray-300">Payment transactions linked to your agreements</p>
+        <h1 className="mb-2 text-2xl font-bold text-gray-900 ">Payments Received</h1>
+        <p className="text-gray-600 ">Payment transactions linked to your agreements</p>
       </div>
 
       {!user?.id ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : loading ? (
-        <Card className="p-5"><p className="text-sm text-gray-600 dark:text-gray-300">Loading payment records…</p></Card>
+        <Card className="p-5"><p className="text-sm text-gray-600 ">Loading payment records…</p></Card>
       ) : loadError ? (
-        <Card className="p-5"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{loadError}</p></Card>
+        <Card className="p-5"><p role="alert" className="text-sm text-red-700 ">{loadError}</p></Card>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Card className="p-4 text-center"><p className="text-sm text-gray-600 dark:text-gray-400">Received</p><p className="mt-2 text-xl font-bold text-green-700 dark:text-green-400">{currencyTotals(paidPayments)}</p></Card>
-            <Card className="p-4 text-center"><p className="text-sm text-gray-600 dark:text-gray-400">Paid transactions</p><p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{paidPayments.length}</p></Card>
-            <Card className="p-4 text-center"><p className="text-sm text-gray-600 dark:text-gray-400">Pending transactions</p><p className="mt-2 text-3xl font-bold text-amber-600">{payments.filter((payment) => payment.status === 'PENDING' || payment.status === 'PROCESSING' || payment.status === 'AUTHORIZED').length}</p></Card>
+            <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Received</p><p className="mt-2 text-xl font-bold text-green-700 ">{currencyTotals(paidPayments)}</p></Card>
+            <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Paid transactions</p><p className="mt-2 text-3xl font-bold text-gray-900 ">{paidPayments.length}</p></Card>
+            <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Pending transactions</p><p className="mt-2 text-3xl font-bold text-amber-600">{payments.filter((payment) => payment.status === 'PENDING' || payment.status === 'PROCESSING' || payment.status === 'AUTHORIZED').length}</p></Card>
           </div>
           <div className="space-y-4">
-            <h2 className="font-semibold text-gray-900 dark:text-white">Payment details</h2>
+            <h2 className="font-semibold text-gray-900 ">Payment details</h2>
             {payments.length === 0 ? (
-              <Card className="p-6 text-sm text-gray-600 dark:text-gray-300">No payment transactions are recorded for your agreements.</Card>
+              <Card className="p-6 text-sm text-gray-600 ">No payment transactions are recorded for your agreements.</Card>
             ) : payments.map((payment) => {
               const agreement = payment.agreementId ? agreementById.get(payment.agreementId) : undefined;
               const StatusIcon = payment.status === 'SUCCESS' || payment.status === 'PAID' ? Check : payment.status === 'PENDING' || payment.status === 'PROCESSING' || payment.status === 'AUTHORIZED' ? Clock : AlertCircle;
@@ -120,14 +120,14 @@ const PaymentsReceived = () => {
                 <Card key={payment.id} className="p-4">
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{payment.user?.fullName || payment.user?.email || 'Tenant details unavailable'}</h3>
-                      <p className="mt-1 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400"><Home size={14} />{agreement ? listingNames.get(agreement.listingId) || 'Property details unavailable' : 'Property details unavailable'}</p>
+                      <h3 className="font-semibold text-gray-900 ">{payment.user?.fullName || payment.user?.email || 'Tenant details unavailable'}</h3>
+                      <p className="mt-1 flex items-center gap-2 text-sm text-gray-600 "><Home size={14} />{agreement ? listingNames.get(agreement.listingId) || 'Property details unavailable' : 'Property details unavailable'}</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-5">
-                      <div><p className="text-xs text-gray-500 dark:text-gray-400">Recorded</p><p className="text-sm font-medium">{new Date(payment.createdAt).toLocaleDateString()}</p></div>
-                      <div><p className="text-xs text-gray-500 dark:text-gray-400">Amount</p><p className="text-lg font-bold text-gray-900 dark:text-white">{payment.currency} {payment.amount.toLocaleString()}</p></div>
+                      <div><p className="text-xs text-gray-500 ">Recorded</p><p className="text-sm font-medium">{new Date(payment.createdAt).toLocaleDateString()}</p></div>
+                      <div><p className="text-xs text-gray-500 ">Amount</p><p className="text-lg font-bold text-gray-900 ">{payment.currency} {payment.amount.toLocaleString()}</p></div>
                       <div><span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${statusStyle(payment.status)}`}><StatusIcon size={14} />{payment.status.replace(/_/g, ' ')}</span></div>
-                      <div><p className="text-xs text-gray-500 dark:text-gray-400">Provider</p><p className="text-sm font-medium">{payment.provider.replace(/_/g, ' ')}</p></div>
+                      <div><p className="text-xs text-gray-500 ">Provider</p><p className="text-sm font-medium">{payment.provider.replace(/_/g, ' ')}</p></div>
                     </div>
                   </div>
                 </Card>

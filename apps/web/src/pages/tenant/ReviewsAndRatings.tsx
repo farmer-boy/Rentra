@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
-import { useTheme } from '../../context/useTheme';
 import Card from '../../components/ui/Card';
 import { reviewsAPI } from '../../api/reviews';
 import { toApiError } from '../../api/api-error';
@@ -29,7 +28,6 @@ interface CompletedBooking {
 
 export default function ReviewsAndRatings() {
   const { user } = useAuthStore();
-  const { isDark } = useTheme();
   const queryClient = useQueryClient();
   const reviewsQuery = useMyReviews(user?.id ?? '');
   const bookingsQuery = useBookings<CompletedBooking>();
@@ -73,10 +71,10 @@ export default function ReviewsAndRatings() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className={`text-xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-black'}`}>
+        <h1 className={`text-xl font-extrabold tracking-tight text-text`}>
           My Reviews & Ratings
         </h1>
-        <p className={`mt-1 text-[13px] ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        <p className={`mt-1 text-[13px] text-text-muted`}>
           Review completed stays. The backend checks rental eligibility and prevents duplicate reviews.
         </p>
       </div>
@@ -108,29 +106,29 @@ export default function ReviewsAndRatings() {
                   Comment (optional)
                   <textarea maxLength={2000} value={comment} onChange={(event) => setComment(event.target.value)} className="mt-1 block w-full rounded-lg border p-2" />
                 </label>
-                <button disabled={createReview.isPending} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">
+                <button disabled={createReview.isPending} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">
                   {createReview.isPending ? 'Submitting...' : 'Submit review'}
                 </button>
               </form>}
             </Card>}
 
             <Card>
-              <h2 className={`mb-4 text-lg font-bold ${isDark ? 'text-white' : 'text-black'}`}>
+              <h2 className={`mb-4 text-lg font-bold text-text`}>
                 Reviews I've Given ({reviews?.length ?? 0})
               </h2>
               {!reviews?.length ? <p className="py-6 text-center text-sm text-gray-500">
                 {completedBookings.length ? 'You have no reviews yet. You can review a completed stay above.' : 'No completed stays are currently eligible for review.'}
               </p> : <div className="space-y-4">
                 {reviews.map((review) => (
-                  <div key={review.id} className={`rounded-lg border p-4 ${isDark ? 'border-white/10 bg-[#1f1f1f]' : 'border-gray-200 bg-gray-50'}`}>
+                  <div key={review.id} className="rounded-lg border border-border p-4 bg-surface-2">
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div>
-                        <div className={`text-sm font-bold ${isDark ? 'text-white' : 'text-black'}`}>{review.listing?.title ?? 'Rental listing'}</div>
+                        <div className={`text-sm font-bold text-text`}>{review.listing?.title ?? 'Rental listing'}</div>
                         <p className="text-[10px] text-gray-500">{new Date(review.createdAt).toLocaleDateString()} · {review.reviewType.toLowerCase()} review</p>
                       </div>
                       <span className="text-amber-500" aria-label={`${review.rating} out of 5 stars`}>{'★'.repeat(review.rating)}</span>
                     </div>
-                    {review.comment && <p className={`text-xs ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{review.comment}</p>}
+                    {review.comment && <p className={`text-xs text-text-muted`}>{review.comment}</p>}
                   </div>
                 ))}
               </div>}
