@@ -1,0 +1,1 @@
+{"root":["./packages/database/seed.ts","./packages/shared/src/index.ts","./packages/shared/src/constants/index.ts","./packages/shared/src/dtos/index.ts","./packages/shared/src/types/enums.ts","./packages/shared/src/types/index.ts"],"errors":true,"version":"6.0.2"}
