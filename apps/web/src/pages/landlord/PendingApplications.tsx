@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckCircle, Clock, Home, MapPin, User, XCircle } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import { rentalRequestsAPI } from '../../api/rentalRequests';
@@ -25,13 +26,14 @@ const errorMessage = (error: unknown) =>
     ?? 'Rental requests could not be loaded. Please try again.';
 
 const PendingApplications = () => {
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const [requests, setRequests] = useState<RentalRequest[]>([]);
   const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState('');
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState('PENDING');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') ?? 'PENDING');
   const [reload, setReload] = useState(0);
 
   useEffect(() => {

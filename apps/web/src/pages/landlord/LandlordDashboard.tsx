@@ -123,6 +123,18 @@ export default function LandlordDashboard() {
   const recentNotifications = (data?.notifications ?? []).slice(0, 4);
   const recentReviews = (data?.reviews ?? []).slice(0, 3);
 
+  const statCard = (label: string, value: number, color: string, path: string) => (
+    <button
+      key={label}
+      type="button"
+      onClick={() => navigate(path)}
+      aria-label={`View ${value} ${label.toLowerCase()}`}
+      className="rounded-xl text-left transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+    >
+      <StatCard label={label} value={value} color={color} />
+    </button>
+  );
+
   const actions = [
     { label: 'My properties', path: '/landlord/properties', icon: <Home size={18} /> },
     { label: 'Add property', path: '/landlord/post', icon: <Plus size={18} /> },
@@ -144,16 +156,16 @@ export default function LandlordDashboard() {
       {loading ? <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">{Array.from({ length: 8 }, (_, index) => <div key={index} className="h-24 animate-pulse rounded-xl bg-gray-200 " />)}</div> : error ? <Card className="flex flex-wrap items-center justify-between gap-3 p-5"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card> : data && (
         <>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            <StatCard label="PROPERTIES" value={listings.length} color="text-gray-800" />
-            <StatCard label="PUBLISHED" value={activeListings.length} color="text-emerald-600" />
-            <StatCard label="PENDING REVIEW" value={pendingListings.length} color="text-amber-600" />
-            <StatCard label="REJECTED" value={rejectedListings.length} color="text-red-600" />
-            <StatCard label="SUSPENDED" value={suspendedListings.length} color="text-red-700" />
-            <StatCard label="RENTED" value={rentedListings.length} color="text-blue-600" />
-            <StatCard label="UPCOMING BOOKINGS" value={upcomingBookings.length} color="text-blue-600" />
-            <StatCard label="PENDING RENTAL REQUESTS" value={pendingRequests.length} color="text-amber-600" />
-            <StatCard label="ACTIVE AGREEMENTS" value={activeAgreements.length} color="text-indigo-600" />
-            <StatCard label="VIEWS THIS MONTH" value={data.analytics.viewsThisMonth} color="text-purple-600" />
+            {statCard('PROPERTIES', listings.length, 'text-gray-800', '/landlord/properties')}
+            {statCard('PUBLISHED', activeListings.length, 'text-emerald-600', '/landlord/properties?status=PUBLISHED')}
+            {statCard('PENDING REVIEW', pendingListings.length, 'text-amber-600', '/landlord/properties?status=PENDING_REVIEW')}
+            {statCard('REJECTED', rejectedListings.length, 'text-red-600', '/landlord/properties?status=REJECTED')}
+            {statCard('SUSPENDED', suspendedListings.length, 'text-red-700', '/landlord/properties?status=SUSPENDED')}
+            {statCard('RENTED', rentedListings.length, 'text-blue-600', '/landlord/properties?status=RENTED')}
+            {statCard('UPCOMING BOOKINGS', upcomingBookings.length, 'text-blue-600', '/landlord/bookings?filter=UPCOMING')}
+            {statCard('PENDING RENTAL REQUESTS', pendingRequests.length, 'text-amber-600', '/landlord/applications?status=PENDING')}
+            {statCard('ACTIVE AGREEMENTS', activeAgreements.length, 'text-indigo-600', '/landlord/agreements?status=ACTIVE')}
+            {statCard('VIEWS THIS MONTH', data.analytics.viewsThisMonth, 'text-purple-600', '/landlord/properties')}
           </div>
           <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
             <Card className="p-5">

@@ -97,10 +97,16 @@ export default function TenantDashboard() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-3 mb-4">
-        <StatCard label="PUBLISHED LISTINGS" value={listingsLoading ? '…' : listingsError ? 'Unavailable' : listingTotal ?? '—'} />
-        <StatCard label="FAKE DETECTED" value="—" change={unavailable} color="text-red-600" />
-        <StatCard label="AGREEMENTS SIGNED" value="—" change={unavailable} color="text-green-600" />
-        <StatCard label="DISPUTES RESOLVED" value="—" change={unavailable} color="text-yellow-600" />
+        {[
+          { label: 'PUBLISHED LISTINGS', value: listingsLoading ? '…' : listingsError ? 'Unavailable' : listingTotal ?? '—', change: undefined, color: undefined, path: '/tenant/listings' },
+          { label: 'FAKE DETECTED', value: '—', change: unavailable, color: 'text-red-600', path: '/tenant/detector' },
+          { label: 'AGREEMENTS SIGNED', value: '—', change: unavailable, color: 'text-green-600', path: '/tenant/agreement' },
+          { label: 'DISPUTES RESOLVED', value: '—', change: unavailable, color: 'text-yellow-600', path: '/tenant/disputes?status=RESOLVED' },
+        ].map((item) => (
+          <button key={item.label} type="button" onClick={() => navigate(item.path)} className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <StatCard label={item.label} value={item.value} change={item.change} color={item.color} />
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">

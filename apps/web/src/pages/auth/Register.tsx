@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../../api/auth';
 import { getApiErrorMessage } from '../../api/api-error';
-import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/useTheme';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
@@ -137,7 +136,6 @@ export default function Register() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark } = useTheme();
-  const { login } = useAuthStore();
   const [form, setForm] = useState<RegistrationForm>({
     username: '',
     email: '',
@@ -222,25 +220,8 @@ export default function Register() {
         cnic: form.cnic,
         password: form.password,
       });
-      login(data.user, data.accessToken);
-      toast.success('Registration successful! 🎉');
-
-      const roles = data.user.roles && data.user.roles.length > 0
-        ? data.user.roles
-        : data.user.role
-          ? [data.user.role]
-          : ['TENANT'];
-
-      const requestedReturnTo = (location.state as { from?: unknown } | null)?.from;
-      const returnTo = typeof requestedReturnTo === 'string' &&
-        requestedReturnTo.startsWith('/') &&
-        !requestedReturnTo.startsWith('//')
-        ? requestedReturnTo
-        : undefined;
-      if (returnTo) navigate(returnTo);
-      else if (roles.includes('ADMIN')) navigate('/admin');
-      else if (roles.includes('LANDLORD')) navigate('/landlord');
-      else navigate('/tenant');
+      toast.success('Verification code sent to your email.');
+      navigate(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (requestError: unknown) {
       toast.error(getApiErrorMessage(requestError, 'Registration failed. Please try again.'));
     } finally {
@@ -489,7 +470,7 @@ export default function Register() {
                 disabled={loading}
                 className="mt-6 w-full rounded-lg bg-primary py-3 text-base font-bold text-primary-contrast shadow-lg transition-all hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {loading ? 'Creating account...' : 'Create Account'}
+                {loading ? 'Sending verification code...' : 'Create Account'}
               </button>
             </form>
           </div>

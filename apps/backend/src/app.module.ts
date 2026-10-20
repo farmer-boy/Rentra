@@ -28,7 +28,8 @@ import { BoostModule } from './modules/boost/boost.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      // Prefer backend-specific secrets over blank/root workspace defaults.
+      envFilePath: ['apps/backend/.env', '.env'],
     }),
     PrismaModule,
     AuthModule,

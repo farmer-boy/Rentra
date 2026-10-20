@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import { adminAPI } from '../../api/admin';
@@ -51,6 +52,7 @@ function unwrap<T>(value: unknown): T {
 }
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activity, setActivity] = useState<DashboardActivity | null>(null);
   const [statsLoading, setStatsLoading] = useState(true);
@@ -98,17 +100,25 @@ export default function AdminDashboard() {
 
       {statsError && <p role="alert" className="mb-3 text-sm text-red-600">{statsError}</p>}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-3 mb-4">
-        <StatCard label="TOTAL USERS" value={metric(stats?.users?.total, statsLoading)} />
-        <StatCard label="LISTINGS" value={metric(stats?.listings?.total, statsLoading)} />
-        <StatCard label="OPEN REPORTS" value={metric(stats?.reports?.open, statsLoading)} />
-        <StatCard label="OPEN DISPUTES" value={metric(stats?.disputes?.open, statsLoading)} />
-        <StatCard label="PENDING VERIFICATIONS" value={metric(stats?.verifications?.pending, statsLoading)} />
-        <StatCard label="TOTAL BOOKINGS" value={metric(stats?.bookings?.total, statsLoading)} />
-        <StatCard label="COMPLETED BOOKINGS" value={metric(stats?.bookings?.completed, statsLoading)} />
+        {[
+          { label: 'TOTAL USERS', value: metric(stats?.users?.total, statsLoading), path: '/admin/users' },
+          { label: 'LISTINGS', value: metric(stats?.listings?.total, statsLoading), path: '/admin/listings' },
+          { label: 'OPEN REPORTS', value: metric(stats?.reports?.open, statsLoading), path: '/admin/reports?status=OPEN' },
+          { label: 'OPEN DISPUTES', value: metric(stats?.disputes?.open, statsLoading), path: '/admin/disputes?status=OPEN' },
+          { label: 'PENDING VERIFICATIONS', value: metric(stats?.verifications?.pending, statsLoading), path: '/admin/approvals' },
+          { label: 'TOTAL BOOKINGS', value: metric(stats?.bookings?.total, statsLoading), path: '/admin/bookings' },
+          { label: 'COMPLETED BOOKINGS', value: metric(stats?.bookings?.completed, statsLoading), path: '/admin/bookings?status=COMPLETED' },
+        ].map((item) => (
+          <button key={item.label} type="button" onClick={() => navigate(item.path)} className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+            <StatCard label={item.label} value={item.value} />
+          </button>
+        ))}
+        <button type="button" onClick={() => navigate('/admin/payments?status=PAID')} className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
         <StatCard
           label="GROSS PAID VOLUME"
           value={statsLoading ? 'Loading...' : Object.entries(grossPaidByCurrency).map(([currency, amount]) => `${currency} ${amount.toLocaleString()}`).join(' · ') || '—'}
         />
+        </button>
       </div>
 
       {stats?.trends && (

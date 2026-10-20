@@ -43,6 +43,7 @@ export class PropertiesService {
   ) {}
 
   async create(ownerId: string, dto: CreatePropertyDto) {
+    await this.requireVerifiedPhone(ownerId);
     this.validateCoordinates(dto.latitude, dto.longitude);
     const location = await this.locationsService.resolveLocationPath({
       country: dto.country,
@@ -109,6 +110,18 @@ export class PropertiesService {
       include: this.propertyInclude(),
     });
     return this.withRentraVerified(property);
+  }
+
+  private async requireVerifiedPhone(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { phoneVerifiedAt: true },
+    });
+    if (!user?.phoneVerifiedAt) {
+      throw new ForbiddenException(
+        'Verify your phone number before posting a property.',
+      );
+    }
   }
 
   async findAll(query: PropertyQueryDto, requesterId?: string) {

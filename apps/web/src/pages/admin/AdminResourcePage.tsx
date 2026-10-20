@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
 import { reportsAPI } from '../../api/reports';
@@ -249,17 +249,25 @@ function toPageResult(data: unknown, page: number): ResourcePageResult {
 
 export default function AdminResourcePage() {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const resourceKey = location.pathname.split('/').filter(Boolean).at(-1) ?? '';
   const definition = definitions[resourceKey];
   const [result, setResult] = useState<ResourcePageResult | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
-  const [appliedFilters, setAppliedFilters] = useState({ search: '', status: '' });
+  const routeStatus = searchParams.get('status') ?? '';
+  const [status, setStatus] = useState(routeStatus);
+  const [appliedFilters, setAppliedFilters] = useState({ search: '', status: routeStatus });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const endpoint = definition?.endpoint;
   const fixedType = definition?.fixedType;
+
+  useEffect(() => {
+    setStatus(routeStatus);
+    setAppliedFilters({ search: '', status: routeStatus });
+    setPage(1);
+  }, [routeStatus]);
 
   const load = useCallback(async () => {
     if (!endpoint) return;

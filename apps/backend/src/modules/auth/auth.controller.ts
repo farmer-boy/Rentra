@@ -22,6 +22,11 @@ import { ForgotPasswordDto, ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
+import {
+  ResendRegistrationCodeDto,
+  VerifyRegistrationDto,
+} from './dto/verify-registration.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -39,6 +44,20 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
+  @Post('register/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify registration code and create the account' })
+  async verifyRegistration(@Body() dto: VerifyRegistrationDto) {
+    return this.authService.verifyRegistration(dto);
+  }
+
+  @Post('register/resend-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resend a pending registration verification code' })
+  async resendRegistrationCode(@Body() dto: ResendRegistrationCodeDto) {
+    return this.authService.resendRegistrationCode(dto.email);
+  }
+
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login karo' })
@@ -46,6 +65,20 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Wrong credentials' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('google/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Sign in to an existing Rentra account with Google' })
+  async loginWithGoogle(@Body() dto: GoogleLoginDto) {
+    return this.authService.loginWithGoogle(dto);
+  }
+
+  @Post('login/verify')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify sign-in code and create the session' })
+  async verifyLoginCode(@Body() dto: VerifyRegistrationDto) {
+    return this.authService.verifyLoginCode(dto);
   }
 
   @Post('refresh')

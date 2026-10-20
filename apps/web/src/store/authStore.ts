@@ -76,10 +76,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
           }
           try {
             const user = await authAPI.getMe();
+            const currentToken = localStorage.getItem('accessToken');
             localStorage.setItem('user', JSON.stringify(user));
             set({
               user,
-              token,
+              token: currentToken,
               isAuthenticated: true,
               isInitialized: true,
             });

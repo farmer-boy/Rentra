@@ -109,8 +109,8 @@ export const adminAPI = {
     (await api.patch(`/admin/listings/${id}/verify`)).data,
 
   // Disputes
-  getAllDisputes: async (page = 1, limit = 20): Promise<AdminDisputesResponse> => {
-    const response = await api.get('/admin/disputes', { params: { page, limit } });
+  getAllDisputes: async (page = 1, limit = 20, status?: string): Promise<AdminDisputesResponse> => {
+    const response = await api.get('/admin/disputes', { params: { page, limit, ...(status && { status }) } });
     return response.data;
   },
 

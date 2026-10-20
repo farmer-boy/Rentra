@@ -41,6 +41,7 @@ export class BookingsService {
   ) {}
 
   async create(tenantId: string, propertyId: string, dto: CreateBookingDto) {
+    await this.requireVerifiedPhone(tenantId);
     const checkIn = this.parseDateOnly(dto.checkIn, 'checkIn');
     const checkOut = this.parseDateOnly(dto.checkOut, 'checkOut');
     if (checkIn >= checkOut)
@@ -301,6 +302,18 @@ export class BookingsService {
       data: { bookingId: bookingAccess.id, propertyId },
     });
     return booking as unknown;
+  }
+
+  private async requireVerifiedPhone(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { phoneVerifiedAt: true },
+    });
+    if (!user?.phoneVerifiedAt) {
+      throw new ForbiddenException(
+        'Verify your phone number before booking a property.',
+      );
+    }
   }
 
   myBookings(tenantId: string) {

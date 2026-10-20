@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { FileText } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import { agreementsAPI } from '../../api/agreements';
@@ -34,11 +35,13 @@ const errorMessage = (error: unknown) =>
     ?? 'Agreements could not be loaded. Please try again.';
 
 const LandlordAgreements = () => {
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [listings, setListings] = useState<Listing[]>([]);
   const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') ?? 'ALL');
 
   useEffect(() => {
     let active = true;
@@ -63,6 +66,9 @@ const LandlordAgreements = () => {
   const listingNames = new Map(listings.map((listing) => [listing.id, listing.title]));
   const activeCount = ownedAgreements.filter((agreement) => agreement.status === 'ACTIVE').length;
   const pendingCount = ownedAgreements.filter((agreement) => agreement.status === 'PENDING').length;
+  const visibleAgreements = statusFilter === 'ALL'
+    ? ownedAgreements
+    : ownedAgreements.filter((agreement) => agreement.status === statusFilter);
   const loading = !!user?.id && loadedUserId !== user.id;
   const loadError = user?.id ? error : 'Your account details are unavailable. Sign in again to view agreements.';
 
@@ -87,11 +93,18 @@ const LandlordAgreements = () => {
             <Card className="p-4 text-center"><p className="text-sm text-gray-600 ">Total agreements</p><p className="mt-2 text-3xl font-bold text-gray-900 ">{ownedAgreements.length}</p></Card>
           </div>
 
-          {ownedAgreements.length === 0 ? (
+          <label className="block max-w-xs text-xs font-semibold">Agreement status
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm">
+              <option value="ALL">All statuses</option>
+              {['ACTIVE', 'PENDING', 'DRAFT', 'TERMINATED', 'EXPIRED', 'CANCELLED', 'ENDED'].map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}
+            </select>
+          </label>
+
+          {visibleAgreements.length === 0 ? (
             <Card className="p-6 text-sm text-gray-600 ">No agreements are recorded for your properties.</Card>
           ) : (
             <div className="space-y-4">
-              {ownedAgreements.map((agreement) => (
+              {visibleAgreements.map((agreement) => (
                 <Card key={agreement.id} className="p-5">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="flex items-start gap-3">

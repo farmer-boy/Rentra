@@ -3,9 +3,12 @@ import { useAuthStore } from '../../store/authStore';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { disputesAPI, type DisputeRecord } from '../../api/disputes';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Disputes() {
   const { user } = useAuthStore();
+  const [searchParams] = useSearchParams();
+  const statusFilter = searchParams.get('status') ?? '';
   const [disputes, setDisputes] = useState<DisputeRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -15,7 +18,9 @@ export default function Disputes() {
     if (!user?.id) {
       return () => { active = false; };
     }
-    disputesAPI.mine()
+    setLoading(true);
+    setError(false);
+    disputesAPI.mine({ ...(statusFilter && { status: statusFilter }) })
       .then((response) => {
         if (active) setDisputes(response.data);
       })
@@ -26,7 +31,7 @@ export default function Disputes() {
         if (active) setLoading(false);
       });
     return () => { active = false; };
-  }, [user?.id]);
+  }, [user?.id, statusFilter]);
 
   const statusVariant = (status: string): 'green' | 'yellow' | 'red' => {
     if (status === 'RESOLVED' || status === 'CLOSED') return 'green';

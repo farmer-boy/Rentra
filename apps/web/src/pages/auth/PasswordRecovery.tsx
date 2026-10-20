@@ -36,8 +36,8 @@ export default function PasswordRecovery() {
     event.preventDefault();
     setError('');
     setMessage('');
-    if (password.length < 6) {
-      setError('Your new password must be at least 6 characters long.');
+    if (password.length < 8) {
+      setError('Your new password must be at least 8 characters long.');
       return;
     }
     if (password !== confirmPassword) {
@@ -78,7 +78,7 @@ export default function PasswordRecovery() {
               ? 'This reset link is incomplete. Request a new one and use the link in your email.'
               : resetComplete
                 ? 'Your password has been changed successfully. Sign in with your new password.'
-                : 'Use a new password with at least 6 characters.'
+                : 'Use a new password with 8 to 72 characters.'
             : 'Enter your account email and we will send you a secure password reset link.'}
         </p>
 
@@ -119,7 +119,8 @@ export default function PasswordRecovery() {
               New password
               <input
                 required
-                minLength={6}
+                minLength={8}
+                maxLength={72}
                 type="password"
                 autoComplete="new-password"
                 value={password}
@@ -131,7 +132,8 @@ export default function PasswordRecovery() {
               Confirm new password
               <input
                 required
-                minLength={6}
+                minLength={8}
+                maxLength={72}
                 type="password"
                 autoComplete="new-password"
                 value={confirmPassword}

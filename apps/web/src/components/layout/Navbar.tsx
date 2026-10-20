@@ -19,6 +19,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { unreadCount } = useContactMessages();
   const roles = user?.roles ?? (user?.role ? [user.role] : []);
+  const hasAdminRole = roles.includes('ADMIN');
   const hasTenantAndLandlordRoles =
     roles.includes('TENANT') && roles.includes('LANDLORD');
   const isLandlordWorkspace = location.pathname.startsWith('/landlord');
@@ -30,10 +31,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
     .join('')
     .toUpperCase() || 'U';
 
-  const messageCount = user?.role === 'ADMIN' ? unreadCount : 0;
+  const isAdminWorkspace = location.pathname.startsWith('/admin');
+  const messageCount = isAdminWorkspace || (!isTenantWorkspace && !isLandlordWorkspace && hasAdminRole)
+    ? unreadCount
+    : 0;
 
   const getRolePath = (section: 'notifications' | 'messages') => {
-    const role = user?.role === 'ADMIN' ? 'admin' : user?.role === 'LANDLORD' ? 'landlord' : 'tenant';
+    const role = isAdminWorkspace
+      ? 'admin'
+      : isLandlordWorkspace
+        ? 'landlord'
+        : isTenantWorkspace
+          ? 'tenant'
+          : hasAdminRole
+            ? 'admin'
+            : user?.role === 'LANDLORD'
+              ? 'landlord'
+              : 'tenant';
     return `/${role}/${section}`;
   };
 
@@ -319,6 +333,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
                   >
                     <ArrowLeftRight size={14} />
                     Landlord workspace
+                  </button>
+                </>
+              )}
+
+              {hasAdminRole && (
+                <>
+                  <div className="border-t" style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
+                  <button
+                    onClick={() => {
+                      navigate('/admin');
+                      setProfileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                    style={{ color: 'var(--text2)' }}
+                  >
+                    <ArrowLeftRight size={14} />
+                    Admin workspace
                   </button>
                 </>
               )}

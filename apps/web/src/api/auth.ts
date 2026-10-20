@@ -2,14 +2,36 @@ import api, { getRefreshToken, setRefreshToken } from './client';
 import type { LoginRequest, RegisterRequest, AuthResponse, User } from './types';
 
 export const authAPI = {
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/register', {
+  register: async (data: RegisterRequest): Promise<{ message: string; email: string }> => {
+    const response = await api.post<{ message: string; email: string }>('/auth/register', {
       fullName: data.fullName,
       email: data.email,
       phone: data.phone,
       password: data.password,
       cnic: data.cnic || undefined,
     });
+    return response.data;
+  },
+
+  verifyRegistration: async (email: string, code: string): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/register/verify', { email, code });
+    if (response.data.refreshToken) setRefreshToken(response.data.refreshToken);
+    if (response.data.accessToken) localStorage.setItem('accessToken', response.data.accessToken);
+    return response.data;
+  },
+
+  resendRegistrationCode: async (email: string): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>('/auth/register/resend-code', { email });
+    return response.data;
+  },
+
+  login: async (data: LoginRequest): Promise<{ message: string; email: string; loginVerificationRequired: true }> => {
+    const response = await api.post<{ message: string; email: string; loginVerificationRequired: true }>('/auth/login', data);
+    return response.data;
+  },
+
+  loginWithGoogle: async (credential: string): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/google/login', { credential });
     if (response.data.refreshToken) setRefreshToken(response.data.refreshToken);
     if (response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
@@ -17,8 +39,8 @@ export const authAPI = {
     return response.data;
   },
 
-  login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await api.post<AuthResponse>('/auth/login', data);
+  verifyLoginCode: async (email: string, code: string): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/login/verify', { email, code });
     if (response.data.refreshToken) setRefreshToken(response.data.refreshToken);
     if (response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);

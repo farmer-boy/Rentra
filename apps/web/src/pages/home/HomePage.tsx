@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, BedDouble, Bell, Building2, ChevronRight, Home, MapPin, Menu, Search, ShieldCheck, Sparkles, Star, X } from 'lucide-react';
+import { ArrowRight, BedDouble, Bell, Building2, Camera, ChevronRight, Home, Mail, MapPin, Menu, Phone, Search, ShieldCheck, Sparkles, Star, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { listingsAPI } from '../../api/listings';
 import { locationsAPI } from '../../api/locations';
@@ -40,12 +40,13 @@ export default function HomePage() {
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 lg:px-8">
           <Link to="/" className="flex items-center gap-2.5" aria-label="Rentra home">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-contrast"><Home size={20} /></span>
-            <span className="text-[22px] font-bold tracking-tight">rentra<span className="text-[var(--green-soft)]">.</span></span>
+            <span className="text-[22px] font-bold tracking-tight">Rentra<span className="text-[var(--green-soft)]">.</span></span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-[var(--text2)] md:flex">
             <a href="#homes" className="transition hover:text-[var(--green)]">Find a home</a>
             <a href="#how-it-works" className="transition hover:text-[var(--green)]">How it works</a>
             <a href="#trust" className="transition hover:text-[var(--green)]">Why Rentra</a>
+            <Link to="/contact" className="transition hover:text-[var(--green)]">Contact us</Link>
           </nav>
           <div className="hidden items-center gap-3 md:flex">
             {isAuthenticated ? <>
@@ -60,7 +61,7 @@ export default function HomePage() {
           </div>
           <button className="rounded-lg p-2 text-[var(--text2)] transition hover:bg-[var(--surface2)] md:hidden" onClick={() => setMobileMenu(!mobileMenu)} aria-label={mobileMenu ? 'Close menu' : 'Open menu'} aria-expanded={mobileMenu}>{mobileMenu ? <X /> : <Menu />}</button>
         </div>
-        {mobileMenu && <div className="grid gap-1 border-t border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-[var(--text)] md:hidden"><a className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" href="#homes" onClick={() => setMobileMenu(false)}>Find a home</a><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/favorites" onClick={() => setMobileMenu(false)}>Favorites</Link>{isAuthenticated ? <><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to={homePath} onClick={() => setMobileMenu(false)}>My Rentra</Link><button className="rounded-lg px-3 py-2 text-left hover:bg-[var(--surface2)]" onClick={() => { logout(); setMobileMenu(false); }}>Log out</button></> : <><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/login" onClick={() => setMobileMenu(false)}>Log in</Link><Link className="rounded-lg bg-primary px-3 py-2 text-primary-contrast" to="/register" onClick={() => setMobileMenu(false)}>Create account</Link></>}</div>}
+        {mobileMenu && <div className="grid gap-1 border-t border-[var(--border)] bg-[var(--surface)] px-5 py-3 text-[var(--text)] md:hidden"><a className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" href="#homes" onClick={() => setMobileMenu(false)}>Find a home</a><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/contact" onClick={() => setMobileMenu(false)}>Contact us</Link><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/favorites" onClick={() => setMobileMenu(false)}>Favorites</Link>{isAuthenticated ? <><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to={homePath} onClick={() => setMobileMenu(false)}>My Rentra</Link><button className="rounded-lg px-3 py-2 text-left hover:bg-[var(--surface2)]" onClick={() => { logout(); setMobileMenu(false); }}>Log out</button></> : <><Link className="rounded-lg px-3 py-2 hover:bg-[var(--surface2)]" to="/login" onClick={() => setMobileMenu(false)}>Log in</Link><Link className="rounded-lg bg-primary px-3 py-2 text-primary-contrast" to="/register" onClick={() => setMobileMenu(false)}>Create account</Link></>}</div>}
       </header>
 
       <section className="relative isolate overflow-hidden">
@@ -96,7 +97,47 @@ export default function HomePage() {
 
       <section className="px-5 pb-16"><div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-3xl bg-primary px-6 py-10 text-primary-contrast sm:flex-row sm:items-center sm:justify-between sm:px-10"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-contrast/80">Your next chapter starts here</p><h2 className="mt-2 text-2xl font-semibold sm:text-3xl">Ready to find a place that feels right?</h2><p className="mt-2 text-sm text-primary-contrast/85">Join Rentra and make renting a little easier.</p></div><Link to="/register" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-surface px-5 py-3 text-sm font-semibold text-primary hover:bg-surface2">Create your account <ArrowRight size={16} /></Link></div></section>
 
-      <footer className="border-t border-[var(--border)] px-5 py-6"><div className="mx-auto flex max-w-7xl flex-col gap-3 text-xs text-[var(--text3)] sm:flex-row sm:items-center sm:justify-between"><span>© {new Date().getFullYear()} Rentra · Better renting starts here.</span><span className="flex gap-5"><Link to="/contact" className="hover:text-[var(--green)]">Contact</Link><Link to="/login" className="hover:text-[var(--green)]">Log in</Link></span></div></footer>
+      <footer className="border-t border-[var(--border)] bg-[var(--surface2)] px-5 py-12">
+        <div className="mx-auto grid max-w-7xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-3">
+          <div>
+            <Link to="/" className="flex items-center gap-2.5" aria-label="Rentra home">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-contrast"><Home size={18} /></span>
+              <span className="text-xl font-bold tracking-tight">Rentra<span className="text-[var(--green-soft)]">.</span></span>
+            </Link>
+            <p className="mt-4 max-w-xs text-sm leading-6 text-[var(--text3)]">A clearer rental journey for tenants and landlords. Find a place you can trust.</p>
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold">Explore</h2>
+            <ul className="mt-4 space-y-3 text-sm text-[var(--text3)]">
+              <li><a href="#homes" className="hover:text-[var(--green)]">Browse homes</a></li>
+              <li><a href="#how-it-works" className="hover:text-[var(--green)]">How it works</a></li>
+              <li><a href="#trust" className="hover:text-[var(--green)]">Why Rentra</a></li>
+              <li><Link to="/favorites" className="hover:text-[var(--green)]">Saved homes</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold">Quick links</h2>
+            <ul className="mt-4 space-y-3 text-sm text-[var(--text3)]">
+              <li><Link to="/contact" className="hover:text-[var(--green)]">Contact us</Link></li>
+              <li><Link to="/help" className="hover:text-[var(--green)]">Help center</Link></li>
+              <li><Link to="/login" className="hover:text-[var(--green)]">Log in</Link></li>
+              <li><Link to="/register" className="hover:text-[var(--green)]">Create account</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold">Get in touch</h2>
+            <ul className="mt-4 space-y-3 text-sm text-[var(--text3)]">
+              <li><a href="mailto:support@rentra.pk" className="inline-flex items-center gap-2 hover:text-[var(--green)]"><Mail size={16} />support@rentra.pk</a></li>
+              <li><a href="tel:+923001234567" className="inline-flex items-center gap-2 hover:text-[var(--green)]"><Phone size={16} />+92 300 1234567</a></li>
+              <li className="inline-flex items-center gap-2" aria-label="Instagram coming soon"><Camera size={16} />Instagram · coming soon</li>
+            </ul>
+          </div>
+        </div>
+        <div className="mx-auto mt-10 flex max-w-7xl flex-col gap-3 border-t border-[var(--border)] pt-6 text-xs text-[var(--text3)] sm:flex-row sm:items-center sm:justify-between">
+          <span>© {new Date().getFullYear()} Rentra. Made with care in Pakistan.</span>
+          <span>Better renting starts here.</span>
+        </div>
+      </footer>
     </main>
   );
 }

@@ -3,6 +3,7 @@ import Card from '../../components/ui/Card';
 import { Scale } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
 import type { DisputeRecord } from '../../api/disputes';
+import { useSearchParams } from 'react-router-dom';
 
 interface AdminDispute extends DisputeRecord {
   createdBy?: { id: string; fullName: string };
@@ -24,6 +25,8 @@ function normalizeDisputes(response: unknown): AdminDispute[] {
 }
 
 const AdminAllDisputes = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const statusFilter = searchParams.get('status') ?? '';
   const [disputes, setDisputes] = useState<AdminDispute[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -31,7 +34,9 @@ const AdminAllDisputes = () => {
 
   useEffect(() => {
     let active = true;
-    adminAPI.getAllDisputes().then((response) => {
+    setLoading(true);
+    setError('');
+    adminAPI.getAllDisputes(1, 100, statusFilter || undefined).then((response) => {
       if (active) setDisputes(normalizeDisputes(response));
     }).catch(() => {
       if (active) setError('Could not load disputes. Please try again later.');
@@ -39,7 +44,7 @@ const AdminAllDisputes = () => {
       if (active) setLoading(false);
     });
     return () => { active = false; };
-  }, []);
+  }, [statusFilter]);
 
   const open = disputes.filter((dispute) => dispute.status === 'OPEN').length;
   const inProgress = disputes.filter((dispute) => (
@@ -86,6 +91,23 @@ const AdminAllDisputes = () => {
         <h1 className="text-3xl font-bold text-gray-900  mb-2">All Disputes</h1>
         <p className="text-gray-600 ">Review and mediate disputes between tenants and landlords</p>
       </div>
+
+      <label className="flex items-center gap-3 text-sm text-gray-700">
+        Filter disputes
+        <select
+          className="rounded-lg border border-gray-300 bg-surface px-3 py-2"
+          value={statusFilter}
+          onChange={(event) => setSearchParams(event.target.value ? { status: event.target.value } : {})}
+        >
+          <option value="">All statuses</option>
+          <option value="OPEN">Open</option>
+          <option value="MEDIATION">Mediation</option>
+          <option value="UNDER_REVIEW">Under review</option>
+          <option value="AWAITING_INFORMATION">Awaiting information</option>
+          <option value="RESOLVED">Resolved</option>
+          <option value="CLOSED">Closed</option>
+        </select>
+      </label>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
         <Card className="p-4 text-center">

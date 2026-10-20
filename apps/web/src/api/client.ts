@@ -44,7 +44,7 @@ const api = axios.create({
 });
 
 const isAuthEndpoint = (url = '') =>
-  /\/auth\/(login|register|refresh|logout|forgot-password|reset-password|verify-email)(?:$|\?)/.test(url);
+  /\/auth\/(?:login(?:\/verify)?|google\/login|register(?:\/(?:verify|resend-code))?|refresh|logout|forgot-password|reset-password|verify-email)(?:$|\?)/.test(url);
 
 api.interceptors.request.use((config) => {
   const token =

@@ -1,12 +1,46 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
+
+  async sendRegistrationCode(email: string, code: string) {
+    await this.sendMail({
+      from: this.sender(),
+      to: email,
+      subject: 'Your Rentra verification code',
+      html: `
+        <p>Hello,</p>
+        <p>Enter this code in Rentra to verify your email and create your account:</p>
+        <p style="font-size:24px;font-weight:bold;letter-spacing:6px">${code}</p>
+        <p>This code expires in 10 minutes. If you did not request it, you can ignore this email.</p>
+      `,
+    });
+  }
+
+  async sendLoginCode(email: string, code: string) {
+    await this.sendMail({
+      from: this.sender(),
+      to: email,
+      subject: 'Your Rentra sign-in code',
+      html: `
+        <p>Hello,</p>
+        <p>Enter this code in Rentra to finish signing in:</p>
+        <p style="font-size:24px;font-weight:bold;letter-spacing:6px">${code}</p>
+        <p>This code expires in 10 minutes. If you did not try to sign in, you can ignore this email.</p>
+      `,
+    });
+  }
+
   async sendVerificationEmail(email: string, token: string) {
     const verificationUrl = `${this.frontendBaseUrl()}/verify-email?token=${encodeURIComponent(token)}`;
 
-    await this.transporter().sendMail({
+    await this.sendMail({
       from: this.sender(),
       to: email,
       subject: 'Verify your Rentra account',
@@ -21,7 +55,8 @@ export class EmailService {
   async sendPasswordResetEmail(email: string, token: string) {
     const resetUrl = `${this.frontendBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
 
-    await this.transporter().sendMail({
+    await this.sendMail({
+      from: this.sender(),
       to: email,
       subject: 'Reset your Rentra password',
       html: `
@@ -32,9 +67,23 @@ export class EmailService {
     });
   }
 
+  private async sendMail(options: nodemailer.SendMailOptions) {
+    try {
+      await this.transporter().sendMail(options);
+    } catch (error) {
+      this.logger.error(
+        'Email delivery failed',
+        error instanceof Error ? error.message : undefined,
+      );
+      throw new ServiceUnavailableException(
+        'Email delivery is unavailable. Check the configured email provider credentials and try again.',
+      );
+    }
+  }
+
   private transporter() {
     const user = process.env.GMAIL_USER;
-    const password = process.env.GMAIL_PASSWORD;
+    const password = process.env.GMAIL_PASSWORD?.replace(/\s/g, '');
     if (!user || !password) {
       throw new ServiceUnavailableException(
         'Email verification delivery is not configured',
@@ -43,6 +92,10 @@ export class EmailService {
     return nodemailer.createTransport({
       service: 'gmail',
       auth: { user, pass: password },
+      dnsTimeout: 2500,
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+      socketTimeout: 4000,
     });
   }
 

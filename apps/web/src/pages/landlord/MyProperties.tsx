@@ -49,6 +49,7 @@ export default function MyProperties() {
 
   useEffect(() => {
     setSearch(searchParams.get('search') ?? '');
+    setStatusFilter(searchParams.get('status') ?? 'ALL');
   }, [searchParams]);
 
   useEffect(() => {
@@ -81,7 +82,11 @@ export default function MyProperties() {
   const types = [...new Set(listings.map((listing) => listing.type).filter(Boolean))].sort();
   const filteredListings = useMemo(() => listings.filter((listing) => {
     const matchesSearch = `${listing.title} ${listing.city} ${listing.area}`.toLowerCase().includes(search.trim().toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || (listing.property?.status ?? listing.status) === statusFilter;
+    const matchesStatus = statusFilter === 'ALL'
+      || (statusFilter === 'PENDING_REVIEW' && ['DRAFT', 'PENDING_VERIFICATION'].includes(listing.property?.status ?? listing.status))
+      || (listing.property?.status ?? listing.status) === statusFilter
+      || listing.publicationStatus === statusFilter
+      || listing.property?.verificationStatus === statusFilter;
     const matchesType = typeFilter === 'ALL' || listing.type === typeFilter;
     return matchesSearch && matchesStatus && matchesType;
   }), [listings, search, statusFilter, typeFilter]);
@@ -134,7 +139,7 @@ export default function MyProperties() {
           <Search size={15} className="absolute left-3 top-8 text-gray-400" /><input value={search} onChange={(event) => setSearch(event.target.value)} className="mt-1 w-full rounded-lg border bg-surface py-2 pl-9 pr-3 text-sm " placeholder="Property, city, area" />
         </label>
         <label className="block text-xs font-semibold">Property status
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm "><option value="ALL">All statuses</option>{['DRAFT', 'PENDING_VERIFICATION', 'ACTIVE', 'RENTED', 'EXPIRED', 'REJECTED', 'SUSPENDED', 'PENDING', 'PUBLISHED', 'UNPUBLISHED', 'REMOVED', 'ARCHIVED'].map((value) => <option key={value} value={value}>{formatStatus(value)}</option>)}</select>
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm "><option value="ALL">All statuses</option>{['PENDING_REVIEW', 'DRAFT', 'PENDING_VERIFICATION', 'ACTIVE', 'RENTED', 'EXPIRED', 'REJECTED', 'SUSPENDED', 'PENDING', 'PUBLISHED', 'UNPUBLISHED', 'REMOVED', 'ARCHIVED'].map((value) => <option key={value} value={value}>{formatStatus(value)}</option>)}</select>
         </label>
         <label className="block text-xs font-semibold">Type
           <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} className="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm "><option value="ALL">All types</option>{types.map((value) => <option key={value} value={value}>{formatStatus(value)}</option>)}</select>

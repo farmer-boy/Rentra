@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CalendarDays, RefreshCw } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import { bookingsAPI } from '../../api/bookings';
@@ -30,10 +31,11 @@ interface HostBooking {
 const dateLabel = (value: string) => new Date(value).toLocaleDateString();
 
 export default function LandlordBookings() {
+  const [searchParams] = useSearchParams();
   const user = useAuthStore((state) => state.user);
   const [bookings, setBookings] = useState<HostBooking[]>([]);
   const [properties, setProperties] = useState<OwnedListing[]>([]);
-  const [filter, setFilter] = useState('ALL');
+  const [filter, setFilter] = useState(() => searchParams.get('filter') ?? 'ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);

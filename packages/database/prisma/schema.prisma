@@ -39,6 +39,7 @@ enum VerificationKind {
 
 enum VerificationChallengeKind {
   PHONE
+  EMAIL_LOGIN
 }
 
 enum PropertyType {
@@ -1184,6 +1185,23 @@ model VerificationToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([email, token])
+}
+
+model PendingRegistration {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  phone        String   @unique
+  cnic         String?  @unique
+  password     String
+  fullName     String
+  role         Role     @default(TENANT)
+  codeHash     String
+  codeAttempts Int      @default(0)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([expiresAt])
 }
 
 model VerificationSubmission {

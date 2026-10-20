@@ -25,6 +25,7 @@ export class RentalRequestsService {
     propertyId: string,
     dto: CreateRentalRequestDto,
   ) {
+    await this.requireVerifiedPhone(tenantId);
     const property = await this.prisma.property.findFirst({
       where: { id: propertyId, status: PropertyStatus.ACTIVE },
       include: {
@@ -98,6 +99,18 @@ export class RentalRequestsService {
         );
       }
       throw error;
+    }
+  }
+
+  private async requireVerifiedPhone(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { phoneVerifiedAt: true },
+    });
+    if (!user?.phoneVerifiedAt) {
+      throw new ForbiddenException(
+        'Verify your phone number before sending a rental request.',
+      );
     }
   }
 
