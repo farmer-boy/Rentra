@@ -390,13 +390,13 @@ export default function LandlordPostProperty() {
         ? 'PENDING verification'
         : statusLabel(savedProperty.status);
       toast.success(propertyId ? `Property saved. Current status: ${finalStatus}.` : `Property created. Current status: ${finalStatus}.`);
-      navigate('/landlord/properties');
+      navigate('/dashboard/properties');
     } catch (cause) {
       const message = toApiError(cause).message || 'The property could not be saved.';
       if (savedProperty) {
         localStorage.removeItem(draftKey);
         toast.error(`Property ${propertyId ? 'changes were saved' : 'was created'}, but a follow-up action failed: ${message}`);
-        navigate('/landlord/properties');
+        navigate('/dashboard/properties');
       } else {
         setSubmitError(message);
         toast.error(message);
@@ -542,7 +542,7 @@ export default function LandlordPostProperty() {
             <textarea className={inputClass} rows={3} value={form.evidenceUrls} onChange={(event) => update('evidenceUrls', event.target.value)} placeholder="Paste one secure evidence URL per line" />
           </label>
           {verificationStatus === 'PENDING' && <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800  ">A property verification submission is already pending. You can save changes, but cannot create a duplicate submission.</p>}
-          <p className="text-xs text-gray-500">Verification requires verified email and phone. This form does not collect or store CNIC or identity-document contents.</p>
+          <p className="text-xs text-gray-500">Phone verification is optional. A verified email is required when submitting verification evidence. This form does not collect or store CNIC or identity-document contents.</p>
         </Card>
       )}
 

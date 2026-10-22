@@ -10,6 +10,7 @@ export interface AdminListFilters {
   type?: string;
   city?: string;
   verificationStatus?: string;
+  publicationStatus?: string;
   from?: string;
   to?: string;
 }
@@ -34,6 +35,19 @@ export type AdminUserRecord = Pick<
   phoneVerifiedAt: string | null;
   verificationSubmissions: Array<{ status: string }>;
 };
+
+export interface AdminUserDetails extends AdminUserRecord {
+  updatedAt: string;
+  properties: Array<{ id: string; title: string; status: string; verificationStatus: string; city: string; price: number | string }>;
+  listings: Array<{ id: string; title: string; status: string; city: string; rent: number | string }>;
+  bookings: Array<{ id: string; status: string; startDate: string; endDate: string; totalAmount: number | string }>;
+  rentalsAsTenant: Array<{ id: string; status: string; createdAt: string; listing?: { title: string } | null }>;
+  tenantAgreements: Array<{ id: string; status: string; startDate: string; endDate: string; monthlyRent: number | string }>;
+  reviews: Array<{ id: string; rating: number; reviewType: string; createdAt: string }>;
+  verificationSubmissions: Array<{ id: string; kind: string; status: string; submittedAt: string; reviewedAt: string | null }>;
+  payments: Array<{ id: string; status: string; amount: number | string; currency: string; createdAt: string }>;
+  reports: Array<{ id: string; status: string; reason: string; createdAt: string }>;
+}
 
 export interface AdminListingRecord {
   id: string;
@@ -70,10 +84,13 @@ export const adminAPI = {
     return response.data;
   },
 
-  getUserById: async (id: string): Promise<User> => {
+  getUserById: async (id: string): Promise<AdminUserDetails> => {
     const response = await api.get(`/admin/users/${id}`);
     return response.data;
   },
+
+  sendUserNotice: async (id: string, reason: string, message: string) =>
+    (await api.post(`/admin/users/${id}/notices`, { reason, message })).data,
 
   suspendUser: async (id: string, reason: string): Promise<User> => {
     const response = await api.post(`/admin/users/${id}/suspend`, { reason });

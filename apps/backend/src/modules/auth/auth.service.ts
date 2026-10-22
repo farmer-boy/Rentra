@@ -114,7 +114,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(dto.password, 12);
     const code = randomInt(100000, 1000000).toString();
     const codeHash = await bcrypt.hash(code, 10);
-    const role = dto.role === 'LANDLORD' ? Role.LANDLORD : Role.TENANT;
+    const role = Role.TENANT;
     try {
       await this.prisma.pendingRegistration.upsert({
         where: { email: dto.email },
@@ -215,7 +215,7 @@ export class AuthService {
             phone: currentPending.phone,
             cnic: currentPending.cnic,
             password: currentPending.password,
-            roles: [currentPending.role],
+            roles: [Role.TENANT],
             isVerified: true,
             emailVerifiedAt: new Date(),
           },

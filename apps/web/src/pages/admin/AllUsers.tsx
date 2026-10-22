@@ -1,24 +1,31 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Card from '../../components/ui/Card';
 import { Users, UserCheck, Ban, Shield, Mail, Phone } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AdminAllUsers = () => {
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const role = location.pathname.endsWith('/tenants') ? 'TENANT' : location.pathname.endsWith('/landlords') ? 'LANDLORD' : '';
   const routeStatus = location.pathname.endsWith('/banned') ? 'SUSPENDED' : '';
   const verificationStatus = location.pathname.endsWith('/verified') ? 'APPROVED' : '';
+
+  useEffect(() => {
+    setPage(1);
+    setQuery('');
+    setSearch('');
+  }, [location.pathname]);
 
   const filters = {
       page,
       limit: 20,
       ...(search && { search }),
-      ...((routeStatus || query) && { status: routeStatus || query }),
+      ...((query || routeStatus) && { status: query || routeStatus }),
       ...(role && { role }),
       ...(verificationStatus && { verificationStatus }),
   };
@@ -67,6 +74,13 @@ const AdminAllUsers = () => {
   const landlords = users.filter((user) => user.roles?.includes('LANDLORD')).length;
   const suspended = users.filter((user) => user.isSuspended).length;
   const statValue = (value: number) => loading || error ? '—' : value;
+  const activeCard = role === 'TENANT'
+    ? 'tenants'
+    : role === 'LANDLORD'
+      ? 'landlords'
+      : (query || routeStatus) === 'SUSPENDED'
+        ? 'suspended'
+        : 'total';
 
   return (
     <div className="space-y-6">
@@ -76,26 +90,34 @@ const AdminAllUsers = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
-        <Card className="p-4 text-center">
-          <Users size={24} className="mx-auto mb-2 text-blue-500" />
-          <p className="text-gray-600  text-sm">Total Users</p>
-          <p className="text-3xl font-bold text-blue-600  mt-2">{statValue(total)}</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <UserCheck size={24} className="mx-auto mb-2 text-green-500" />
-          <p className="text-gray-600  text-sm">Tenants on page</p>
-          <p className="text-3xl font-bold text-green-600  mt-2">{statValue(tenants)}</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <Shield size={24} className="mx-auto mb-2 text-purple-500" />
-          <p className="text-gray-600  text-sm">Landlords on page</p>
-          <p className="text-3xl font-bold text-purple-600  mt-2">{statValue(landlords)}</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <Ban size={24} className="mx-auto mb-2 text-red-500" />
-          <p className="text-gray-600  text-sm">Suspended on page</p>
-          <p className="text-3xl font-bold text-red-600  mt-2">{statValue(suspended)}</p>
-        </Card>
+        <button type="button" onClick={() => navigate('/admin/users')} aria-label="Show all users" aria-pressed={activeCard === 'total'} className="w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <Card className={`p-4 text-center transition hover:-translate-y-0.5 hover:border-primary ${activeCard === 'total' ? 'border-2 border-blue-500 ring-2 ring-blue-500/20 shadow-md' : ''}`}>
+            <Users size={24} className="mx-auto mb-2 text-blue-500" />
+            <p className={`text-gray-600 text-sm ${activeCard === 'total' ? 'font-extrabold text-blue-700' : ''}`}>Total Users</p>
+            <p className="text-3xl font-bold text-blue-600  mt-2">{statValue(total)}</p>
+          </Card>
+        </button>
+        <button type="button" onClick={() => navigate('/admin/users/tenants')} aria-label="Show tenant accounts" aria-pressed={activeCard === 'tenants'} className="w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <Card className={`p-4 text-center transition hover:-translate-y-0.5 hover:border-primary ${activeCard === 'tenants' ? 'border-2 border-green-500 ring-2 ring-green-500/20 shadow-md' : ''}`}>
+            <UserCheck size={24} className="mx-auto mb-2 text-green-500" />
+            <p className={`text-gray-600 text-sm ${activeCard === 'tenants' ? 'font-extrabold text-green-700' : ''}`}>Tenants on page</p>
+            <p className="text-3xl font-bold text-green-600  mt-2">{statValue(tenants)}</p>
+          </Card>
+        </button>
+        <button type="button" onClick={() => navigate('/admin/users/landlords')} aria-label="Show landlord accounts" aria-pressed={activeCard === 'landlords'} className="w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <Card className={`p-4 text-center transition hover:-translate-y-0.5 hover:border-primary ${activeCard === 'landlords' ? 'border-2 border-purple-500 ring-2 ring-purple-500/20 shadow-md' : ''}`}>
+            <Shield size={24} className="mx-auto mb-2 text-purple-500" />
+            <p className={`text-gray-600 text-sm ${activeCard === 'landlords' ? 'font-extrabold text-purple-700' : ''}`}>Landlords on page</p>
+            <p className="text-3xl font-bold text-purple-600  mt-2">{statValue(landlords)}</p>
+          </Card>
+        </button>
+        <button type="button" onClick={() => navigate('/admin/users/banned')} aria-label="Show suspended accounts" aria-pressed={activeCard === 'suspended'} className="w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+          <Card className={`p-4 text-center transition hover:-translate-y-0.5 hover:border-primary ${activeCard === 'suspended' ? 'border-2 border-red-500 ring-2 ring-red-500/20 shadow-md' : ''}`}>
+            <Ban size={24} className="mx-auto mb-2 text-red-500" />
+            <p className={`text-gray-600 text-sm ${activeCard === 'suspended' ? 'font-extrabold text-red-700' : ''}`}>Suspended on page</p>
+            <p className="text-3xl font-bold text-red-600  mt-2">{statValue(suspended)}</p>
+          </Card>
+        </button>
       </div>
 
       <Card className="p-6">
@@ -112,7 +134,7 @@ const AdminAllUsers = () => {
           />
           <select
             className="rounded-lg border border-gray-300  bg-surface  px-3 py-2 text-sm"
-            value={routeStatus || query}
+            value={query || routeStatus}
             onChange={(event) => { setQuery(event.target.value); setPage(1); }}
             aria-label="Filter users by account status"
           >
@@ -143,7 +165,21 @@ const AdminAllUsers = () => {
               ) : users.map((user) => {
                 const roles = user.roles ?? [];
                 return (
-                  <tr key={user.id} className="border-b border-gray-100  hover:bg-gray-50  transition">
+                  <tr
+                    key={user.id}
+                    className="cursor-pointer border-b border-gray-100 transition hover:bg-primary/5 focus:bg-primary/5"
+                    onClick={() => navigate(`/admin/users/${encodeURIComponent(user.id)}`)}
+                    onKeyDown={(event) => {
+                      if (event.target !== event.currentTarget) return;
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        navigate(`/admin/users/${encodeURIComponent(user.id)}`);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="link"
+                    aria-label={`Open ${user.fullName || user.email} user details`}
+                  >
                     <td className="py-3 px-4"><p className="font-medium text-gray-900 ">{user.fullName || '—'}</p></td>
                     <td className="py-3 px-4">
                       <div className="space-y-0.5">
@@ -173,7 +209,7 @@ const AdminAllUsers = () => {
                       <button
                         type="button"
                         className="rounded border border-gray-300  px-2 py-1 text-xs font-semibold"
-                        onClick={() => void moderateUser(user)}
+                        onClick={(event) => { event.stopPropagation(); void moderateUser(user); }}
                       >
                         {user.isSuspended ? 'Reinstate' : 'Suspend'}
                       </button>

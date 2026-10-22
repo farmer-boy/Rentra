@@ -29,12 +29,22 @@ interface VerificationOverview {
 
 const normalizedUrls = (value: string) => value.split(/\r?\n/).map((url) => url.trim()).filter(Boolean);
 const statusClass = (status: string) => status === 'APPROVED'
-  ? 'bg-green-100 text-green-800'
+  ? 'verification-approved-badge'
   : status === 'PENDING'
     ? 'bg-amber-100 text-amber-800'
     : status === 'REJECTED'
       ? 'bg-red-100 text-red-800'
       : 'bg-gray-100 text-gray-700';
+const reviewTextClass = (status: string) => status === 'APPROVED'
+  ? 'verification-approved-text'
+  : status === 'REJECTED'
+    ? 'text-red-700'
+    : 'text-gray-700';
+const reviewLabel = (status: string) => status === 'APPROVED'
+  ? 'Admin approved'
+  : status === 'REJECTED'
+    ? 'Admin rejected'
+    : 'Admin note';
 
 export default function LandlordVerification() {
   const user = useAuthStore((state) => state.user);
@@ -174,7 +184,7 @@ export default function LandlordVerification() {
               </div>
             )}
             {!profile.emailVerified && <p className="text-sm text-amber-700">Verify your email before submitting evidence. Email verification is handled through the existing account flow.</p>}
-            <p className="text-xs text-gray-500">The verification API requires both verified email and phone before evidence can be submitted. Verification is not granted by the browser.</p>
+            <p className="text-xs text-gray-500">A verified email is required to submit evidence. Phone verification is optional. Verification is not granted by the browser.</p>
           </Card>
 
           <Card className="space-y-4 p-5">
@@ -185,7 +195,7 @@ export default function LandlordVerification() {
                 const currentStatus = submission?.status ?? (submissionKind === 'HOST' ? profile.verificationStatus : profile.identityVerificationStatus);
                 return <div key={submissionKind} className="rounded-lg border p-4">
                   <div className="flex items-center justify-between gap-2"><strong>{submissionKind === 'HOST' ? 'Host verification' : 'Identity verification'}</strong><span className={`rounded-full px-2 py-1 text-xs font-bold ${statusClass(currentStatus)}`}>{currentStatus.replaceAll('_', ' ')}</span></div>
-                  {submission?.reviewNotes && <p className="mt-3 text-sm text-red-700">Review note: {submission.reviewNotes}</p>}
+                  {submission?.reviewNotes && <p className="mt-3 text-sm"><strong>{reviewLabel(submission.status)}:</strong> <span className={reviewTextClass(submission.status)}>{submission.reviewNotes}</span></p>}
                   {submission?.submittedAt && <p className="mt-2 text-xs text-gray-500">Submitted {new Date(submission.submittedAt).toLocaleString()}</p>}
                 </div>;
               })}
@@ -197,7 +207,7 @@ export default function LandlordVerification() {
               <label className="text-sm font-semibold">Submission type
                 <select value={kind} onChange={(event) => setKind(event.target.value as 'HOST' | 'IDENTITY')} className="ml-2 rounded-lg border bg-surface px-3 py-2 text-sm"><option value="HOST">Host</option><option value="IDENTITY">Identity</option></select>
               </label>
-              <button type="button" disabled={saving || !profile.emailVerified || !profile.phoneVerified || latestSubmission(kind)?.status === 'PENDING' || latestSubmission(kind)?.status === 'APPROVED'} onClick={() => void submitUserVerification()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">{saving ? 'Submitting…' : `Submit ${kind.toLowerCase()} verification`}</button>
+              <button type="button" disabled={saving || !profile.emailVerified || latestSubmission(kind)?.status === 'PENDING' || latestSubmission(kind)?.status === 'APPROVED'} onClick={() => void submitUserVerification()} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-primary-contrast disabled:opacity-50">{saving ? 'Submitting…' : `Submit ${kind.toLowerCase()} verification`}</button>
             </div>
           </Card>
 
@@ -207,8 +217,8 @@ export default function LandlordVerification() {
             {overview.properties.length === 0 ? <p className="text-sm text-gray-500">No properties are associated with this account yet.</p> : overview.properties.map((property) => {
               const submission = overview.submissions.find((item) => item.propertyId === property.id);
               return <div key={property.id} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
-                <div><p className="font-semibold">{property.title}</p><p className="text-xs text-gray-500">Verification: {property.verificationStatus.replaceAll('_', ' ')}</p>{submission?.reviewNotes && <p className="mt-1 text-xs text-red-700">Review note: {submission.reviewNotes}</p>}</div>
-                <button type="button" disabled={saving || property.verificationStatus === 'PENDING' || property.verificationStatus === 'APPROVED' || !profile.emailVerified || !profile.phoneVerified} onClick={() => void submitProperty(property.id)} className="rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50">Submit property evidence</button>
+                <div><p className="font-semibold">{property.title}</p><p className="text-xs text-gray-500">Verification: {property.verificationStatus.replaceAll('_', ' ')}</p>{submission?.reviewNotes && <p className="mt-2 text-xs"><strong>{reviewLabel(submission.status)}:</strong> <span className={reviewTextClass(submission.status)}>{submission.reviewNotes}</span></p>}</div>
+                <button type="button" disabled={saving || property.verificationStatus === 'PENDING' || property.verificationStatus === 'APPROVED' || !profile.emailVerified} onClick={() => void submitProperty(property.id)} className="rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50">Submit property evidence</button>
               </div>;
             })}
           </Card>

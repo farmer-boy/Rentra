@@ -7,6 +7,7 @@ interface Message {
   senderId: string;
   content: string;
   attachmentUrl?: string;
+  isDelivered: boolean;
   isRead: boolean;
   createdAt: string;
   sender: {
@@ -24,8 +25,9 @@ export interface Conversation {
   createdAt: string;
   participant1: { id: string; fullName: string; email?: string };
   participant2: { id: string; fullName: string; email?: string };
-  otherParticipant: { id: string; fullName: string; email?: string };
+  otherParticipant: { id: string; fullName: string; email?: string; roles?: string[] };
   lastMessage?: Message;
+  unreadCount?: number;
   listing?: { id: string; title: string; city: string; area: string } | null;
 }
 
@@ -106,6 +108,23 @@ export const useChat = (initialConversation?: Conversation) => {
     [],
   );
 
+  const updateMessage = useCallback(
+    async (conversationId: string, messageId: string, content: string) => {
+      const updated = await messagesAPI.update(conversationId, messageId, content);
+      setMessages((previous) => previous.map((message) => message.id === messageId ? updated : message));
+      return updated;
+    },
+    [],
+  );
+
+  const deleteMessage = useCallback(
+    async (conversationId: string, messageId: string) => {
+      await messagesAPI.delete(conversationId, messageId);
+      setMessages((previous) => previous.filter((message) => message.id !== messageId));
+    },
+    [],
+  );
+
   const fetchUnreadCount = useCallback(async () => {
     try {
       const response = await messagesAPI.unreadCount();
@@ -145,6 +164,8 @@ export const useChat = (initialConversation?: Conversation) => {
     startConversation,
     fetchMessages,
     sendMessage,
+    updateMessage,
+    deleteMessage,
     fetchUnreadCount,
     notifications,
     fetchNotifications,

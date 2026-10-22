@@ -10,9 +10,11 @@ import {
   ListingAvailability,
   ListingStatus,
   ListingPublicationStatus,
+  PropertyType,
   Prisma,
   RentalDuration,
   VerificationStatus,
+  Role,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { AmenitiesDto } from './dto/amenities.dto';
@@ -174,43 +176,23 @@ export class ListingsService {
         },
       ];
     }
-    if (
-      query.country ||
-      query.province ||
-      query.city ||
-      query.area ||
-      query.blockSector
-    ) {
+    if (query.country || query.province || query.blockSector) {
       const locationIds = await this.locationsService.findDescendantIds({
         COUNTRY: query.country,
         PROVINCE: query.province,
-        CITY: query.city,
-        AREA: query.area,
         BLOCK_SECTOR: query.blockSector,
       });
       where.locationId = { in: locationIds };
     }
-    if (query.propertyType) where.type = query.propertyType;
+    if (query.propertyType === PropertyType.FLAT || query.propertyType === PropertyType.APARTMENT) {
+      where.type = { in: [PropertyType.FLAT, PropertyType.APARTMENT] };
+    } else if (query.propertyType) {
+      where.type = query.propertyType;
+    }
     if (query.furnishedStatus) where.furnishedStatus = query.furnishedStatus;
     if (query.availability) where.availability = query.availability;
     if (query.rentalDuration) where.rentalDuration = query.rentalDuration;
-    if (query.availableFrom)
-      where.availableFrom = { lte: new Date(query.availableFrom) };
     const roomFilter: Prisma.HostelRoomWhereInput = {};
-    if (query.gender) {
-      roomFilter.OR = [
-        { genderPolicy: query.gender },
-        { genderPolicy: 'MIXED' },
-        {
-          genderPolicy: null,
-          listing: {
-            hostelDetails: {
-              genderPolicy: { in: [query.gender, 'MIXED'] },
-            },
-          },
-        },
-      ];
-    }
     if (query.roomType) {
       roomFilter.roomType = {
         contains: query.roomType.trim(),
@@ -236,10 +218,13 @@ export class ListingsService {
         },
       };
     }
-    if (query.bedrooms !== undefined) where.bedrooms = query.bedrooms;
-    if (query.bathrooms !== undefined) where.bathrooms = query.bathrooms;
+    // Bedrooms, bathrooms, gender, and availability date are soft preferences
+    // on public browse. They should not hide otherwise relevant area matches.
     if (query.minRent !== undefined || query.maxRent !== undefined) {
-      where.rent = { gte: query.minRent, lte: query.maxRent };
+      where.rent = {
+        gte: query.minRent === undefined ? undefined : Math.floor(query.minRent * 0.9),
+        lte: query.maxRent === undefined ? undefined : Math.ceil(query.maxRent * 1.1),
+      };
     }
 
     const skip = (query.page - 1) * query.limit;
@@ -270,6 +255,28 @@ export class ListingsService {
     };
   }
 
+  async findFeatured() {
+    const items = await this.prisma.listing.findMany({
+      where: { publicationStatus: ListingPublicationStatus.PUBLISHED },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+      select: {
+        id: true,
+        title: true,
+        area: true,
+        city: true,
+        rent: true,
+        bedrooms: true,
+        rentalDuration: true,
+        images: {
+          orderBy: { sortOrder: 'asc' },
+          select: { url: true },
+        },
+      },
+    });
+    return items;
+  }
+
   async findById(id: string) {
     const listing = await this.prisma.listing.findUnique({
       where: { id },
@@ -279,7 +286,7 @@ export class ListingsService {
     return this.withRentraVerified(listing);
   }
 
-  async findPublicById(id: string, viewerId?: string) {
+  async findPublicById(id: string, viewerId?: string, viewerRoles: string[] = []) {
     const listing = await this.prisma.listing.findUnique({
       where: { id },
       include: this.listingInclude(),
@@ -287,7 +294,8 @@ export class ListingsService {
     if (
       !listing ||
       (listing.publicationStatus !== ListingPublicationStatus.PUBLISHED &&
-        listing.landlordId !== viewerId)
+        listing.landlordId !== viewerId &&
+        !viewerRoles.includes('ADMIN'))
     ) {
       throw new NotFoundException('Listing not found');
     }
@@ -593,6 +601,13 @@ export class ListingsService {
   }
 
   private async assertLandlord(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { roles: true },
+    });
+    if (user?.roles.includes(Role.ADMIN)) {
+      throw new ForbiddenException('Administrator accounts cannot create listings');
+    }
     const profile = await this.prisma.landlordProfile.findUnique({
       where: { userId },
     });

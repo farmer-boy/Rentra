@@ -77,13 +77,26 @@ export class MessagesService {
 
   // Get all conversations for a user
   async getUserConversations(userId: string) {
+    const currentUser = await this.prisma.user.findUnique({ where: { id: userId }, select: { roles: true } });
+    // Inbox delivery means the message has reached the recipient's account.
+    await this.prisma.message.updateMany({
+      where: {
+        senderId: { not: userId },
+        isDelivered: false,
+        conversation: {
+          OR: [{ participant1Id: userId }, { participant2Id: userId }],
+        },
+      },
+      data: { isDelivered: true },
+    });
+
     const conversations = await this.prisma.conversation.findMany({
       where: {
         OR: [{ participant1Id: userId }, { participant2Id: userId }],
       },
       include: {
-        participant1: { select: { id: true, fullName: true } },
-        participant2: { select: { id: true, fullName: true } },
+        participant1: { select: { id: true, fullName: true, roles: true } },
+        participant2: { select: { id: true, fullName: true, roles: true } },
         messages: {
           take: 1,
           orderBy: { createdAt: 'desc' },
@@ -104,13 +117,15 @@ export class MessagesService {
       orderBy: { lastMessageAt: 'desc' },
     });
 
-    return conversations.map((conv) => ({
+    return conversations
+      .filter((conv) => !currentUser?.roles.includes('ADMIN') || (!conv.participant1.roles.includes('ADMIN') && !conv.participant2.roles.includes('ADMIN')))
+      .map((conv) => ({
       ...conv,
       otherParticipant:
         conv.participant1Id === userId ? conv.participant2 : conv.participant1,
       lastMessage: conv.messages[0] || null,
       unreadCount: conv._count.messages,
-    }));
+      }));
   }
 
   async getConversation(conversationId: string, userId: string) {
@@ -131,7 +146,13 @@ export class MessagesService {
   private async assertParticipant(conversationId: string, userId: string) {
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
-      select: { participant1Id: true, participant2Id: true },
+      select: {
+        participant1Id: true,
+        participant2Id: true,
+        createdAt: true,
+        participant1: { select: { roles: true } },
+        participant2: { select: { roles: true } },
+      },
     });
     if (!conversation) throw new NotFoundException('Conversation not found');
     if (
@@ -139,6 +160,14 @@ export class MessagesService {
       conversation.participant2Id !== userId
     ) {
       throw new ForbiddenException('You are not part of this conversation');
+    }
+    const requestingUserIsAdmin = userId === conversation.participant1Id
+      ? conversation.participant1.roles.includes('ADMIN')
+      : conversation.participant2.roles.includes('ADMIN');
+    if (requestingUserIsAdmin) {
+      throw new ForbiddenException(
+        'Direct messages with admins are disabled. Please use Help & Support.',
+      );
     }
     return conversation;
   }
@@ -152,10 +181,22 @@ export class MessagesService {
   ): Promise<{ listingId?: string; propertyId?: string; bookingId?: string }> {
     const otherUser = await this.prisma.user.findUnique({
       where: { id: otherUserId },
-      select: { id: true },
+      select: { id: true, roles: true },
     });
     if (!otherUser)
       throw new NotFoundException('Conversation participant not found');
+    const currentUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { roles: true },
+    });
+    if (
+      otherUser.roles.includes('ADMIN') ||
+      currentUser?.roles.includes('ADMIN')
+    ) {
+      throw new ForbiddenException(
+        'Direct messages with admins are disabled. Please use Help & Support.',
+      );
+    }
 
     if (bookingId) {
       const booking = await this.prisma.booking.findUnique({
@@ -264,8 +305,8 @@ export class MessagesService {
 
   private conversationInclude() {
     return {
-      participant1: { select: { id: true, fullName: true } },
-      participant2: { select: { id: true, fullName: true } },
+      participant1: { select: { id: true, fullName: true, roles: true } },
+      participant2: { select: { id: true, fullName: true, roles: true } },
       listing: { select: { id: true, title: true, city: true, area: true } },
       property: { select: { id: true, title: true, city: true, area: true } },
       booking: {
@@ -286,8 +327,8 @@ export class MessagesService {
     const safeOffset = Math.max(0, offset);
 
     await this.prisma.message.updateMany({
-      where: { conversationId, senderId: { not: userId }, isRead: false },
-      data: { isRead: true },
+      where: { conversationId, senderId: { not: userId }, isDelivered: false },
+      data: { isDelivered: true },
     });
 
     const messages = await this.prisma.message.findMany({
@@ -336,6 +377,11 @@ export class MessagesService {
         ? conversation.participant2Id
         : conversation.participant1Id;
 
+    const recipient = await this.prisma.user.findUnique({ where: { id: recipientId }, select: { roles: true } });
+    if (recipient?.roles.includes('ADMIN')) {
+      throw new ForbiddenException('This is an official notice inbox. Replies are disabled.');
+    }
+
     return this.prisma.$transaction(async (transaction) => {
       const message = await transaction.message.create({
         data: {
@@ -371,6 +417,59 @@ export class MessagesService {
 
       return message;
     });
+  }
+
+  async updateMessage(
+    conversationId: string,
+    messageId: string,
+    userId: string,
+    content: string,
+  ) {
+    await this.assertParticipant(conversationId, userId);
+    const normalizedContent = content.trim();
+    if (!normalizedContent) {
+      throw new BadRequestException('Message text cannot be empty');
+    }
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      select: { id: true, conversationId: true, senderId: true },
+    });
+    if (!message || message.conversationId !== conversationId) {
+      throw new NotFoundException('Message not found');
+    }
+    if (message.senderId !== userId) {
+      throw new ForbiddenException('You can only edit your own messages');
+    }
+    return this.prisma.message.update({
+      where: { id: messageId },
+      data: { content: normalizedContent },
+      include: { sender: { select: { id: true, fullName: true } } },
+    });
+  }
+
+  async deleteMessage(conversationId: string, messageId: string, userId: string) {
+    const conversation = await this.assertParticipant(conversationId, userId);
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      select: { id: true, conversationId: true, senderId: true },
+    });
+    if (!message || message.conversationId !== conversationId) {
+      throw new NotFoundException('Message not found');
+    }
+    if (message.senderId !== userId) {
+      throw new ForbiddenException('You can only delete your own messages');
+    }
+    await this.prisma.message.delete({ where: { id: messageId } });
+    const latestMessage = await this.prisma.message.findFirst({
+      where: { conversationId },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+    await this.prisma.conversation.update({
+      where: { id: conversationId },
+      data: { lastMessageAt: latestMessage?.createdAt ?? conversation.createdAt },
+    });
+    return { success: true, messageId };
   }
 
   // Get unread message count for a user
@@ -412,6 +511,7 @@ export class MessagesService {
         isRead: false,
       },
       data: {
+        isDelivered: true,
         isRead: true,
         updatedAt: new Date(),
       },

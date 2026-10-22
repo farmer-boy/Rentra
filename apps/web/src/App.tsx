@@ -1,7 +1,6 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { LayoutDashboard, Home, Plus, Star, FileText, CreditCard, Scale, User, Heart, MessageCircle, Eye, Users, TrendingUp, Bell, Settings, Bookmark, ClipboardList, CalendarDays, ShieldCheck, Zap } from 'lucide-react';
 
 // Context
 import { ThemeProvider } from './context/ThemeContext';
@@ -16,6 +15,7 @@ import Contact from './pages/contact/Contact';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
+import { getUnifiedNavSections } from './components/layout/unifiedNavSections';
 import AdminLayout from './components/layout/AdminLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
@@ -23,9 +23,10 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import SettingsPage from './pages/settings/SettingsPage';
 
 // Tenant Pages
-import TenantDashboard from './pages/tenant/TenantDashboard';
+import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
 import BrowseListings from './pages/tenant/BrowseListings';
 import ListingDetails from './pages/tenant/ListingDetails';
+import PublicListingsLayout from './components/layout/PublicListingsLayout';
 import SavedListings from './pages/tenant/SavedListings';
 import SavedSearches from './pages/tenant/SavedSearches';
 import TenantRentalRequests from './pages/tenant/RentalRequests';
@@ -42,7 +43,6 @@ import ReviewsAndRatings from './pages/tenant/ReviewsAndRatings';
 import PostProperty from './pages/tenant/PostProperty';
 
 // Landlord Pages
-import LandlordDashboard from './pages/landlord/LandlordDashboard';
 import LandlordProfile from './pages/landlord/Profile';
 import LandlordPostProperty from './pages/landlord/PostProperty';
 import MyProperties from './pages/landlord/MyProperties';
@@ -65,13 +65,17 @@ import ChatPage from './pages/messages/ChatPage';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProfile from './pages/admin/Profile';
 import AdminAllUsers from './pages/admin/AllUsers';
+import AdminUserDetails from './pages/admin/AdminUserDetails';
 import AdminAllDisputes from './pages/admin/AllDisputes';
 import AdminPlatformAnalytics from './pages/admin/PlatformAnalytics';
 import AdminMessages from './pages/admin/Messages';
 import AdminResourcePage from './pages/admin/AdminResourcePage';
 import VerificationQueue from './pages/admin/VerificationQueue';
 import NotificationsPage from './pages/notifications/NotificationsPage';
+import SupportPage from './pages/support/SupportPage';
+import SupportTickets from './pages/admin/SupportTickets';
 import { useAuthStore } from './store/authStore';
+import type { Role } from './types';
 
 function NotFoundPage() {
   return (
@@ -86,148 +90,52 @@ function NotFoundPage() {
   );
 }
 
-// Nav configs
-const tenantNavSections = [
-  {
-    title: 'MAIN',
-    items: [
-      { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/tenant' },
-      {
-        icon: <Home size={16} />,
-        label: 'Explore & Post',
-        children: [
-          { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings' },
-          { icon: <Heart size={16} />, label: 'Saved Listings', path: '/tenant/saved' },
-          { icon: <Bookmark size={16} />, label: 'Saved Searches', path: '/tenant/saved-searches' },
-          { icon: <Plus size={16} />, label: 'Post a Property', path: '/tenant/post' },
-        ],
-      },
-      {
-        icon: <MessageCircle size={16} />,
-        label: 'Communication',
-        children: [
-          { icon: <MessageCircle size={16} />, label: 'Messages', path: '/tenant/messages' },
-          { icon: <Bell size={16} />, label: 'Notifications', path: '/tenant/notifications' },
-        ],
-      },
-      {
-        icon: <Zap size={16} />,
-        label: 'Property Tools',
-        children: [
-          { icon: <Eye size={16} />, label: 'AI Listing Detector', path: '/tenant/detector' },
-          { icon: <TrendingUp size={16} />, label: 'Rent Estimator', path: '/tenant/estimator' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'MY TENANCY',
-    items: [
-      {
-        icon: <ClipboardList size={16} />,
-        label: 'Rental Management',
-        children: [
-          { icon: <ClipboardList size={16} />, label: 'Rental Requests', path: '/tenant/rental-requests' },
-          { icon: <CalendarDays size={16} />, label: 'My Bookings', path: '/tenant/bookings' },
-          { icon: <FileText size={16} />, label: 'My Agreements', path: '/tenant/agreement' },
-          { icon: <CreditCard size={16} />, label: 'Payments', path: '/tenant/payments' },
-          { icon: <Scale size={16} />, label: 'Disputes', path: '/tenant/disputes' },
-          { icon: <Settings size={16} />, label: 'Maintenance', path: '/tenant/maintenance' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'ACCOUNT',
-    items: [
-      {
-        icon: <User size={16} />,
-        label: 'My Account',
-        children: [
-          { icon: <User size={16} />, label: 'Profile', path: '/tenant/profile' },
-          { icon: <ShieldCheck size={16} />, label: 'Trust Score', path: '/tenant/trust' },
-          { icon: <Star size={16} />, label: 'My Reviews & Ratings', path: '/tenant/reviews' },
-          { icon: <Settings size={16} />, label: 'Settings', path: '/tenant/settings' },
-        ],
-      },
-    ],
-  },
-];
+function HomeEntry() {
+  const { user, isInitialized } = useAuthStore();
+  if (!isInitialized) return <div role="status" className="p-6 text-center">Restoring your session…</div>;
+  const roles = user?.roles ?? (user?.role ? [user.role] : []);
+  return roles.includes('ADMIN') ? <Navigate to="/admin" replace /> : <HomePage />;
+}
 
-const landlordNavSections = [
-  {
-    title: 'MAIN',
-    items: [
-      { icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: '/landlord' },
-      { icon: <Zap size={16} />, label: 'Rentra Boost', path: '/landlord/boost' },
-      {
-        icon: <Home size={16} />,
-        label: 'Properties',
-        children: [
-          { icon: <Home size={16} />, label: 'My Properties', path: '/landlord/properties' },
-          { icon: <Plus size={16} />, label: 'Post Property', path: '/landlord/post' },
-        ],
-      },
-      {
-        icon: <CalendarDays size={16} />,
-        label: 'Rental Operations',
-        children: [
-          { icon: <CalendarDays size={16} />, label: 'Bookings', path: '/landlord/bookings' },
-          { icon: <CalendarDays size={16} />, label: 'Availability', path: '/landlord/availability' },
-          { icon: <ClipboardList size={16} />, label: 'Pending Applications', path: '/landlord/applications' },
-          { icon: <Users size={16} />, label: 'My Tenants', path: '/landlord/tenants' },
-          { icon: <FileText size={16} />, label: 'Agreements', path: '/landlord/agreements' },
-          { icon: <Settings size={16} />, label: 'Maintenance', path: '/landlord/maintenance' },
-        ],
-      },
-      {
-        icon: <MessageCircle size={16} />,
-        label: 'Communication',
-        children: [
-          { icon: <MessageCircle size={16} />, label: 'Messages', path: '/landlord/messages' },
-          { icon: <Bell size={16} />, label: 'Notifications', path: '/landlord/notifications' },
-        ],
-      },
-      {
-        icon: <Zap size={16} />,
-        label: 'Property Tools',
-        children: [
-          { icon: <TrendingUp size={16} />, label: 'Rent Estimator', path: '/landlord/estimator' },
-          { icon: <Eye size={16} />, label: 'Fake Listing Detector', path: '/landlord/detector' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'MONEY',
-    items: [
-      {
-        icon: <CreditCard size={16} />,
-        label: 'Finance',
-        children: [
-          { icon: <CreditCard size={16} />, label: 'Payments Received', path: '/landlord/payments' },
-          { icon: <TrendingUp size={16} />, label: 'Income Report', path: '/landlord/income' },
-        ],
-      },
-    ],
-  },
-  {
-    title: 'ACCOUNT',
-    items: [
-      {
-        icon: <User size={16} />,
-        label: 'My Account',
-        children: [
-          { icon: <User size={16} />, label: 'Profile', path: '/landlord/profile' },
-          { icon: <ShieldCheck size={16} />, label: 'Verification', path: '/landlord/verification' },
-          { icon: <Eye size={16} />, label: 'Tenant Trust Scores', path: '/landlord/trust' },
-          { icon: <Star size={16} />, label: 'Reviews', path: '/landlord/reviews' },
-          { icon: <Settings size={16} />, label: 'Settings', path: '/landlord/settings' },
-        ],
-      },
-    ],
-  },
-];
+function LegacyWorkspaceRedirect({ workspace }: { workspace: 'tenant' | 'landlord' }) {
+  const { pathname, search, hash } = useLocation();
+  const subpath = pathname.replace(new RegExp(`^/${workspace}/?`), '').replace(/\/$/, '');
+  const mappings: Record<string, string> = workspace === 'tenant'
+    ? {
+        '': '', listings: 'listings', saved: 'saved', 'saved-searches': 'saved-searches',
+        post: 'enable-hosting', 'rental-requests': 'my-requests', bookings: 'my-bookings',
+        messages: 'messages', notifications: 'notifications', detector: 'fake-detector',
+        estimator: 'rent-estimator', trust: 'trust-scores', agreement: 'my-agreements',
+        payments: 'my-payments', disputes: 'disputes', maintenance: 'my-maintenance',
+        profile: 'profile', reviews: 'my-reviews', settings: 'settings',
+      }
+    : {
+        '': '', properties: 'properties', post: 'post-property', boost: 'boost',
+        bookings: 'property-bookings', availability: 'availability', verification: 'host-verification',
+        messages: 'messages', notifications: 'notifications', tenants: 'tenants',
+        applications: 'received-requests', agreements: 'property-agreements', payments: 'received-payments',
+        income: 'income', estimator: 'rent-estimator', detector: 'host-detector', trust: 'host-trust',
+        maintenance: 'property-maintenance', profile: 'host-profile', reviews: 'host-reviews', settings: 'settings',
+      };
+  const listingDetails = subpath.match(/^listings\/([^/]+)$/);
+  const destination = listingDetails
+    ? `/dashboard/listings/${listingDetails[1]}`
+    : mappings[subpath] !== undefined
+      ? `/dashboard${mappings[subpath] ? `/${mappings[subpath]}` : ''}`
+      : '/dashboard';
+
+  return <Navigate to={`${destination}${search}${hash}`} replace />;
+}
+
+function LandlordCapabilityRoute({ children }: { children: React.ReactNode }) {
+  return <ProtectedRoute allowedRoles={['LANDLORD']}>{children}</ProtectedRoute>;
+}
+
+function NonAdminLandlordRoute({ children }: { children: React.ReactNode }) {
+  const user = useAuthStore((state) => state.user);
+  const roles = user?.roles ?? (user?.role ? [user.role] : []);
+  return roles.includes('ADMIN') ? <Navigate to="/admin" replace /> : <>{children}</>;
+}
 
 export default function App() {
   return (
@@ -239,6 +147,9 @@ export default function App() {
 
 function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initialize);
+  const user = useAuthStore((state) => state.user);
+  const userRoles: Role[] = user?.roles ?? (user?.role ? [user.role] : []);
+  const dashboardNavSections = getUnifiedNavSections(userRoles.includes('LANDLORD'), userRoles.includes('ADMIN'));
 
   useEffect(() => {
     void initializeAuth();
@@ -259,10 +170,12 @@ function AppContent() {
       />
       <Routes>
         {/* Public */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/listings" element={<BrowseListings />} />
-        <Route path="/listings/:id" element={<ListingDetails />} />
-        <Route path="/favorites" element={<SavedListings />} />
+        <Route path="/" element={<HomeEntry />} />
+        <Route element={<PublicListingsLayout />}>
+          <Route path="/listings" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><BrowseListings /></ProtectedRoute>} />
+          <Route path="/listings/:id" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><ListingDetails /></ProtectedRoute>} />
+        </Route>
+        <Route path="/favorites" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><SavedListings /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<PasswordRecovery />} />
@@ -273,67 +186,60 @@ function AppContent() {
 
         {/* Shared - Settings */}
         <Route path="/settings" element={
-          <ProtectedRoute allowedRoles={['TENANT', 'LANDLORD', 'ADMIN']}>
+          <ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}>
             <SettingsPage />
           </ProtectedRoute>
         } />
 
-        {/* Tenant Routes */}
-        <Route path="/tenant" element={
-          <ProtectedRoute allowedRoles={['TENANT']}>
-            <DashboardLayout navSections={tenantNavSections} />
+        {/* One shared tenant and landlord dashboard */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}>
+            <DashboardLayout navSections={dashboardNavSections} />
           </ProtectedRoute>
         }>
-          <Route index element={<TenantDashboard />} />
+          <Route index element={<UnifiedDashboard />} />
           <Route path="listings" element={<BrowseListings />} />
           <Route path="listings/:id" element={<ListingDetails />} />
           <Route path="saved" element={<SavedListings />} />
           <Route path="saved-searches" element={<SavedSearches />} />
-          <Route path="rental-requests" element={<TenantRentalRequests />} />
-          <Route path="bookings" element={<TenantBookings />} />
+          <Route path="enable-hosting" element={<NonAdminLandlordRoute><PostProperty /></NonAdminLandlordRoute>} />
+          <Route path="post-property" element={<NonAdminLandlordRoute><LandlordPostProperty /></NonAdminLandlordRoute>} />
+          <Route path="properties" element={<LandlordCapabilityRoute><MyProperties /></LandlordCapabilityRoute>} />
+          <Route path="received-requests" element={<LandlordCapabilityRoute><PendingApplications /></LandlordCapabilityRoute>} />
+          <Route path="my-requests" element={<TenantRentalRequests />} />
+          <Route path="my-bookings" element={<TenantBookings />} />
+          <Route path="property-bookings" element={<LandlordCapabilityRoute><LandlordBookings /></LandlordCapabilityRoute>} />
+          <Route path="availability" element={<LandlordCapabilityRoute><LandlordAvailability /></LandlordCapabilityRoute>} />
+          <Route path="my-agreements" element={<Agreements />} />
+          <Route path="rental-history" element={<Agreements />} />
+          <Route path="property-agreements" element={<LandlordCapabilityRoute><LandlordAgreements /></LandlordCapabilityRoute>} />
+          <Route path="my-payments" element={<Payments />} />
+          <Route path="received-payments" element={<LandlordCapabilityRoute><PaymentsReceived /></LandlordCapabilityRoute>} />
+          <Route path="income" element={<LandlordCapabilityRoute><IncomeReport /></LandlordCapabilityRoute>} />
           <Route path="messages" element={<ChatPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="post" element={<PostProperty />} />
-          <Route path="detector" element={<AIDetector />} />
-          <Route path="estimator" element={<RentEstimator />} />
-          <Route path="trust" element={<TrustScores />} />
-          <Route path="agreement" element={<Agreements />} />
-          <Route path="payments" element={<Payments />} />
+          <Route path="support" element={<SupportPage />} />
           <Route path="disputes" element={<Disputes />} />
-          <Route path="maintenance" element={<MaintenanceRequests />} />
+          <Route path="my-maintenance" element={<MaintenanceRequests />} />
+          <Route path="property-maintenance" element={<LandlordCapabilityRoute><LandlordMaintenanceRequests /></LandlordCapabilityRoute>} />
+          <Route path="fake-detector" element={<AIDetector />} />
+          <Route path="host-detector" element={<LandlordCapabilityRoute><LandlordFakeDetector /></LandlordCapabilityRoute>} />
+          <Route path="rent-estimator" element={<RentEstimator />} />
+          <Route path="trust-scores" element={<TrustScores />} />
+          <Route path="host-trust" element={<LandlordCapabilityRoute><LandlordTrustScores /></LandlordCapabilityRoute>} />
+          <Route path="host-verification" element={<LandlordCapabilityRoute><LandlordVerification /></LandlordCapabilityRoute>} />
+          <Route path="tenants" element={<LandlordCapabilityRoute><MyTenants /></LandlordCapabilityRoute>} />
+          <Route path="boost" element={<LandlordCapabilityRoute><RentraBoost /></LandlordCapabilityRoute>} />
           <Route path="profile" element={<Profile />} />
-          <Route path="reviews" element={<ReviewsAndRatings />} />
+          <Route path="host-profile" element={<LandlordCapabilityRoute><LandlordProfile /></LandlordCapabilityRoute>} />
+          <Route path="my-reviews" element={<ReviewsAndRatings />} />
+          <Route path="host-reviews" element={<LandlordCapabilityRoute><LandlordReviews /></LandlordCapabilityRoute>} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 
-        {/* Landlord Routes */}
-        <Route path="/landlord" element={
-          <ProtectedRoute allowedRoles={['LANDLORD']}>
-            <DashboardLayout navSections={landlordNavSections} />
-          </ProtectedRoute>
-        }>
-          <Route index element={<LandlordDashboard />} />
-          <Route path="properties" element={<MyProperties />} />
-          <Route path="post" element={<LandlordPostProperty />} />
-          <Route path="boost" element={<RentraBoost />} />
-          <Route path="bookings" element={<LandlordBookings />} />
-          <Route path="availability" element={<LandlordAvailability />} />
-          <Route path="verification" element={<LandlordVerification />} />
-          <Route path="messages" element={<ChatPage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-          <Route path="tenants" element={<MyTenants />} />
-          <Route path="applications" element={<PendingApplications />} />
-          <Route path="agreements" element={<LandlordAgreements />} />
-          <Route path="payments" element={<PaymentsReceived />} />
-          <Route path="income" element={<IncomeReport />} />
-          <Route path="estimator" element={<RentEstimator />} />
-          <Route path="detector" element={<LandlordFakeDetector />} />
-          <Route path="trust" element={<LandlordTrustScores />} />
-          <Route path="maintenance" element={<LandlordMaintenanceRequests />} />
-          <Route path="profile" element={<LandlordProfile />} />
-          <Route path="reviews" element={<LandlordReviews />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
+        {/* Keep old bookmarks working, but send them into the one dashboard. */}
+        <Route path="/tenant/*" element={<LegacyWorkspaceRedirect workspace="tenant" />} />
+        <Route path="/landlord/*" element={<LegacyWorkspaceRedirect workspace="landlord" />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={
@@ -343,14 +249,19 @@ function AppContent() {
         }>
           <Route index element={<AdminDashboard />} />
           <Route path="listings" element={<AdminResourcePage />} />
-          <Route path="approvals" element={<VerificationQueue />} />
+          <Route path="listings/:id" element={<ListingDetails />} />
+          <Route path="approvals" element={<VerificationQueue kind="ALL" />} />
+          <Route path="user-verification" element={<VerificationQueue kind="USER" />} />
+          <Route path="property-verification" element={<VerificationQueue kind="PROPERTY" />} />
           <Route path="reported" element={<AdminResourcePage />} />
           <Route path="users" element={<AdminAllUsers />} />
+          <Route path="users/:id" element={<AdminUserDetails />} />
           <Route path="users/tenants" element={<AdminAllUsers />} />
           <Route path="users/landlords" element={<AdminAllUsers />} />
           <Route path="users/verified" element={<AdminAllUsers />} />
           <Route path="users/banned" element={<AdminAllUsers />} />
           <Route path="messages" element={<AdminMessages />} />
+          <Route path="support" element={<SupportTickets />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="reviews" element={<AdminResourcePage />} />
           <Route path="properties" element={<AdminResourcePage />} />
@@ -362,7 +273,7 @@ function AppContent() {
           <Route path="agreements" element={<AdminResourcePage />} />
           <Route path="payments" element={<AdminResourcePage />} />
           <Route path="reports" element={<AdminResourcePage />} />
-          <Route path="verification" element={<VerificationQueue />} />
+          <Route path="verification" element={<VerificationQueue kind="ALL" />} />
           <Route path="audit" element={<AdminResourcePage />} />
           <Route path="disputes" element={<AdminAllDisputes />} />
           <Route path="disputes/open" element={<AdminAllDisputes />} />

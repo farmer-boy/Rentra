@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { verificationAPI } from '../../api/verification';
+import { toApiError } from '../../api/api-error';
 import Card from '../../components/ui/Card';
 
 interface VerificationItem {
@@ -23,11 +24,18 @@ interface VerificationDetail extends VerificationItem {
   };
 }
 
-export default function VerificationQueue() {
+type VerificationQueueKind = 'ALL' | 'USER' | 'PROPERTY';
+
+export default function VerificationQueue({ kind }: { kind: VerificationQueueKind }) {
   const [items, setItems] = useState<VerificationItem[]>([]);
   const [selected, setSelected] = useState<VerificationDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const queueItems = items.filter((item) =>
+    kind === 'ALL' || (kind === 'PROPERTY'
+      ? item.kind === 'PROPERTY'
+      : item.kind === 'IDENTITY' || item.kind === 'HOST'),
+  );
 
   const loadQueue = useCallback(async () => {
     setLoading(true);
@@ -60,35 +68,45 @@ export default function VerificationQueue() {
       await verificationAPI.review(selected.id, { decision, reviewNotes });
       setSelected(null);
       await loadQueue();
-    } catch {
-      setError('The verification decision could not be saved. The submission may already have been reviewed.');
+    } catch (cause) {
+      setError(toApiError(cause).message || 'The verification decision could not be saved. The submission may already have been reviewed.');
     }
   };
 
   return (
     <section className="space-y-5">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900 ">Verification Queue</h1>
+        <h1 className="text-2xl font-bold text-gray-900 ">{kind === 'ALL' ? 'Verification Queue' : kind === 'PROPERTY' ? 'Property Verification' : 'User Verification'}</h1>
         <p className="mt-1 text-sm text-gray-600 ">
-          Review submitted evidence. Property approval is determined by the verification workflow.
+          {kind === 'ALL'
+            ? 'Review identity, host, and property submissions.'
+            : kind === 'PROPERTY'
+            ? 'Review posted properties separately from landlord identity and host checks.'
+            : 'Review identity and landlord host verification separately from property posts.'}
         </p>
       </header>
       {error && <p role="alert" className="text-sm text-red-600 ">{error}</p>}
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4">
         <Card className="p-0">
-          {loading ? <p className="p-5 text-sm text-gray-500">Loading submissions...</p> : items.length === 0 ? (
-            <p className="p-5 text-sm text-gray-500">No pending verification submissions.</p>
+          {loading ? <p className="p-5 text-sm text-gray-500">Loading submissions...</p> : queueItems.length === 0 ? (
+            <p className="p-5 text-sm text-gray-500">{kind === 'ALL' ? 'No pending verification submissions.' : kind === 'PROPERTY' ? 'No pending property reviews.' : 'No pending user verification submissions.'}</p>
           ) : (
             <ul className="divide-y divide-gray-100 ">
-              {items.map((item) => (
+              {queueItems.map((item) => (
                 <li key={item.id}>
                   <button
                     type="button"
                     onClick={() => void selectSubmission(item.id)}
-                    className="w-full p-4 text-left hover:bg-gray-50 "
+                    aria-pressed={selected?.id === item.id}
+                    className={`w-full p-4 text-left hover:bg-gray-50 ${selected?.id === item.id ? 'bg-emerald-50 ring-1 ring-inset ring-emerald-200' : ''}`}
                   >
-                    <span className="block font-semibold text-gray-900 ">{item.kind} · {item.user?.fullName ?? item.property?.title ?? item.id}</span>
-                    <span className="mt-1 block text-xs text-gray-500">{item.status} · {new Date(item.submittedAt).toLocaleString()}</span>
+                    <span className="block text-xs font-bold uppercase tracking-wide text-emerald-800">
+                      {item.kind === 'HOST' ? 'Landlord verification' : item.kind === 'IDENTITY' ? 'Identity verification' : 'Property review'}
+                    </span>
+                    <span className="mt-1 block font-semibold text-gray-900 ">{item.property?.title ?? item.user?.fullName ?? item.id}</span>
+                    <span className="mt-1 block text-xs text-gray-500">
+                      {item.status} · {new Date(item.submittedAt).toLocaleString()} · Click to review
+                    </span>
                   </button>
                 </li>
               ))}
@@ -126,6 +144,11 @@ export default function VerificationQueue() {
                     <li key={url}><a className="break-all text-sm text-blue-600 underline" href={url} target="_blank" rel="noreferrer">Open submitted evidence</a></li>
                   ))}</ul>
                 </div>
+              )}
+              {selected.kind !== 'PROPERTY' && !selected.evidenceUrls?.length && (
+                <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+                  No evidence links were submitted. Ask the landlord to provide proof before approving this verification.
+                </p>
               )}
               {selected.status === 'PENDING' && (
                 <div className="flex flex-wrap gap-2 border-t border-gray-200  pt-4">

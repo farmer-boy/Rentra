@@ -1,14 +1,21 @@
 import { useState } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { contactsAPI } from '../../api/contacts';
 import { getApiErrorMessage } from '../../api/api-error';
+import { useAuthStore } from '../../store/authStore';
 
 export default function Contact() {
+  const user = useAuthStore((state) => state.user);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  if (user) {
+    const roles = user.roles ?? (user.role ? [user.role] : []);
+    return <Navigate to={roles.includes('ADMIN') ? '/admin/support' : '/dashboard/support'} replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

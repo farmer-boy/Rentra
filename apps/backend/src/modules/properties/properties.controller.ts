@@ -75,7 +75,8 @@ export class PropertiesController {
   }
 
   @Get()
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary:
       'List active properties, plus the caller’s own/managed properties when authenticated',
@@ -85,6 +86,8 @@ export class PropertiesController {
   }
 
   @Get('search')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Search active properties with filters, radius, and sorting',
   })
@@ -97,6 +100,8 @@ export class PropertiesController {
   }
 
   @Get('nearby')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Find active properties around map coordinates',
   })
@@ -124,7 +129,8 @@ export class PropertiesController {
   }
 
   @Get(':id/room-types')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'List room types, units, prices, capacities, and amenities',
     description:
@@ -135,6 +141,8 @@ export class PropertiesController {
   }
 
   @Get(':id/availability')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get daily availability for a date range',
     description:
@@ -208,7 +216,8 @@ export class PropertiesController {
   }
 
   @Get(':id')
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({
     summary:
       'Get an active property, or an owned/managed property for its authorized user',

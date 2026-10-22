@@ -25,6 +25,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AdminListQueryDto } from './dto/admin-list-query.dto';
+import { SendUserNoticeDto } from './dto/send-user-notice.dto';
 
 @Injectable()
 export class AdminService {
@@ -32,6 +33,51 @@ export class AdminService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
   ) {}
+
+  async sendUserNotice(userId: string, actorId: string, dto: SendUserNoticeDto) {
+    const message = dto.message.trim();
+    if (!message) throw new BadRequestException('A message is required');
+    return this.prisma.$transaction(async (transaction) => {
+      const recipient = await transaction.user.findUnique({ where: { id: userId }, select: { id: true } });
+      if (!recipient) throw new NotFoundException('User not found');
+
+      const [participant1Id, participant2Id] = [actorId, userId].sort();
+      let conversation = await transaction.conversation.findFirst({
+        where: { participant1Id, participant2Id, listingId: null, propertyId: null, bookingId: null },
+      });
+      if (!conversation) {
+        conversation = await transaction.conversation.create({
+          data: { participant1Id, participant2Id },
+        });
+      }
+      const chatMessage = await transaction.message.create({
+        data: { conversationId: conversation.id, senderId: actorId, content: message },
+        select: { id: true, content: true, createdAt: true },
+      });
+      await transaction.conversation.update({
+        where: { id: conversation.id },
+        data: { lastMessageAt: chatMessage.createdAt },
+      });
+      await transaction.notification.create({
+        data: {
+          userId,
+          type: NotificationType.NEW_MESSAGE,
+          title: dto.reason,
+          message: 'Rentra Support sent you a notice',
+          data: { conversationId: conversation.id, messageId: chatMessage.id, reason: dto.reason },
+        },
+      });
+      await this.audit.record(transaction, {
+        actorId,
+        actorRole: 'ADMIN',
+        entityType: 'USER',
+        entityId: userId,
+        action: 'USER_NOTICE_SENT',
+        reason: `${dto.reason}: ${message}`,
+      });
+      return { ...chatMessage, conversationId: conversation.id };
+    });
+  }
 
   async getAllUsers(query: AdminListQueryDto = new AdminListQueryDto()) {
     const where: Prisma.UserWhereInput = {
@@ -727,6 +773,7 @@ export class AdminService {
       ...(query.status && {
         status: this.enumFilter(query.status, Object.values(ListingStatus)),
       }),
+      ...(query.publicationStatus && { publicationStatus: query.publicationStatus }),
       ...(query.type && {
         type: this.enumFilter(query.type, Object.values(PropertyType)),
       }),
@@ -840,6 +887,10 @@ export class AdminService {
       suspendedUsers,
       totalListings,
       verifiedListings,
+      publishedListings,
+      unpublishedListings,
+      approvedListings,
+      pendingReviewListings,
       totalAgreements,
       activeAgreements,
       totalDisputes,
@@ -857,6 +908,10 @@ export class AdminService {
       this.prisma.user.count({ where: { isSuspended: true } }),
       this.prisma.listing.count(),
       this.prisma.listing.count({ where: { status: ListingStatus.PUBLISHED } }),
+      this.prisma.listing.count({ where: { publicationStatus: ListingPublicationStatus.PUBLISHED } }),
+      this.prisma.listing.count({ where: { publicationStatus: ListingPublicationStatus.UNPUBLISHED } }),
+      this.prisma.listing.count({ where: { property: { verificationStatus: VerificationStatus.APPROVED } } }),
+      this.prisma.listing.count({ where: { property: { verificationStatus: VerificationStatus.PENDING } } }),
       this.prisma.agreement.count(),
       this.prisma.agreement.count({ where: { status: 'ACTIVE' } }),
       this.prisma.dispute.count(),
@@ -896,6 +951,10 @@ export class AdminService {
       listings: {
         total: totalListings,
         verified: verifiedListings,
+        published: publishedListings,
+        unpublished: unpublishedListings,
+        approved: approvedListings,
+        pendingReview: pendingReviewListings,
       },
       agreements: {
         total: totalAgreements,

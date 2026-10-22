@@ -50,7 +50,7 @@ export default function TenantBookings() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <h2 className="font-semibold">{property?.title ?? 'Property details unavailable'}</h2>
-                    {booking.listing?.id && <Link to={`/listings/${booking.listing.id}`} className="mt-1 inline-block text-xs font-semibold text-emerald-700 underline">View listing</Link>}
+                    {booking.listing?.id && <Link to={`/dashboard/listings/${booking.listing.id}`} className="mt-1 inline-block text-xs font-semibold text-emerald-700 underline">View listing</Link>}
                     {location && <p className="mt-1 flex items-center gap-1 text-sm text-gray-500"><MapPin size={14} />{location}</p>}
                     <p className="mt-2 text-sm text-gray-600">{new Date(booking.startDate).toLocaleDateString()} – {new Date(booking.endDate).toLocaleDateString()}</p>
                     <p className="mt-1 text-sm text-gray-500">{booking.guests} guest(s) · <span className={booking.status === 'CONFIRMED' ? 'font-semibold text-emerald-700' : booking.status === 'CANCELLED' || booking.status === 'REJECTED' ? 'font-semibold text-red-600' : 'font-semibold'}>{booking.status.replaceAll('_', ' ')}</span></p>

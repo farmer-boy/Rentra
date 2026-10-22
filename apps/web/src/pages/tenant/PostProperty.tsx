@@ -29,10 +29,10 @@ export default function TenantPostProperty() {
           ? [user.role]
           : (['TENANT'] as Role[]);
       updateUser({
-        role: 'LANDLORD',
+        role: roles[0] ?? 'TENANT',
         roles: [...new Set<Role>([...roles, 'LANDLORD'])],
       });
-      navigate('/landlord/post');
+      navigate('/dashboard/post-property');
     } catch (error) {
       toast.error(
         error instanceof ApiError

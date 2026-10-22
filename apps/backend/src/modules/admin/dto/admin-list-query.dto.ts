@@ -10,7 +10,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { Role } from '@prisma/client';
+import { ListingPublicationStatus, Role } from '@prisma/client';
 
 export class AdminListQueryDto {
   @ApiPropertyOptional({ minimum: 1, default: 1 })
@@ -62,6 +62,11 @@ export class AdminListQueryDto {
   @IsString()
   @MaxLength(40)
   verificationStatus?: string;
+
+  @ApiPropertyOptional({ enum: ListingPublicationStatus })
+  @IsOptional()
+  @IsEnum(ListingPublicationStatus)
+  publicationStatus?: ListingPublicationStatus;
 
   @ApiPropertyOptional({ format: 'date-time' })
   @IsOptional()

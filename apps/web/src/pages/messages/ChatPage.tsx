@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { ArrowLeft, Send, Search, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCheck, ChevronUp, Copy, Pencil, Search, Send, Trash2, X } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuthStore } from "../../store/authStore";
 import { useChat, type Conversation } from "../../hooks/useChat";
@@ -17,6 +17,8 @@ export default function ChatPage() {
     fetchConversations,
     fetchMessages,
     sendMessage,
+    updateMessage,
+    deleteMessage,
     markAsRead,
     setCurrentConversation,
     notifications,
@@ -33,7 +35,13 @@ export default function ChatPage() {
   const [conversationLoading, setConversationLoading] = useState(true);
   const [conversationError, setConversationError] = useState("");
   const [messageError, setMessageError] = useState("");
+  const [messageNotice, setMessageNotice] = useState("");
+  const [activeMessageMenuId, setActiveMessageMenuId] = useState<string | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingMessageContent, setEditingMessageContent] = useState("");
+  const [messageActionLoading, setMessageActionLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   const loadConversations = useCallback(async () => {
     setConversationLoading(true);
@@ -66,13 +74,13 @@ export default function ChatPage() {
   useEffect(() => {
     if (currentConversation) {
       fetchMessages(currentConversation.id);
-      markAsRead(currentConversation.id);
+      void markAsRead(currentConversation.id).then(() => fetchConversations());
       const timer = setInterval(() => {
         fetchMessages(currentConversation.id);
       }, 3000);
       return () => clearInterval(timer);
     }
-  }, [currentConversation, fetchMessages, markAsRead]);
+  }, [currentConversation, fetchMessages, markAsRead, fetchConversations]);
 
   // Scroll to bottom when messages update
   useEffect(() => {
@@ -95,6 +103,7 @@ export default function ChatPage() {
       setAttachmentUrl("");
       await fetchMessages(currentConversation.id);
       setMessageError("");
+      requestAnimationFrame(() => messageInputRef.current?.focus());
     } catch {
       setMessageError("Message could not be sent. Please try again.");
     } finally {
@@ -106,11 +115,60 @@ export default function ChatPage() {
     setCurrentConversation(conversation);
   };
 
+  const handleCopyMessage = async (content: string, attachmentUrl?: string) => {
+    const text = content || attachmentUrl || "";
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setMessageNotice("Message copied.");
+      setMessageError("");
+    } catch {
+      setMessageError("Could not copy this message.");
+      setMessageNotice("");
+    }
+    setActiveMessageMenuId(null);
+  };
+
+  const handleSaveEdit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!currentConversation || !editingMessageId || !editingMessageContent.trim()) return;
+    setMessageActionLoading(true);
+    try {
+      await updateMessage(currentConversation.id, editingMessageId, editingMessageContent.trim());
+      await fetchConversations();
+      setEditingMessageId(null);
+      setEditingMessageContent("");
+      setMessageError("");
+      setMessageNotice("");
+    } catch (error: unknown) {
+      setMessageError(toApiError(error).message || "Message could not be edited.");
+    } finally {
+      setMessageActionLoading(false);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!currentConversation || !window.confirm("Delete this message for everyone in the conversation?")) return;
+    setMessageActionLoading(true);
+    try {
+      await deleteMessage(currentConversation.id, messageId);
+      await fetchConversations();
+      setActiveMessageMenuId(null);
+      setMessageError("");
+      setMessageNotice("");
+    } catch (error: unknown) {
+      setMessageError(toApiError(error).message || "Message could not be deleted.");
+    } finally {
+      setMessageActionLoading(false);
+    }
+  };
+
   const filteredConversations = conversations.filter((conv) =>
     conv.otherParticipant?.fullName
       ?.toLowerCase()
       .includes(searchQuery.toLowerCase()),
   );
+  const officialNoticeChat = Boolean(currentConversation?.otherParticipant?.roles?.includes('ADMIN'));
 
   return (
     <div
@@ -176,40 +234,52 @@ export default function ChatPage() {
               <button
                 key={conv.id}
                 onClick={() => handleSelectConversation(conv)}
-                className={`w-full p-4 border-b text-left transition-colors hover:opacity-80`}
+                className={`w-full p-4 border-b text-left transition-colors hover:opacity-80 ${conv.unreadCount ? "font-bold" : "font-normal"}`}
                 style={{
                   borderColor: "var(--border)",
                   backgroundColor:
                     currentConversation?.id === conv.id
                       ? "var(--surface2)"
+                      : conv.unreadCount
+                        ? "var(--surface2)"
                       : "transparent",
                 }}
               >
                 <div className="flex items-center justify-between mb-1">
                   <h3
-                    className="min-w-0 truncate font-semibold text-sm"
+                    className={`min-w-0 truncate text-sm ${conv.unreadCount ? "font-extrabold" : "font-semibold"}`}
                     style={{ color: "var(--text)" }}
                   >
-                    {conv.otherParticipant?.fullName}
+                    {conv.otherParticipant?.roles?.includes('ADMIN') ? 'Rentra Support' : conv.otherParticipant?.fullName}
                   </h3>
-                  <span className="shrink-0 text-xs" style={{ color: "var(--text2)" }}>
+                  <span className={`shrink-0 text-xs ${conv.unreadCount ? "font-bold" : "font-normal"}`} style={{ color: "var(--text2)" }}>
                     {new Date(conv.lastMessageAt).toLocaleDateString()}
                   </span>
                 </div>
                 {conv.listing && (
-                  <p className="text-[10px] text-emerald-600 truncate">
+                    <p className={`truncate text-[10px] text-emerald-600 ${conv.unreadCount ? "font-bold" : "font-normal"}`}>
                     {conv.listing.title} · {conv.listing.area},{" "}
                     {conv.listing.city}
                   </p>
                 )}
-                {conv.lastMessage && (
+                <div className="flex min-w-0 items-center justify-between gap-2">
                   <p
-                    className="text-xs truncate"
+                    className={`min-w-0 flex-1 truncate text-xs ${conv.unreadCount ? "font-bold" : "font-normal"}`}
                     style={{ color: "var(--text2)" }}
                   >
-                    {conv.lastMessage.content}
+                    {conv.lastMessage?.content || (conv.lastMessage?.attachmentUrl ? "Photo" : "No messages yet")}
                   </p>
-                )}
+                  {!!conv.unreadCount && (
+                    <span
+                      className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full px-1.5 text-[10px] font-bold text-white"
+                      style={{ backgroundColor: "#dc2626" }}
+                      aria-label={`${conv.unreadCount} unread messages`}
+                      title={`${conv.unreadCount} unread messages`}
+                    >
+                      {conv.unreadCount}
+                    </span>
+                  )}
+                </div>
               </button>
             ))
           )}
@@ -230,7 +300,7 @@ export default function ChatPage() {
                   className="truncate text-lg font-semibold"
                   style={{ color: "var(--text)" }}
                 >
-                  {currentConversation.otherParticipant?.fullName}
+                  {officialNoticeChat ? "Rentra Support" : currentConversation.otherParticipant?.fullName}
                 </h2>
                 <p className="truncate text-xs" style={{ color: "var(--text2)" }}>
                   {currentConversation.otherParticipant?.email}
@@ -258,6 +328,7 @@ export default function ChatPage() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messageError && <p role="alert" className="text-sm text-red-600">{messageError}</p>}
+              {messageNotice && <p role="status" className="text-sm text-emerald-600">{messageNotice}</p>}
               {chatLoading && messages.length === 0 && <p className="text-center text-sm" style={{ color: "var(--text2)" }}>Loading messages...</p>}
               {messages.length === 0 ? (
                 <div
@@ -272,17 +343,39 @@ export default function ChatPage() {
                   return (
                     <div
                       key={message.id}
-                      className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                      className={`group flex ${isOwn ? "justify-end" : "justify-start"}`}
+                      onMouseLeave={() => {
+                        if (activeMessageMenuId === message.id) setActiveMessageMenuId(null);
+                      }}
                     >
                       <div
-                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg`}
+                        className="relative max-w-xs rounded-lg px-4 py-2 lg:max-w-md"
                         style={{
                           backgroundColor: isOwn
                             ? "var(--green)"
                             : "var(--surface2)",
-                          color: isOwn ? "white" : "var(--text)",
+                          color: isOwn
+                            ? "rgb(var(--rentra-primary-contrast))"
+                            : "var(--text)",
                         }}
                       >
+                        {activeMessageMenuId === message.id && (
+                          <div className="absolute bottom-0 right-0 z-20 min-w-36 overflow-hidden rounded-lg border py-1 shadow-lg" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}>
+                            <button type="button" onClick={() => void handleCopyMessage(message.content, message.attachmentUrl)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[var(--surface2)]">
+                              <Copy size={14} /> Copy
+                            </button>
+                            {isOwn && message.content && (
+                              <button type="button" onClick={() => { setEditingMessageId(message.id); setEditingMessageContent(message.content); setActiveMessageMenuId(null); }} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-[var(--surface2)]">
+                                <Pencil size={14} /> Edit
+                              </button>
+                            )}
+                            {isOwn && (
+                              <button type="button" disabled={messageActionLoading} onClick={() => void handleDeleteMessage(message.id)} className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-600 hover:bg-red-50 disabled:opacity-50">
+                                <Trash2 size={14} /> Delete
+                              </button>
+                            )}
+                          </div>
+                        )}
                         {message.attachmentUrl && (
                           <img
                             src={message.attachmentUrl}
@@ -290,10 +383,46 @@ export default function ChatPage() {
                             className="mb-2 max-h-48 rounded object-cover"
                           />
                         )}
-                        <p className="text-sm break-words">{message.content}</p>
-                        <p className="text-xs mt-1 opacity-70">
-                          {new Date(message.createdAt).toLocaleTimeString()}
-                        </p>
+                        {editingMessageId === message.id ? (
+                          <form onSubmit={(event) => void handleSaveEdit(event)} className="flex gap-1">
+                            <input
+                              autoFocus
+                              value={editingMessageContent}
+                              onChange={(event) => setEditingMessageContent(event.target.value)}
+                              maxLength={5000}
+                              className="min-w-0 flex-1 rounded border px-2 py-1 text-sm"
+                              style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", color: "var(--text)" }}
+                              aria-label="Edit message"
+                            />
+                            <button type="submit" disabled={messageActionLoading || !editingMessageContent.trim()} className="rounded p-1 disabled:opacity-50" aria-label="Save edited message"><Check size={16} /></button>
+                            <button type="button" onClick={() => { setEditingMessageId(null); setEditingMessageContent(""); }} className="rounded p-1" aria-label="Cancel editing"><X size={16} /></button>
+                          </form>
+                        ) : (
+                          <p className="text-sm break-words">
+                            {message.content}
+                            <span className="ml-2 inline-flex items-center gap-0.5 whitespace-nowrap align-baseline text-[11px] opacity-75">
+                              {new Date(message.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                              {isOwn && (
+                                <span
+                                  className={message.isRead ? "text-sky-300" : "opacity-80"}
+                                  title={message.isRead ? "Seen" : message.isDelivered ? "Delivered" : "Sent"}
+                                  aria-label={message.isRead ? "Seen" : message.isDelivered ? "Delivered" : "Sent"}
+                                >
+                                  {message.isDelivered ? <CheckCheck size={15} /> : <Check size={15} />}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => setActiveMessageMenuId(activeMessageMenuId === message.id ? null : message.id)}
+                                className={`-mr-1 rounded-full p-0.5 transition-opacity hover:bg-black/10 focus:opacity-100 ${activeMessageMenuId === message.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
+                                aria-label="Message actions"
+                                title="Message actions"
+                              >
+                                <ChevronUp size={14} />
+                              </button>
+                            </span>
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
@@ -303,12 +432,13 @@ export default function ChatPage() {
             </div>
 
             {/* Message Input */}
-            <form
+            {officialNoticeChat ? <div className="border-t p-4 text-center text-sm" style={{ borderColor: "var(--border)", color: "var(--text2)" }}>Official notices from Rentra Support. Replies are disabled.</div> : <form
               onSubmit={handleSendMessage}
               className="p-4 border-t flex gap-2"
               style={{ borderColor: "var(--border)" }}
             >
               <input
+                ref={messageInputRef}
                 type="text"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
@@ -339,12 +469,12 @@ export default function ChatPage() {
                 className="px-4 py-2 rounded-lg flex items-center gap-2 font-medium disabled:opacity-50"
                 style={{
                   backgroundColor: "var(--green)",
-                  color: "white",
+                  color: "rgb(var(--rentra-primary-contrast))",
                 }}
               >
                 <Send size={18} />
               </button>
-            </form>
+            </form>}
           </>
         ) : (
           <div

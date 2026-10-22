@@ -1,0 +1,2 @@
+ALTER TABLE "SupportTicket"
+ALTER COLUMN "status" SET DEFAULT 'NEW';

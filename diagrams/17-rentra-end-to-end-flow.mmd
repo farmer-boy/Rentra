@@ -1,0 +1,96 @@
+flowchart LR
+  subgraph People[People and roles]
+    Tenant[Tenant]
+    Landlord[Landlord]
+    Admin[Admin]
+  end
+
+  subgraph Clients[Client applications]
+    Web[Rentra Web<br/>React + TypeScript + Vite<br/>React Router, Zustand, React Query]
+    Mobile[Rentra Mobile<br/>Expo + React Native<br/>Login/register + role home screens<br/>Current app is a starter shell]
+  end
+
+  subgraph Edge[API and security]
+    Axios[Web Axios client<br/>API base URL + bearer access token<br/>refresh token handling]
+    MobileClient[Mobile Axios client<br/>Secure token storage]
+    API[NestJS + Express REST API<br/>Global /api prefix<br/>ValidationPipe + Swagger /api/docs + CORS]
+    Guards[JWT authentication<br/>RolesGuard + ADMIN / LANDLORD / TENANT rules<br/>DTO validation]
+  end
+
+  Tenant --> Web
+  Landlord --> Web
+  Admin --> Web
+  Tenant --> Mobile
+  Landlord --> Mobile
+  Admin --> Mobile
+  Web --> Axios --> API
+  Mobile --> MobileClient --> API
+  API --> Guards
+
+  subgraph Backend[Backend feature modules]
+    Identity[Identity and trust<br/>auth · users · verification · trust-score]
+    Supply[Property supply and discovery<br/>properties · listings · locations · availability<br/>favorites · saved-searches · recommendations]
+    Tenancy[Rental lifecycle<br/>rental-requests · bookings · agreements<br/>payments · boost · reviews]
+    Safety[Safety and operations<br/>admin · reports · disputes · audit<br/>support tickets · contact]
+    Comms[Communication<br/>messages · notifications]
+    Shared[Shared infrastructure<br/>PrismaService · config · guards · audit trail]
+  end
+  Guards --> Identity
+  Guards --> Supply
+  Guards --> Tenancy
+  Guards --> Safety
+  Guards --> Comms
+  Identity --> Shared
+  Supply --> Shared
+  Tenancy --> Shared
+  Safety --> Shared
+  Comms --> Shared
+
+  subgraph Data[Data layer]
+    Prisma[Prisma Client<br/>schema + migrations<br/>packages/database/prisma]
+    Postgres[(PostgreSQL<br/>users and roles · properties/listings/images<br/>search/favorites · rental requests/bookings<br/>agreements/payments · messages/notifications<br/>verification/reports/disputes/audit/support)]
+  end
+  Shared --> Prisma --> Postgres
+
+  subgraph External[External providers configured/in use]
+    Cloudinary[Cloudinary<br/>property image upload and deletion]
+    Gmail[Gmail SMTP<br/>verification and auth email delivery]
+    PayAdapters[Payment adapter interface<br/>currently no provider adapters registered<br/>online provider payment unavailable]
+  end
+  Supply --> Cloudinary
+  Identity --> Gmail
+  Tenancy -. payment flow awaits adapter .-> PayAdapters
+
+  subgraph AI[AI capability status]
+    AIService[Python FastAPI service<br/>packages/ai-service<br/>currently /health only]
+    AIUI[Web Fake Detector page<br/>shows reports confirmed by admin<br/>does not run an AI scan]
+    Future[Future integration ideas<br/>listing fraud/risk scoring · rent estimation<br/>search recommendations · document triage<br/>human admin review remains in control]
+  end
+  AIUI --> Safety
+  AIService -. future authenticated API integration .-> API
+  AIService -. future model/service calls .-> Future
+
+  subgraph MainFlows[Main product flows]
+    Signup[Register / login]
+    List[Create property → add images → create listing]
+    Rent[Browse/search → rental request → booking]
+    Contract[Agreement → rent/payment records]
+    SupportFlow[User support ticket → admin opens/replies/status update]
+    Notice[Admin sends notice → user chat inbox + unread state]
+  end
+  Signup --> Identity
+  List --> Supply
+  Rent --> Supply --> Tenancy
+  Contract --> Tenancy
+  SupportFlow --> Safety
+  Notice --> Safety --> Comms
+  Comms --> Postgres
+
+  classDef current fill:#e8f0fe,stroke:#5b7cbd,color:#172554
+  classDef storage fill:#edf7ed,stroke:#5a8a5a,color:#18351a
+  classDef external fill:#fff4e5,stroke:#bd8135,color:#482d08
+  classDef future fill:#f3edfa,stroke:#8a68ad,color:#2d1d3d
+  class Web,Mobile,API,Guards,Identity,Supply,Tenancy,Safety,Comms,Shared,Prisma,AIUI current
+  class Postgres storage
+  class Cloudinary,Gmail,PayAdapters external
+  class AIService,Future future

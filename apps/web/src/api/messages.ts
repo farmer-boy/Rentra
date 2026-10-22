@@ -32,6 +32,10 @@ export const messagesAPI = {
     (await api.get(`/messages/conversation/${conversationId}`, { params: { limit, offset } })).data,
   send: async (conversationId: string, body: CreateMessageInput) =>
     (await api.post(`/messages/conversation/${conversationId}/send`, body)).data,
+  update: async (conversationId: string, messageId: string, content: string) =>
+    (await api.patch(`/messages/conversation/${conversationId}/${messageId}`, { content })).data,
+  delete: async (conversationId: string, messageId: string) =>
+    (await api.delete(`/messages/conversation/${conversationId}/${messageId}`)).data,
   markRead: async (conversationId: string) =>
     (await api.post(`/messages/conversation/${conversationId}/read`)).data,
   unreadCount: async () => (await api.get<{ unreadCount: number }>('/messages/unread-count')).data,

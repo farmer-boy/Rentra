@@ -124,3 +124,51 @@ textarea {
     font-size: 16px;
   }
 }
+
+/* The app's general green palette is intentionally neutral. Keep the admin
+   approval reason and status badge visibly green in both themes. */
+.verification-approved-text {
+  color: #15803d;
+}
+.verification-approved-badge {
+  background-color: #166534;
+  color: #f0fdf4;
+}
+
+:root[data-theme='dark'] .verification-approved-text {
+  color: #86efac;
+}
+
+:root[data-theme='dark'] .verification-approved-badge {
+  background-color: #166534;
+  color: #dcfce7;
+}
+.audit-table-scroll {
+  scrollbar-width: none;
+}
+
+.audit-table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.audit-table-dock {
+  position: fixed;
+  bottom: 0;
+  z-index: 100;
+  scrollbar-color: var(--text3) var(--surface2);
+  scrollbar-width: auto;
+}
+
+.audit-table-dock::-webkit-scrollbar {
+  height: 18px;
+}
+
+.audit-table-dock::-webkit-scrollbar-track {
+  background: var(--surface2);
+}
+
+.audit-table-dock::-webkit-scrollbar-thumb {
+  background: var(--text3);
+  border: 3px solid var(--surface2);
+  border-radius: 999px;
+}

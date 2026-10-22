@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 import Navbar from './Navbar';
+import BackToDashboard from './BackToDashboard';
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -46,6 +47,7 @@ const AdminLayout = () => {
         )}
 
         <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 transition-all duration-300 sm:p-4 lg:p-6" style={{ backgroundColor: 'var(--bg)', scrollbarGutter: 'stable' }}>
+          <BackToDashboard />
           <Outlet />
         </main>
       </div>

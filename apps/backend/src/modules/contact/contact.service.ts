@@ -26,6 +26,16 @@ export class ContactService {
         throw new BadRequestException('All fields are required');
       }
 
+      const registeredUser = await this.prisma.user.findUnique({
+        where: { email: dto.email.trim().toLowerCase() },
+        select: { id: true },
+      });
+      if (registeredUser) {
+        throw new BadRequestException(
+          'Please sign in and use Help & Support to contact Rentra.',
+        );
+      }
+
       // Save to database
       const message = await this.prisma.contactMessage.create({
         data: {

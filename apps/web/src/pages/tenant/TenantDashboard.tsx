@@ -5,49 +5,46 @@ import StatCard from '../../components/ui/StatCard';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { Bot, Lightbulb, Star, FileText, CreditCard, Home } from 'lucide-react';
-import { listingsAPI } from '../../api/listings';
 import { usersAPI } from '../../api/users';
-
-interface Listing {
-  id: string;
-  title: string;
-  city: string;
-  area: string;
-  rent: number;
-  publicationStatus: string;
-}
+import { agreementsAPI } from '../../api/agreements';
+import { disputesAPI } from '../../api/disputes';
+import { reportsAPI } from '../../api/reports';
 
 interface Profile {
   trustScore: number | null;
 }
 
+interface DashboardAgreement {
+  id: string;
+  tenantId: string;
+  listingId: string;
+  status: string;
+  monthlyRent: number;
+  startDate: string;
+  endDate: string | null;
+  listing?: { title?: string; address?: string } | null;
+  property?: { title?: string; city?: string; area?: string } | null;
+}
+
 export default function TenantDashboard() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [listingTotal, setListingTotal] = useState<number | null>(null);
-  const [listingsLoading, setListingsLoading] = useState(true);
-  const [listingsError, setListingsError] = useState(false);
+  const [tenantAgreements, setTenantAgreements] = useState<DashboardAgreement[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState(false);
+  const [signedAgreementCount, setSignedAgreementCount] = useState<number | null>(null);
+  const [agreementsLoading, setAgreementsLoading] = useState(true);
+  const [agreementsError, setAgreementsError] = useState(false);
+  const [resolvedDisputeCount, setResolvedDisputeCount] = useState<number | null>(null);
+  const [disputesLoading, setDisputesLoading] = useState(true);
+  const [disputesError, setDisputesError] = useState(false);
+  const [fakeReportCount, setFakeReportCount] = useState<number | null>(null);
+  const [fakeReportsLoading, setFakeReportsLoading] = useState(true);
+  const [fakeReportsError, setFakeReportsError] = useState(false);
 
   useEffect(() => {
     let active = true;
-    listingsAPI.getAll<Listing>({ page: 1, limit: 5 })
-      .then((data) => {
-        if (active) {
-          setListings(Array.isArray(data.data) ? data.data : []);
-          const pagination = data.pagination as { total?: number } | undefined;
-          setListingTotal(typeof pagination?.total === 'number' ? pagination.total : null);
-        }
-      })
-      .catch(() => {
-        if (active) setListingsError(true);
-      })
-      .finally(() => {
-        if (active) setListingsLoading(false);
-      });
     usersAPI.getMe()
       .then((data) => {
         if (active) setProfile(data);
@@ -58,8 +55,41 @@ export default function TenantDashboard() {
       .finally(() => {
         if (active) setProfileLoading(false);
       });
+    if (user?.id) {
+      agreementsAPI.mine<DashboardAgreement>()
+        .then((records) => {
+          if (!active) return;
+          const signedStatuses = new Set(['ACTIVE', 'ENDED', 'CANCELLED', 'EXPIRED', 'TERMINATED']);
+          const mine = records.filter((agreement) => agreement.tenantId === user.id);
+          setTenantAgreements(mine);
+          setSignedAgreementCount(mine.filter((agreement) => signedStatuses.has(agreement.status)).length);
+        })
+        .catch(() => { if (active) setAgreementsError(true); })
+        .finally(() => { if (active) setAgreementsLoading(false); });
+
+      disputesAPI.mine({ status: 'RESOLVED', page: 1, limit: 100 })
+        .then((response) => {
+          if (active) setResolvedDisputeCount(response.totalCount);
+        })
+        .catch(() => { if (active) setDisputesError(true); })
+        .finally(() => { if (active) setDisputesLoading(false); });
+
+      reportsAPI.confirmedFakeListingReports()
+        .then((reports) => { if (active) setFakeReportCount(reports.length); })
+        .catch(() => { if (active) setFakeReportsError(true); })
+        .finally(() => { if (active) setFakeReportsLoading(false); });
+    } else {
+      setAgreementsLoading(false);
+      setDisputesLoading(false);
+      setFakeReportsLoading(false);
+    }
     return () => { active = false; };
-  }, []);
+  }, [user?.id]);
+
+  const rentalHistory = tenantAgreements.filter((agreement) => (
+    ['ACTIVE', 'ENDED', 'EXPIRED', 'TERMINATED'].includes(agreement.status)
+  ));
+  const rentedPropertyCount = new Set(rentalHistory.map((agreement) => agreement.listingId).filter(Boolean)).size;
 
   const quickActions = [
     { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings', color: 'bg-blue-500/20 text-blue-600' },
@@ -69,8 +99,6 @@ export default function TenantDashboard() {
     { icon: <FileText size={16} />, label: 'Agreements', path: '/tenant/agreement', color: 'bg-purple-500/20 text-purple-600' },
     { icon: <CreditCard size={16} />, label: 'Payments', path: '/tenant/payments', color: 'bg-teal-500/20 text-teal-600' },
   ];
-  const unavailable = 'Not provided by the backend';
-
   return (
     <div>
       <div className="mb-3">
@@ -98,10 +126,10 @@ export default function TenantDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-3 mb-4">
         {[
-          { label: 'PUBLISHED LISTINGS', value: listingsLoading ? '…' : listingsError ? 'Unavailable' : listingTotal ?? '—', change: undefined, color: undefined, path: '/tenant/listings' },
-          { label: 'FAKE DETECTED', value: '—', change: unavailable, color: 'text-red-600', path: '/tenant/detector' },
-          { label: 'AGREEMENTS SIGNED', value: '—', change: unavailable, color: 'text-green-600', path: '/tenant/agreement' },
-          { label: 'DISPUTES RESOLVED', value: '—', change: unavailable, color: 'text-yellow-600', path: '/tenant/disputes?status=RESOLVED' },
+          { label: 'MY RENTED PROPERTIES', value: agreementsLoading ? '…' : agreementsError ? 'Unavailable' : rentedPropertyCount, change: undefined, color: undefined, path: '/tenant/agreement?status=SIGNED' },
+          { label: 'FAKE REPORTS CONFIRMED', value: fakeReportsLoading ? '…' : fakeReportsError ? 'Unavailable' : fakeReportCount ?? '—', change: undefined, color: 'text-red-600', path: '/tenant/detector' },
+          { label: 'AGREEMENTS SIGNED', value: agreementsLoading ? '…' : agreementsError ? 'Unavailable' : signedAgreementCount ?? '—', change: undefined, color: 'text-green-600', path: '/tenant/agreement?status=SIGNED' },
+          { label: 'DISPUTES RESOLVED', value: disputesLoading ? '…' : disputesError ? 'Unavailable' : resolvedDisputeCount ?? '—', change: undefined, color: 'text-yellow-600', path: '/tenant/disputes?status=RESOLVED' },
         ].map((item) => (
           <button key={item.label} type="button" onClick={() => navigate(item.path)} className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
             <StatCard label={item.label} value={item.value} change={item.change} color={item.color} />
@@ -112,32 +140,33 @@ export default function TenantDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         <Card>
           <div className="flex items-center justify-between mb-2">
-            <span className={`text-xs font-bold text-text`}>Recent Listings</span>
-            <button onClick={() => navigate('/tenant/listings')} className={`text-xs font-mono text-text-muted hover:text-primary-hover`}>View All →</button>
+            <span className={`text-xs font-bold text-text`}>My Rental History</span>
+            <button onClick={() => navigate('/tenant/agreement?status=SIGNED')} className={`text-xs font-mono text-text-muted hover:text-primary-hover`}>View All →</button>
           </div>
-          {listingsLoading ? (
-            <p className="py-4 text-xs text-gray-500">Loading listings…</p>
-          ) : listingsError ? (
-            <p role="alert" className="py-4 text-xs text-red-500">Unable to load listings right now.</p>
-          ) : listings.length === 0 ? (
-            <p className="py-4 text-xs text-gray-500">No listings are currently available.</p>
+          {agreementsLoading ? (
+            <p className="py-4 text-xs text-gray-500">Loading your rental history…</p>
+          ) : agreementsError ? (
+            <p role="alert" className="py-4 text-xs text-red-500">Unable to load your rental history right now.</p>
+          ) : rentalHistory.length === 0 ? (
+            <p className="py-4 text-xs text-gray-500">No signed rental history yet. Properties you rent through Rentra will appear here.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-max">
                 <thead>
                   <tr className="text-left">
-                    {['Property', 'Area', 'Rent', 'Status'].map(h => (
+                    {['Property', 'Area', 'Rent', 'Tenancy', 'Status'].map(h => (
                       <th key={h} className={`text-xs font-mono text-text-muted border-border tracking-widest pb-2 border-b`}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {listings.map((listing) => (
-                    <tr key={listing.id} className="hover:bg-surface-2 transition-colors">
-                      <td className={`py-2 text-xs text-text-muted`}>{listing.title}</td>
-                      <td className={`py-2 text-xs text-text-muted`}>{[listing.area, listing.city].filter(Boolean).join(', ') || '—'}</td>
-                      <td className="py-2 text-xs text-green-600">Rs {Number(listing.rent).toLocaleString()}</td>
-                      <td className="py-2"><Pill variant={listing.publicationStatus === 'PUBLISHED' ? 'green' : 'yellow'}>{listing.publicationStatus}</Pill></td>
+                  {rentalHistory.map((agreement) => (
+                    <tr key={agreement.id} className="transition-colors hover:bg-surface-2">
+                      <td className="py-2 text-xs text-text-muted">{agreement.listing?.title ?? agreement.property?.title ?? `Property ${agreement.listingId.slice(0, 8)}`}</td>
+                      <td className="py-2 text-xs text-text-muted">{[agreement.property?.area, agreement.property?.city].filter(Boolean).join(', ') || agreement.listing?.address || '—'}</td>
+                      <td className="py-2 text-xs text-green-600">Rs {Number(agreement.monthlyRent).toLocaleString()}</td>
+                      <td className="py-2 text-xs text-text-muted">{new Date(agreement.startDate).toLocaleDateString()} – {agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'Ongoing'}</td>
+                      <td className="py-2"><Pill variant={agreement.status === 'ACTIVE' ? 'green' : agreement.status === 'ENDED' || agreement.status === 'EXPIRED' ? 'yellow' : 'red'}>{agreement.status}</Pill></td>
                     </tr>
                   ))}
                 </tbody>

@@ -43,7 +43,6 @@ export class PropertiesService {
   ) {}
 
   async create(ownerId: string, dto: CreatePropertyDto) {
-    await this.requireVerifiedPhone(ownerId);
     this.validateCoordinates(dto.latitude, dto.longitude);
     const location = await this.locationsService.resolveLocationPath({
       country: dto.country,
@@ -55,73 +54,79 @@ export class PropertiesService {
     const status = PropertyStatus.PENDING_VERIFICATION;
     const listingStatus = this.toListingStatus(status);
 
-    const property = await this.prisma.property.create({
-      data: {
-        ownerId,
-        title: dto.title.trim(),
-        description: dto.description,
-        propertyType: dto.type,
-        rentalMode: dto.rentalMode,
-        price: dto.price,
-        securityDeposit: dto.securityDeposit,
-        bedrooms: dto.bedrooms,
-        bathrooms: dto.bathrooms,
-        areaSizeSqft: dto.areaSizeSqft,
-        furnishedStatus: dto.furnishedStatus ?? FurnishedStatus.UNFURNISHED,
-        availability: dto.availability ?? ListingAvailability.AVAILABLE,
-        rules: dto.rules,
-        status,
-        country: dto.country.trim(),
-        city: dto.city.trim(),
-        area: dto.area.trim(),
-        address: dto.address.trim(),
-        latitude: dto.latitude,
-        longitude: dto.longitude,
-        locationId: location.id,
-        listings: {
-          create: {
-            title: dto.title.trim(),
-            description: dto.description ?? '',
-            rules: dto.rules,
-            area: dto.area.trim(),
-            city: dto.city.trim(),
-            address: dto.address.trim(),
-            type: dto.type,
-            bedrooms: dto.bedrooms,
-            bathrooms: dto.bathrooms,
-            unitCount: 1,
-            roomCount: dto.bedrooms,
-            sqft: dto.areaSizeSqft ?? 0,
-            rent: dto.price,
-            deposit: dto.securityDeposit,
-            rentalDuration: dto.rentalMode,
-            listingMode: this.toListingMode(dto.rentalMode),
-            latitude: dto.latitude,
-            longitude: dto.longitude,
-            status: listingStatus,
-            publicationStatus: this.toPublicationStatus(status),
-            availability: dto.availability ?? ListingAvailability.AVAILABLE,
-            furnishedStatus: dto.furnishedStatus ?? FurnishedStatus.UNFURNISHED,
-            landlordId: ownerId,
-            locationId: location.id,
+    const property = await this.prisma.$transaction(async (transaction) => {
+      const owner = await transaction.user.findUnique({
+        where: { id: ownerId },
+        select: { roles: true },
+      });
+      if (!owner) throw new NotFoundException('Property owner not found');
+      if (owner.roles.includes(Role.ADMIN)) {
+        throw new ForbiddenException('Administrator accounts cannot create listings');
+      }
+      const roles = new Set([...owner.roles, Role.TENANT, Role.LANDLORD]);
+      if (roles.size !== owner.roles.length) {
+        await transaction.user.update({
+          where: { id: ownerId },
+          data: { roles: [...roles] },
+        });
+      }
+
+      return transaction.property.create({
+        data: {
+          ownerId,
+          title: dto.title.trim(),
+          description: dto.description,
+          propertyType: dto.type,
+          rentalMode: dto.rentalMode,
+          price: dto.price,
+          securityDeposit: dto.securityDeposit,
+          bedrooms: dto.bedrooms,
+          bathrooms: dto.bathrooms,
+          areaSizeSqft: dto.areaSizeSqft,
+          furnishedStatus: dto.furnishedStatus ?? FurnishedStatus.UNFURNISHED,
+          availability: dto.availability ?? ListingAvailability.AVAILABLE,
+          rules: dto.rules,
+          status,
+          country: dto.country.trim(),
+          city: dto.city.trim(),
+          area: dto.area.trim(),
+          address: dto.address.trim(),
+          latitude: dto.latitude,
+          longitude: dto.longitude,
+          locationId: location.id,
+          listings: {
+            create: {
+              title: dto.title.trim(),
+              description: dto.description ?? '',
+              rules: dto.rules,
+              area: dto.area.trim(),
+              city: dto.city.trim(),
+              address: dto.address.trim(),
+              type: dto.type,
+              bedrooms: dto.bedrooms,
+              bathrooms: dto.bathrooms,
+              unitCount: 1,
+              roomCount: dto.bedrooms,
+              sqft: dto.areaSizeSqft ?? 0,
+              rent: dto.price,
+              deposit: dto.securityDeposit,
+              rentalDuration: dto.rentalMode,
+              listingMode: this.toListingMode(dto.rentalMode),
+              latitude: dto.latitude,
+              longitude: dto.longitude,
+              status: listingStatus,
+              publicationStatus: this.toPublicationStatus(status),
+              availability: dto.availability ?? ListingAvailability.AVAILABLE,
+              furnishedStatus: dto.furnishedStatus ?? FurnishedStatus.UNFURNISHED,
+              landlordId: ownerId,
+              locationId: location.id,
+            },
           },
         },
-      },
-      include: this.propertyInclude(),
+        include: this.propertyInclude(),
+      });
     });
     return this.withRentraVerified(property);
-  }
-
-  private async requireVerifiedPhone(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { phoneVerifiedAt: true },
-    });
-    if (!user?.phoneVerifiedAt) {
-      throw new ForbiddenException(
-        'Verify your phone number before posting a property.',
-      );
-    }
   }
 
   async findAll(query: PropertyQueryDto, requesterId?: string) {

@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { adminAPI } from '../../api/admin';
 import { reportsAPI } from '../../api/reports';
 import Card from '../../components/ui/Card';
+import StatCard from '../../components/ui/StatCard';
 
 type Row = Record<string, unknown>;
 
@@ -22,6 +24,14 @@ interface ResourcePageResult {
   totalPages: number;
 }
 
+interface ListingStats {
+  total?: number;
+  published?: number;
+  unpublished?: number;
+  approved?: number;
+  pendingReview?: number;
+}
+
 const definitions: Record<string, ResourceDefinition> = {
   listings: {
     title: 'Listings',
@@ -31,7 +41,8 @@ const definitions: Record<string, ResourceDefinition> = {
       { key: 'landlord.fullName', label: 'Host' },
       { key: 'city', label: 'City' },
       { key: 'rent', label: 'Rent' },
-      { key: 'status', label: 'Status' },
+      { key: 'status', label: 'Listing status' },
+      { key: 'publicationStatus', label: 'Publication' },
       { key: 'property.verificationStatus', label: 'Property verification' },
     ],
   },
@@ -249,6 +260,7 @@ function toPageResult(data: unknown, page: number): ResourcePageResult {
 
 export default function AdminResourcePage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const resourceKey = location.pathname.split('/').filter(Boolean).at(-1) ?? '';
   const definition = definitions[resourceKey];
@@ -256,18 +268,53 @@ export default function AdminResourcePage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const routeStatus = searchParams.get('status') ?? '';
+  const routePublicationStatus = searchParams.get('publicationStatus') ?? '';
+  const routeVerificationStatus = searchParams.get('verificationStatus') ?? '';
   const [status, setStatus] = useState(routeStatus);
-  const [appliedFilters, setAppliedFilters] = useState({ search: '', status: routeStatus });
+  const [appliedFilters, setAppliedFilters] = useState({
+    search: '',
+    status: routeStatus,
+    publicationStatus: routePublicationStatus,
+    verificationStatus: routeVerificationStatus,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [listingStats, setListingStats] = useState<ListingStats | null>(null);
+  const [listingStatsLoading, setListingStatsLoading] = useState(false);
+  const auditTableScrollRef = useRef<HTMLDivElement>(null);
+  const auditDockScrollRef = useRef<HTMLDivElement>(null);
+  const auditDockWidthRef = useRef<HTMLDivElement>(null);
+  const [auditHasHorizontalOverflow, setAuditHasHorizontalOverflow] = useState(false);
+  const [auditDockPosition, setAuditDockPosition] = useState({ left: 0, width: 0 });
   const endpoint = definition?.endpoint;
   const fixedType = definition?.fixedType;
 
   useEffect(() => {
     setStatus(routeStatus);
-    setAppliedFilters({ search: '', status: routeStatus });
+    setAppliedFilters({
+      search: '',
+      status: routeStatus,
+      publicationStatus: routePublicationStatus,
+      verificationStatus: routeVerificationStatus,
+    });
     setPage(1);
-  }, [routeStatus]);
+  }, [routeStatus, routePublicationStatus, routeVerificationStatus]);
+
+  useEffect(() => {
+    if (resourceKey !== 'listings') return;
+    let active = true;
+    setListingStatsLoading(true);
+    adminAPI.getDashboardStats().then((response) => {
+      const outer = response as { data?: { listings?: ListingStats }; listings?: ListingStats };
+      const payload = outer?.data ?? outer;
+      if (active) setListingStats(payload.listings ?? null);
+    }).catch(() => {
+      if (active) setListingStats(null);
+    }).finally(() => {
+      if (active) setListingStatsLoading(false);
+    });
+    return () => { active = false; };
+  }, [resourceKey]);
 
   const load = useCallback(async () => {
     if (!endpoint) return;
@@ -275,10 +322,12 @@ export default function AdminResourcePage() {
     setError('');
     try {
       const response = await adminAPI.getResourcePage(endpoint, {
-          page,
-          limit: 20,
+          page: resourceKey === 'audit' ? 1 : page,
+          limit: resourceKey === 'audit' ? 100 : 20,
           ...(appliedFilters.search.trim() && { search: appliedFilters.search.trim() }),
           ...(appliedFilters.status && { status: appliedFilters.status }),
+          ...(appliedFilters.publicationStatus && { publicationStatus: appliedFilters.publicationStatus }),
+          ...(appliedFilters.verificationStatus && { verificationStatus: appliedFilters.verificationStatus }),
           ...(fixedType && { type: fixedType }),
       });
       setResult(toPageResult(response, page));
@@ -287,17 +336,79 @@ export default function AdminResourcePage() {
     } finally {
       setLoading(false);
     }
-  }, [endpoint, fixedType, page, appliedFilters, definition?.title]);
+  }, [endpoint, fixedType, page, appliedFilters, definition?.title, resourceKey]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   const rows = useMemo(() => result?.items ?? [], [result]);
+
+  useEffect(() => {
+    if (resourceKey !== 'audit') {
+      setAuditHasHorizontalOverflow(false);
+      return;
+    }
+    const tableScroll = auditTableScrollRef.current;
+    const dockScroll = auditDockScrollRef.current;
+    const dockWidth = auditDockWidthRef.current;
+    if (!tableScroll) return;
+
+    const updateDimensions = () => {
+      const rect = tableScroll.getBoundingClientRect();
+      const left = Math.max(0, rect.left);
+      const right = Math.min(window.innerWidth, rect.right);
+      if (dockWidth) dockWidth.style.width = `${tableScroll.scrollWidth}px`;
+      setAuditDockPosition({ left, width: Math.max(0, right - left) });
+      setAuditHasHorizontalOverflow(tableScroll.scrollWidth > tableScroll.clientWidth + 1);
+      if (dockScroll) dockScroll.scrollLeft = tableScroll.scrollLeft;
+    };
+    const syncFromTable = () => {
+      if (dockScroll && dockScroll.scrollLeft !== tableScroll.scrollLeft) {
+        dockScroll.scrollLeft = tableScroll.scrollLeft;
+      }
+    };
+    const syncFromDock = () => {
+      if (dockScroll && tableScroll.scrollLeft !== dockScroll.scrollLeft) {
+        tableScroll.scrollLeft = dockScroll.scrollLeft;
+      }
+    };
+    const observer = new ResizeObserver(updateDimensions);
+    observer.observe(tableScroll);
+    if (tableScroll.firstElementChild) observer.observe(tableScroll.firstElementChild);
+    window.addEventListener('resize', updateDimensions);
+    tableScroll.addEventListener('scroll', syncFromTable, { passive: true });
+    dockScroll?.addEventListener('scroll', syncFromDock, { passive: true });
+    updateDimensions();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateDimensions);
+      tableScroll.removeEventListener('scroll', syncFromTable);
+      dockScroll?.removeEventListener('scroll', syncFromDock);
+    };
+  }, [resourceKey, rows.length, loading, definition?.columns.length, auditHasHorizontalOverflow]);
+
   if (!definition) {
     return <p role="alert">Admin resource page was not found.</p>;
   }
   const showActions = resourceKey === 'listings' || resourceKey === 'reports' || resourceKey === 'reported';
+  const activeListingCard = routePublicationStatus === 'PUBLISHED'
+    ? 'published'
+    : routePublicationStatus === 'UNPUBLISHED'
+      ? 'unpublished'
+      : routeVerificationStatus === 'APPROVED'
+        ? 'verified'
+        : routeVerificationStatus === 'PENDING'
+          ? 'pending'
+          : 'total';
+  const listingCards = [
+    { key: 'total', label: 'TOTAL LISTINGS', value: listingStats?.total, path: '/admin/listings' },
+    { key: 'published', label: 'PUBLISHED', value: listingStats?.published, path: '/admin/listings?publicationStatus=PUBLISHED' },
+    { key: 'unpublished', label: 'UNPUBLISHED', value: listingStats?.unpublished, path: '/admin/listings?publicationStatus=UNPUBLISHED' },
+    { key: 'verified', label: 'VERIFIED', value: listingStats?.approved, path: '/admin/listings?verificationStatus=APPROVED' },
+    { key: 'pending', label: 'PENDING REVIEW', value: listingStats?.pendingReview, path: '/admin/listings?verificationStatus=PENDING' },
+  ];
 
   const runAction = async (row: Row, action: string) => {
     const id = typeof row.id === 'string' ? row.id : '';
@@ -336,13 +447,43 @@ export default function AdminResourcePage() {
         </p>
       </header>
 
+      {resourceKey === 'audit' && auditHasHorizontalOverflow && auditDockPosition.width > 0 && createPortal(
+        <div
+          ref={auditDockScrollRef}
+          role="region"
+          aria-label="Audit log horizontal scroll control"
+          tabIndex={0}
+          className="audit-table-dock h-5 overflow-x-scroll border border-border bg-surface shadow-md"
+          style={{ left: auditDockPosition.left, width: auditDockPosition.width }}
+        >
+          <div ref={auditDockWidthRef} className="h-px" />
+        </div>,
+        document.body,
+      )}
+
+      {resourceKey === 'listings' && (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {listingCards.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => navigate(item.path)}
+              aria-pressed={activeListingCard === item.key}
+              className={`rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${activeListingCard === item.key ? 'ring-2 ring-primary/40' : ''}`}
+            >
+              <StatCard label={item.label} value={listingStatsLoading ? 'Loading...' : item.value ?? '—'} />
+            </button>
+          ))}
+        </div>
+      )}
+
       <Card className="p-4">
         <form
           className="flex flex-col sm:flex-row gap-3"
           onSubmit={(event) => {
             event.preventDefault();
             setPage(1);
-            setAppliedFilters({ search, status });
+            setAppliedFilters({ search, status, publicationStatus: routePublicationStatus, verificationStatus: routeVerificationStatus });
           }}
         >
           <label className="relative flex-1">
@@ -370,7 +511,10 @@ export default function AdminResourcePage() {
 
       <Card className="p-0">
         {error && <p role="alert" className="p-4 text-sm text-red-600 ">{error}</p>}
-        <div className="overflow-x-auto">
+        <div
+          ref={resourceKey === 'audit' ? auditTableScrollRef : undefined}
+          className={resourceKey === 'audit' ? 'audit-table-scroll overflow-x-auto' : 'overflow-x-auto'}
+        >
           <table className="w-full min-w-[720px]">
             <thead>
               <tr className="border-b border-gray-200 ">
@@ -387,17 +531,37 @@ export default function AdminResourcePage() {
                 <tr><td className="p-6 text-center text-sm text-gray-500" colSpan={definition.columns.length + Number(showActions)}>Loading records...</td></tr>
               ) : rows.length === 0 ? (
                 <tr><td className="p-6 text-center text-sm text-gray-500" colSpan={definition.columns.length + Number(showActions)}>No records found.</td></tr>
-              ) : rows.map((row, index) => (
-                <tr key={String(row.id ?? index)} className="border-b border-gray-100 ">
+              ) : rows.map((row, index) => {
+                const listingId = resourceKey === 'listings' && typeof row.id === 'string' ? row.id : '';
+                return (
+                <tr
+                  key={String(row.id ?? index)}
+                  className={`border-b border-gray-100 ${listingId ? 'cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/5' : ''}`}
+                  onClick={listingId ? () => navigate(`/admin/listings/${encodeURIComponent(listingId)}`) : undefined}
+                  onKeyDown={listingId ? (event) => {
+                    if (event.target !== event.currentTarget) return;
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      navigate(`/admin/listings/${encodeURIComponent(listingId)}`);
+                    }
+                  } : undefined}
+                  tabIndex={listingId ? 0 : undefined}
+                  role={listingId ? 'link' : undefined}
+                  aria-label={listingId ? `Open listing ${String(row.title ?? '')}` : undefined}
+                >
                   {definition.columns.map((column) => (
-                    <td key={column.key} className="max-w-xs truncate px-4 py-3 text-sm text-gray-800 ">
+                    <td
+                      key={column.key}
+                      title={renderValue(getValue(row, column.key))}
+                      className="max-w-xs truncate px-4 py-3 text-sm text-gray-800"
+                    >
                       {renderValue(getValue(row, column.key))}
                     </td>
                   ))}
                   {showActions && (
                     <td className="px-4 py-3">
-                      {resourceKey === 'listings' && row.status !== 'UNPUBLISHED' && row.status !== 'REMOVED' && (
-                        <button type="button" onClick={() => void runAction(row, 'unpublish-listing')} className="mr-2 rounded border border-amber-500 px-2 py-1 text-xs text-amber-700 ">
+                      {resourceKey === 'listings' && row.publicationStatus !== 'UNPUBLISHED' && row.status !== 'REMOVED' && (
+                        <button type="button" onClick={(event) => { event.stopPropagation(); void runAction(row, 'unpublish-listing'); }} className="mr-2 rounded border border-amber-500 px-2 py-1 text-xs text-amber-700 ">
                           Unpublish
                         </button>
                       )}
@@ -416,13 +580,13 @@ export default function AdminResourcePage() {
                     </td>
                   )}
                 </tr>
-              ))}
+              );})}
             </tbody>
           </table>
         </div>
         <div className="flex items-center justify-between border-t border-gray-200  px-4 py-3 text-sm text-gray-600 ">
-          <span>{result?.total ?? 0} records</span>
-          {result && result.totalPages > 1 && (
+          <span>{resourceKey === 'audit' ? `Showing ${rows.length} latest of ${result?.total ?? 0} records` : `${result?.total ?? 0} records`}</span>
+          {resourceKey !== 'audit' && result && result.totalPages > 1 && (
             <div className="flex items-center gap-3">
               <button
                 type="button"

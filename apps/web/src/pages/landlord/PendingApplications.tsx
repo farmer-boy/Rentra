@@ -137,7 +137,7 @@ const PendingApplications = () => {
                       <button disabled={processingId !== null} onClick={() => void decideRequest(request.id, 'reject')} className="inline-flex items-center justify-center gap-2 rounded bg-red-100 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-200 disabled:opacity-50">
                         {processingId === request.id ? <Clock size={14} /> : <XCircle size={14} />}{processingId === request.id ? 'Saving…' : 'Reject'}
                       </button>
-                    </div> : request.status === 'ACCEPTED' ? <a href="/landlord/agreements" className="text-xs font-semibold text-emerald-700">View agreements</a> : null}
+                    </div> : request.status === 'ACCEPTED' ? <a href="/dashboard/property-agreements" className="text-xs font-semibold text-emerald-700">View agreements</a> : null}
                   </div>
                 </div>
               </Card>

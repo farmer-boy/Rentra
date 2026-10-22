@@ -23,6 +23,7 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { VerificationModule } from './modules/verification/verification.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { BoostModule } from './modules/boost/boost.module';
+import { SupportModule } from './modules/support/support.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { BoostModule } from './modules/boost/boost.module';
     VerificationModule,
     RecommendationsModule,
     BoostModule,
+    SupportModule,
   ],
 })
 export class AppModule {}

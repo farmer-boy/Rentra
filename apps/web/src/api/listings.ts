@@ -14,6 +14,9 @@ export interface ListingPage<T> {
 }
 
 export const listingsAPI = {
+  getFeatured: async <T = Listing>(): Promise<T[]> =>
+    (await api.get<{ data: T[] }>('/listings/featured')).data.data,
+
   getAll: async <T = Listing>(params: Record<string, unknown> = {}) =>
     (
       await api.get<{ data: T[]; pagination: unknown }>('/listings', {

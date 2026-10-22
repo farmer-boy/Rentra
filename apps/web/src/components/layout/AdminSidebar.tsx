@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   ChevronDown,
   Settings2,
+  LifeBuoy,
 } from 'lucide-react';
 
 interface SidebarItemBase {
@@ -152,8 +153,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       icon: <Settings2 size={20} />,
       children: [
         { label: 'Reported Items', path: '/admin/reported', icon: <FileText size={18} /> },
-        { label: 'Approvals', path: '/admin/approvals', icon: <Settings2 size={18} /> },
-        { label: 'Verification Queue', path: '/admin/verification', icon: <Settings2 size={18} /> },
+        { label: 'User Verification', path: '/admin/user-verification', icon: <Users size={18} /> },
+        { label: 'Property Verification', path: '/admin/property-verification', icon: <FileText size={18} /> },
         { label: 'Bookings', path: '/admin/bookings', icon: <FileText size={18} /> },
         { label: 'Rental Requests', path: '/admin/rental-requests', icon: <FileText size={18} /> },
         { label: 'Agreements', path: '/admin/agreements', icon: <FileText size={18} /> },
@@ -175,6 +176,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       icon: <Mail size={20} />,
       children: [
         { label: 'Messages', path: '/admin/messages', icon: <Mail size={18} />, badge: unreadCount || undefined },
+        { label: 'Support Tickets', path: '/admin/support', icon: <LifeBuoy size={18} /> },
         { label: 'Reviews', path: '/admin/reviews', icon: <Star size={18} /> },
         { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={18} /> },
       ],

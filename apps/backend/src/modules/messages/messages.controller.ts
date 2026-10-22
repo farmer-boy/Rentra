@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -9,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { UpdateMessageDto } from './dto/update-message.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
@@ -65,6 +68,34 @@ export class MessagesController {
       conversationId,
       user.sub,
       createMessageDto,
+    );
+  }
+
+  @Patch('conversation/:conversationId/:messageId')
+  async updateMessage(
+    @Param('conversationId') conversationId: string,
+    @Param('messageId') messageId: string,
+    @Body() dto: UpdateMessageDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.updateMessage(
+      conversationId,
+      messageId,
+      user.sub,
+      dto.content,
+    );
+  }
+
+  @Delete('conversation/:conversationId/:messageId')
+  async deleteMessage(
+    @Param('conversationId') conversationId: string,
+    @Param('messageId') messageId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.deleteMessage(
+      conversationId,
+      messageId,
+      user.sub,
     );
   }
 

@@ -21,10 +21,13 @@ export default function ProtectedRoute({ children, allowedRoles }: Props) {
       ? [user.role]
       : [];
 
+  if (userRoles.includes('ADMIN') && !allowedRoles?.includes('ADMIN')) {
+    return <Navigate to="/admin" replace />;
+  }
+
   if (allowedRoles && user && !allowedRoles.some((role) => userRoles.includes(role))) {
     if (userRoles.includes('ADMIN')) return <Navigate to="/admin" replace />;
-    if (userRoles.includes('LANDLORD')) return <Navigate to="/landlord" replace />;
-    return <Navigate to="/tenant" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

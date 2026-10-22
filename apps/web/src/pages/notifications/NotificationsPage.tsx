@@ -1,4 +1,5 @@
-import { Bell, CheckCheck } from 'lucide-react';
+import { Bell, CheckCheck, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { ApiError } from '../../api/api-error';
 import {
   useMarkAllNotificationsRead,
@@ -13,9 +14,11 @@ interface Notification {
   message: string;
   isRead: boolean;
   createdAt: string;
+  data?: { href?: string } | null;
 }
 
 export default function NotificationsPage() {
+  const navigate = useNavigate();
   const notificationsQuery = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllMutation = useMarkAllNotificationsRead();
@@ -93,6 +96,18 @@ export default function NotificationsPage() {
                 <p className={`mt-2 text-xs ${mutedText}`}>
                   {new Date(notification.createdAt).toLocaleString()}
                 </p>
+                {notification.data?.href && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!notification.isRead) markRead(notification.id);
+                      navigate(notification.data!.href!);
+                    }}
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                  >
+                    Open <ExternalLink size={13} />
+                  </button>
+                )}
               </div>
               {!notification.isRead && (
                 <button

@@ -3,6 +3,7 @@ import { useAuthStore } from '../../store/authStore';
 import Card from '../../components/ui/Card';
 import Pill from '../../components/ui/Pill';
 import { agreementsAPI } from '../../api/agreements';
+import { useSearchParams } from 'react-router-dom';
 
 interface Agreement {
   id: string;
@@ -20,6 +21,8 @@ interface Agreement {
 
 export default function Agreements() {
   const { user } = useAuthStore();
+  const [searchParams] = useSearchParams();
+  const showSignedOnly = searchParams.get('status') === 'SIGNED';
   const [agreements, setAgreements] = useState<Agreement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -47,6 +50,9 @@ export default function Agreements() {
     if (status === 'CANCELLED' || status === 'ENDED' || status === 'TERMINATED' || status === 'EXPIRED') return 'red';
     return 'yellow';
   };
+  const visibleAgreements = showSignedOnly
+    ? agreements.filter((agreement) => !['DRAFT', 'PENDING'].includes(agreement.status))
+    : agreements;
 
   return (
     <div>
@@ -61,11 +67,11 @@ export default function Agreements() {
           <p className="py-6 text-center text-[12px] text-gray-500">Loading agreements…</p>
         ) : error || !user?.id ? (
           <p role="alert" className="py-6 text-center text-[12px] text-red-500">Unable to load your agreements right now.</p>
-        ) : agreements.length === 0 ? (
+        ) : visibleAgreements.length === 0 ? (
           <p className="py-6 text-center text-[12px] text-gray-500">No agreements are available for your account.</p>
         ) : (
           <div className="space-y-3">
-            {agreements.map((agreement) => (
+            {visibleAgreements.map((agreement) => (
               <div key={agreement.id} className="p-4 border border-border rounded-lg bg-surface-2">
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
                   <div>

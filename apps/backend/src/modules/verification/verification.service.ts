@@ -9,7 +9,11 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import {
+  ListingPublicationStatus,
+  ListingStatus,
+  NotificationType,
   Prisma,
+  PropertyStatus,
   TrustSource,
   VerificationKind,
   VerificationStatus,
@@ -27,6 +31,7 @@ const PHONE_CODE_TTL_MS = 10 * 60 * 1000;
 const PHONE_CODE_ATTEMPT_LIMIT = 5;
 const PHONE_CODE_SEND_LIMIT = 3;
 const PHONE_CODE_SEND_WINDOW_MS = 15 * 60 * 1000;
+const PENDING_PROPERTY_QUEUE_PREFIX = 'property:';
 
 @Injectable()
 export class VerificationService {
@@ -328,22 +333,86 @@ export class VerificationService {
     return { submissions, properties };
   }
 
-  listPendingSubmissions() {
-    return this.prisma.verificationSubmission.findMany({
-      where: { status: VerificationStatus.PENDING },
-      orderBy: { submittedAt: 'asc' },
-      select: {
-        id: true,
-        kind: true,
-        status: true,
-        submittedAt: true,
-        user: { select: { id: true, fullName: true } },
-        property: { select: { id: true, title: true } },
-      },
-    });
+  async listPendingSubmissions() {
+    const [submissions, pendingProperties] = await Promise.all([
+      this.prisma.verificationSubmission.findMany({
+        where: { status: VerificationStatus.PENDING },
+        orderBy: { submittedAt: 'asc' },
+        select: {
+          id: true,
+          kind: true,
+          status: true,
+          submittedAt: true,
+          user: { select: { id: true, fullName: true } },
+          property: { select: { id: true, title: true } },
+        },
+      }),
+      this.prisma.property.findMany({
+        where: {
+          status: PropertyStatus.PENDING_VERIFICATION,
+          verificationStatus: { in: [VerificationStatus.UNVERIFIED, VerificationStatus.PENDING] },
+          verificationSubmissions: {
+            none: { kind: VerificationKind.PROPERTY, status: VerificationStatus.PENDING },
+          },
+        },
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+          title: true,
+          createdAt: true,
+          owner: { select: { id: true, fullName: true } },
+        },
+      }),
+    ]);
+
+    return [
+      ...submissions,
+      ...pendingProperties.map((property) => ({
+        id: `${PENDING_PROPERTY_QUEUE_PREFIX}${property.id}`,
+        kind: VerificationKind.PROPERTY,
+        status: VerificationStatus.PENDING,
+        submittedAt: property.createdAt,
+        user: property.owner,
+        property: { id: property.id, title: property.title },
+      })),
+    ].sort((first, second) => first.submittedAt.getTime() - second.submittedAt.getTime());
   }
 
   async getSubmissionForAdmin(id: string) {
+    if (id.startsWith(PENDING_PROPERTY_QUEUE_PREFIX)) {
+      const propertyId = id.slice(PENDING_PROPERTY_QUEUE_PREFIX.length);
+      const property = await this.prisma.property.findUnique({
+        where: { id: propertyId },
+        include: {
+          owner: { select: { id: true, fullName: true, email: true, phone: true, emailVerifiedAt: true, phoneVerifiedAt: true } },
+          images: { select: { url: true }, orderBy: { sortOrder: 'asc' } },
+        },
+      });
+      if (!property || property.status !== PropertyStatus.PENDING_VERIFICATION || property.verificationStatus === VerificationStatus.REJECTED) {
+        throw new NotFoundException('Pending property verification was not found');
+      }
+      return {
+        id,
+        kind: VerificationKind.PROPERTY,
+        status: VerificationStatus.PENDING,
+        submittedAt: property.createdAt,
+        user: property.owner,
+        property: { id: property.id, title: property.title, address: property.address },
+        details: {
+          description: property.description,
+          propertyType: property.propertyType,
+          rentalMode: property.rentalMode,
+          price: property.price,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          area: property.area,
+          city: property.city,
+          address: property.address,
+        },
+        evidenceUrls: property.images.map((image) => image.url),
+      };
+    }
+
     const submission = await this.prisma.verificationSubmission.findUnique({
       where: { id },
       include: {
@@ -370,6 +439,15 @@ export class VerificationService {
     submissionId: string,
     dto: ReviewVerificationDto,
   ) {
+    if (submissionId.startsWith(PENDING_PROPERTY_QUEUE_PREFIX)) {
+      return this.reviewPendingProperty(
+        adminId,
+        submissionId.slice(PENDING_PROPERTY_QUEUE_PREFIX.length),
+        submissionId,
+        dto,
+      );
+    }
+
     const submission = await this.prisma.verificationSubmission.findUnique({
       where: { id: submissionId },
       select: {
@@ -422,7 +500,18 @@ export class VerificationService {
       ) {
         await transaction.property.update({
           where: { id: submission.propertyId },
-          data: { verificationStatus: nextStatus },
+          data: {
+            verificationStatus: nextStatus,
+            status: nextStatus === VerificationStatus.APPROVED
+              ? PropertyStatus.ACTIVE
+              : PropertyStatus.REJECTED,
+          },
+        });
+        await transaction.listing.updateMany({
+          where: { propertyId: submission.propertyId },
+          data: nextStatus === VerificationStatus.APPROVED
+            ? { status: ListingStatus.PUBLISHED, publicationStatus: ListingPublicationStatus.PUBLISHED }
+            : { status: ListingStatus.REMOVED, publicationStatus: ListingPublicationStatus.UNPUBLISHED },
         });
         await this.auditService.record(transaction, {
           actorId: adminId,
@@ -455,6 +544,25 @@ export class VerificationService {
           });
         }
       }
+
+      await transaction.notification.create({
+        data: {
+          userId: submission.userId,
+          type: NotificationType.VERIFICATION,
+          title: `${submission.kind === VerificationKind.PROPERTY ? 'Property' : submission.kind === VerificationKind.HOST ? 'Landlord' : 'Identity'} verification ${nextStatus.toLowerCase()}`,
+          message: dto.reviewNotes.trim(),
+          data: {
+            submissionId: submission.id,
+            propertyId: submission.propertyId,
+            kind: submission.kind,
+            href: submission.kind === VerificationKind.PROPERTY
+              ? '/dashboard/properties'
+              : submission.kind === VerificationKind.HOST
+                ? '/dashboard/host-verification'
+                : '/dashboard/profile',
+          },
+        },
+      });
     });
 
     if (submission.kind === VerificationKind.IDENTITY) {
@@ -624,14 +732,73 @@ export class VerificationService {
   private async assertContactVerified(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { emailVerifiedAt: true, phoneVerifiedAt: true },
+      select: { emailVerifiedAt: true },
     });
     if (!user) throw new NotFoundException('User not found');
-    if (!user.emailVerifiedAt || !user.phoneVerifiedAt) {
+    if (!user.emailVerifiedAt) {
       throw new ForbiddenException(
-        'Verify both email and phone before submitting verification evidence',
+        'Verify your email before submitting verification evidence',
       );
     }
+  }
+
+  private async reviewPendingProperty(
+    adminId: string,
+    propertyId: string,
+    queueId: string,
+    dto: ReviewVerificationDto,
+  ) {
+    const property = await this.prisma.property.findUnique({
+      where: { id: propertyId },
+      select: { id: true, title: true, ownerId: true, status: true, verificationStatus: true },
+    });
+    if (
+      !property ||
+      property.status !== PropertyStatus.PENDING_VERIFICATION ||
+      property.verificationStatus === VerificationStatus.REJECTED
+    ) {
+      throw new NotFoundException('Pending property verification was not found');
+    }
+    if (dto.decision === VerificationStatus.APPROVED) {
+      await this.assertHostAndIdentityApproved(property.ownerId);
+    }
+
+    const nextStatus = dto.decision as VerificationStatus;
+    await this.prisma.$transaction(async (transaction) => {
+      const updated = await transaction.property.updateMany({
+        where: {
+          id: property.id,
+          status: PropertyStatus.PENDING_VERIFICATION,
+          verificationStatus: property.verificationStatus,
+        },
+        data: {
+          verificationStatus: nextStatus,
+          status: nextStatus === VerificationStatus.APPROVED
+            ? PropertyStatus.ACTIVE
+            : PropertyStatus.REJECTED,
+        },
+      });
+      if (updated.count !== 1) {
+        throw new ConflictException('Property changed before the review was saved');
+      }
+      await transaction.listing.updateMany({
+        where: { propertyId: property.id },
+        data: nextStatus === VerificationStatus.APPROVED
+          ? { status: ListingStatus.PUBLISHED, publicationStatus: ListingPublicationStatus.PUBLISHED }
+          : { status: ListingStatus.REMOVED, publicationStatus: ListingPublicationStatus.UNPUBLISHED },
+      });
+      await this.auditService.record(transaction, {
+        actorId: adminId,
+        actorRole: 'ADMIN',
+        entityType: 'PROPERTY',
+        entityId: property.id,
+        action: `PROPERTY_VERIFICATION_${nextStatus}`,
+        previousStatus: property.verificationStatus,
+        newStatus: nextStatus,
+        reason: dto.reviewNotes.trim(),
+      });
+    });
+    return { id: queueId, kind: VerificationKind.PROPERTY, status: nextStatus };
   }
 
   private validateEvidenceUrls(urls?: string[]) {

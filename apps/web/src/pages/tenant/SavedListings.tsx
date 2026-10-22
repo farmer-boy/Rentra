@@ -109,7 +109,7 @@ export default function SavedListings() {
             const areaSize = favorite.sqft ?? favorite.squareFeet ?? favorite.areaSizeSqft;
             return (
               <Card key={favorite.id} className="overflow-hidden">
-                <Link to={`/listings/${favorite.id}`} className="block">
+                <Link to={`/dashboard/listings/${favorite.id}`} className="block">
                   <div className="h-48 overflow-hidden bg-gray-100">
                     {favorite.images?.[0]?.url ? (
                       <img src={favorite.images[0].url} alt={favorite.title ?? 'Saved home'} className="h-full w-full object-cover" />

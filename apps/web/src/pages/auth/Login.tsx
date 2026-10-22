@@ -53,8 +53,7 @@ export default function Login() {
 
     if (returnTo) navigate(returnTo);
     else if (roles.includes('ADMIN')) navigate('/admin');
-    else if (roles.includes('LANDLORD')) navigate('/landlord');
-    else navigate('/tenant');
+    else navigate('/dashboard');
   };
 
   const finishLoginRef = useRef(finishLogin);

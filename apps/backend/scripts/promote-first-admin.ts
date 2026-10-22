@@ -47,7 +47,7 @@ async function promoteFirstAdmin() {
           emailVerifiedAt: { not: null },
           NOT: { roles: { has: Role.ADMIN } },
         },
-        data: { roles: [...new Set([...user.roles, Role.ADMIN])] },
+        data: { roles: [Role.ADMIN] },
       });
       if (updated.count !== 1) {
         throw new Error(

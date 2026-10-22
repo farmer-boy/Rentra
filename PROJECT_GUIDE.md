@@ -1,4 +1,4 @@
-# Rentra Project Guide
+   # Rentra Project Guide
 
 This guide explains the repository layout, how to run the applications, how their main parts connect, and how to test common API operations.
 

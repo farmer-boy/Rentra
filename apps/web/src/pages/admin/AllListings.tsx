@@ -15,9 +15,9 @@ const AdminListings = () => {
   const totalPages = data?.totalPages ?? 0;
   const error = isError ? 'Could not load listings. Please try again later.' : '';
 
-  const published = listings.filter((listing) => listing.status === 'PUBLISHED').length;
+  const published = listings.filter((listing) => listing.publicationStatus === 'PUBLISHED').length;
   const pending = listings.filter((listing) => listing.status === 'PENDING').length;
-  const unpublished = listings.filter((listing) => listing.status === 'UNPUBLISHED').length;
+  const unpublished = listings.filter((listing) => listing.publicationStatus === 'UNPUBLISHED').length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -71,14 +71,15 @@ const AdminListings = () => {
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Landlord</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 ">City</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Price</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Status</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Listing status</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Publication</th>
               </tr>
             </thead>
             <tbody>
               {isFetching && listings.length === 0 ? (
-                <tr><td colSpan={5} className="py-8 text-center text-gray-500">Loading listings...</td></tr>
+                <tr><td colSpan={6} className="py-8 text-center text-gray-500">Loading listings...</td></tr>
               ) : listings.length === 0 ? (
-                <tr><td colSpan={5} className="py-8 text-center text-gray-500">{error ? 'Listing records are unavailable.' : 'No listings found.'}</td></tr>
+                <tr><td colSpan={6} className="py-8 text-center text-gray-500">{error ? 'Listing records are unavailable.' : 'No listings found.'}</td></tr>
               ) : listings.map((listing) => (
                 <tr key={listing.id} className="border-b border-gray-100  hover:bg-gray-50  transition">
                   <td className="py-3 px-4">
@@ -100,6 +101,11 @@ const AdminListings = () => {
                   <td className="py-3 px-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(listing.status)}`}>
                       {listing.status.replaceAll('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(listing.publicationStatus)}`}>
+                      {listing.publicationStatus.replaceAll('_', ' ')}
                     </span>
                   </td>
                 </tr>

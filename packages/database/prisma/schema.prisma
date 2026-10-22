@@ -216,6 +216,22 @@ enum NotificationType {
   VERIFICATION
 }
 
+enum SupportTicketCategory {
+  ACCOUNT
+  VERIFICATION
+  LISTING
+  PAYMENT
+  SAFETY
+  OTHER
+}
+
+enum SupportTicketStatus {
+  NEW
+  OPEN
+  PENDING
+  RESOLVED
+}
+
 enum ReportTargetType {
   PROPERTY
   LISTING
@@ -301,6 +317,8 @@ model User {
   emailVerifiedAt DateTime?
   phoneVerifiedAt DateTime?
   isSuspended     Boolean   @default(false)
+  supportBlockedUntil DateTime?
+  supportWarningCount Int @default(0)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -339,6 +357,8 @@ model User {
   verificationSubmissions VerificationSubmission[] @relation("VerificationSubmitter")
   reviewedVerifications   VerificationSubmission[] @relation("VerificationReviewer")
   verificationChallenges  VerificationChallenge[]
+  supportTickets          SupportTicket[]
+  supportTicketMessages   SupportTicketMessage[]
 }
 
 model UserProfile {
@@ -1109,6 +1129,7 @@ model Message {
   senderId       String
   content        String
   attachmentUrl  String?
+  isDelivered    Boolean  @default(false)
   isRead         Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
@@ -1134,6 +1155,35 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead, createdAt])
+}
+
+model SupportTicket {
+  id          String               @id @default(cuid())
+  userId      String
+  category    SupportTicketCategory
+  subject     String
+  status      SupportTicketStatus   @default(NEW)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  messages    SupportTicketMessage[]
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, updatedAt])
+  @@index([status, updatedAt])
+  @@index([createdAt])
+}
+
+model SupportTicketMessage {
+  id        String        @id @default(cuid())
+  ticketId  String
+  senderId  String
+  body      String
+  createdAt DateTime      @default(now())
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender    User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@index([senderId, createdAt])
 }
 
 model SavedSearch {

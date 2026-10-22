@@ -23,16 +23,19 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
   const roles = user?.roles ?? (user?.role ? [user.role] : []);
-  const homePath = roles.includes('LANDLORD') ? '/landlord' : '/tenant';
+  const homePath = roles.includes('ADMIN') ? '/admin' : roles.includes('LANDLORD') ? '/landlord' : '/tenant';
   const featuredListings = useQuery({
     queryKey: ['listings', 'home-featured'],
-    queryFn: () => listingsAPI.getAll<FeaturedListing>({ limit: 3 }),
+    queryFn: () => listingsAPI.getFeatured<FeaturedListing>(),
   });
   const cityQuery = useQuery({
     queryKey: ['locations', 'cities'],
     queryFn: () => locationsAPI.cities(),
   });
-  const browseTo = `/listings${city ? `?city=${encodeURIComponent(city)}` : ''}`;
+  const browseTo = isAuthenticated
+    ? `/dashboard/listings${city ? `?city=${encodeURIComponent(city)}` : ''}`
+    : '/register';
+  const listingsPath = isAuthenticated ? '/dashboard/listings' : '/register';
 
   return (
     <main className="public-home min-h-screen bg-[var(--bg)] text-[var(--text)]">
@@ -80,13 +83,13 @@ export default function HomePage() {
             {!!cityQuery.data?.length && <div className="mt-5 flex flex-wrap gap-2 text-xs text-[var(--text2)]"><span className="self-center mr-1">Explore cities:</span>{cityQuery.data.slice(0, 5).map((item) => <button key={item.id} onClick={() => setCity(item.name)} className="rounded-full border border-border-strong bg-surface/65 px-3 py-1.5 transition hover:border-primary hover:text-primary">{item.name}</button>)}</div>}
             <div className="mt-8 text-sm text-[var(--text2)]"><strong className="text-[var(--text)]">Rent with clarity.</strong> Move in with confidence.</div>
           </div>
-          <div className="justify-end hidden lg:flex"><div className="w-[275px] rounded-2xl border border-border bg-surface/90 p-5"><Building2 className="text-primary" size={28} /><p className="mt-4 text-xs text-[var(--text3)]">Browse homes that are</p><p className="mt-1 text-lg font-semibold">currently listed on Rentra</p><Link to="/listings" className="inline-flex items-center gap-2 mt-5 text-sm font-semibold text-primary">Explore listings <ArrowRight size={15} /></Link></div></div>
+          <div className="justify-end hidden lg:flex"><div className="w-[275px] rounded-2xl border border-border bg-surface/90 p-5"><Building2 className="text-primary" size={28} /><p className="mt-4 text-xs text-[var(--text3)]">Browse homes that are</p><p className="mt-1 text-lg font-semibold">currently listed on Rentra</p><Link to={listingsPath} className="inline-flex items-center gap-2 mt-5 text-sm font-semibold text-primary">Explore listings <ArrowRight size={15} /></Link></div></div>
         </div>
       </section>
 
       <section id="homes" className="px-5 py-16 mx-auto max-w-7xl lg:px-8 lg:py-20">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--green-soft)]">A good place to start</p><h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-[38px]">Homes worth coming home to</h2><p className="mt-2 text-sm text-[var(--text3)]">Published listings currently available on Rentra.</p></div><Link to="/listings" className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--green)] hover:gap-2">See all homes <ArrowRight size={16} /></Link></div>
-        {featuredListings.isPending ? <p className="mt-8 text-sm text-[var(--text3)]">Loading current listings...</p> : featuredListings.isError ? <div role="alert" className="mt-8 text-sm text-[var(--red)]">Current listings could not be loaded. <button onClick={() => void featuredListings.refetch()} className="underline">Retry</button></div> : featuredListings.data?.data.length ? <div className="grid gap-5 mt-8 sm:grid-cols-2 lg:grid-cols-3">{featuredListings.data.data.map((listing) => <Link key={listing.id} to={`/listings/${listing.id}`} className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]"><div className="h-56 overflow-hidden bg-[var(--surface2)]">{listing.images?.[0]?.url ? <img src={listing.images[0].url} alt={listing.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="flex h-full items-center justify-center text-sm text-[var(--text3)]">No property image</div>}</div><div className="p-4"><p className="flex items-center gap-1 text-xs text-[var(--text3)]"><MapPin size={13} />{[listing.area, listing.city].filter(Boolean).join(', ')}</p><h3 className="mt-2 font-semibold">{listing.title}</h3><div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3"><p><strong className="text-lg text-[var(--green)]">Rs. {listing.rent.toLocaleString()}</strong><span className="text-xs text-[var(--text3)]"> / {listing.rentalDuration.toLowerCase().replace('_', ' ')}</span></p><span className="flex items-center gap-1 text-xs text-[var(--text2)]"><BedDouble size={14} />{listing.bedrooms}</span></div></div></Link>)}</div> : <p className="mt-8 text-sm text-[var(--text3)]">There are no published listings to show right now.</p>}
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-[var(--green-soft)]">A good place to start</p><h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-[38px]">Homes worth coming home to</h2><p className="mt-2 text-sm text-[var(--text3)]">{isAuthenticated ? 'Published listings currently available on Rentra.' : 'Create an account to browse available homes.'}</p></div><Link to={listingsPath} className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--green)] hover:gap-2">{isAuthenticated ? 'See all homes' : 'Create account to browse'} <ArrowRight size={16} /></Link></div>
+        {featuredListings.isPending ? <p className="mt-8 text-sm text-[var(--text3)]">Loading current listings...</p> : featuredListings.isError ? <div role="alert" className="mt-8 text-sm text-[var(--red)]">Current listings could not be loaded. <button onClick={() => void featuredListings.refetch()} className="underline">Retry</button></div> : featuredListings.data?.length ? <div className="grid gap-5 mt-8 sm:grid-cols-2 lg:grid-cols-3">{featuredListings.data.map((listing) => <Link key={listing.id} to={isAuthenticated ? `/dashboard/listings/${listing.id}` : '/register'} className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]"><div className="h-56 overflow-hidden bg-[var(--surface2)]">{listing.images?.[0]?.url ? <img src={listing.images[0].url} alt={listing.title} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]" /> : <div className="flex h-full items-center justify-center text-sm text-[var(--text3)]">No property image</div>}</div><div className="p-4"><p className="flex items-center gap-1 text-xs text-[var(--text3)]"><MapPin size={13} />{[listing.area, listing.city].filter(Boolean).join(', ')}</p><h3 className="mt-2 font-semibold">{listing.title}</h3><div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3"><p><strong className="text-lg text-[var(--green)]">Rs. {listing.rent.toLocaleString()}</strong><span className="text-xs text-[var(--text3)]"> / {listing.rentalDuration.toLowerCase().replace('_', ' ')}</span></p><span className="flex items-center gap-1 text-xs text-[var(--text2)]"><BedDouble size={14} />{listing.bedrooms}</span></div></div></Link>)}</div> : <p className="mt-8 text-sm text-[var(--text3)]">There are no published listings to show right now.</p>}
       </section>
 
       <section id="trust" className="border-y border-[var(--border)] bg-[var(--surface2)]">

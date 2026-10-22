@@ -32,6 +32,7 @@ import type { JwtPayload } from '../../common/types/jwt-payload';
 import { ModerationActionDto } from '../reports/dto/moderation-action.dto';
 import { InvestigationNoteDto } from '../audit/dto/investigation-note.dto';
 import { AdminListQueryDto } from './dto/admin-list-query.dto';
+import { SendUserNoticeDto } from './dto/send-user-notice.dto';
 
 @ApiTags('Admin')
 @Controller('admin')
@@ -55,6 +56,16 @@ export class AdminController {
   @Get('users/:id')
   async getUserDetails(@Param('id') userId: string) {
     return this.adminService.getUserDetails(userId);
+  }
+
+  @Post('users/:id/notices')
+  @HttpCode(HttpStatus.CREATED)
+  async sendUserNotice(
+    @Param('id') userId: string,
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: SendUserNoticeDto,
+  ) {
+    return this.adminService.sendUserNotice(userId, user.sub, dto);
   }
 
   @Post('users/:id/suspend')

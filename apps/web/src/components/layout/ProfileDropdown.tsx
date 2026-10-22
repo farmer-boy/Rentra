@@ -99,10 +99,8 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
   };
 
   const getProfilePath = () => {
-    const role = user?.role?.toLowerCase();
-    if (role === 'landlord') return '/landlord/profile';
-    if (role === 'admin') return '/admin/profile';
-    return '/tenant/profile';
+    const roles = user?.roles ?? (user?.role ? [user.role] : []);
+    return roles.includes('ADMIN') ? '/admin/profile' : '/dashboard/profile';
   };
 
   if (!isOpen) return null;

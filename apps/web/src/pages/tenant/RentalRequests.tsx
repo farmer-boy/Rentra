@@ -70,14 +70,14 @@ export default function TenantRentalRequests() {
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <h2 className="font-semibold">{title}</h2>
-                    {request.listing?.id && <Link to={`/listings/${request.listing.id}`} className="mt-1 inline-block text-xs font-semibold text-emerald-700 underline">View listing</Link>}
+                      {request.listing?.id && <Link to={`/dashboard/listings/${request.listing.id}`} className="mt-1 inline-block text-xs font-semibold text-emerald-700 underline">View listing</Link>}
                     {location && <p className="mt-1 flex items-center gap-1 text-sm text-gray-500"><MapPin size={14} />{location}</p>}
                     <p className="mt-2 text-sm text-gray-600">Sent {new Date(request.createdAt).toLocaleDateString()} · {request.status.replaceAll('_', ' ')}</p>
                     {request.moveInDate && <p className="mt-1 text-sm text-gray-500">Requested move-in: {new Date(request.moveInDate).toLocaleDateString()}</p>}
                     {request.durationMonths != null && <p className="mt-1 text-sm text-gray-500">Duration: {request.durationMonths} months</p>}
                     {request.message && <p className="mt-2 whitespace-pre-wrap text-sm text-gray-600">{request.message}</p>}
                     {request.agreements?.map((agreement) => (
-                      <Link key={agreement.id} to="/tenant/agreement" className="mt-3 inline-block rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">
+                      <Link key={agreement.id} to="/dashboard/my-agreements" className="mt-3 inline-block rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700">
                         View {agreement.status.toLowerCase()} agreement
                       </Link>
                     ))}

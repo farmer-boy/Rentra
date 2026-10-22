@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar, { type NavSection } from './Sidebar';
 import Navbar from './Navbar';
+import BackToDashboard from './BackToDashboard';
 
 interface DashboardLayoutProps {
   navSections: NavSection[];
@@ -56,6 +57,7 @@ export default function DashboardLayout({ navSections }: DashboardLayoutProps) {
         )}
 
         <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 transition-all duration-300 sm:p-4 lg:p-6" style={{ backgroundColor: 'var(--bg)' }}>
+          <BackToDashboard />
           <Outlet />
         </main>
       </div>

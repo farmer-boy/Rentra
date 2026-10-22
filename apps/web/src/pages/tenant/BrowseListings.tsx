@@ -75,6 +75,7 @@ function ListingFiltersForm({
     return {
       city: initial.city ?? '',
       area: initial.area ?? '',
+      hostel: initial.hostel ?? '',
       propertyType: initial.propertyType ?? '',
       minRent: initial.minRent ?? '',
       maxRent: initial.maxRent ?? '',
@@ -112,7 +113,8 @@ function ListingFiltersForm({
         <SlidersHorizontal size={16} className="text-primary" />
         Refine your search
       </div>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_auto]">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]">
+        <input aria-label="Property name" value={filters.hostel} onChange={(event) => setFilter('hostel', event.target.value)} placeholder="Property name" className={filterFieldClass} />
         <input aria-label="City" value={filters.city} onChange={(event) => setFilter('city', event.target.value)} placeholder="City" className={filterFieldClass} />
         <input aria-label="Area" value={filters.area} onChange={(event) => setFilter('area', event.target.value)} placeholder="Area or neighbourhood" className={filterFieldClass} />
         <button type="submit" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 py-2 text-sm font-semibold text-primary-contrast transition hover:bg-primary-hover"><Search size={16} /> Search homes</button>
@@ -122,8 +124,8 @@ function ListingFiltersForm({
         <input aria-label="Minimum price" type="number" placeholder="Minimum Rs." value={filters.minRent} onChange={(event) => setFilter('minRent', event.target.value)} className={filterFieldClass} />
         <input aria-label="Maximum price" type="number" placeholder="Maximum Rs." value={filters.maxRent} onChange={(event) => setFilter('maxRent', event.target.value)} className={filterFieldClass} />
         <select aria-label="Rental duration" value={filters.rentalDuration} onChange={(event) => setFilter('rentalDuration', event.target.value)} className={filterFieldClass}><option value="">Rental duration</option>{durations.map((duration) => <option key={duration} value={duration}>{duration.replace('_', ' ')}</option>)}</select>
-        <select aria-label="Bedrooms" value={filters.bedrooms} onChange={(event) => setFilter('bedrooms', event.target.value)} className={filterFieldClass}><option value="">Bedrooms</option>{['1', '2', '3', '4'].map((value) => <option key={value} value={value}>{value}</option>)}</select>
-        <select aria-label="Bathrooms" value={filters.bathrooms} onChange={(event) => setFilter('bathrooms', event.target.value)} className={filterFieldClass}><option value="">Bathrooms</option>{['1', '2', '3'].map((value) => <option key={value} value={value}>{value}</option>)}</select>
+        <input aria-label="Bedrooms" type="number" min="0" step="1" value={filters.bedrooms} onChange={(event) => setFilter('bedrooms', event.target.value)} placeholder="Bedrooms" className={filterFieldClass} />
+        <input aria-label="Bathrooms" type="number" min="0" step="1" value={filters.bathrooms} onChange={(event) => setFilter('bathrooms', event.target.value)} placeholder="Bathrooms" className={filterFieldClass} />
         <select aria-label="Furnished" value={filters.furnishedStatus} onChange={(event) => setFilter('furnishedStatus', event.target.value)} className={filterFieldClass}><option value="">Furnished</option>{furnishing.map((value) => <option key={value} value={value}>{value.replace('_', ' ')}</option>)}</select>
         <select
           aria-label="Sort listings"
@@ -185,7 +187,7 @@ function SaveListingButton({ listingId }: { listingId: string }) {
       aria-label={saved ? 'Remove from favorites' : 'Save to favorites'}
       aria-pressed={saved}
       disabled={toggleFavorite.isPending}
-      onClick={() => void toggle()}
+      onClick={(event) => { event.stopPropagation(); void toggle(); }}
       className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-surface/95 text-rose-600 disabled:opacity-60"
     >
       <Heart size={18} fill={saved ? 'currentColor' : 'none'} />
@@ -195,6 +197,7 @@ function SaveListingButton({ listingId }: { listingId: string }) {
 
 export default function BrowseListings() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState<'list' | 'map'>('list');
   const appliedFilters = readParams(searchParams);
@@ -210,6 +213,12 @@ export default function BrowseListings() {
   const mappedListings = listings.filter(
     (listing) => typeof listing.latitude === 'number' && typeof listing.longitude === 'number',
   );
+  const hasSoftPreferences = Boolean(
+    appliedFilters.bedrooms || appliedFilters.bathrooms || appliedFilters.gender || appliedFilters.availableFrom,
+  );
+  const openListing = (listingId: string) => navigate(`${location.pathname.startsWith('/dashboard') ? '/dashboard/listings' : '/listings'}/${listingId}`, {
+    state: { from: `${location.pathname}${location.search}` },
+  });
 
   const applySearch = (filters: Filters, selectedAmenities: string[]) => {
     const params = Object.fromEntries(
@@ -224,7 +233,7 @@ export default function BrowseListings() {
   };
   const clearFilters = () => setSearchParams(new URLSearchParams());
   const activeFilters = Object.entries(appliedFilters).filter(
-    ([key, value]) => !['page', 'limit', 'sortBy', 'sortOrder'].includes(key) && value,
+    ([key, value]) => !['page', 'limit', 'sortBy', 'sortOrder', 'bedrooms', 'bathrooms', 'gender', 'availableFrom'].includes(key) && value,
   );
   const removeFilter = (key: string) => {
     const params = new URLSearchParams(searchParams);
@@ -281,6 +290,9 @@ export default function BrowseListings() {
       </header>
 
       <ListingFiltersForm key={searchParams.toString()} params={searchParams} onApply={applySearch} />
+      <p className="-mt-3 text-xs text-text-muted">
+        Budget allows around 10% flexibility. Bedrooms, bathrooms, gender, and date are preferences, so matching area listings still appear if these differ.
+      </p>
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2" aria-label="Active filters">
           <span className="mr-1 text-xs font-semibold text-text-muted">Filters:</span>
@@ -312,7 +324,7 @@ export default function BrowseListings() {
           <p className="text-sm text-text-muted" aria-live="polite">
             <span className="font-semibold text-text">{pagination?.total ?? listings.length}</span>
             {' '}homes found
-            {activeFilters.length > 0 && <span> matching your filters</span>}
+            {(activeFilters.length > 0 || hasSoftPreferences) && <span> matching your search</span>}
           </p>
           {pagination && pagination.totalPages > 1 && (
             <span className="text-xs text-text-muted">Page {currentPage} of {pagination.totalPages}</span>
@@ -346,7 +358,7 @@ export default function BrowseListings() {
                       <strong>{listing.title}</strong>
                       <p>Rs. {listing.rent.toLocaleString()} / {listing.rentalDuration.toLowerCase().replace('_', ' ')}</p>
                       <p className="text-xs text-gray-500">{listing.area}, {listing.city}</p>
-                      <button onClick={() => navigate(`/listings/${listing.id}`)} className="mt-2 rounded bg-emerald-600 px-2 py-1 text-xs font-semibold text-primary-contrast">View property</button>
+                  <button onClick={() => openListing(listing.id)} className="mt-2 rounded bg-emerald-600 px-2 py-1 text-xs font-semibold text-primary-contrast">View property</button>
                     </div>
                   </Popup>
                 </Marker>
@@ -362,7 +374,21 @@ export default function BrowseListings() {
       ) : (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {listings.map((listing) => (
-            <article key={listing.id} className="group overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+            <article
+              key={listing.id}
+              role="link"
+              tabIndex={0}
+              aria-label={`Open property ${listing.title}`}
+              onClick={() => openListing(listing.id)}
+              onKeyDown={(event) => {
+                if (event.target !== event.currentTarget) return;
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  openListing(listing.id);
+                }
+              }}
+              className="group cursor-pointer overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
               <div className="relative aspect-[4/3] overflow-hidden bg-surface2">
                 {listing.images?.[0]?.url
                   ? <img src={listing.images[0].url} alt={listing.title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04]" />
@@ -373,7 +399,7 @@ export default function BrowseListings() {
                 <SaveListingButton listingId={listing.id} />
               </div>
               <div className="p-4 sm:p-5">
-                <button className="block w-full text-left" onClick={() => navigate(`/listings/${listing.id}`)}>
+                <button className="block w-full text-left" onClick={(event) => { event.stopPropagation(); openListing(listing.id); }}>
                   <h2 className="truncate text-base font-bold text-text transition-colors group-hover:text-primary" title={listing.title}>{listing.title}</h2>
                   <p className="mt-1.5 flex items-center gap-1.5 text-sm text-text-muted">
                     <MapPin size={14} className="shrink-0 text-primary" />
@@ -391,7 +417,7 @@ export default function BrowseListings() {
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
                   <span className="truncate text-xs text-text-muted">{listing.furnishedStatus.replaceAll('_', ' ').toLowerCase()}</span>
-                  <button type="button" onClick={() => navigate(`/listings/${listing.id}`)} className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary-soft">
+                  <button type="button" onClick={(event) => { event.stopPropagation(); openListing(listing.id); }} className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary-soft">
                     View details <ChevronRight size={14} />
                   </button>
                 </div>

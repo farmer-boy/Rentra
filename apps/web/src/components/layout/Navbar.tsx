@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useContactMessages } from '../../hooks/useContactMessages';
-import { Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart, ArrowLeftRight } from 'lucide-react';
+import { messagesAPI } from '../../api/messages';
+import { Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart } from 'lucide-react';
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -18,12 +20,17 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { unreadCount } = useContactMessages();
+  const isAdminWorkspace = location.pathname.startsWith('/admin');
+  const isAdminMessagesWorkspace = isAdminWorkspace;
+  const unreadChats = useQuery({
+    queryKey: ['unreadMessages', user?.id],
+    queryFn: messagesAPI.unreadCount,
+    enabled: Boolean(user?.id) && !isAdminMessagesWorkspace,
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+  });
   const roles = user?.roles ?? (user?.role ? [user.role] : []);
   const hasAdminRole = roles.includes('ADMIN');
-  const hasTenantAndLandlordRoles =
-    roles.includes('TENANT') && roles.includes('LANDLORD');
-  const isLandlordWorkspace = location.pathname.startsWith('/landlord');
-  const isTenantWorkspace = location.pathname.startsWith('/tenant');
 
   const initials = user?.fullName
     ?.split(' ')
@@ -31,31 +38,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
     .join('')
     .toUpperCase() || 'U';
 
-  const isAdminWorkspace = location.pathname.startsWith('/admin');
-  const messageCount = isAdminWorkspace || (!isTenantWorkspace && !isLandlordWorkspace && hasAdminRole)
+  const messageCount = isAdminMessagesWorkspace
     ? unreadCount
-    : 0;
+    : unreadChats.data?.unreadCount ?? 0;
 
   const getRolePath = (section: 'notifications' | 'messages') => {
-    const role = isAdminWorkspace
-      ? 'admin'
-      : isLandlordWorkspace
-        ? 'landlord'
-        : isTenantWorkspace
-          ? 'tenant'
-          : hasAdminRole
-            ? 'admin'
-            : user?.role === 'LANDLORD'
-              ? 'landlord'
-              : 'tenant';
-    return `/${role}/${section}`;
+    return hasAdminRole || isAdminWorkspace
+      ? `/admin/${section}`
+      : `/dashboard/${section}`;
   };
 
   const getRoleText = () => {
-    if (isLandlordWorkspace) return 'LANDLORD';
-    if (isTenantWorkspace) return 'TENANT';
-    if (location.pathname.startsWith('/admin') || user?.role === 'ADMIN') return 'ADMIN';
-    return user?.role === 'LANDLORD' ? 'LANDLORD' : 'TENANT';
+    return isAdminWorkspace ? 'ADMIN' : 'RENTRA';
   };
 
   const handleLogout = () => {
@@ -66,9 +60,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const query = searchQuery.trim();
-    const listingsPath = isLandlordWorkspace
-      ? '/landlord/properties'
-      : '/listings';
+    const listingsPath = isAdminWorkspace
+      ? '/admin/listings'
+      : location.pathname.startsWith('/dashboard')
+        ? '/dashboard/listings'
+        : '/listings';
     navigate(query ? `${listingsPath}?search=${encodeURIComponent(query)}` : listingsPath);
   };
 
@@ -100,30 +96,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
       }}
     >
       {/* Hamburger Menu - Mobile Only */}
-      <button
-        onClick={onMenuClick}
-        className="flex-shrink-0 p-2 transition-colors rounded-lg md:hidden"
-        style={{ color: 'var(--text2)' }}
-        title={sidebarOpen ? 'Close menu' : 'Open menu'}
-        aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
-        aria-expanded={sidebarOpen}
-      >
-        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      {onMenuClick && (
+        <button
+          onClick={onMenuClick}
+          className="flex-shrink-0 p-2 transition-colors rounded-lg md:hidden"
+          style={{ color: 'var(--text2)' }}
+          title={sidebarOpen ? 'Close menu' : 'Open menu'}
+          aria-label={sidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={sidebarOpen}
+        >
+          {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      )}
 
       {/* Logo and Role - Left */}
       <button 
         onClick={() => {
           if (!user) return; // Don't navigate if user not loaded
-          const dashboardPath = location.pathname.startsWith('/landlord')
-            ? '/landlord'
-            : location.pathname.startsWith('/tenant')
-              ? '/tenant'
-              : location.pathname.startsWith('/admin') || user.role === 'ADMIN'
-                ? '/admin'
-                : user.role === 'LANDLORD'
-                  ? '/landlord'
-                  : '/tenant';
+          const dashboardPath = isAdminWorkspace ? '/admin' : '/dashboard';
           navigate(dashboardPath);
         }}
         className="flex items-center flex-shrink-0 gap-2 transition-opacity hover:opacity-80"
@@ -148,7 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
       <div className="flex-1"></div>
 
       {/* Listing search for every signed-in role */}
-      {user && (
+      {user && !hasAdminRole && (
         <form 
           onSubmit={handleSearchSubmit}
           role="search"
@@ -158,8 +148,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
           <Search size={16} className="ml-1 shrink-0" style={{ color: 'var(--text3)' }} />
           <input
             type="text"
-            aria-label={isLandlordWorkspace ? 'Search your properties' : 'Search homes'}
-            placeholder={isLandlordWorkspace ? 'Search your properties...' : 'Search homes...'}
+            aria-label="Search properties"
+            placeholder="Search properties..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="min-w-0 flex-1 bg-transparent text-xs outline-none placeholder:text-text-subtle"
@@ -177,14 +167,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
 
       {/* Action Items - Right Side */}
       <div className="flex items-center gap-1 md:gap-2">
-        {user && (
+        {user && !hasAdminRole && (
           <button
             type="button"
-            onClick={() => navigate(isLandlordWorkspace ? '/landlord/properties' : '/listings')}
+          onClick={() => navigate(isAdminWorkspace ? '/admin/listings' : location.pathname.startsWith('/dashboard') ? '/dashboard/listings' : '/listings')}
             className="rounded-lg p-2 transition-colors hover:bg-[var(--surface2)] md:hidden"
             style={{ color: 'var(--text2)' }}
-            aria-label={isLandlordWorkspace ? 'Search your properties' : 'Search listings'}
-            title={isLandlordWorkspace ? 'Search your properties' : 'Search listings'}
+            aria-label="Search listings"
+            title="Search listings"
           >
             <Search size={18} />
           </button>
@@ -219,12 +209,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
             className="relative p-2 transition-colors rounded-lg"
             style={{ color: 'var(--text2)' }}
             title="Messages"
+            aria-label={messageCount > 0 ? `Messages, ${messageCount} unread` : 'Messages'}
           >
             <MessageCircle size={16} strokeWidth={1.5} />
             {messageCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center" 
+              <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 rounded-full px-1 text-[9px] font-bold flex items-center justify-center"
                 style={{ backgroundColor: 'var(--red)', color: 'rgb(var(--rentra-danger-contrast))' }}>
-                {messageCount}
+                {messageCount > 99 ? '99+' : messageCount}
               </span>
             )}
           </button>
@@ -236,7 +227,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
               border: '1px solid var(--border)'
             }}
           >
-            {user?.role === 'ADMIN' ? `${messageCount} Contact Messages` : 'Messages'}
+            {isAdminMessagesWorkspace ? `${messageCount} Contact Messages` : `${messageCount} unread messages`}
           </div>
         </div>
 
@@ -285,81 +276,38 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
                 </div>
               </div>
 
-              <button
-                onClick={() => {
-                  navigate('/listings');
-                  setProfileOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
-                style={{ color: 'var(--text2)' }}
-              >
-                <Search size={14} />
-                Browse listings
-              </button>
+              {!hasAdminRole && <>
+                <button
+                  onClick={() => {
+                    navigate('/dashboard/listings');
+                    setProfileOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                  style={{ color: 'var(--text2)' }}
+                >
+                  <Search size={14} />
+                  Browse listings
+                </button>
 
-              <button
-                onClick={() => {
-                  navigate('/favorites');
-                  setProfileOpen(false);
-                }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
-                style={{ color: 'var(--text2)' }}
-              >
-                <Heart size={14} />
-                Saved homes
-              </button>
-
-              {hasTenantAndLandlordRoles && (
-                <>
-                  <div className="border-t" style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
-                  <button
-                    onClick={() => {
-                      navigate('/tenant');
-                      setProfileOpen(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
-                    style={{ color: 'var(--text2)' }}
-                  >
-                    <ArrowLeftRight size={14} />
-                    Tenant workspace
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate('/landlord');
-                      setProfileOpen(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
-                    style={{ color: 'var(--text2)' }}
-                  >
-                    <ArrowLeftRight size={14} />
-                    Landlord workspace
-                  </button>
-                </>
-              )}
-
-              {hasAdminRole && (
-                <>
-                  <div className="border-t" style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
-                  <button
-                    onClick={() => {
-                      navigate('/admin');
-                      setProfileOpen(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
-                    style={{ color: 'var(--text2)' }}
-                  >
-                    <ArrowLeftRight size={14} />
-                    Admin workspace
-                  </button>
-                </>
-              )}
+                <button
+                  onClick={() => {
+                    navigate('/dashboard/saved');
+                    setProfileOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                  style={{ color: 'var(--text2)' }}
+                >
+                  <Heart size={14} />
+                  Saved homes
+                </button>
+              </>}
 
               <div className="border-t" style={{ borderColor: 'var(--border)', margin: '4px 0' }} />
 
               {/* Settings Option */}
               <button 
                 onClick={() => {
-                  navigate('/settings');
+                  navigate(isAdminWorkspace ? '/admin/settings' : '/dashboard/settings');
                   setProfileOpen(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
@@ -372,7 +320,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
               {/* Privacy Option */}
               <button 
                 onClick={() => {
-                  navigate('/settings?section=data-privacy');
+                  navigate(isAdminWorkspace ? '/admin/settings?section=data-privacy' : '/dashboard/settings?section=data-privacy');
                   setProfileOpen(false);
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"

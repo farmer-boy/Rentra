@@ -41,7 +41,7 @@ export default function VerifyEmail() {
       login(result.user, result.accessToken);
       setStatus('success');
       const roles = result.user.roles ?? (result.user.role ? [result.user.role] : ['TENANT']);
-      navigate(roles.includes('ADMIN') ? '/admin' : roles.includes('LANDLORD') ? '/landlord' : '/tenant');
+      navigate(roles.includes('ADMIN') ? '/admin' : '/dashboard');
     } catch (requestError: unknown) {
       setMessage(getApiErrorMessage(requestError, 'The code could not be verified. Check it and try again.'));
       setStatus('error');
