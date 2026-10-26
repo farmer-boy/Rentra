@@ -12,7 +12,11 @@ async function bootstrap() {
   // CORS - Allow localhost on any port for development
   app.enableCors({
     origin: (origin, callback) => {
+      const frontendOrigin = process.env.FRONTEND_URL
+        ? new URL(process.env.FRONTEND_URL).origin
+        : undefined;
       const allowedOrigins = [
+        frontendOrigin,
         'http://localhost:5173',
         'http://localhost:5174',
         'http://localhost:5175',
