@@ -16,6 +16,8 @@
     "typescript": "^5.1.3"
   },
   "dependencies": {
+    "@neon/config": "^1.9.4",
+    "@neon/env": "^1.6.5",
     "@prisma/client": "^5.22.0"
   }
 }

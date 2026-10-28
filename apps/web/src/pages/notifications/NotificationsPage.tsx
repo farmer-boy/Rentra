@@ -1,9 +1,11 @@
-import { Bell, CheckCheck, ExternalLink } from 'lucide-react';
+import { Bell, CheckCheck, ExternalLink, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '../../store/authStore';
 import { ApiError } from '../../api/api-error';
 import {
   useMarkAllNotificationsRead,
   useMarkNotificationRead,
+  useClearAllNotifications,
   useNotifications,
 } from '../../hooks/useRentraQueries';
 
@@ -14,19 +16,21 @@ interface Notification {
   message: string;
   isRead: boolean;
   createdAt: string;
-  data?: { href?: string } | null;
+  data?: { href?: string; conversationId?: string; ticketId?: string; rentalRequestId?: string } | null;
 }
 
 export default function NotificationsPage() {
   const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const notificationsQuery = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllMutation = useMarkAllNotificationsRead();
+  const clearAllMutation = useClearAllNotifications();
   const notifications = (notificationsQuery.data ?? []) as Notification[];
   const loading = notificationsQuery.isPending;
   const savingId = markReadMutation.isPending ? markReadMutation.variables : null;
   const markingAll = markAllMutation.isPending;
-  const errorCause = notificationsQuery.error ?? markReadMutation.error ?? markAllMutation.error;
+  const errorCause = notificationsQuery.error ?? markReadMutation.error ?? markAllMutation.error ?? clearAllMutation.error;
   const error = errorCause instanceof ApiError
     ? errorCause.message
     : errorCause
@@ -35,30 +39,65 @@ export default function NotificationsPage() {
   const loadNotifications = () => notificationsQuery.refetch();
   const markRead = (id: string) => markReadMutation.mutate(id);
   const markAllRead = () => markAllMutation.mutate();
+  const isAdmin = (user?.roles ?? (user?.role ? [user.role] : [])).includes('ADMIN');
+
+  const openNotification = (notification: Notification) => {
+    if (!notification.isRead) markRead(notification.id);
+    const data = notification.data;
+    if (data?.conversationId) {
+      navigate(`${isAdmin ? '/admin' : '/dashboard'}/messages?conversationId=${encodeURIComponent(data.conversationId)}`);
+      return;
+    }
+    if (data?.ticketId) {
+      navigate(`${isAdmin ? '/admin' : '/dashboard'}/support?ticketId=${encodeURIComponent(data.ticketId)}`);
+      return;
+    }
+    if (data?.rentalRequestId && !data.href) {
+      const landlordAccess = (user?.roles ?? (user?.role ? [user.role] : [])).includes('LANDLORD');
+      navigate(landlordAccess
+        ? `/dashboard/received-requests?requestId=${encodeURIComponent(data.rentalRequestId)}`
+        : '/dashboard/my-requests');
+      return;
+    }
+    if (data?.href?.startsWith('/') && !data.href.startsWith('//')) navigate(data.href);
+  };
 
   const unreadCount = notifications.filter((notification) => !notification.isRead).length;
   const mutedText = 'text-text-muted';
 
   return (
     <section>
-      <header className="flex items-start justify-between gap-4 mb-6">
+      <header className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <div>
           <h1 className="text-xl font-bold text-text">Notifications</h1>
           <p className={`mt-1 text-sm ${mutedText}`}>
             {unreadCount ? `${unreadCount} unread` : 'Updates for your account'}
           </p>
         </div>
-        {unreadCount > 0 && (
-          <button
-            type="button"
-            onClick={markAllRead}
-            disabled={markingAll}
-            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-contrast bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60"
-          >
-            <CheckCheck size={16} />
-            {markingAll ? 'Updating...' : 'Mark all read'}
-          </button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={markAllRead}
+              disabled={markingAll}
+              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary-contrast bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60"
+            >
+              <CheckCheck size={16} />
+              {markingAll ? 'Updating...' : 'Mark all read'}
+            </button>
+          )}
+          {notifications.length > 0 && (
+            <button
+              type="button"
+              onClick={() => clearAllMutation.mutate()}
+              disabled={clearAllMutation.isPending}
+              className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+            >
+              <Trash2 size={16} />
+              {clearAllMutation.isPending ? 'Clearing...' : 'Clear all'}
+            </button>
+          )}
+        </div>
       </header>
 
       {error && (
@@ -87,7 +126,7 @@ export default function NotificationsPage() {
                 notification.isRead ? 'border-border bg-surface' : 'border-primary/30 bg-primary-soft'
               }`}
             >
-              <div className="min-w-0">
+              <button type="button" onClick={() => openNotification(notification)} className="min-w-0 flex-1 text-left" aria-label={`Open notification: ${notification.title}`}>
                 <div className="flex items-center gap-2">
                   <p className="font-semibold text-text">{notification.title}</p>
                   {!notification.isRead && <span className="w-2 h-2 bg-green-500 rounded-full" aria-label="Unread" />}
@@ -96,19 +135,8 @@ export default function NotificationsPage() {
                 <p className={`mt-2 text-xs ${mutedText}`}>
                   {new Date(notification.createdAt).toLocaleString()}
                 </p>
-                {notification.data?.href && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!notification.isRead) markRead(notification.id);
-                      navigate(notification.data!.href!);
-                    }}
-                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                  >
-                    Open <ExternalLink size={13} />
-                  </button>
-                )}
-              </div>
+                <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary">Open <ExternalLink size={13} /></span>
+              </button>
               {!notification.isRead && (
                 <button
                   type="button"

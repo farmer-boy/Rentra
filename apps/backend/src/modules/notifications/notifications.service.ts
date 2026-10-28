@@ -22,6 +22,10 @@ export class NotificationsService {
     });
   }
 
+  unreadCount(userId: string) {
+    return this.prisma.notification.count({ where: { userId, isRead: false } }).then((unreadCount) => ({ unreadCount }));
+  }
+
   async create(input: CreateNotificationInput) {
     return this.prisma.notification.create({ data: input });
   }
@@ -40,5 +44,10 @@ export class NotificationsService {
       data: { isRead: true },
     });
     return { updated: result.count };
+  }
+
+  async clearAll(userId: string) {
+    const result = await this.prisma.notification.deleteMany({ where: { userId } });
+    return { deleted: result.count };
   }
 }

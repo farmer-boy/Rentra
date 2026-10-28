@@ -26,8 +26,8 @@ export interface ConversationRecord {
 
 export const messagesAPI = {
   conversations: async () => (await api.get('/messages/conversations')).data,
-  getOrCreateConversation: async (otherUserId: string, listingId?: string) =>
-    (await api.post<ConversationRecord>(`/messages/conversation/${otherUserId}`, {}, { params: { listingId } })).data,
+  getOrCreateConversation: async (otherUserId: string, listingId?: string, propertyId?: string) =>
+    (await api.post<ConversationRecord>(`/messages/conversation/${otherUserId}`, {}, { params: { ...(listingId && { listingId }), ...(propertyId && { propertyId }) } })).data,
   messages: async (conversationId: string, limit = 50, offset = 0) =>
     (await api.get(`/messages/conversation/${conversationId}`, { params: { limit, offset } })).data,
   send: async (conversationId: string, body: CreateMessageInput) =>
@@ -36,8 +36,30 @@ export const messagesAPI = {
     (await api.patch(`/messages/conversation/${conversationId}/${messageId}`, { content })).data,
   delete: async (conversationId: string, messageId: string) =>
     (await api.delete(`/messages/conversation/${conversationId}/${messageId}`)).data,
+  star: async (conversationId: string, messageId: string, isStarred: boolean) =>
+    (await api.post(`/messages/conversation/${conversationId}/${messageId}/star`, { isStarred })).data,
   markRead: async (conversationId: string) =>
     (await api.post(`/messages/conversation/${conversationId}/read`)).data,
+  markUnread: async (conversationId: string) =>
+    (await api.post(`/messages/conversation/${conversationId}/unread`)).data,
+  archive: async (conversationId: string) =>
+    (await api.post(`/messages/conversation/${conversationId}/archive`)).data,
+  unarchive: async (conversationId: string) =>
+    (await api.post(`/messages/conversation/${conversationId}/unarchive`)).data,
+  favorite: async (conversationId: string, isFavorite: boolean) =>
+    (await api.post(`/messages/conversation/${conversationId}/favorite`, { isFavorite })).data,
+  pin: async (conversationId: string, isPinned: boolean) =>
+    (await api.post(`/messages/conversation/${conversationId}/pin`, { isPinned })).data,
+  block: async (conversationId: string, isBlocked: boolean) =>
+    (await api.post(`/messages/conversation/${conversationId}/block`, { isBlocked })).data,
+  mute: async (conversationId: string, duration: number | 'always') =>
+    (await api.post(`/messages/conversation/${conversationId}/mute`, { duration })).data,
+  unmute: async (conversationId: string) =>
+    (await api.post(`/messages/conversation/${conversationId}/unmute`)).data,
+  deleteConversation: async (conversationId: string) =>
+    (await api.delete(`/messages/conversation/${conversationId}`)).data,
+  clearConversation: async (conversationId: string) =>
+    (await api.post(`/messages/conversation/${conversationId}/clear`)).data,
   unreadCount: async () => (await api.get<{ unreadCount: number }>('/messages/unread-count')).data,
   legacyNotifications: async () => (await api.get('/messages/notifications')).data,
   markLegacyNotificationRead: async (id: string) =>

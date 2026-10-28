@@ -1,96 +1,153 @@
+%% FLOW: 1. Complete system map
 flowchart LR
-  subgraph People[People and roles]
-    Tenant[Tenant]
-    Landlord[Landlord]
-    Admin[Admin]
+  subgraph Actors[People]
+    T[Tenant] --- W
+    L[Landlord] --- W
+    A[Admin] --- W
+    T --- M
+    L --- M
+    A --- M
   end
-
-  subgraph Clients[Client applications]
-    Web[Rentra Web<br/>React + TypeScript + Vite<br/>React Router, Zustand, React Query]
-    Mobile[Rentra Mobile<br/>Expo + React Native<br/>Login/register + role home screens<br/>Current app is a starter shell]
+  subgraph Clients[Apps]
+    W[Web app<br/>React + TypeScript + Vite<br/>pages → API helpers → Axios<br/>React Router · Zustand · React Query]
+    M[Mobile app<br/>Expo + React Native<br/>auth + role-specific home shells<br/>most marketplace flows not yet built]
   end
-
-  subgraph Edge[API and security]
-    Axios[Web Axios client<br/>API base URL + bearer access token<br/>refresh token handling]
-    MobileClient[Mobile Axios client<br/>Secure token storage]
-    API[NestJS + Express REST API<br/>Global /api prefix<br/>ValidationPipe + Swagger /api/docs + CORS]
-    Guards[JWT authentication<br/>RolesGuard + ADMIN / LANDLORD / TENANT rules<br/>DTO validation]
+  W --> WX[Web API client<br/>base URL + Bearer token<br/>refresh handling]
+  M --> MX[Mobile API client<br/>Expo SecureStore on native]
+  WX --> API
+  MX --> API
+  subgraph Server[NestJS + Express backend]
+    API[REST API<br/>/api prefix · CORS · ValidationPipe<br/>Swagger /api/docs]
+    SEC[JWT guard → identity<br/>RolesGuard → role permissions<br/>DTO validation → controller → service]
+    ID[auth · users · verification · trust-score]
+    MARKET[properties · listings · locations<br/>favorites · saved-searches · recommendations]
+    RENT[ rental-requests · bookings · agreements<br/>payments · boost · reviews ]
+    OPS[admin · support · reports · disputes<br/>audit · contact · messages · notifications]
+    API --> SEC
+    SEC --> ID
+    SEC --> MARKET
+    SEC --> RENT
+    SEC --> OPS
   end
-
-  Tenant --> Web
-  Landlord --> Web
-  Admin --> Web
-  Tenant --> Mobile
-  Landlord --> Mobile
-  Admin --> Mobile
-  Web --> Axios --> API
-  Mobile --> MobileClient --> API
-  API --> Guards
-
-  subgraph Backend[Backend feature modules]
-    Identity[Identity and trust<br/>auth · users · verification · trust-score]
-    Supply[Property supply and discovery<br/>properties · listings · locations · availability<br/>favorites · saved-searches · recommendations]
-    Tenancy[Rental lifecycle<br/>rental-requests · bookings · agreements<br/>payments · boost · reviews]
-    Safety[Safety and operations<br/>admin · reports · disputes · audit<br/>support tickets · contact]
-    Comms[Communication<br/>messages · notifications]
-    Shared[Shared infrastructure<br/>PrismaService · config · guards · audit trail]
+  subgraph Persistence[Data layer]
+    PS[PrismaService / Prisma Client<br/>schema + migration history]
+    DB[(PostgreSQL<br/>accounts/roles · property/listing data<br/>inventory/availability · rental lifecycle<br/>chat/notifications · verification/moderation<br/>audit and support tickets)]
+    PS --> DB
   end
-  Guards --> Identity
-  Guards --> Supply
-  Guards --> Tenancy
-  Guards --> Safety
-  Guards --> Comms
-  Identity --> Shared
-  Supply --> Shared
-  Tenancy --> Shared
-  Safety --> Shared
-  Comms --> Shared
-
-  subgraph Data[Data layer]
-    Prisma[Prisma Client<br/>schema + migrations<br/>packages/database/prisma]
-    Postgres[(PostgreSQL<br/>users and roles · properties/listings/images<br/>search/favorites · rental requests/bookings<br/>agreements/payments · messages/notifications<br/>verification/reports/disputes/audit/support)]
+  ID --> PS
+  MARKET --> PS
+  RENT --> PS
+  OPS --> PS
+  subgraph Providers[Connected or defined providers]
+    CLOUD[Cloudinary<br/>property/listing image files]
+    EMAIL[Gmail SMTP<br/>verification and sign-in email codes]
+    PAY[Payment adapter interface exists<br/>adapter list currently empty<br/>no real gateway connected]
   end
-  Shared --> Prisma --> Postgres
-
-  subgraph External[External providers configured/in use]
-    Cloudinary[Cloudinary<br/>property image upload and deletion]
-    Gmail[Gmail SMTP<br/>verification and auth email delivery]
-    PayAdapters[Payment adapter interface<br/>currently no provider adapters registered<br/>online provider payment unavailable]
+  MARKET --> CLOUD
+  ID --> EMAIL
+  RENT -. provider adapter required .-> PAY
+  subgraph AI[AI state]
+    PY[Python FastAPI<br/>packages/ai-service<br/>/health only]
+    UI[Fake Detector screen<br/>admin-confirmed user reports<br/>no automated detection]
+    NEXT[Future: risk scoring · rent estimate<br/>search ranking · document triage<br/>admin reviews consequential flags]
   end
-  Supply --> Cloudinary
-  Identity --> Gmail
-  Tenancy -. payment flow awaits adapter .-> PayAdapters
+  UI --> OPS
+  PY -. future service integration .-> API
+  PY -. future inference features .-> NEXT
 
-  subgraph AI[AI capability status]
-    AIService[Python FastAPI service<br/>packages/ai-service<br/>currently /health only]
-    AIUI[Web Fake Detector page<br/>shows reports confirmed by admin<br/>does not run an AI scan]
-    Future[Future integration ideas<br/>listing fraud/risk scoring · rent estimation<br/>search recommendations · document triage<br/>human admin review remains in control]
-  end
-  AIUI --> Safety
-  AIService -. future authenticated API integration .-> API
-  AIService -. future model/service calls .-> Future
+%% FLOW: 2. Register, log in, and get role access
+flowchart TD
+  C[Web or mobile: register] --> R[POST /api/auth/register]
+  R --> CHECK[Backend checks existing email/phone/CNIC]
+  CHECK --> HASH[Hash password + one-time code]
+  HASH --> PENDING[(PendingRegistration in PostgreSQL<br/>default role TENANT · code expires in 10 min)]
+  PENDING --> MAIL[EmailService sends registration code via Gmail SMTP]
+  MAIL --> CODE{User enters valid code?}
+  CODE -- no / expired --> RETRY[Reject; retry limits / resend flow apply]
+  CODE -- yes --> VERIFY[POST /api/auth/register/verify]
+  VERIFY --> USER[(Create verified account<br/>TENANT role initially)]
+  USER --> TOKEN[Issue access + refresh tokens]
+  TOKEN --> STORE[Client stores session<br/>web storage / native SecureStore]
+  STORE --> ROUTE[Protected route loads role capabilities]
+  C2[Web or mobile: login] --> LOGIN[POST /api/auth/login]
+  LOGIN --> PASS{Password correct<br/>and account active?}
+  PASS -- no --> DENY[Reject login]
+  PASS -- yes --> OTP[Send EMAIL_LOGIN code by email]
+  OTP --> OTPVERIFY[POST /api/auth/login/verify]
+  OTPVERIFY --> TOKEN
+  ROUTE --> TENANT[Tenant workspace]
+  ROUTE --> LANDLORD[Landlord workspace<br/>capability added after property posting/role update]
+  ROUTE --> ADMIN[Admin workspace<br/>admin-only management routes]
 
-  subgraph MainFlows[Main product flows]
-    Signup[Register / login]
-    List[Create property → add images → create listing]
-    Rent[Browse/search → rental request → booking]
-    Contract[Agreement → rent/payment records]
-    SupportFlow[User support ticket → admin opens/replies/status update]
-    Notice[Admin sends notice → user chat inbox + unread state]
-  end
-  Signup --> Identity
-  List --> Supply
-  Rent --> Supply --> Tenancy
-  Contract --> Tenancy
-  SupportFlow --> Safety
-  Notice --> Safety --> Comms
-  Comms --> Postgres
+%% FLOW: 3. Landlord adds a property; admin verifies it; tenants discover it
+flowchart TD
+  OWNER[Landlord fills property/listing form] --> API1[Web API helper sends authenticated request]
+  API1 --> RULES[Backend validates ownership, coordinates,<br/>location and property/listing fields]
+  RULES --> CREATE[(Prisma transaction / PostgreSQL<br/>property + linked listing + details<br/>initially pending/unpublished)]
+  OWNER --> PHOTO[Upload property photos]
+  PHOTO --> UPLOAD[Backend validates image and sends bytes to Cloudinary]
+  UPLOAD --> IMG[(Save secure image URL + metadata in PostgreSQL)]
+  CREATE --> QUEUE[Verification/admin review queue]
+  IMG --> QUEUE
+  QUEUE --> DOCS[Owner supplies verification evidence URLs<br/>identity / host / property evidence]
+  DOCS --> REVIEW[Admin reviews evidence and records notes]
+  REVIEW --> APPROVED{Identity and host checks approved?}
+  APPROVED -- no --> REJECT[Reject or request updates<br/>record decision + audit event + notification]
+  APPROVED -- yes --> PUBLISH[Set property ACTIVE;<br/>linked listing PUBLISHED]
+  PUBLISH --> SEARCH[Tenant browse/search/filter/nearby<br/>availability and listing details from API]
+  SEARCH --> SAVED[Optional: favorite or saved search]
+  SEARCH --> REQUEST[Tenant submits rental request<br/>phone verification required]
 
-  classDef current fill:#e8f0fe,stroke:#5b7cbd,color:#172554
-  classDef storage fill:#edf7ed,stroke:#5a8a5a,color:#18351a
-  classDef external fill:#fff4e5,stroke:#bd8135,color:#482d08
-  classDef future fill:#f3edfa,stroke:#8a68ad,color:#2d1d3d
-  class Web,Mobile,API,Guards,Identity,Supply,Tenancy,Safety,Comms,Shared,Prisma,AIUI current
-  class Postgres storage
-  class Cloudinary,Gmail,PayAdapters external
-  class AIService,Future future
+%% FLOW: 4. Tenant request, booking, agreement and payment limits
+flowchart TD
+  START[Tenant chooses a property or listing] --> KIND{Rental flow}
+  KIND -- long-term rental request --> REQ[Create request after phone check<br/>verify property is active; prevent duplicate active request]
+  REQ --> NOTIFY[Persist request + notify landlord]
+  NOTIFY --> DECIDE{Landlord response}
+  DECIDE -- decline --> DECLINED[Request REJECTED; tenant notified]
+  DECIDE -- accept --> AGREE[Accept request in transaction]
+  AGREE --> ACTIVE[Create ACTIVE rental agreement<br/>request becomes ACCEPTED]
+  ACTIVE --> RENTPAY[Payment records / rent collection endpoints]
+  KIND -- short stay booking --> BOOK[Create booking after phone check<br/>validate dates, active property and availability]
+  BOOK --> LOCK[Database transaction + advisory lock<br/>avoid overlapping inventory bookings]
+  LOCK --> HOLD[Create booking/payment state<br/>notify tenant and property owner]
+  HOLD --> CHECKOUT{Real payment adapter configured?}
+  RENTPAY --> CHECKOUT
+  CHECKOUT -- no; current setup --> UNAVAILABLE[No gateway adapter is registered<br/>real checkout/verification/refund unavailable]
+  CHECKOUT -- after provider is integrated --> PROVIDER[Provider initiate → webhook/verify<br/>idempotent payment status update]
+  PROVIDER --> COMPLETE[Update booking/agreement/payment state<br/>receipt/status is available in product]
+  ACTIVE --> END[Participants manage agreement lifecycle<br/>and may terminate through API]
+
+%% FLOW: 5. Messages, notices, support tickets, moderation
+flowchart TD
+  CHAT[Landlord ↔ tenant chat] --> MSG[Authenticated message API]
+  MSG --> SAVE[(Conversation + Message in PostgreSQL)]
+  MSG --> NEWMSG[Recipient gets unread count / message notification]
+  READ[Recipient opens conversation] --> MARK[Mark delivered/read timestamps and state]
+  MARK --> SAVE
+  USER[User submits Help & Support ticket] --> LIMIT[Backend checks ticket limits and account restrictions]
+  LIMIT --> NEW[(Create ticket status NEW<br/>user sees Not opened)]
+  NEW --> ADMININBOX[Admin inbox shows NEW ticket bold]
+  ADMININBOX --> OPEN[Admin opens ticket → status OPEN<br/>user sees Opened / waiting for admin]
+  OPEN --> REPLY[Admin replies → status PENDING<br/>user notified in app]
+  REPLY --> USERREPLY[User replies → status OPEN]
+  USERREPLY --> REPLY
+  REPLY --> RESOLVE[Admin resolves → RESOLVED]
+  PROFILE[Admin opens a user profile] --> NOTICE[Send Notice: choose reason + write message]
+  NOTICE --> NOTICECHAT[Create/use Rentra Support chat<br/>message appears in user's message inbox]
+  NOTICECHAT --> UNREAD[Unread badge/notification; user can read<br/>official notice inbox is not reply-enabled]
+  ADMINACTION[Admin moderation / warning / restriction] --> AUDIT[(Audit event + notification where applicable)]
+
+%% FLOW: 6. Database, integrations and AI roadmap
+flowchart LR
+  FEATURE[Backend services] --> PRISMA[Prisma Client generated from schema]
+  PRISMA --> MIG[Prisma migrations define DB evolution]
+  PRISMA --> PG[(PostgreSQL stores structured records<br/>relations, statuses, timestamps, audit history)]
+  FILES[Image bytes] --> CLOUD[Cloudinary stores media files]
+  CLOUD --> URL[Backend stores media URL / public ID in PostgreSQL]
+  AUTH[Registration/login verification] --> SMTP[Gmail SMTP sends email codes]
+  PAYMENT[Payment business logic] --> ADAPTER[Provider interface]
+  ADAPTER -. currently empty .-> GATEWAY[Future JazzCash / Easypaisa / card adapter<br/>verify signatures server-side before trusting result]
+  CURRENT[AI service today<br/>FastAPI /health only] --> HEALTH[Health response only<br/>no model inference]
+  ROADMAP[Possible next AI work<br/>listing risk cues · price estimation<br/>search ranking · document triage] -. future APIs .-> CURRENT
+  ROADMAP --> HUMAN[Human review for high-impact decisions]

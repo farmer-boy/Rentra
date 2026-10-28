@@ -1,0 +1,3 @@
+ALTER TABLE "ConversationUserState"
+ADD COLUMN "isPinned" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN "isBlocked" BOOLEAN NOT NULL DEFAULT false;

@@ -13,6 +13,7 @@ import {
   RentalDuration,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { requiresVerifiedPhoneForTenantRequests } from '../../common/phone-verification-policy';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AvailabilityService } from '../properties/availability.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
@@ -305,6 +306,7 @@ export class BookingsService {
   }
 
   private async requireVerifiedPhone(userId: string) {
+    if (!requiresVerifiedPhoneForTenantRequests()) return;
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { phoneVerifiedAt: true },

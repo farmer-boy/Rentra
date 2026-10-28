@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
+import BackToDashboard from './BackToDashboard';
 
 export default function PublicListingsLayout() {
   return (
@@ -8,6 +9,7 @@ export default function PublicListingsLayout() {
         <Navbar />
       </div>
       <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-3 sm:p-4 lg:p-6">
+        <BackToDashboard />
         <Outlet />
       </main>
     </div>

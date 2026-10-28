@@ -3,8 +3,10 @@ dist/
 .next/
 .env
 *.env
+.env.neon.local
 .turbo/
 __pycache__/
 *.pyc
 .venv/
 *.egg-info/
+.neon

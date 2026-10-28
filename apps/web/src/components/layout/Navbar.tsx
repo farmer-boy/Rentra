@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useContactMessages } from '../../hooks/useContactMessages';
 import { messagesAPI } from '../../api/messages';
+import { notificationsAPI } from '../../api/notifications';
 import { Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart } from 'lucide-react';
 
 interface NavbarProps {
@@ -29,6 +30,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
     refetchInterval: 5000,
     refetchIntervalInBackground: true,
   });
+  const unreadNotifications = useQuery({
+    queryKey: ['unreadNotifications', user?.id],
+    queryFn: notificationsAPI.unreadCount,
+    enabled: Boolean(user?.id),
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
+  });
   const roles = user?.roles ?? (user?.role ? [user.role] : []);
   const hasAdminRole = roles.includes('ADMIN');
 
@@ -41,6 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   const messageCount = isAdminMessagesWorkspace
     ? unreadCount
     : unreadChats.data?.unreadCount ?? 0;
+  const notificationCount = unreadNotifications.data?.unreadCount ?? 0;
 
   const getRolePath = (section: 'notifications' | 'messages') => {
     return hasAdminRole || isAdminWorkspace
@@ -187,8 +196,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
             className="relative p-2 transition-colors rounded-lg"
             style={{ color: 'var(--text2)' }}
             title="Notifications"
+            aria-label={notificationCount > 0 ? `Notifications, ${notificationCount} unread` : 'Notifications'}
           >
             <Bell size={16} strokeWidth={1.5} />
+            {notificationCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-4 h-4 rounded-full px-1 text-[9px] font-bold flex items-center justify-center" style={{ backgroundColor: 'var(--red)', color: 'rgb(var(--rentra-danger-contrast))' }}>
+                {notificationCount > 99 ? '99+' : notificationCount}
+              </span>
+            )}
           </button>
           {/* Tooltip Below */}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 px-2 py-1 rounded text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-40"

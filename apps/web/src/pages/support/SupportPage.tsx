@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { LifeBuoy, Send, Ticket as TicketIcon } from 'lucide-react';
 import { supportAPI, type MySupportTickets, type SupportTicket, type SupportTicketCategory } from '../../api/support';
 import { toApiError } from '../../api/api-error';
@@ -20,6 +21,8 @@ const statusLabel = (status: string) => ({
 }[status] ?? status);
 
 export default function SupportPage() {
+  const location = useLocation();
+  const requestedTicketId = new URLSearchParams(location.search).get('ticketId');
   const [overview, setOverview] = useState<MySupportTickets | null>(null);
   const [selected, setSelected] = useState<SupportTicket | null>(null);
   const [category, setCategory] = useState<SupportTicketCategory>('ACCOUNT');
@@ -50,6 +53,12 @@ export default function SupportPage() {
     const timer = window.setInterval(() => void loadTickets(true), 10_000);
     return () => window.clearInterval(timer);
   }, [loadTickets]);
+
+  useEffect(() => {
+    if (!requestedTicketId || !overview) return;
+    const ticket = overview.items.find((item) => item.id === requestedTicketId);
+    if (ticket) setSelected(ticket);
+  }, [overview, requestedTicketId]);
 
   const submitTicket = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -90,6 +99,9 @@ export default function SupportPage() {
   };
 
   const blocked = Boolean(overview?.supportBlockedUntil && new Date(overview.supportBlockedUntil) > new Date());
+  const canReply = selected?.status === 'PENDING' || (
+    selected?.status === 'RESOLVED' && selected.messages.at(-1)?.sender.roles.includes('ADMIN')
+  );
 
   return (
     <section className="space-y-5 text-text">
@@ -182,11 +194,13 @@ export default function SupportPage() {
                   );
                 })}
               </div>
-              {!blocked ? (
+              {!blocked && canReply ? (
                 <form onSubmit={(event) => void submitReply(event)} className="flex gap-2 border-t border-border p-3">
                   <input value={reply} onChange={(event) => setReply(event.target.value)} maxLength={5000} required placeholder="Reply to this ticket…" className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm" />
                   <button disabled={saving || !reply.trim()} className="rounded-lg bg-primary p-2 text-primary-contrast disabled:opacity-50" aria-label="Send reply"><Send size={18} /></button>
                 </form>
+              ) : !blocked ? (
+                <p className="border-t border-border p-3 text-center text-xs text-text-muted">Aap is ticket par ek reply de chuke hain. Mazeed reply ke liye Rentra Support ke jawab ka intezar karein.</p>
               ) : null}
             </>
           )}

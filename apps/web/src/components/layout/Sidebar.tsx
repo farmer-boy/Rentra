@@ -112,7 +112,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ navSections, onNavigate, isExp
             to={item.path}
             title={isExpanded ? undefined : item.label}
             tabIndex={visible ? undefined : -1}
-            onClick={() => onNavigate?.()}
+            onClick={(event) => {
+              if (item.label === 'Messages' && location.pathname === item.path) {
+                event.preventDefault();
+                window.dispatchEvent(new Event('rentra:messages-back'));
+              }
+              onNavigate?.();
+            }}
             className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors duration-200"
             style={{
               ...indent,

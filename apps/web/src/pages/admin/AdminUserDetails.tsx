@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, BadgeCheck, CalendarDays, Mail, Phone, Send, ShieldCheck } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { BadgeCheck, CalendarDays, Mail, Phone, Send, ShieldCheck } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { adminAPI, type AdminUserDetails as UserDetails } from '../../api/admin';
 import Card from '../../components/ui/Card';
 import { toApiError } from '../../api/api-error';
@@ -32,7 +32,6 @@ function RecordSection<T extends { id: string }>({ title, rows, children }: {
 
 export default function AdminUserDetails() {
   const { id = '' } = useParams();
-  const navigate = useNavigate();
   const [noticeOpen, setNoticeOpen] = useState(false);
   const [noticeReason, setNoticeReason] = useState(noticeReasons[0]);
   const [noticeMessage, setNoticeMessage] = useState('');
@@ -66,10 +65,6 @@ export default function AdminUserDetails() {
 
   return (
     <section className="space-y-5">
-      <button type="button" onClick={() => navigate(-1)} className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-text-muted hover:bg-surface2">
-        <ArrowLeft size={16} /> Back to users
-      </button>
-
       {userQuery.isPending ? <p className="text-sm text-text-muted">Loading user details...</p> : userQuery.isError ? (
         <Card className="space-y-3">
           <p role="alert" className="text-sm text-red-600">User details could not be loaded.</p>

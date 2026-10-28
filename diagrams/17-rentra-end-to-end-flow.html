@@ -1,125 +1,163 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rentra — End-to-end project flow</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Rentra — Detailed project flow</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
-:root{color-scheme:light dark}*{box-sizing:border-box}body{margin:0;background:#f7f8fa;color:#18212f;font:15px/1.55 Segoe UI,Arial,sans-serif}.wrap{max-width:1500px;margin:auto;padding:30px 24px 60px}h1{font-size:28px;margin:0 0 6px}h2{font-size:18px;margin:0 0 8px}p{margin:0;color:#4e5969}.sub{margin-bottom:22px}.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:20px 0}.fact{padding:16px;background:white;border:1px solid #dfe3e8;border-radius:10px}.fact strong{display:block;margin-bottom:5px}.diagram{overflow:auto;background:white;border:1px solid #dfe3e8;border-radius:10px;padding:20px}.mermaid{min-width:1000px}.caption{font-size:12px;margin-top:10px;color:#687386}.key{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 20px;font-size:13px}.key span{display:flex;align-items:center;gap:7px}.dot{width:12px;height:12px;border-radius:3px;background:#e8f0fe;border:1px solid #5b7cbd}.dot.external{background:#fff4e5;border-color:#bd8135}.dot.future{background:#f3edfa;border-color:#8a68ad}.dot.db{background:#edf7ed;border-color:#5a8a5a}.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;margin-top:16px}.notes section{padding:16px;background:white;border:1px solid #dfe3e8;border-radius:10px}.notes ul{margin:8px 0 0;padding-left:20px;color:#4e5969}.source{margin-top:20px;font-size:12px;color:#687386}@media(prefers-color-scheme:dark){body{background:#121821;color:#e7edf5}.fact,.diagram,.notes section{background:#1b2430;border-color:#354150}p,.notes ul,.caption,.source{color:#b2becc}}
-</style>
-</head>
-<body><main class="wrap">
-<h1>Rentra — end-to-end project flow</h1>
-<p class="sub">Repository-based map of how web/mobile clients connect to backend modules, Prisma, PostgreSQL, and external services.</p>
-<div class="facts">
-<section class="fact"><strong>Web</strong><p>React + TypeScript + Vite. Pages call API helpers through Axios; signed-in requests attach a bearer token.</p></section>
-<section class="fact"><strong>Backend</strong><p>NestJS + Express REST API under <code>/api</code>. Controllers, DTO validation, guards, services, and shared Prisma access.</p></section>
-<section class="fact"><strong>Mobile</strong><p>Expo/React Native starter with auth and role home screens. It calls the same API; most full marketplace flows are currently web/backend-side.</p></section>
-<section class="fact"><strong>AI today</strong><p>Python FastAPI service currently exposes only <code>/health</code>. The web Fake Detector page displays admin-confirmed reports; automated scanning is not implemented.</p></section>
+*{box-sizing:border-box}body{margin:0;background:#f6f7f9;color:#17212f;font:15px/1.55 Segoe UI,Arial,sans-serif}.wrap{max-width:1600px;margin:auto;padding:30px 24px 70px}h1{font-size:28px;margin:0 0 5px}h2{font-size:19px;margin:0 0 12px}.lead{color:#566274;margin:0 0 20px}.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:16px 0 26px}.summary section,.callout{padding:15px 17px;border:1px solid #dfe3e8;border-radius:10px;background:#fff}.summary strong{display:block;margin-bottom:4px}.summary p,.callout p{margin:0;color:#566274}.flow{margin:0 0 28px}.diagram{overflow:auto;border:1px solid #dfe3e8;border-radius:10px;background:#fff;padding:18px}.mermaid{min-width:1120px}.callouts{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px;margin:18px 0 24px}.callout h2{font-size:16px}.callout ul{margin:6px 0 0;padding-left:19px;color:#566274}.source{font-size:12px;color:#687386;margin-top:24px}@media(prefers-color-scheme:dark){body{background:#121821;color:#e6edf5}.summary section,.callout,.diagram{background:#1b2430;border-color:#344151}.lead,.summary p,.callout p,.callout ul,.source{color:#b5c0ce}}
+</style></head><body><main class="wrap">
+<h1>Rentra — detailed end-to-end project flow</h1>
+<p class="lead">Follow each flow from the screen a person uses, through API/security and business rules, to database writes and service responses. Dashed connectors mark a planned or currently unavailable integration.</p>
+<div class="summary">
+<section><strong>Web app</strong><p>Full marketplace experience in React + TypeScript + Vite. Screen → API helper/Axios → backend. Access token is attached to protected API calls.</p></section>
+<section><strong>Mobile app</strong><p>Expo/React Native with register/login and tenant, landlord, admin home shells. It uses the same API; most detailed rental workflows remain web-first.</p></section>
+<section><strong>Backend + database</strong><p>NestJS/Express routes under <code>/api</code>. Guards and DTO validation run before feature services. Prisma maps service reads/writes to PostgreSQL.</p></section>
+<section><strong>Current limits to know</strong><p>Payment module has no provider adapter registered. AI FastAPI only has <code>/health</code>. Fake Detector is a confirmed-report view, not automated AI.</p></section>
 </div>
-<div class="key"><span><i class="dot"></i>Current application components</span><span><i class="dot db"></i>Database</span><span><i class="dot external"></i>External integration</span><span><i class="dot future"></i>AI/future area</span><span>Dashed connectors mean optional or planned integration.</span></div>
-<div class="diagram"><pre class="mermaid">flowchart LR
-  subgraph People[People and roles]
-    Tenant[Tenant]
-    Landlord[Landlord]
-    Admin[Admin]
-  end
-
-  subgraph Clients[Client applications]
-    Web[Rentra Web<br/>React + TypeScript + Vite<br/>React Router, Zustand, React Query]
-    Mobile[Rentra Mobile<br/>Expo + React Native<br/>Login/register + role home screens<br/>Current app is a starter shell]
-  end
-
-  subgraph Edge[API and security]
-    Axios[Web Axios client<br/>API base URL + bearer access token<br/>refresh token handling]
-    MobileClient[Mobile Axios client<br/>Secure token storage]
-    API[NestJS + Express REST API<br/>Global /api prefix<br/>ValidationPipe + Swagger /api/docs + CORS]
-    Guards[JWT authentication<br/>RolesGuard + ADMIN / LANDLORD / TENANT rules<br/>DTO validation]
-  end
-
-  Tenant --> Web
-  Landlord --> Web
-  Admin --> Web
-  Tenant --> Mobile
-  Landlord --> Mobile
-  Admin --> Mobile
-  Web --> Axios --> API
-  Mobile --> MobileClient --> API
-  API --> Guards
-
-  subgraph Backend[Backend feature modules]
-    Identity[Identity and trust<br/>auth · users · verification · trust-score]
-    Supply[Property supply and discovery<br/>properties · listings · locations · availability<br/>favorites · saved-searches · recommendations]
-    Tenancy[Rental lifecycle<br/>rental-requests · bookings · agreements<br/>payments · boost · reviews]
-    Safety[Safety and operations<br/>admin · reports · disputes · audit<br/>support tickets · contact]
-    Comms[Communication<br/>messages · notifications]
-    Shared[Shared infrastructure<br/>PrismaService · config · guards · audit trail]
-  end
-  Guards --> Identity
-  Guards --> Supply
-  Guards --> Tenancy
-  Guards --> Safety
-  Guards --> Comms
-  Identity --> Shared
-  Supply --> Shared
-  Tenancy --> Shared
-  Safety --> Shared
-  Comms --> Shared
-
-  subgraph Data[Data layer]
-    Prisma[Prisma Client<br/>schema + migrations<br/>packages/database/prisma]
-    Postgres[(PostgreSQL<br/>users and roles · properties/listings/images<br/>search/favorites · rental requests/bookings<br/>agreements/payments · messages/notifications<br/>verification/reports/disputes/audit/support)]
-  end
-  Shared --> Prisma --> Postgres
-
-  subgraph External[External providers configured/in use]
-    Cloudinary[Cloudinary<br/>property image upload and deletion]
-    Gmail[Gmail SMTP<br/>verification and auth email delivery]
-    PayAdapters[Payment adapter interface<br/>currently no provider adapters registered<br/>online provider payment unavailable]
-  end
-  Supply --> Cloudinary
-  Identity --> Gmail
-  Tenancy -. payment flow awaits adapter .-> PayAdapters
-
-  subgraph AI[AI capability status]
-    AIService[Python FastAPI service<br/>packages/ai-service<br/>currently /health only]
-    AIUI[Web Fake Detector page<br/>shows reports confirmed by admin<br/>does not run an AI scan]
-    Future[Future integration ideas<br/>listing fraud/risk scoring · rent estimation<br/>search recommendations · document triage<br/>human admin review remains in control]
-  end
-  AIUI --> Safety
-  AIService -. future authenticated API integration .-> API
-  AIService -. future model/service calls .-> Future
-
-  subgraph MainFlows[Main product flows]
-    Signup[Register / login]
-    List[Create property → add images → create listing]
-    Rent[Browse/search → rental request → booking]
-    Contract[Agreement → rent/payment records]
-    SupportFlow[User support ticket → admin opens/replies/status update]
-    Notice[Admin sends notice → user chat inbox + unread state]
-  end
-  Signup --> Identity
-  List --> Supply
-  Rent --> Supply --> Tenancy
-  Contract --> Tenancy
-  SupportFlow --> Safety
-  Notice --> Safety --> Comms
-  Comms --> Postgres
-
-  classDef current fill:#e8f0fe,stroke:#5b7cbd,color:#172554
-  classDef storage fill:#edf7ed,stroke:#5a8a5a,color:#18351a
-  classDef external fill:#fff4e5,stroke:#bd8135,color:#482d08
-  classDef future fill:#f3edfa,stroke:#8a68ad,color:#2d1d3d
-  class Web,Mobile,API,Guards,Identity,Supply,Tenancy,Safety,Comms,Shared,Prisma,AIUI current
-  class Postgres storage
-  class Cloudinary,Gmail,PayAdapters external
-  class AIService,Future future
-</pre></div>
-<div class="notes">
-<section><h2>Typical request path</h2><ul><li>Browser/mobile screen collects input and invokes an API helper.</li><li>Axios calls the shared NestJS API and attaches an access token when signed in.</li><li>JWT/role guards and DTO validation check the request.</li><li>Feature service applies business rules, then Prisma reads/writes PostgreSQL.</li><li>API returns JSON; clients refresh the screen/state.</li></ul></section>
-<section><h2>Property to rental lifecycle</h2><ul><li>Landlord submits property details; backend resolves location and creates a pending-verification property/listing record.</li><li>Images go through the backend upload route to Cloudinary; image metadata/URLs are stored in PostgreSQL.</li><li>After moderation/publication, tenants browse, search, save, and submit rental requests/bookings.</li><li>Agreements, payments, reviews, reports and audit events are managed by separate backend modules.</li></ul></section>
-<section><h2>Current integration limits</h2><ul><li>Prisma is the database access layer; migrations/schema are in <code>packages/database/prisma</code>.</li><li>Cloudinary handles listing/property images. Gmail SMTP credentials are used by the email service.</li><li>Payments has an adapter interface, but the module registers an empty adapter list, so a real payment provider is not connected.</li><li>No Redis/cache or live WebSocket infrastructure is represented in the current app wiring.</li></ul></section>
-<section><h2>AI: future use, not current behavior</h2><ul><li>Potential API integration: listing risk signals, rent-price estimates, search ranking, and document triage.</li><li>Keep AI as a recommendation/flagging layer; require admin review for consequential moderation.</li><li>Current FastAPI service has health-check only; AI calls/models, datasets, and inference pipeline still need to be built and connected.</li></ul></section>
+<div class="callouts">
+<section class="callout"><h2>How to read</h2><p>Each numbered diagram is one complete sequence. Database cylinders are persisted records; external provider boxes are outside PostgreSQL; dashed arrows are future/unavailable links.</p></section>
+<section class="callout"><h2>One schema, one source of truth</h2><p>Prisma schema and migrations live under <code>packages/database/prisma</code>. Backend business rules decide whether a record can be created or its status can change.</p></section>
+<section class="callout"><h2>AI roadmap is separate</h2><p>Possible future model use: fraud-risk cues, rent estimate, listing search ranking, document triage. Keep suggestions explainable and let a human admin review consequential decisions.</p></section>
 </div>
-<p class="source">Source: repository structure, Nest AppModule, web/mobile API clients, Prisma schema and AI service entry point. This describes code present in the workspace, not a production deployment topology.</p>
+<section class='flow'><h2>1. Complete system map</h2><div class='diagram'><pre class='mermaid'>flowchart LR
+  subgraph Actors[People]
+    T[Tenant] --- W
+    L[Landlord] --- W
+    A[Admin] --- W
+    T --- M
+    L --- M
+    A --- M
+  end
+  subgraph Clients[Apps]
+    W[Web app&lt;br/&gt;React + TypeScript + Vite&lt;br/&gt;pages → API helpers → Axios&lt;br/&gt;React Router · Zustand · React Query]
+    M[Mobile app&lt;br/&gt;Expo + React Native&lt;br/&gt;auth + role-specific home shells&lt;br/&gt;most marketplace flows not yet built]
+  end
+  W --&gt; WX[Web API client&lt;br/&gt;base URL + Bearer token&lt;br/&gt;refresh handling]
+  M --&gt; MX[Mobile API client&lt;br/&gt;Expo SecureStore on native]
+  WX --&gt; API
+  MX --&gt; API
+  subgraph Server[NestJS + Express backend]
+    API[REST API&lt;br/&gt;/api prefix · CORS · ValidationPipe&lt;br/&gt;Swagger /api/docs]
+    SEC[JWT guard → identity&lt;br/&gt;RolesGuard → role permissions&lt;br/&gt;DTO validation → controller → service]
+    ID[auth · users · verification · trust-score]
+    MARKET[properties · listings · locations&lt;br/&gt;favorites · saved-searches · recommendations]
+    RENT[ rental-requests · bookings · agreements&lt;br/&gt;payments · boost · reviews ]
+    OPS[admin · support · reports · disputes&lt;br/&gt;audit · contact · messages · notifications]
+    API --&gt; SEC
+    SEC --&gt; ID
+    SEC --&gt; MARKET
+    SEC --&gt; RENT
+    SEC --&gt; OPS
+  end
+  subgraph Persistence[Data layer]
+    PS[PrismaService / Prisma Client&lt;br/&gt;schema + migration history]
+    DB[(PostgreSQL&lt;br/&gt;accounts/roles · property/listing data&lt;br/&gt;inventory/availability · rental lifecycle&lt;br/&gt;chat/notifications · verification/moderation&lt;br/&gt;audit and support tickets)]
+    PS --&gt; DB
+  end
+  ID --&gt; PS
+  MARKET --&gt; PS
+  RENT --&gt; PS
+  OPS --&gt; PS
+  subgraph Providers[Connected or defined providers]
+    CLOUD[Cloudinary&lt;br/&gt;property/listing image files]
+    EMAIL[Gmail SMTP&lt;br/&gt;verification and sign-in email codes]
+    PAY[Payment adapter interface exists&lt;br/&gt;adapter list currently empty&lt;br/&gt;no real gateway connected]
+  end
+  MARKET --&gt; CLOUD
+  ID --&gt; EMAIL
+  RENT -. provider adapter required .-&gt; PAY
+  subgraph AI[AI state]
+    PY[Python FastAPI&lt;br/&gt;packages/ai-service&lt;br/&gt;/health only]
+    UI[Fake Detector screen&lt;br/&gt;admin-confirmed user reports&lt;br/&gt;no automated detection]
+    NEXT[Future: risk scoring · rent estimate&lt;br/&gt;search ranking · document triage&lt;br/&gt;admin reviews consequential flags]
+  end
+  UI --&gt; OPS
+  PY -. future service integration .-&gt; API
+  PY -. future inference features .-&gt; NEXT</pre></div></section>
+<section class='flow'><h2>2. Register, log in, and get role access</h2><div class='diagram'><pre class='mermaid'>flowchart TD
+  C[Web or mobile: register] --&gt; R[POST /api/auth/register]
+  R --&gt; CHECK[Backend checks existing email/phone/CNIC]
+  CHECK --&gt; HASH[Hash password + one-time code]
+  HASH --&gt; PENDING[(PendingRegistration in PostgreSQL&lt;br/&gt;default role TENANT · code expires in 10 min)]
+  PENDING --&gt; MAIL[EmailService sends registration code via Gmail SMTP]
+  MAIL --&gt; CODE{User enters valid code?}
+  CODE -- no / expired --&gt; RETRY[Reject; retry limits / resend flow apply]
+  CODE -- yes --&gt; VERIFY[POST /api/auth/register/verify]
+  VERIFY --&gt; USER[(Create verified account&lt;br/&gt;TENANT role initially)]
+  USER --&gt; TOKEN[Issue access + refresh tokens]
+  TOKEN --&gt; STORE[Client stores session&lt;br/&gt;web storage / native SecureStore]
+  STORE --&gt; ROUTE[Protected route loads role capabilities]
+  C2[Web or mobile: login] --&gt; LOGIN[POST /api/auth/login]
+  LOGIN --&gt; PASS{Password correct&lt;br/&gt;and account active?}
+  PASS -- no --&gt; DENY[Reject login]
+  PASS -- yes --&gt; OTP[Send EMAIL_LOGIN code by email]
+  OTP --&gt; OTPVERIFY[POST /api/auth/login/verify]
+  OTPVERIFY --&gt; TOKEN
+  ROUTE --&gt; TENANT[Tenant workspace]
+  ROUTE --&gt; LANDLORD[Landlord workspace&lt;br/&gt;capability added after property posting/role update]
+  ROUTE --&gt; ADMIN[Admin workspace&lt;br/&gt;admin-only management routes]</pre></div></section>
+<section class='flow'><h2>3. Landlord adds a property; admin verifies it; tenants discover it</h2><div class='diagram'><pre class='mermaid'>flowchart TD
+  OWNER[Landlord fills property/listing form] --&gt; API1[Web API helper sends authenticated request]
+  API1 --&gt; RULES[Backend validates ownership, coordinates,&lt;br/&gt;location and property/listing fields]
+  RULES --&gt; CREATE[(Prisma transaction / PostgreSQL&lt;br/&gt;property + linked listing + details&lt;br/&gt;initially pending/unpublished)]
+  OWNER --&gt; PHOTO[Upload property photos]
+  PHOTO --&gt; UPLOAD[Backend validates image and sends bytes to Cloudinary]
+  UPLOAD --&gt; IMG[(Save secure image URL + metadata in PostgreSQL)]
+  CREATE --&gt; QUEUE[Verification/admin review queue]
+  IMG --&gt; QUEUE
+  QUEUE --&gt; DOCS[Owner supplies verification evidence URLs&lt;br/&gt;identity / host / property evidence]
+  DOCS --&gt; REVIEW[Admin reviews evidence and records notes]
+  REVIEW --&gt; APPROVED{Identity and host checks approved?}
+  APPROVED -- no --&gt; REJECT[Reject or request updates&lt;br/&gt;record decision + audit event + notification]
+  APPROVED -- yes --&gt; PUBLISH[Set property ACTIVE;&lt;br/&gt;linked listing PUBLISHED]
+  PUBLISH --&gt; SEARCH[Tenant browse/search/filter/nearby&lt;br/&gt;availability and listing details from API]
+  SEARCH --&gt; SAVED[Optional: favorite or saved search]
+  SEARCH --&gt; REQUEST[Tenant submits rental request&lt;br/&gt;phone verification required]</pre></div></section>
+<section class='flow'><h2>4. Tenant request, booking, agreement and payment limits</h2><div class='diagram'><pre class='mermaid'>flowchart TD
+  START[Tenant chooses a property or listing] --&gt; KIND{Rental flow}
+  KIND -- long-term rental request --&gt; REQ[Create request after phone check&lt;br/&gt;verify property is active; prevent duplicate active request]
+  REQ --&gt; NOTIFY[Persist request + notify landlord]
+  NOTIFY --&gt; DECIDE{Landlord response}
+  DECIDE -- decline --&gt; DECLINED[Request REJECTED; tenant notified]
+  DECIDE -- accept --&gt; AGREE[Accept request in transaction]
+  AGREE --&gt; ACTIVE[Create ACTIVE rental agreement&lt;br/&gt;request becomes ACCEPTED]
+  ACTIVE --&gt; RENTPAY[Payment records / rent collection endpoints]
+  KIND -- short stay booking --&gt; BOOK[Create booking after phone check&lt;br/&gt;validate dates, active property and availability]
+  BOOK --&gt; LOCK[Database transaction + advisory lock&lt;br/&gt;avoid overlapping inventory bookings]
+  LOCK --&gt; HOLD[Create booking/payment state&lt;br/&gt;notify tenant and property owner]
+  HOLD --&gt; CHECKOUT{Real payment adapter configured?}
+  RENTPAY --&gt; CHECKOUT
+  CHECKOUT -- no; current setup --&gt; UNAVAILABLE[No gateway adapter is registered&lt;br/&gt;real checkout/verification/refund unavailable]
+  CHECKOUT -- after provider is integrated --&gt; PROVIDER[Provider initiate → webhook/verify&lt;br/&gt;idempotent payment status update]
+  PROVIDER --&gt; COMPLETE[Update booking/agreement/payment state&lt;br/&gt;receipt/status is available in product]
+  ACTIVE --&gt; END[Participants manage agreement lifecycle&lt;br/&gt;and may terminate through API]</pre></div></section>
+<section class='flow'><h2>5. Messages, notices, support tickets, moderation</h2><div class='diagram'><pre class='mermaid'>flowchart TD
+  CHAT[Landlord ↔ tenant chat] --&gt; MSG[Authenticated message API]
+  MSG --&gt; SAVE[(Conversation + Message in PostgreSQL)]
+  MSG --&gt; NEWMSG[Recipient gets unread count / message notification]
+  READ[Recipient opens conversation] --&gt; MARK[Mark delivered/read timestamps and state]
+  MARK --&gt; SAVE
+  USER[User submits Help &amp; Support ticket] --&gt; LIMIT[Backend checks ticket limits and account restrictions]
+  LIMIT --&gt; NEW[(Create ticket status NEW&lt;br/&gt;user sees Not opened)]
+  NEW --&gt; ADMININBOX[Admin inbox shows NEW ticket bold]
+  ADMININBOX --&gt; OPEN[Admin opens ticket → status OPEN&lt;br/&gt;user sees Opened / waiting for admin]
+  OPEN --&gt; REPLY[Admin replies → status PENDING&lt;br/&gt;user notified in app]
+  REPLY --&gt; USERREPLY[User replies → status OPEN]
+  USERREPLY --&gt; REPLY
+  REPLY --&gt; RESOLVE[Admin resolves → RESOLVED]
+  PROFILE[Admin opens a user profile] --&gt; NOTICE[Send Notice: choose reason + write message]
+  NOTICE --&gt; NOTICECHAT[Create/use Rentra Support chat&lt;br/&gt;message appears in user's message inbox]
+  NOTICECHAT --&gt; UNREAD[Unread badge/notification; user can read&lt;br/&gt;official notice inbox is not reply-enabled]
+  ADMINACTION[Admin moderation / warning / restriction] --&gt; AUDIT[(Audit event + notification where applicable)]</pre></div></section>
+<section class='flow'><h2>6. Database, integrations and AI roadmap</h2><div class='diagram'><pre class='mermaid'>flowchart LR
+  FEATURE[Backend services] --&gt; PRISMA[Prisma Client generated from schema]
+  PRISMA --&gt; MIG[Prisma migrations define DB evolution]
+  PRISMA --&gt; PG[(PostgreSQL stores structured records&lt;br/&gt;relations, statuses, timestamps, audit history)]
+  FILES[Image bytes] --&gt; CLOUD[Cloudinary stores media files]
+  CLOUD --&gt; URL[Backend stores media URL / public ID in PostgreSQL]
+  AUTH[Registration/login verification] --&gt; SMTP[Gmail SMTP sends email codes]
+  PAYMENT[Payment business logic] --&gt; ADAPTER[Provider interface]
+  ADAPTER -. currently empty .-&gt; GATEWAY[Future JazzCash / Easypaisa / card adapter&lt;br/&gt;verify signatures server-side before trusting result]
+  CURRENT[AI service today&lt;br/&gt;FastAPI /health only] --&gt; HEALTH[Health response only&lt;br/&gt;no model inference]
+  ROADMAP[Possible next AI work&lt;br/&gt;listing risk cues · price estimation&lt;br/&gt;search ranking · document triage] -. future APIs .-&gt; CURRENT
+  ROADMAP --&gt; HUMAN[Human review for high-impact decisions]</pre></div></section>
+<p class="source">Built from the current workspace source: Nest <code>AppModule</code>, feature controllers/services, web/mobile clients, Prisma schema, payment-provider registration, and Python AI entry point. This describes implemented code and explicitly marked future work; it does not assume production hosting details.</p>
 </main><script>mermaid.initialize({startOnLoad:true,securityLevel:'loose',theme:'neutral',flowchart:{htmlLabels:true,curve:'basis'}});</script></body></html>

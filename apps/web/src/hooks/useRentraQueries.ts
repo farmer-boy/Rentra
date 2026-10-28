@@ -197,3 +197,14 @@ export function useMarkAllNotificationsRead() {
     },
   });
 }
+
+export function useClearAllNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => notificationsAPI.clearAll(),
+    onSuccess: () => {
+      queryClient.setQueryData<NotificationRecord[]>(rentraQueryKeys.notifications, []);
+      return queryClient.invalidateQueries({ queryKey: rentraQueryKeys.notifications });
+    },
+  });
+}

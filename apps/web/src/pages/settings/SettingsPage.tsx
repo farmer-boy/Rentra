@@ -5,6 +5,7 @@ import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/useTheme';
 import { usersAPI } from '../../api/users';
 import { getApiErrorMessage } from '../../api/api-error';
+import BackToDashboard from '../../components/layout/BackToDashboard';
 
 type MenuSection = 'account-preferences' | 'sign-in-security' | 'data-privacy' | 'notifications';
 type AccountSubMenu = 'profile-info' | 'display' | 'general' | 'syncing' | 'account-management';
@@ -256,6 +257,7 @@ export default function SettingsPage() {
       {/* Main Content */}
       <div className="pt-3 md:pt-6">
         <div className="max-w-6xl mx-auto px-3 md:px-6">
+          <BackToDashboard />
           <div className="mb-4 md:mb-8">
             <h1 className={`text-xl md:text-3xl font-bold text-text mb-1 md:mb-2`}>Settings</h1>
             <p className={`text-[11px] md:text-sm text-text-muted`}>Manage your account preferences and security settings</p>

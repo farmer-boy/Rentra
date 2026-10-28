@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
@@ -18,10 +18,22 @@ export class NotificationsController {
     return this.notificationsService.list(user.sub);
   }
 
+  @Get('unread-count')
+  @ApiOperation({ summary: 'Get unread notification count for the authenticated user' })
+  unreadCount(@CurrentUser() user: JwtPayload) {
+    return this.notificationsService.unreadCount(user.sub);
+  }
+
   @Patch('read-all')
   @ApiOperation({ summary: 'Mark all notifications as read' })
   markAllRead(@CurrentUser() user: JwtPayload) {
     return this.notificationsService.markAllRead(user.sub);
+  }
+
+  @Delete()
+  @ApiOperation({ summary: 'Clear all notifications for the authenticated user' })
+  clearAll(@CurrentUser() user: JwtPayload) {
+    return this.notificationsService.clearAll(user.sub);
   }
 
   @Patch(':id/read')

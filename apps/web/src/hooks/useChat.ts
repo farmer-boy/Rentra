@@ -9,6 +9,7 @@ interface Message {
   attachmentUrl?: string;
   isDelivered: boolean;
   isRead: boolean;
+  isStarred?: boolean;
   createdAt: string;
   sender: {
     id: string;
@@ -28,6 +29,12 @@ export interface Conversation {
   otherParticipant: { id: string; fullName: string; email?: string; roles?: string[] };
   lastMessage?: Message;
   unreadCount?: number;
+  isArchived?: boolean;
+  isFavorite?: boolean;
+  isPinned?: boolean;
+  isBlocked?: boolean;
+  mutedUntil?: string | null;
+  isMuted?: boolean;
   listing?: { id: string; title: string; city: string; area: string } | null;
 }
 
@@ -52,7 +59,9 @@ export const useChat = (initialConversation?: Conversation) => {
   const fetchConversations = useCallback(async () => {
     try {
       setLoading(true);
-      setConversations(await messagesAPI.conversations());
+      const result = await messagesAPI.conversations() as Conversation[];
+      setConversations(result);
+      return result;
     } finally {
       setLoading(false);
     }

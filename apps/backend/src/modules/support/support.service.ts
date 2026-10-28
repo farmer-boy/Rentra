@@ -149,7 +149,14 @@ export class SupportService {
   async reply(ticketId: string, userId: string, isAdmin: boolean, body: string) {
     const ticket = await this.prisma.supportTicket.findUnique({
       where: { id: ticketId },
-      include: { user: { select: { id: true, fullName: true } } },
+      include: {
+        user: { select: { id: true, fullName: true } },
+        messages: {
+          take: 1,
+          orderBy: { createdAt: 'desc' },
+          select: { senderId: true },
+        },
+      },
     });
     if (!ticket) throw new NotFoundException('Support ticket not found');
     if (!isAdmin && ticket.userId !== userId) {
@@ -161,9 +168,28 @@ export class SupportService {
         select: { supportBlockedUntil: true },
       });
       this.assertSupportAvailable(user?.supportBlockedUntil ?? null);
+      const lastMessage = ticket.messages[0];
+      const canReply = ticket.status === SupportTicketStatus.PENDING ||
+        (ticket.status === SupportTicketStatus.RESOLVED && lastMessage?.senderId !== userId);
+      if (!canReply) {
+        throw new BadRequestException(
+          'Please wait for Rentra Support to reply before sending another message on this ticket.',
+        );
+      }
     }
 
     return this.prisma.$transaction(async (transaction) => {
+      if (!isAdmin) {
+        const claimed = await transaction.supportTicket.updateMany({
+          where: { id: ticketId, status: ticket.status },
+          data: { status: SupportTicketStatus.OPEN },
+        });
+        if (claimed.count !== 1) {
+          throw new BadRequestException(
+            'This ticket has already been replied to. Refresh it to see the latest update.',
+          );
+        }
+      }
       const updated = await transaction.supportTicket.update({
         where: { id: ticketId },
         data: {

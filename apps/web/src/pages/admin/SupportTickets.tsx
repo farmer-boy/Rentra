@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Ban, CheckCircle2, Inbox, LifeBuoy, Send, ShieldAlert, Undo2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import { toApiError } from '../../api/api-error';
 import { supportAPI, type SupportTicket, type SupportTicketStatus } from '../../api/support';
 
@@ -17,6 +18,8 @@ const prettyStatus = (status: string) => ({
 }[status] ?? status);
 
 export default function SupportTickets() {
+  const location = useLocation();
+  const requestedTicketId = new URLSearchParams(location.search).get('ticketId');
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [selected, setSelected] = useState<SupportTicket | null>(null);
   const [filter, setFilter] = useState<SupportTicketStatus | ''>('');
@@ -25,6 +28,7 @@ export default function SupportTickets() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const autoOpenedTicket = useRef<string | null>(null);
 
   const loadTickets = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -66,6 +70,14 @@ export default function SupportTickets() {
       setError(toApiError(cause).message || 'Ticket details could not be opened.');
     }
   };
+
+  useEffect(() => {
+    if (!requestedTicketId || autoOpenedTicket.current === requestedTicketId) return;
+    const ticket = tickets.find((item) => item.id === requestedTicketId);
+    if (!ticket) return;
+    autoOpenedTicket.current = requestedTicketId;
+    void openTicket(ticket);
+  }, [tickets, requestedTicketId]);
 
   const sendReply = async (event: React.FormEvent) => {
     event.preventDefault();

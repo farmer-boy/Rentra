@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Bath, BedDouble, Check, Heart, MapPin, MessageCircle, Ruler, ShieldCheck, Star } from 'lucide-react';
+import { Bath, BedDouble, Check, Heart, MapPin, MessageCircle, Ruler, ShieldCheck, Star } from 'lucide-react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CircleMarker, MapContainer, TileLayer } from 'react-leaflet';
@@ -84,17 +84,6 @@ export default function ListingDetails() {
       : '';
   const loading = listingQuery.isPending;
   const ratingError = ratingQuery.isError;
-  const navigationState = location.state as { from?: unknown } | null;
-  const fallbackPath = isAdmin
-    ? '/admin/listings'
-    : location.pathname.startsWith('/dashboard')
-      ? '/dashboard/listings'
-        : '/listings';
-  const backPath = typeof navigationState?.from === 'string' && navigationState.from.startsWith('/')
-    ? navigationState.from
-    : fallbackPath;
-  const goBack = () => navigate(backPath);
-
   useEffect(() => {
     if (!id || isAdmin) return;
     const sessionKey = 'rentra-view-session';
@@ -107,17 +96,11 @@ export default function ListingDetails() {
 
   if (error) return (
     <div className="mx-auto max-w-5xl space-y-4 px-3 pb-8 sm:px-5 lg:px-6">
-      <button onClick={goBack} className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-text-muted transition hover:bg-surface2 hover:text-text">
-        <ArrowLeft size={17} /> Back to listings
-      </button>
       <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">{error}</div>
     </div>
   );
   if (loading || !listing) return (
     <div className="mx-auto max-w-5xl space-y-4 px-3 pb-8 sm:px-5 lg:px-6">
-      <button onClick={goBack} className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-text-muted transition hover:bg-surface2 hover:text-text">
-        <ArrowLeft size={17} /> Back to listings
-      </button>
       <div role="status" className="rounded-2xl border border-border bg-surface p-6 text-sm text-text-muted">Loading property details…</div>
     </div>
   );
@@ -244,9 +227,6 @@ export default function ListingDetails() {
   const reviews: PropertyReviewRecord[] = propertyReviewsQuery.data?.data ?? [];
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-3 pb-10 text-text sm:px-5 lg:px-6">
-      <button onClick={goBack} className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2.5 text-sm font-semibold text-text-muted shadow-sm transition hover:border-primary/40 hover:bg-surface2 hover:text-text">
-        <ArrowLeft size={17} /> Back to listings
-      </button>
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_1fr]">
         <section className="min-w-0 space-y-3 rounded-2xl border border-border bg-surface p-3 shadow-sm sm:p-4">
           <div className="relative h-[min(55vw,440px)] min-h-[260px] overflow-hidden rounded-xl bg-surface2">

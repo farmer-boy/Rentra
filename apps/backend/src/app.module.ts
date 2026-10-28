@@ -30,7 +30,7 @@ import { SupportModule } from './modules/support/support.module';
     ConfigModule.forRoot({
       isGlobal: true,
       // Prefer backend-specific secrets over blank/root workspace defaults.
-      envFilePath: ['apps/backend/.env', '.env'],
+      envFilePath: ['apps/backend/.env', '.env.neon.local', '.env'],
     }),
     PrismaModule,
     AuthModule,

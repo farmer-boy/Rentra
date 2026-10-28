@@ -175,7 +175,9 @@ function AppContent() {
           <Route path="/listings" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><BrowseListings /></ProtectedRoute>} />
           <Route path="/listings/:id" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><ListingDetails /></ProtectedRoute>} />
         </Route>
-        <Route path="/favorites" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><SavedListings /></ProtectedRoute>} />
+        <Route element={<PublicListingsLayout />}>
+          <Route path="/favorites" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><SavedListings /></ProtectedRoute>} />
+        </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<PasswordRecovery />} />

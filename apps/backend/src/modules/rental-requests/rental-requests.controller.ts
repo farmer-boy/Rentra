@@ -15,6 +15,8 @@ import type { JwtPayload } from '../../common/types/jwt-payload';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AcceptRentalRequestDto } from './dto/accept-rental-request.dto';
 import { CreateRentalRequestDto } from './dto/create-rental-request.dto';
+import { RejectRentalRequestDto } from './dto/reject-rental-request.dto';
+import { RequestInformationDto } from './dto/request-information.dto';
 import { RentalRequestsService } from './rental-requests.service';
 
 @ApiTags('rental-requests')
@@ -55,6 +57,13 @@ export class RentalRequestsController {
     return this.rentalRequestsService.receivedRequests(user.sub);
   }
 
+  @Get('rental-requests/:id/review-profile')
+  @Roles('LANDLORD')
+  @ApiOperation({ summary: 'Get minimized tenant review information for an owned request' })
+  reviewProfile(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.rentalRequestsService.getTenantReviewProfile(id, user.sub);
+  }
+
   @Patch('rental-requests/:id/accept')
   @Roles('LANDLORD')
   @ApiOperation({
@@ -72,8 +81,22 @@ export class RentalRequestsController {
   @Patch('rental-requests/:id/reject')
   @Roles('LANDLORD')
   @ApiOperation({ summary: 'Owner rejects a pending request' })
-  reject(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.rentalRequestsService.reject(id, user.sub);
+  reject(@Param('id') id: string, @CurrentUser() user: JwtPayload, @Body() dto: RejectRentalRequestDto = new RejectRentalRequestDto()) {
+    return this.rentalRequestsService.reject(id, user.sub, dto?.reason);
+  }
+
+  @Post('rental-requests/:id/request-information')
+  @Roles('LANDLORD')
+  @ApiOperation({ summary: 'Ask the tenant for relevant additional rental information' })
+  requestInformation(@Param('id') id: string, @CurrentUser() user: JwtPayload, @Body() dto: RequestInformationDto) {
+    return this.rentalRequestsService.requestInformation(id, user.sub, dto.message);
+  }
+
+  @Post('rental-requests/:id/respond-information')
+  @Roles('TENANT')
+  @ApiOperation({ summary: 'Tenant replies to a landlord information request' })
+  respondToInformation(@Param('id') id: string, @CurrentUser() user: JwtPayload, @Body() dto: RequestInformationDto) {
+    return this.rentalRequestsService.respondToInformation(id, user.sub, dto.message);
   }
 
   @Patch('rental-requests/:id/cancel')

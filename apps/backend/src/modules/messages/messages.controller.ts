@@ -27,11 +27,13 @@ export class MessagesController {
     @CurrentUser() user: JwtPayload,
     @Param('otherUserId') otherUserId: string,
     @Query('listingId') listingId?: string,
+    @Query('propertyId') propertyId?: string,
   ) {
     return this.messagesService.getOrCreateConversation(
       user.sub,
       otherUserId,
       listingId,
+      propertyId,
     );
   }
 
@@ -99,6 +101,16 @@ export class MessagesController {
     );
   }
 
+  @Post('conversation/:conversationId/:messageId/star')
+  async setMessageStarred(
+    @Param('conversationId') conversationId: string,
+    @Param('messageId') messageId: string,
+    @Body('isStarred') isStarred: boolean,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.setMessageStarred(conversationId, messageId, user.sub, Boolean(isStarred));
+  }
+
   // Get unread message count
   @Get('unread-count')
   async getUnreadCount(@CurrentUser() user: JwtPayload) {
@@ -128,5 +140,79 @@ export class MessagesController {
       conversationId,
       user.sub,
     );
+  }
+
+  @Post('conversation/:conversationId/unread')
+  async markAsUnread(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.markConversationAsUnread(conversationId, user.sub);
+  }
+
+  @Post('conversation/:conversationId/archive')
+  async archiveConversation(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.archiveConversation(conversationId, user.sub);
+  }
+
+  @Post('conversation/:conversationId/unarchive')
+  async unarchiveConversation(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.archiveConversation(conversationId, user.sub, false);
+  }
+
+  @Post('conversation/:conversationId/mute')
+  async muteConversation(
+    @Param('conversationId') conversationId: string,
+    @Body('duration') duration: number | 'always',
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const normalizedDuration = duration === 'always' ? duration : Number(duration);
+    return this.messagesService.muteConversation(conversationId, user.sub, normalizedDuration);
+  }
+
+  @Post('conversation/:conversationId/unmute')
+  async unmuteConversation(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.unmuteConversation(conversationId, user.sub);
+  }
+
+  @Post('conversation/:conversationId/favorite')
+  async setConversationFavorite(
+    @Param('conversationId') conversationId: string,
+    @Body('isFavorite') isFavorite: boolean,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.setConversationFavorite(conversationId, user.sub, Boolean(isFavorite));
+  }
+
+  @Post('conversation/:conversationId/pin')
+  async setConversationPinned(@Param('conversationId') conversationId: string, @Body('isPinned') isPinned: boolean, @CurrentUser() user: JwtPayload) {
+    return this.messagesService.setConversationPinned(conversationId, user.sub, Boolean(isPinned));
+  }
+
+  @Post('conversation/:conversationId/block')
+  async setConversationBlocked(@Param('conversationId') conversationId: string, @Body('isBlocked') isBlocked: boolean, @CurrentUser() user: JwtPayload) {
+    return this.messagesService.setConversationBlocked(conversationId, user.sub, Boolean(isBlocked));
+  }
+
+  @Delete('conversation/:conversationId')
+  async deleteConversation(
+    @Param('conversationId') conversationId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.messagesService.deleteConversationForUser(conversationId, user.sub);
+  }
+
+  @Post('conversation/:conversationId/clear')
+  async clearConversation(@Param('conversationId') conversationId: string, @CurrentUser() user: JwtPayload) {
+    return this.messagesService.clearConversationForUser(conversationId, user.sub);
   }
 }
