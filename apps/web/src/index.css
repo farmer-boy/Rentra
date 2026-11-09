@@ -125,8 +125,113 @@ textarea {
   }
 }
 
-/* The app's general green palette is intentionally neutral. Keep the admin
-   approval reason and status badge visibly green in both themes. */
+/* Admin navigation uses a localized burgundy accent in both themes. */
+.admin-sidebar-shell {
+  background-color: rgb(var(--rentra-admin-sidebar-bg));
+  border-color: rgb(var(--rentra-admin-sidebar-border));
+}
+
+.admin-sidebar-item {
+  color: var(--text2);
+  background-color: transparent;
+}
+
+.admin-sidebar-item > span:first-child {
+  color: rgb(var(--rentra-admin-sidebar-active));
+}
+
+.admin-sidebar-item:hover {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-hover));
+}
+
+.admin-sidebar-item-parent-active {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-soft));
+}
+
+.admin-sidebar-item-parent-active:hover {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-soft));
+}
+
+.admin-sidebar-item-current,
+.admin-sidebar-item-current:hover {
+  color: rgb(var(--rentra-admin-sidebar-active-foreground));
+  background-color: rgb(var(--rentra-admin-sidebar-active));
+}
+
+.admin-sidebar-item-current > span:first-child {
+  color: rgb(var(--rentra-admin-sidebar-active-foreground));
+}
+
+.admin-sidebar-item-current:hover {
+  background-color: rgb(var(--rentra-admin-sidebar-active-hover));
+}
+
+.admin-sidebar-submenu-rail {
+  border-color: rgb(var(--rentra-admin-sidebar-border));
+}
+
+.admin-sidebar-control:hover {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-hover));
+}
+
+.workspace-sidebar-shell {
+  background-color: rgb(var(--rentra-admin-sidebar-bg));
+  border-color: rgb(var(--rentra-admin-sidebar-border));
+}
+
+.workspace-sidebar-item {
+  color: var(--text2);
+  background-color: transparent;
+}
+
+.workspace-sidebar-item > span:first-child {
+  color: rgb(var(--rentra-admin-sidebar-active));
+}
+
+.workspace-sidebar-item:hover {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-hover));
+}
+
+.workspace-sidebar-item-parent-active,
+.workspace-sidebar-item-parent-active:hover {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-soft));
+}
+
+.workspace-sidebar-item-current,
+.workspace-sidebar-item-current:hover {
+  color: rgb(var(--rentra-admin-sidebar-active-foreground));
+  background-color: rgb(var(--rentra-admin-sidebar-active));
+}
+
+.workspace-sidebar-item-current > span:first-child {
+  color: rgb(var(--rentra-admin-sidebar-active-foreground));
+}
+
+.workspace-sidebar-item-current:hover {
+  background-color: rgb(var(--rentra-admin-sidebar-active-hover));
+}
+
+.workspace-sidebar-submenu-rail {
+  border-color: rgb(var(--rentra-admin-sidebar-border));
+}
+
+.workspace-sidebar-control {
+  color: var(--text2);
+  background-color: transparent;
+}
+
+.workspace-sidebar-control:hover {
+  color: rgb(var(--rentra-admin-sidebar-active));
+  background-color: rgb(var(--rentra-admin-sidebar-hover));
+}
+
+/* Keep approval text and badges visibly green in both themes. */
 .verification-approved-text {
   color: #15803d;
 }

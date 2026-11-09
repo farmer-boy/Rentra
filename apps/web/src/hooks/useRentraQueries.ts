@@ -162,6 +162,8 @@ export function useNotifications() {
   return useQuery({
     queryKey: rentraQueryKeys.notifications,
     queryFn: () => notificationsAPI.list(),
+    refetchInterval: 5000,
+    refetchIntervalInBackground: true,
   });
 }
 

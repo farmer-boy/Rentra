@@ -8,7 +8,8 @@ interface StatCardProps {
 
 export default function StatCard({ label, value, change, changeType, color }: StatCardProps) {
   return (
-    <div className="rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors hover:border-border-strong hover:shadow-md">
+    <div className="relative overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary-soft/45 via-surface to-surface p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md">
+      <div className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-gradient-to-r from-primary via-blue-500 to-amber-400" />
       <div className="mb-2 text-[10px] font-mono tracking-widest text-text-muted">{label}</div>
       <div className={`text-3xl font-extrabold tracking-tight ${color || 'text-text'}`}>{value}</div>
       {change && (

@@ -29,7 +29,9 @@ import { PropertyImageDto } from './dto/property-image.dto';
 import { UpdateAvailabilityDto } from './dto/update-availability.dto';
 import { UpdateHostelBedStatusDto } from './dto/update-hostel-bed-status.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
+import { RentEstimateDto } from './dto/rent-estimate.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../properties/guards/optional-jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/types/jwt-payload';
 import { UploadService } from './upload.service';
@@ -57,8 +59,7 @@ export class ListingsController {
   }
 
   @Get()
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Search and filter published properties' })
   @ApiResponse({ status: 200, description: 'Paginated property results' })
   async getAllListings(@Query() query: ListingQueryDto) {
@@ -76,6 +77,14 @@ export class ListingsController {
   })
   async getFeaturedListings() {
     return { data: await this.listingsService.findFeatured() };
+  }
+
+  @Get('rent-estimate')
+  @ApiOperation({
+    summary: 'Estimate rent from comparable published Rentra listings',
+  })
+  async estimateRent(@Query() query: RentEstimateDto) {
+    return this.listingsService.estimateRent(query);
   }
 
   @Get('landlord/my-listings')
@@ -103,8 +112,7 @@ export class ListingsController {
   }
 
   @Get(':id')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'View a property' })
   async getListingById(
     @Param('id') id: string,

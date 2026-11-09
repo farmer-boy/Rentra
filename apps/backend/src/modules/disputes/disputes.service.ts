@@ -13,6 +13,7 @@ import {
   DisputeType,
   Prisma,
   Role,
+  NotificationType,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -104,6 +105,21 @@ export class DisputesService {
       throw new ForbiddenException(
         'You must be a participant in every associated rental or transaction',
       );
+    }
+    if (dto.type === DisputeType.AGREEMENT_TERMINATION) {
+      if (!agreement) throw new BadRequestException('A termination agreement is required for this dispute type');
+      const agreementScope: Prisma.AgreementWhereInput = agreement.propertyId
+        ? { OR: [{ propertyId: agreement.propertyId }, { listing: { propertyId: agreement.propertyId } }] }
+        : { listingId: agreement.listingId };
+      const [tenantAmendments, landlordAmendments, tenantCancellations, landlordCancellations] = await Promise.all([
+        this.prisma.agreementAmendment.count({ where: { status: 'REJECTED', decidedById: agreement.tenantId, agreement: agreementScope } }),
+        this.prisma.agreementAmendment.count({ where: { status: 'REJECTED', decidedById: agreement.landlordId, agreement: agreementScope } }),
+        this.prisma.agreementTerminationResponse.count({ where: { decision: 'REJECTED', responderId: agreement.tenantId, terminationRequest: { agreement: agreementScope } } }),
+        this.prisma.agreementTerminationResponse.count({ where: { decision: 'REJECTED', responderId: agreement.landlordId, terminationRequest: { agreement: agreementScope } } }),
+      ]);
+      if (tenantAmendments + tenantCancellations < 3 || landlordAmendments + landlordCancellations < 3) {
+        throw new ForbiddenException('Both the tenant and landlord must have rejected at least three agreement requests before opening this dispute');
+      }
     }
     if (booking && agreement && !this.rentalContextsMatch(booking, agreement)) {
       throw new BadRequestException(
@@ -207,6 +223,18 @@ export class DisputesService {
             agreementId: dto.agreementId ?? null,
           },
         });
+        if (dto.type === DisputeType.AGREEMENT_TERMINATION && agreement) {
+          const admins = await transaction.user.findMany({ where: { roles: { has: Role.ADMIN } }, select: { id: true } });
+          await transaction.notification.createMany({
+            data: admins.map(({ id }) => ({
+              userId: id,
+              type: NotificationType.SYSTEM,
+              title: 'Agreement rejection dispute opened',
+              message: `A participant opened a dispute after both sides rejected at least three agreement requests. Property: ${agreement.propertyTitle}. Tenant ID: ${agreement.tenantId}. Landlord ID: ${agreement.landlordId}. Open the dispute to review and resolve it.`,
+              data: { disputeId: dispute.id, agreementId: agreement.agreementId, propertyId: agreement.propertyId, listingId: agreement.listingId, tenantId: agreement.tenantId, landlordId: agreement.landlordId, href: '/admin/disputes' },
+            })),
+          });
+        }
         return dispute;
       });
     } catch (error) {
@@ -455,8 +483,8 @@ export class DisputesService {
     if (dto.type === DisputeType.PAYMENT && !dto.paymentId) {
       throw new BadRequestException('PAYMENT disputes require paymentId');
     }
-    if (dto.type === DisputeType.AGREEMENT && !dto.agreementId) {
-      throw new BadRequestException('AGREEMENT disputes require agreementId');
+    if ((dto.type === DisputeType.AGREEMENT || dto.type === DisputeType.AGREEMENT_TERMINATION) && !dto.agreementId) {
+      throw new BadRequestException('Agreement disputes require agreementId');
     }
   }
 
@@ -497,6 +525,8 @@ export class DisputesService {
         listingId: true,
         propertyId: true,
         status: true,
+        property: { select: { title: true } },
+        listing: { select: { title: true } },
       },
     });
     if (!agreement) throw new NotFoundException('Agreement not found');
@@ -508,6 +538,9 @@ export class DisputesService {
       listingId: agreement.listingId,
       propertyId: agreement.propertyId,
       participants: new Set([agreement.tenantId, agreement.landlordId]),
+      tenantId: agreement.tenantId,
+      landlordId: agreement.landlordId,
+      propertyTitle: agreement.property?.title ?? agreement.listing?.title ?? 'Rental property',
     };
   }
 

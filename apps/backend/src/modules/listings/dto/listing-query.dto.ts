@@ -104,6 +104,20 @@ export class ListingQueryDto {
   @Min(0)
   bathrooms?: number;
 
+  @ApiPropertyOptional({ minimum: 0, description: 'Minimum listing area in square feet.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minSqft?: number;
+
+  @ApiPropertyOptional({ minimum: 0, description: 'Maximum listing area in square feet.' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  maxSqft?: number;
+
   @ApiPropertyOptional({ enum: FurnishedStatus })
   @IsOptional()
   @IsEnum(FurnishedStatus)

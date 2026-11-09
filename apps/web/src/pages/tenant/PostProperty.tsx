@@ -5,11 +5,10 @@ import Card from '../../components/ui/Card';
 import { ApiError } from '../../api/api-error';
 import { usersAPI } from '../../api/users';
 import { useAuthStore } from '../../store/authStore';
-import type { Role } from '../../types';
 
 export default function TenantPostProperty() {
   const navigate = useNavigate();
-  const { user, updateUser } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
   const [loading, setLoading] = useState(false);
 
   const enableLandlordAccount = async () => {
@@ -22,17 +21,7 @@ export default function TenantPostProperty() {
         if (!(error instanceof ApiError) || error.status !== 404) throw error;
         await usersAPI.createLandlordProfile({ displayName: user.fullName });
       }
-
-      const roles: Role[] = user.roles?.length
-        ? user.roles
-        : user.role
-          ? [user.role]
-          : (['TENANT'] as Role[]);
-      updateUser({
-        role: roles[0] ?? 'TENANT',
-        roles: [...new Set<Role>([...roles, 'LANDLORD'])],
-      });
-      navigate('/dashboard/post-property');
+      navigate('/dashboard/host-verification');
     } catch (error) {
       toast.error(
         error instanceof ApiError
@@ -47,12 +36,9 @@ export default function TenantPostProperty() {
   return (
     <div className="mx-auto max-w-2xl">
       <Card className="p-6 md:p-8">
-        <h1 className="text-2xl font-bold text-gray-900 ">
-          Post a property
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-900 ">Become a landlord</h1>
         <p className="mt-2 text-sm text-gray-600 ">
-          Set up your landlord profile to manage and publish your rental
-          property. Your tenant account and rental features will stay available.
+          Your account starts in the tenant workspace. Set up your landlord profile and complete identity and host verification. The landlord workspace opens after both are approved; your tenant workspace stays available.
         </p>
         <button
           type="button"
@@ -60,7 +46,7 @@ export default function TenantPostProperty() {
           disabled={loading}
           className="mt-6 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-primary-contrast transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Setting up your account…' : 'Continue to property details'}
+          {loading ? 'Opening verification…' : 'Continue to landlord verification'}
         </button>
       </Card>
     </div>

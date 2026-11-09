@@ -8,6 +8,7 @@ import { toApiError } from '../../api/api-error';
 import { verificationAPI } from '../../api/verification';
 import Card from '../../components/ui/Card';
 import { useAuthStore } from '../../store/authStore';
+import { AREA_UNITS, convertAreaToSquareFeet, getAreaUnit } from '../../utils/areaUnits';
 
 const PROPERTY_TYPES = [
   ['HOUSE', 'House'],
@@ -40,7 +41,8 @@ interface PropertyForm {
   securityDeposit: string;
   bedrooms: string;
   bathrooms: string;
-  areaSizeSqft: string;
+  areaSize: string;
+  areaSizeUnit: string;
   furnishedStatus: string;
   country: string;
   province: string;
@@ -90,7 +92,8 @@ const emptyForm = (): PropertyForm => ({
   securityDeposit: '',
   bedrooms: '0',
   bathrooms: '1',
-  areaSizeSqft: '',
+  areaSize: '',
+  areaSizeUnit: 'sqft',
   furnishedStatus: 'UNFURNISHED',
   country: 'Pakistan',
   province: '',
@@ -117,7 +120,8 @@ const toForm = (property: EditableProperty): PropertyForm => ({
   securityDeposit: property.securityDeposit == null ? '' : String(property.securityDeposit),
   bedrooms: String(property.bedrooms ?? 0),
   bathrooms: String(property.bathrooms ?? 1),
-  areaSizeSqft: property.areaSizeSqft == null ? '' : String(property.areaSizeSqft),
+  areaSize: property.areaSizeSqft == null ? '' : String(property.areaSizeSqft),
+  areaSizeUnit: 'sqft',
   furnishedStatus: property.furnishedStatus ?? 'UNFURNISHED',
   country:
     (typeof property.country === 'string' ? property.country : null) ??
@@ -208,6 +212,10 @@ export default function LandlordPostProperty() {
                 ]),
               ),
             );
+            if (typeof values.areaSize !== 'string' && typeof values.areaSizeSqft === 'string') {
+              restored.areaSize = values.areaSizeSqft;
+              restored.areaSizeUnit = 'sqft';
+            }
             setForm(restored);
           }
         }
@@ -262,7 +270,7 @@ export default function LandlordPostProperty() {
     if (targetStep === 2) {
       if (!Number.isInteger(price) || price < 0) errors.push('a whole-number rent of zero or more');
       if (form.securityDeposit && (!Number.isInteger(deposit) || deposit < 0)) errors.push('a valid non-negative deposit');
-      if (form.areaSizeSqft && (!Number.isInteger(Number(form.areaSizeSqft)) || Number(form.areaSizeSqft) < 0)) errors.push('a valid property area');
+      if (form.areaSize && (!Number.isFinite(Number(form.areaSize)) || Number(form.areaSize) < 0)) errors.push('a valid property area');
     }
     if (targetStep === 3) {
       const evidence = form.evidenceUrls.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
@@ -339,7 +347,9 @@ export default function LandlordPostProperty() {
         ...(form.securityDeposit !== '' && { securityDeposit: Number(form.securityDeposit) }),
         bedrooms: Number(form.bedrooms),
         bathrooms: Number(form.bathrooms),
-        ...(form.areaSizeSqft !== '' && { areaSizeSqft: Number(form.areaSizeSqft) }),
+        ...(form.areaSize !== '' && {
+          areaSizeSqft: Math.round(convertAreaToSquareFeet(Number(form.areaSize), form.areaSizeUnit)),
+        }),
         furnishedStatus: form.furnishedStatus,
         country: form.country.trim(),
         province: form.province.trim(),
@@ -505,9 +515,15 @@ export default function LandlordPostProperty() {
             <label className="block text-sm font-medium">Security deposit (PKR, optional)
               <input className={inputClass} type="number" min="0" step="1" value={form.securityDeposit} onChange={(event) => update('securityDeposit', event.target.value)} />
             </label>
-            <label className="block text-sm font-medium">Area (square feet, optional)
-              <input className={inputClass} type="number" min="0" step="1" value={form.areaSizeSqft} onChange={(event) => update('areaSizeSqft', event.target.value)} />
-            </label>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium" htmlFor="property-area-size">Property area (optional)</label>
+              <div className="mt-1 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                <input id="property-area-size" className={inputClass.replace('mt-1 ', '')} type="number" min="0" step="0.01" value={form.areaSize} onChange={(event) => update('areaSize', event.target.value)} placeholder="Enter area" />
+                <select className={inputClass.replace('mt-1 ', '')} aria-label="Property area unit" value={form.areaSizeUnit} onChange={(event) => update('areaSizeUnit', event.target.value)}>
+                  {AREA_UNITS.map((unit) => <option key={unit.value} value={unit.value}>{unit.label}</option>)}
+                </select>
+              </div>
+            </div>
           </div>
           <label className="block text-sm font-medium">House rules<textarea className={inputClass} maxLength={2000} rows={3} value={form.rules} onChange={(event) => update('rules', event.target.value)} /></label>
         </Card>
@@ -559,7 +575,7 @@ export default function LandlordPostProperty() {
               <h2 className="text-2xl font-bold">{form.title || 'Untitled property'}</h2>
               <p className="text-sm text-gray-600 ">{[form.area, form.city, form.province, form.country].filter(Boolean).join(', ')}</p>
               <p className="text-xl font-extrabold text-emerald-700">PKR {Number(form.price || 0).toLocaleString()} <span className="text-sm font-medium">{statusLabel(form.rentalMode)}</span></p>
-              <p className="text-sm">{form.bedrooms} bedroom(s) · {form.bathrooms} bathroom(s){form.areaSizeSqft ? ` · ${form.areaSizeSqft} sqft` : ''}</p>
+              <p className="text-sm">{form.bedrooms} bedroom(s) · {form.bathrooms} bathroom(s){form.areaSize && ` · ${form.areaSize} ${getAreaUnit(form.areaSizeUnit).shortLabel}`}</p>
               <p className="whitespace-pre-wrap text-sm text-gray-700 ">{form.description || 'No description provided.'}</p>
               {form.amenities.trim() && <p className="text-sm"><strong>Amenities:</strong> {form.amenities}</p>}
               {form.rules.trim() && <p className="whitespace-pre-wrap text-sm"><strong>Rules:</strong> {form.rules}</p>}

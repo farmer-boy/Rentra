@@ -179,13 +179,17 @@ export class VerificationService {
   ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, roles: true },
+      select: {
+        id: true,
+        roles: true,
+        landlordProfile: { select: { id: true } },
+      },
     });
     if (!user) throw new NotFoundException('User not found');
     await this.assertContactVerified(userId);
-    if (dto.kind === 'HOST' && !user.roles.includes('LANDLORD')) {
+    if (dto.kind === 'HOST' && !user.landlordProfile) {
       throw new ForbiddenException(
-        'Only a landlord can submit host verification',
+        'Create a landlord profile before submitting host verification',
       );
     }
     await this.assertSubmissionAllowed(userId, dto.kind);
@@ -211,7 +215,9 @@ export class VerificationService {
         });
         await this.auditService.record(transaction, {
           actorId: userId,
-          actorRole: dto.kind === 'HOST' ? 'LANDLORD' : 'USER',
+          actorRole: dto.kind === 'HOST'
+            ? user.roles.includes('LANDLORD') ? 'LANDLORD' : 'TENANT'
+            : 'USER',
           entityType: 'USER',
           entityId: userId,
           action: `${dto.kind}_VERIFICATION_SUBMITTED`,
@@ -543,6 +549,12 @@ export class VerificationService {
             data: { verificationStatus: VerificationStatus.UNVERIFIED },
           });
         }
+        if (
+          submission.kind === VerificationKind.HOST ||
+          submission.kind === VerificationKind.IDENTITY
+        ) {
+          await this.syncLandlordWorkspaceAccess(transaction, submission.userId);
+        }
       }
 
       await transaction.notification.create({
@@ -671,6 +683,12 @@ export class VerificationService {
             reason: 'Owner verification was revoked',
           });
         }
+        if (
+          submission.kind === VerificationKind.HOST ||
+          submission.kind === VerificationKind.IDENTITY
+        ) {
+          await this.syncLandlordWorkspaceAccess(transaction, submission.userId);
+        }
       }
     });
 
@@ -726,6 +744,61 @@ export class VerificationService {
       throw new ForbiddenException(
         'Identity and host verification must be approved before property approval',
       );
+    }
+  }
+
+  private async syncLandlordWorkspaceAccess(
+    transaction: Prisma.TransactionClient,
+    userId: string,
+  ) {
+    const [user, landlordProfile, identity, host] = await Promise.all([
+      transaction.user.findUnique({
+        where: { id: userId },
+        select: { roles: true },
+      }),
+      transaction.landlordProfile.findUnique({
+        where: { userId },
+        select: { isVerified: true },
+      }),
+      transaction.verificationSubmission.findFirst({
+        where: { userId, kind: VerificationKind.IDENTITY },
+        orderBy: { submittedAt: 'desc' },
+        select: { status: true },
+      }),
+      transaction.verificationSubmission.findFirst({
+        where: { userId, kind: VerificationKind.HOST },
+        orderBy: { submittedAt: 'desc' },
+        select: { status: true },
+      }),
+    ]);
+    if (!user || !landlordProfile) return;
+
+    const verified =
+      identity?.status === VerificationStatus.APPROVED &&
+      host?.status === VerificationStatus.APPROVED;
+    if (verified) {
+      await transaction.landlordProfile.update({
+        where: { userId },
+        data: { isVerified: true },
+      });
+      if (!user.roles.includes('LANDLORD')) {
+        await transaction.user.update({
+          where: { id: userId },
+          data: { roles: [...user.roles, 'LANDLORD'] },
+        });
+      }
+      return;
+    }
+
+    if (landlordProfile.isVerified) {
+      await transaction.landlordProfile.update({
+        where: { userId },
+        data: { isVerified: false },
+      });
+      await transaction.user.update({
+        where: { id: userId },
+        data: { roles: user.roles.filter((role) => role !== 'LANDLORD') },
+      });
     }
   }
 

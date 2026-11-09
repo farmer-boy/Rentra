@@ -1,16 +1,32 @@
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar, { type NavSection } from './Sidebar';
 import Navbar from './Navbar';
 import BackToDashboard from './BackToDashboard';
+import { useAuthStore } from '../../store/authStore';
+import { getUnifiedNavSections } from './unifiedNavSections';
+import { getSavedWorkspace, getWorkspaceFromPath, saveWorkspace } from './workspace';
 
-interface DashboardLayoutProps {
-  navSections: NavSection[];
-}
-
-export default function DashboardLayout({ navSections }: DashboardLayoutProps) {
+export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarExpanded, setSidebarExpanded] = useState(true); // Desktop expand/collapse
+  const location = useLocation();
+  const user = useAuthStore((state) => state.user);
+  const roles = user?.roles ?? (user?.role ? [user.role] : []);
+  const hasLandlordAccess = roles.includes('LANDLORD');
+  const pathWorkspace = getWorkspaceFromPath(location.pathname, hasLandlordAccess);
+  const activeWorkspace = hasLandlordAccess
+    ? pathWorkspace ?? getSavedWorkspace(user?.id)
+    : 'tenant';
+  const navSections: NavSection[] = getUnifiedNavSections(
+    hasLandlordAccess,
+    roles.includes('ADMIN'),
+    activeWorkspace,
+  );
+
+  useEffect(() => {
+    if (pathWorkspace && user?.id) saveWorkspace(user.id, pathWorkspace);
+  }, [pathWorkspace, user?.id]);
 
   useEffect(() => {
     if (!sidebarOpen) return;

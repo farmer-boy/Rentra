@@ -96,6 +96,39 @@ const definitions: Record<string, ResourceDefinition> = {
       { key: 'verificationStatus', label: 'Verification' },
     ],
   },
+  apartments: { title: 'Apartments', endpoint: '/admin/properties', fixedType: 'APARTMENT', columns: [
+    { key: 'title', label: 'Apartment' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  flats: { title: 'Flats', endpoint: '/admin/properties', fixedType: 'FLAT', columns: [
+    { key: 'title', label: 'Flat' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  houses: { title: 'Houses', endpoint: '/admin/properties', fixedType: 'HOUSE', columns: [
+    { key: 'title', label: 'House' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  portions: { title: 'Portions', endpoint: '/admin/properties', fixedType: 'PORTION', columns: [
+    { key: 'title', label: 'Portion' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  rooms: { title: 'Rooms', endpoint: '/admin/properties', fixedType: 'ROOM', columns: [
+    { key: 'title', label: 'Room' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  studios: { title: 'Studios', endpoint: '/admin/properties', fixedType: 'STUDIO', columns: [
+    { key: 'title', label: 'Studio' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  farmhouses: { title: 'Farmhouses', endpoint: '/admin/properties', fixedType: 'FARMHOUSE', columns: [
+    { key: 'title', label: 'Farmhouse' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  pg: { title: 'PG', endpoint: '/admin/properties', fixedType: 'PG', columns: [
+    { key: 'title', label: 'PG' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  'shared-rooms': { title: 'Shared rooms', endpoint: '/admin/properties', fixedType: 'SHARED_ROOM', columns: [
+    { key: 'title', label: 'Shared room' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  'other-properties': { title: 'Other properties', endpoint: '/admin/properties', fixedType: 'OTHER', columns: [
+    { key: 'title', label: 'Property' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
+  'guest-houses': { title: 'Guest houses', endpoint: '/admin/properties', fixedType: 'GUEST_HOUSE', columns: [
+    { key: 'title', label: 'Guest house' }, { key: 'owner.fullName', label: 'Host' }, { key: 'city', label: 'City' }, { key: 'status', label: 'Status' }, { key: 'verificationStatus', label: 'Verification' },
+  ] },
   bookings: {
     title: 'Bookings',
     endpoint: '/admin/bookings',

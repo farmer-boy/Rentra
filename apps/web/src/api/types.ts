@@ -100,8 +100,30 @@ export interface Agreement {
   startDate: string;
   endDate: string | null;
   status: string;
+  terminationReason?: string | null;
+    amendments?: AgreementAmendment[];
+    terminationRequests?: import('./agreements').AgreementTerminationRequest[];
+    disputeEligibility?: { tenant: number; landlord: number; eligible: boolean };
+    tenant?: { id: string; fullName: string; email: string; phone: string };
+    landlord?: { id: string; fullName: string; email: string; phone: string };
+    property?: { id: string; title: string; propertyType: string; city: string | null; area: string | null; address: string } | null;
+    listing?: { id: string; title: string; type: string; city: string; area: string; address: string } | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AgreementAmendment {
+  id: string;
+  agreementId: string;
+  proposedMonthlyRent: number;
+  proposedSecurityDeposit: number;
+  reason?: string | null;
+  decisionNote?: string | null;
+  reviewRating?: number | null;
+  reviewComment?: string | null;
+  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
+  createdAt: string;
+  decidedAt?: string | null;
 }
 
 // Payment types

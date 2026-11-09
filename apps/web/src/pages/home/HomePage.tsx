@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowRight, BedDouble, Bell, Building2, ChevronRight, Home, Mail, MapPin, Menu, Phone, Search, ShieldCheck, Sparkles, Star, X } from 'lucide-react';
+import { ArrowRight, BedDouble, Bell, Building2, ChevronRight, Mail, MapPin, Menu, Phone, Search, ShieldCheck, Sparkles, Star, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { listingsAPI } from '../../api/listings';
 import { locationsAPI } from '../../api/locations';
@@ -42,7 +42,7 @@ export default function HomePage() {
       <header className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 lg:px-8">
           <Link to="/" className="flex items-center gap-2.5" aria-label="Rentra home">
-            <span className="grid w-10 h-10 place-items-center rounded-xl bg-primary text-primary-contrast"><Home size={20} /></span>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl p-1.5" style={{ backgroundColor: 'rgb(var(--rentra-admin-sidebar-active))' }}><img src="/rentra-mark-offwhite.png" alt="" className="h-full w-full object-contain" /></span>
             <span className="text-[22px] font-bold tracking-tight">Rentra<span className="text-[var(--green-soft)]">.</span></span>
           </Link>
           <nav className="hidden items-center gap-8 text-sm font-medium text-[var(--text2)] md:flex">
@@ -104,7 +104,7 @@ export default function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:px-3">
           <div>
             <Link to="/" className="flex items-center gap-2.5" aria-label="Rentra home">
-              <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-contrast"><Home size={18} /></span>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl p-1.5" style={{ backgroundColor: 'rgb(var(--rentra-admin-sidebar-active))' }}><img src="/rentra-mark-offwhite.png" alt="" className="h-full w-full object-contain" /></span>
               <span className="text-xl font-bold tracking-tight">Rentra<span className="text-[var(--green-soft)]">.</span></span>
             </Link>
             <p className="mt-4 max-w-xs text-sm leading-6 text-[var(--text3)]">A clearer rental journey for tenants and landlords. Find a place you can trust.</p>

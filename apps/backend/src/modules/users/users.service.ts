@@ -518,7 +518,7 @@ export class UsersService {
   async createLandlordProfile(userId: string, dto: CreateLandlordProfileDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, roles: true },
+      select: { id: true },
     });
 
     if (!user) {
@@ -533,26 +533,14 @@ export class UsersService {
       throw new ConflictException('Landlord profile already exists');
     }
 
-    const roles = user.roles.includes(Role.LANDLORD)
-      ? user.roles
-      : [...user.roles, Role.LANDLORD];
-
-    const [profile] = await this.prisma.$transaction([
-      this.prisma.landlordProfile.create({
-        data: {
-          userId,
-          displayName: dto.displayName,
-          bio: dto.bio,
-          avatarUrl: dto.avatarUrl,
-        },
-      }),
-      this.prisma.user.update({
-        where: { id: userId },
-        data: { roles },
-      }),
-    ]);
-
-    return profile;
+    return this.prisma.landlordProfile.create({
+      data: {
+        userId,
+        displayName: dto.displayName,
+        bio: dto.bio,
+        avatarUrl: dto.avatarUrl,
+      },
+    });
   }
 
   async getLandlordProfile(userId: string) {

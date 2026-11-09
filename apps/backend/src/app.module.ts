@@ -1,3 +1,4 @@
+import * as path from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './common/prisma/prisma.module';
@@ -24,13 +25,22 @@ import { VerificationModule } from './modules/verification/verification.module';
 import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 import { BoostModule } from './modules/boost/boost.module';
 import { SupportModule } from './modules/support/support.module';
+import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      // Prefer backend-specific secrets over blank/root workspace defaults.
-      envFilePath: ['apps/backend/.env', '.env.neon.local', '.env'],
+      // Prefer the workspace root .env so backend-local blank placeholders cannot mask it.
+      envFilePath: [
+        path.resolve(__dirname, '../../../.env'),
+        path.resolve(process.cwd(), '.env'),
+        path.resolve(process.cwd(), 'apps/backend/.env'),
+        path.resolve(process.cwd(), '../../.env'),
+        path.resolve(process.cwd(), '../.env'),
+        '.env.neon.local',
+        '.env',
+      ],
     }),
     PrismaModule,
     AuthModule,
@@ -56,6 +66,7 @@ import { SupportModule } from './modules/support/support.module';
     RecommendationsModule,
     BoostModule,
     SupportModule,
+    MaintenanceModule,
   ],
 })
 export class AppModule {}

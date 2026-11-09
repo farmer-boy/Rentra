@@ -61,6 +61,8 @@ creating feature-specific Axios instances.
 | `admin.ts` | Admin user/listing/property/dispute moderation, verification, and dashboard routes |
 | `locations.ts` | Country/province/city/area lookup (including `GET /locations/cities`), search, and `GET /locations/:id` |
 | `contacts.ts` | `POST /contact/message`; admin-only `GET /contact/messages`, `GET /contact/message/:id`, `PATCH /contact/message/:id/read`, and `DELETE /contact/message/:id` |
+| `rentEstimate.ts` | Public `GET /listings/rent-estimate`, using only currently published and available Rentra listings as comparables |
+| `maintenance.ts` | `GET /maintenance/my`, `POST /maintenance`, landlord `GET /maintenance/received`, and landlord `PATCH /maintenance/:id/status` |
 
 `/listings` and `/properties` are separate backend resources with separate
 response shapes. Do not substitute one for the other. The listings create
@@ -99,6 +101,13 @@ contract uses `price`, `securityDeposit`, `type`, and `rentalMode`.
   automated email-link scanners do not consume the single-use token.
 - An agreement is created by accepting a rental request. There is no standalone
   agreement-create or sign route.
+- A maintenance request requires an active agreement linked to a Property.
+  Older listing-only agreements are not eligible. Tenants can create and view
+  their requests; the linked landlord can move a request to in-progress or
+  resolved.
+- Rent estimates are calculated from published, available Rentra listings in
+  the requested city and rental period. The API returns sample size, matching
+  filters, and comparable listings. This is not an external market valuation.
 - Payment initiation accepts a booking or agreement plus provider and optional
   billing month. The server resolves payer and amount; never send a trusted
   amount from the browser. The current `PaymentsModule` has no provider

@@ -1,13 +1,15 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
 export class TerminateAgreementDto {
-  @ApiPropertyOptional({
+  @ApiProperty({
     maxLength: 1000,
-    description: 'Reason recorded with the terminated agreement.',
+    description: 'Required reason recorded with the terminated agreement and shown to both participants.',
   })
-  @IsOptional()
+  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString()
+  @IsNotEmpty()
   @MaxLength(1000)
-  reason?: string;
+  reason!: string;
 }

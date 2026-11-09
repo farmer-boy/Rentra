@@ -15,7 +15,6 @@ import Contact from './pages/contact/Contact';
 
 // Layout
 import DashboardLayout from './components/layout/DashboardLayout';
-import { getUnifiedNavSections } from './components/layout/unifiedNavSections';
 import AdminLayout from './components/layout/AdminLayout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 
@@ -23,7 +22,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute';
 import SettingsPage from './pages/settings/SettingsPage';
 
 // Tenant Pages
-import UnifiedDashboard from './pages/dashboard/UnifiedDashboard';
+import TenantDashboard from './pages/tenant/TenantDashboard';
 import BrowseListings from './pages/tenant/BrowseListings';
 import ListingDetails from './pages/tenant/ListingDetails';
 import PublicListingsLayout from './components/layout/PublicListingsLayout';
@@ -55,6 +54,7 @@ import LandlordMaintenanceRequests from './pages/landlord/MaintenanceRequests';
 import LandlordFakeDetector from './pages/landlord/FakeDetector';
 import LandlordTrustScores from './pages/landlord/TrustScores';
 import LandlordReviews from './pages/landlord/Reviews';
+import LandlordDashboard from './pages/landlord/LandlordDashboard';
 import LandlordBookings from './pages/landlord/Bookings';
 import LandlordAvailability from './pages/landlord/Availability';
 import LandlordVerification from './pages/landlord/Verification';
@@ -75,7 +75,6 @@ import NotificationsPage from './pages/notifications/NotificationsPage';
 import SupportPage from './pages/support/SupportPage';
 import SupportTickets from './pages/admin/SupportTickets';
 import { useAuthStore } from './store/authStore';
-import type { Role } from './types';
 
 function NotFoundPage() {
   return (
@@ -120,6 +119,8 @@ function LegacyWorkspaceRedirect({ workspace }: { workspace: 'tenant' | 'landlor
   const listingDetails = subpath.match(/^listings\/([^/]+)$/);
   const destination = listingDetails
     ? `/dashboard/listings/${listingDetails[1]}`
+    : workspace === 'landlord' && !subpath
+      ? '/dashboard/landlord'
     : mappings[subpath] !== undefined
       ? `/dashboard${mappings[subpath] ? `/${mappings[subpath]}` : ''}`
       : '/dashboard';
@@ -147,9 +148,6 @@ export default function App() {
 
 function AppContent() {
   const initializeAuth = useAuthStore((state) => state.initialize);
-  const user = useAuthStore((state) => state.user);
-  const userRoles: Role[] = user?.roles ?? (user?.role ? [user.role] : []);
-  const dashboardNavSections = getUnifiedNavSections(userRoles.includes('LANDLORD'), userRoles.includes('ADMIN'));
 
   useEffect(() => {
     void initializeAuth();
@@ -172,8 +170,8 @@ function AppContent() {
         {/* Public */}
         <Route path="/" element={<HomeEntry />} />
         <Route element={<PublicListingsLayout />}>
-          <Route path="/listings" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><BrowseListings /></ProtectedRoute>} />
-          <Route path="/listings/:id" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><ListingDetails /></ProtectedRoute>} />
+          <Route path="/listings" element={<BrowseListings />} />
+          <Route path="/listings/:id" element={<ListingDetails />} />
         </Route>
         <Route element={<PublicListingsLayout />}>
           <Route path="/favorites" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><SavedListings /></ProtectedRoute>} />
@@ -193,19 +191,20 @@ function AppContent() {
           </ProtectedRoute>
         } />
 
-        {/* One shared tenant and landlord dashboard */}
+        {/* Separate tenant and approved landlord workspaces */}
         <Route path="/dashboard" element={
           <ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}>
-            <DashboardLayout navSections={dashboardNavSections} />
+            <DashboardLayout />
           </ProtectedRoute>
         }>
-          <Route index element={<UnifiedDashboard />} />
+          <Route index element={<TenantDashboard />} />
+          <Route path="landlord" element={<LandlordCapabilityRoute><LandlordDashboard /></LandlordCapabilityRoute>} />
           <Route path="listings" element={<BrowseListings />} />
           <Route path="listings/:id" element={<ListingDetails />} />
           <Route path="saved" element={<SavedListings />} />
           <Route path="saved-searches" element={<SavedSearches />} />
           <Route path="enable-hosting" element={<NonAdminLandlordRoute><PostProperty /></NonAdminLandlordRoute>} />
-          <Route path="post-property" element={<NonAdminLandlordRoute><LandlordPostProperty /></NonAdminLandlordRoute>} />
+          <Route path="post-property" element={<LandlordCapabilityRoute><LandlordPostProperty /></LandlordCapabilityRoute>} />
           <Route path="properties" element={<LandlordCapabilityRoute><MyProperties /></LandlordCapabilityRoute>} />
           <Route path="received-requests" element={<LandlordCapabilityRoute><PendingApplications /></LandlordCapabilityRoute>} />
           <Route path="my-requests" element={<TenantRentalRequests />} />
@@ -229,7 +228,7 @@ function AppContent() {
           <Route path="rent-estimator" element={<RentEstimator />} />
           <Route path="trust-scores" element={<TrustScores />} />
           <Route path="host-trust" element={<LandlordCapabilityRoute><LandlordTrustScores /></LandlordCapabilityRoute>} />
-          <Route path="host-verification" element={<LandlordCapabilityRoute><LandlordVerification /></LandlordCapabilityRoute>} />
+          <Route path="host-verification" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><LandlordVerification /></ProtectedRoute>} />
           <Route path="tenants" element={<LandlordCapabilityRoute><MyTenants /></LandlordCapabilityRoute>} />
           <Route path="boost" element={<LandlordCapabilityRoute><RentraBoost /></LandlordCapabilityRoute>} />
           <Route path="profile" element={<Profile />} />
@@ -267,6 +266,17 @@ function AppContent() {
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="reviews" element={<AdminResourcePage />} />
           <Route path="properties" element={<AdminResourcePage />} />
+          <Route path="apartments" element={<AdminResourcePage />} />
+          <Route path="flats" element={<AdminResourcePage />} />
+          <Route path="houses" element={<AdminResourcePage />} />
+          <Route path="portions" element={<AdminResourcePage />} />
+          <Route path="rooms" element={<AdminResourcePage />} />
+          <Route path="studios" element={<AdminResourcePage />} />
+          <Route path="farmhouses" element={<AdminResourcePage />} />
+          <Route path="pg" element={<AdminResourcePage />} />
+          <Route path="shared-rooms" element={<AdminResourcePage />} />
+          <Route path="other-properties" element={<AdminResourcePage />} />
+          <Route path="guest-houses" element={<AdminResourcePage />} />
           <Route path="hosts" element={<AdminResourcePage />} />
           <Route path="hotels" element={<AdminResourcePage />} />
           <Route path="hostels" element={<AdminResourcePage />} />

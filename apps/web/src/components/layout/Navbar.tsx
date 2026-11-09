@@ -5,7 +5,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useContactMessages } from '../../hooks/useContactMessages';
 import { messagesAPI } from '../../api/messages';
 import { notificationsAPI } from '../../api/notifications';
-import { Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart } from 'lucide-react';
+import { ArrowLeftRight, Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart } from 'lucide-react';
+import { getSavedWorkspace, getWorkspaceFromPath, saveWorkspace } from './workspace';
 
 interface NavbarProps {
   onMenuClick?: () => void;
@@ -39,6 +40,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   });
   const roles = user?.roles ?? (user?.role ? [user.role] : []);
   const hasAdminRole = roles.includes('ADMIN');
+  const hasLandlordRole = roles.includes('LANDLORD');
+  const pathWorkspace = getWorkspaceFromPath(location.pathname, hasLandlordRole);
+  const activeWorkspace = hasLandlordRole
+    ? pathWorkspace ?? getSavedWorkspace(user?.id)
+    : 'tenant';
+
+  useEffect(() => {
+    if (pathWorkspace && user?.id) saveWorkspace(user.id, pathWorkspace);
+  }, [pathWorkspace, user?.id]);
 
   const initials = user?.fullName
     ?.split(' ')
@@ -58,7 +68,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   };
 
   const getRoleText = () => {
-    return isAdminWorkspace ? 'ADMIN' : 'RENTRA';
+    if (isAdminWorkspace) return 'ADMIN';
+    return location.pathname.startsWith('/dashboard')
+      ? activeWorkspace.toUpperCase()
+      : 'RENTRA';
   };
 
   const handleLogout = () => {
@@ -314,6 +327,26 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
                 >
                   <Heart size={14} />
                   Saved homes
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (hasLandlordRole) {
+                      const nextWorkspace = activeWorkspace === 'landlord' ? 'tenant' : 'landlord';
+                      saveWorkspace(user?.id, nextWorkspace);
+                      navigate(nextWorkspace === 'landlord' ? '/dashboard/landlord' : '/dashboard');
+                    } else {
+                      navigate('/dashboard/enable-hosting');
+                    }
+                    setProfileOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-[12px] transition-colors hover:bg-opacity-50"
+                  style={{ color: 'var(--text2)' }}
+                >
+                  <ArrowLeftRight size={14} />
+                  {hasLandlordRole
+                    ? activeWorkspace === 'landlord' ? 'Tenant workspace' : 'Landlord workspace'
+                    : 'Become a landlord'}
                 </button>
               </>}
 

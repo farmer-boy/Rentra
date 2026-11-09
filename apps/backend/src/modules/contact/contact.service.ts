@@ -6,17 +6,14 @@ import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class ContactService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null;
 
   constructor(private prisma: PrismaService) {
-    // Configure email transporter
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER || 'subssems336@gmail.com',
-        pass: process.env.GMAIL_PASSWORD || '', // Use app-specific password
-      },
-    });
+    const user = process.env.GMAIL_USER?.trim();
+    const password = process.env.GMAIL_PASSWORD?.replace(/\s/g, '');
+    this.transporter = user && password
+      ? nodemailer.createTransport({ service: 'gmail', auth: { user, pass: password } })
+      : null;
   }
 
   async createMessage(dto: CreateContactMessageDto) {
@@ -70,10 +67,11 @@ export class ContactService {
   }
 
   private async sendEmailToAdmin(message: any) {
-    const adminEmail = process.env.ADMIN_EMAIL || 'subssems336@gmail.com';
+    const adminEmail = process.env.ADMIN_EMAIL?.trim() || process.env.GMAIL_USER?.trim();
+    if (!this.transporter || !adminEmail) return;
 
     const mailOptions = {
-      from: process.env.GMAIL_USER || 'subssems336@gmail.com',
+      from: process.env.GMAIL_USER,
       to: adminEmail,
       subject: `New Contact Form Message from ${message.name}`,
       html: `
@@ -82,14 +80,14 @@ export class ContactService {
             <h2 style="color: #22c55e; margin-bottom: 20px;">📬 New Contact Message from Rentra</h2>
             
             <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #22c55e; margin-bottom: 20px;">
-              <p><strong>Name:</strong> ${message.name}</p>
-              <p><strong>Email:</strong> <a href="mailto:${message.email}">${message.email}</a></p>
-              <p><strong>Phone:</strong> <a href="tel:${message.phone}">${message.phone}</a></p>
+              <p><strong>Name:</strong> ${this.escapeHtml(message.name)}</p>
+              <p><strong>Email:</strong> <a href="mailto:${this.escapeHtml(message.email)}">${this.escapeHtml(message.email)}</a></p>
+              <p><strong>Phone:</strong> <a href="tel:${this.escapeHtml(message.phone)}">${this.escapeHtml(message.phone)}</a></p>
             </div>
 
             <div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
               <h3 style="color: #333; margin-top: 0;">Message:</h3>
-              <p style="color: #555; line-height: 1.6;">${message.message.replace(/\n/g, '<br>')}</p>
+              <p style="color: #555; line-height: 1.6;">${this.escapeHtml(message.message).replace(/\n/g, '<br>')}</p>
             </div>
 
             <div style="border-top: 1px solid #ddd; padding-top: 15px; color: #999; font-size: 12px;">
@@ -111,6 +109,17 @@ export class ContactService {
     };
 
     await this.transporter.sendMail(mailOptions);
+  }
+
+  private escapeHtml(value: string) {
+    const replacements: Record<string, string> = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    };
+    return value.replace(/[&<>"']/g, (character) => replacements[character] ?? character);
   }
 
   async getAllMessages(filters?: { status?: string; read?: boolean }) {

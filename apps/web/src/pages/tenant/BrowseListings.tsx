@@ -22,6 +22,7 @@ import toast from 'react-hot-toast';
 import { ApiError } from '../../api/api-error';
 import { useFavorites, useListingSearch, useToggleFavorite } from '../../hooks/useRentraQueries';
 import { useAuthStore } from '../../store/authStore';
+import { AREA_UNITS, convertAreaToSquareFeet, formatAreaFromSquareFeet, getAreaUnit } from '../../utils/areaUnits';
 
 const propertyTypes = ['HOSTEL', 'HOTEL', 'GUEST_HOUSE', 'HOUSE', 'APARTMENT', 'FLAT', 'ROOM', 'PORTION', 'STUDIO', 'FARMHOUSE', 'PG', 'SHARED_ROOM'];
 const furnishing = ['FURNISHED', 'SEMI_FURNISHED', 'UNFURNISHED'];
@@ -75,6 +76,9 @@ function ListingFiltersForm({
     return {
       city: initial.city ?? '',
       area: initial.area ?? '',
+      minArea: initial.minArea ?? '',
+      maxArea: initial.maxArea ?? '',
+      areaUnit: initial.areaUnit ?? 'sqft',
       hostel: initial.hostel ?? '',
       propertyType: initial.propertyType ?? '',
       minRent: initial.minRent ?? '',
@@ -121,6 +125,9 @@ function ListingFiltersForm({
       </div>
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <select aria-label="Property type" value={filters.propertyType} onChange={(event) => setFilter('propertyType', event.target.value)} className={filterFieldClass}><option value="">Property type</option>{propertyTypes.map((type) => <option key={type} value={type}>{type.replace('_', ' ')}</option>)}</select>
+        <input aria-label="Minimum property area" type="number" min="0" step="0.01" placeholder="Minimum area" value={filters.minArea} onChange={(event) => setFilter('minArea', event.target.value)} className={filterFieldClass} />
+        <input aria-label="Maximum property area" type="number" min="0" step="0.01" placeholder="Maximum area" value={filters.maxArea} onChange={(event) => setFilter('maxArea', event.target.value)} className={filterFieldClass} />
+        <select aria-label="Property area unit" value={filters.areaUnit} onChange={(event) => setFilter('areaUnit', event.target.value)} className={filterFieldClass}>{AREA_UNITS.map((unit) => <option key={unit.value} value={unit.value}>{unit.label}</option>)}</select>
         <input aria-label="Minimum price" type="number" placeholder="Minimum Rs." value={filters.minRent} onChange={(event) => setFilter('minRent', event.target.value)} className={filterFieldClass} />
         <input aria-label="Maximum price" type="number" placeholder="Maximum Rs." value={filters.maxRent} onChange={(event) => setFilter('maxRent', event.target.value)} className={filterFieldClass} />
         <select aria-label="Rental duration" value={filters.rentalDuration} onChange={(event) => setFilter('rentalDuration', event.target.value)} className={filterFieldClass}><option value="">Rental duration</option>{durations.map((duration) => <option key={duration} value={duration}>{duration.replace('_', ' ')}</option>)}</select>
@@ -201,7 +208,18 @@ export default function BrowseListings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [mode, setMode] = useState<'list' | 'map'>('list');
   const appliedFilters = readParams(searchParams);
-  const listingQuery = useListingSearch<Listing>(appliedFilters);
+  const listingSearchFilters = { ...appliedFilters };
+  const areaUnit = getAreaUnit(appliedFilters.areaUnit);
+  if (appliedFilters.minArea) {
+    listingSearchFilters.minSqft = String(Math.ceil(convertAreaToSquareFeet(Number(appliedFilters.minArea), areaUnit.value)));
+  }
+  if (appliedFilters.maxArea) {
+    listingSearchFilters.maxSqft = String(Math.floor(convertAreaToSquareFeet(Number(appliedFilters.maxArea), areaUnit.value)));
+  }
+  delete listingSearchFilters.minArea;
+  delete listingSearchFilters.maxArea;
+  delete listingSearchFilters.areaUnit;
+  const listingQuery = useListingSearch<Listing>(listingSearchFilters);
   const listings = listingQuery.data?.data ?? [];
   const pagination = listingQuery.data?.pagination;
   const currentPage = pagination?.page ?? 1;
@@ -221,6 +239,10 @@ export default function BrowseListings() {
   });
 
   const applySearch = (filters: Filters, selectedAmenities: string[]) => {
+    if (filters.minArea && filters.maxArea && Number(filters.minArea) > Number(filters.maxArea)) {
+      toast.error('Minimum area cannot be greater than maximum area.');
+      return;
+    }
     const params = Object.fromEntries(
       Object.entries({
         ...filters,
@@ -233,8 +255,13 @@ export default function BrowseListings() {
   };
   const clearFilters = () => setSearchParams(new URLSearchParams());
   const activeFilters = Object.entries(appliedFilters).filter(
-    ([key, value]) => !['page', 'limit', 'sortBy', 'sortOrder', 'bedrooms', 'bathrooms', 'gender', 'availableFrom'].includes(key) && value,
+    ([key, value]) => !['page', 'limit', 'sortBy', 'sortOrder', 'bedrooms', 'bathrooms', 'gender', 'availableFrom', 'areaUnit'].includes(key) && value,
   );
+  const getFilterLabel = (key: string, value: string) => {
+    if (key === 'minArea') return `Minimum area: ${value} ${areaUnit.shortLabel}`;
+    if (key === 'maxArea') return `Maximum area: ${value} ${areaUnit.shortLabel}`;
+    return `${key.replaceAll(/([A-Z])/g, ' $1')}: ${value}`;
+  };
   const removeFilter = (key: string) => {
     const params = new URLSearchParams(searchParams);
     params.delete(key);
@@ -311,7 +338,7 @@ export default function BrowseListings() {
                 </button>
               ))
               : [<button key={key} onClick={() => removeFilter(key)} className="rounded-full border border-border bg-surface px-3 py-1 text-xs text-text-muted transition-colors hover:bg-surface2">
-                {key.replaceAll(/([A-Z])/g, ' $1')}: {value} <span aria-hidden="true">×</span>
+                {getFilterLabel(key, value)} <span aria-hidden="true">×</span>
               </button>],
           )}
           <button onClick={clearFilters} className="text-xs font-semibold text-primary underline underline-offset-2">Clear all</button>
@@ -413,7 +440,7 @@ export default function BrowseListings() {
                 <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-text-muted">
                   <span className="inline-flex items-center gap-1.5"><BedDouble size={14} className="text-[var(--text3)]" />{listing.bedrooms} beds</span>
                   <span className="inline-flex items-center gap-1.5"><Bath size={14} className="text-[var(--text3)]" />{listing.bathrooms} baths</span>
-                  {listing.sqft > 0 && <span className="inline-flex items-center gap-1.5"><Ruler size={14} className="text-[var(--text3)]" />{listing.sqft.toLocaleString()} sqft</span>}
+                  {listing.sqft > 0 && <span className="inline-flex items-center gap-1.5"><Ruler size={14} className="text-[var(--text3)]" />{formatAreaFromSquareFeet(listing.sqft, areaUnit.value)}</span>}
                 </div>
                 <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
                   <span className="truncate text-xs text-text-muted">{listing.furnishedStatus.replaceAll('_', ' ').toLowerCase()}</span>

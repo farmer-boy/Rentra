@@ -5,11 +5,20 @@ import Card from '../../components/ui/Card';
 import { agreementsAPI } from '../../api/agreements';
 import { listingsAPI } from '../../api/listings';
 import { useAuthStore } from '../../store/authStore';
+import TerminateAgreementButton from '../../components/agreements/TerminateAgreementButton';
+import ProposeAgreementTermsButton from '../../components/agreements/ProposeAgreementTermsButton';
+import AgreementAmendmentsPanel from '../../components/agreements/AgreementAmendmentsPanel';
+import TerminationRequestsPanel from '../../components/agreements/TerminationRequestsPanel';
+import type { AgreementAmendment } from '../../api/types';
+import type { AgreementTerminationRequest } from '../../api/agreements';
+import AgreementPresencePulse from '../../components/agreements/AgreementPresencePulse';
+import AgreementTerminationDisputeButton from '../../components/agreements/AgreementTerminationDisputeButton';
+import AgreementDisputeEligibilityStatus from '../../components/agreements/AgreementDisputeEligibilityStatus';
 
 interface Agreement {
   id: string;
   landlordId: string;
-  tenant?: { fullName?: string; email?: string };
+  tenant?: { fullName?: string; email?: string; phone?: string };
   listingId: string;
   monthlyRent: number;
   securityDeposit: number | null;
@@ -17,6 +26,13 @@ interface Agreement {
   endDate: string | null;
   pdfUrl?: string | null;
   status: string;
+  terminationReason?: string | null;
+  amendments?: AgreementAmendment[];
+  tenantId: string;
+  terminationRequests?: AgreementTerminationRequest[];
+  disputeEligibility?: { tenant: number; landlord: number; eligible: boolean };
+  property?: { title: string; propertyType: string; city?: string | null; area?: string | null; address?: string } | null;
+  listing?: { title: string; type: string; city?: string; area?: string; address?: string } | null;
 }
 
 interface Listing {
@@ -62,8 +78,26 @@ const LandlordAgreements = () => {
     return () => { active = false; };
   }, [user?.id]);
 
+  useEffect(() => {
+    if (!user?.id) return;
+    let active = true;
+    let refreshing = false;
+    const refresh = async () => {
+      if (refreshing) return;
+      refreshing = true;
+      try {
+        const records = await agreementsAPI.mine<Agreement>();
+        if (active) setAgreements(records.filter((agreement) => agreement.landlordId === user.id));
+      } catch { /* Keep the last loaded agreement data while a poll is unavailable. */ }
+      finally { refreshing = false; }
+    };
+    const timer = window.setInterval(() => void refresh(), 6000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [user?.id]);
+
   const ownedAgreements = agreements;
   const listingNames = new Map(listings.map((listing) => [listing.id, listing.title]));
+  const niceType = (value?: string | null) => value?.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase()) || 'Property type unavailable';
   const activeCount = ownedAgreements.filter((agreement) => agreement.status === 'ACTIVE').length;
   const pendingCount = ownedAgreements.filter((agreement) => agreement.status === 'PENDING').length;
   const visibleAgreements = statusFilter === 'ALL'
@@ -106,13 +140,17 @@ const LandlordAgreements = () => {
             <div className="space-y-4">
               {visibleAgreements.map((agreement) => (
                 <Card key={agreement.id} className="p-5">
+                  <AgreementPresencePulse agreementId={agreement.id} />
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
                       <FileText size={20} className="mt-1 text-blue-500" />
                       <div>
-                        <h2 className="font-semibold text-gray-900 ">{agreement.tenant?.fullName || 'Tenant details unavailable'}</h2>
-                        <p className="text-sm text-gray-600 ">{listingNames.get(agreement.listingId) || 'Property details unavailable'}</p>
-                        {agreement.tenant?.email && <p className="mt-1 text-sm text-gray-500 ">{agreement.tenant.email}</p>}
+                        <h2 className="font-semibold text-gray-900 ">Tenant: {agreement.tenant?.fullName || 'Details unavailable'}</h2>
+                        {(agreement.tenant?.email || agreement.tenant?.phone) && <p className="text-sm text-gray-500 ">{[agreement.tenant.email, agreement.tenant.phone].filter(Boolean).join(' · ')}</p>}
+                        <p className="mt-2 font-semibold text-gray-900">{agreement.property?.title || agreement.listing?.title || listingNames.get(agreement.listingId) || 'Property name unavailable'}</p>
+                        <p className="text-sm text-gray-600">{niceType(agreement.property?.propertyType || agreement.listing?.type)}{[agreement.property?.area || agreement.listing?.area, agreement.property?.city || agreement.listing?.city].filter(Boolean).length ? ` · ${[agreement.property?.area || agreement.listing?.area, agreement.property?.city || agreement.listing?.city].filter(Boolean).join(', ')}` : ''}</p>
+                        {(agreement.property?.address || agreement.listing?.address) && <p className="text-xs text-gray-500">{agreement.property?.address || agreement.listing?.address}</p>}
+                        <p className="mt-1 text-[10px] text-gray-500">Agreement ref: {agreement.id.slice(-8).toUpperCase()}</p>
                       </div>
                     </div>
                     <span className={`rounded px-2 py-1 text-xs font-semibold ${agreement.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : agreement.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-gray-700'}`}>
@@ -123,7 +161,30 @@ const LandlordAgreements = () => {
                     <div><p className="text-gray-500 ">Start date</p><p className="font-medium text-gray-900 ">{new Date(agreement.startDate).toLocaleDateString()}</p></div>
                     <div><p className="text-gray-500 ">End date</p><p className="font-medium text-gray-900 ">{agreement.endDate ? new Date(agreement.endDate).toLocaleDateString() : 'Not specified'}</p></div>
                     <div><p className="text-gray-500 ">Monthly rent</p><p className="font-medium text-gray-900 ">PKR {agreement.monthlyRent.toLocaleString()}</p></div>
+                    <div><p className="text-gray-500 ">Security deposit</p><p className="font-medium text-gray-900 ">PKR {(agreement.securityDeposit ?? 0).toLocaleString()}</p></div>
                   </div>
+                  <AgreementAmendmentsPanel agreementId={agreement.id} amendments={agreement.amendments} onUpdated={(updated) => setAgreements((current) => current.map((item) => item.id === updated.id ? { ...item, monthlyRent: updated.monthlyRent, securityDeposit: updated.securityDeposit, amendments: updated.amendments } : item))} />
+                  <AgreementDisputeEligibilityStatus counts={agreement.disputeEligibility} />
+                  {agreement.disputeEligibility?.eligible && <AgreementTerminationDisputeButton agreementId={agreement.id} />}
+                  {agreement.terminationReason && (
+                    <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">
+                      <span className="font-semibold">Cancellation reason:</span> {agreement.terminationReason}
+                    </p>
+                  )}
+                  {agreement.status === 'ACTIVE' && (
+                    <>
+                    {!agreement.terminationRequests?.some((request) => request.status === 'PENDING') && (
+                    <TerminateAgreementButton
+                      agreementId={agreement.id}
+                      onRequested={(request) => setAgreements((current) => current.map((item) => item.id === agreement.id ? { ...item, terminationRequests: [request, ...(item.terminationRequests ?? [])] } : item))}
+                    />
+                    )}
+                    {!agreement.amendments?.some((amendment) => amendment.status === 'PENDING') && (
+                      <ProposeAgreementTermsButton agreementId={agreement.id} monthlyRent={agreement.monthlyRent} securityDeposit={agreement.securityDeposit} onProposed={(amendment) => setAgreements((current) => current.map((item) => item.id === agreement.id ? { ...item, amendments: [amendment, ...(item.amendments ?? [])] } : item))} />
+                    )}
+                    </>
+                  )}
+                  {!!agreement.terminationRequests?.length && <TerminationRequestsPanel agreementId={agreement.id} tenantId={agreement.tenantId} currentUserId={user?.id} requests={agreement.terminationRequests} onUpdated={(updated) => setAgreements((current) => current.map((item) => item.id === updated.id ? { ...item, status: updated.status, terminationReason: updated.terminationReason, terminationRequests: updated.terminationRequests, disputeEligibility: updated.disputeEligibility } : item))} />}
                   {agreement.pdfUrl && <a href={agreement.pdfUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:underline">View agreement document</a>}
                 </Card>
               ))}

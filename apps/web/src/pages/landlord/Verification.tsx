@@ -5,6 +5,7 @@ import { verificationAPI } from '../../api/verification';
 import { toApiError } from '../../api/api-error';
 import type { CurrentUserProfile } from '../../api/users';
 import { useAuthStore } from '../../store/authStore';
+import { useNavigate } from 'react-router-dom';
 
 interface VerificationSubmission {
   id: string;
@@ -48,6 +49,8 @@ const reviewLabel = (status: string) => status === 'APPROVED'
 
 export default function LandlordVerification() {
   const user = useAuthStore((state) => state.user);
+  const updateUser = useAuthStore((state) => state.updateUser);
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<CurrentUserProfile | null>(null);
   const [overview, setOverview] = useState<VerificationOverview | null>(null);
   const [kind, setKind] = useState<'HOST' | 'IDENTITY'>('HOST');
@@ -78,6 +81,30 @@ export default function LandlordVerification() {
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [reload, user?.id]);
+
+  useEffect(() => {
+    const roles = user?.roles ?? (user?.role ? [user.role] : []);
+    if (!user?.id || roles.includes('LANDLORD')) return;
+
+    let active = true;
+    const refreshApproval = async () => {
+      try {
+        const latest = await usersAPI.getMe();
+        const latestRoles = latest.roles ?? [];
+        if (!active || !latestRoles.includes('LANDLORD')) return;
+        updateUser({ roles: latestRoles, role: latestRoles[0] });
+        navigate('/dashboard/landlord', { replace: true });
+      } catch {
+        // Keep the verification page usable if a background status check fails.
+      }
+    };
+
+    const timer = window.setInterval(() => void refreshApproval(), 15000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [navigate, updateUser, user?.id, user?.role, user?.roles]);
 
   const submitUserVerification = async () => {
     const urls = normalizedUrls(evidence);
@@ -164,7 +191,7 @@ export default function LandlordVerification() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <header><h1 className="text-2xl font-extrabold">Host Verification</h1><p className="mt-1 text-sm text-gray-500">Review and submit verification through Rentra’s existing verification service.</p></header>
+      <header><h1 className="text-2xl font-extrabold">Landlord verification</h1><p className="mt-1 text-sm text-gray-500">Submit both identity and host verification. Your landlord workspace unlocks after both are approved.</p></header>
       {error && <Card className="flex flex-wrap items-center justify-between gap-3 p-4"><p role="alert" className="text-sm text-red-700">{error}</p><button type="button" onClick={() => setReload((value) => value + 1)} className="text-sm font-semibold text-emerald-700">Try again</button></Card>}
       {notice && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800  ">{notice}</p>}
       {loading ? <Card className="p-5 text-sm text-gray-500">Loading verification status…</Card> : profile && overview && (

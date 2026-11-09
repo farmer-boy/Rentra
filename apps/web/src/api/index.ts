@@ -3,6 +3,10 @@
 
 export { authAPI } from './auth';
 export { listingsAPI } from './listings';
+export { rentEstimateAPI } from './rentEstimate';
+export type { RentEstimateInput, RentEstimateResult } from './rentEstimate';
+export { maintenanceAPI } from './maintenance';
+export type { MaintenanceRequest, CreateMaintenanceRequestInput, MaintenanceCategory, MaintenancePriority, MaintenanceStatus } from './maintenance';
 export { agreementsAPI } from './agreements';
 export { paymentsAPI } from './payments';
 export { disputesAPI } from './disputes';

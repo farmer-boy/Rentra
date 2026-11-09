@@ -83,11 +83,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ navSections, onNavigate, isExp
                 return next;
               });
             }}
-            className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors duration-200"
+            className={`workspace-sidebar-item flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors duration-200 ${activeWithin ? 'workspace-sidebar-item-parent-active' : ''}`}
             style={{
               ...indent,
-              color: activeWithin ? 'var(--green)' : 'var(--text2)',
-              backgroundColor: activeWithin ? 'var(--surface2)' : 'transparent',
             }}
           >
             <span className="flex flex-shrink-0 items-center justify-center text-[16px]">
@@ -119,11 +117,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ navSections, onNavigate, isExp
               }
               onNavigate?.();
             }}
-            className="flex items-center gap-2 rounded-lg px-2 py-2 transition-colors duration-200"
+            className={`workspace-sidebar-item flex items-center gap-2 rounded-lg px-2 py-2 transition-colors duration-200 ${active ? 'workspace-sidebar-item-current' : ''}`}
             style={{
               ...indent,
-              color: active ? 'var(--green)' : 'var(--text2)',
-              backgroundColor: active ? 'var(--surface2)' : 'transparent',
             }}
           >
             <span className="flex flex-shrink-0 items-center justify-center text-[16px]">{item.icon}</span>
@@ -147,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ navSections, onNavigate, isExp
             }`}
           >
             <div className="min-h-0 overflow-hidden">
-              <div className="mt-1 space-y-1 border-l py-1" style={{ borderColor: 'var(--border)' }}>
+              <div className="workspace-sidebar-submenu-rail mt-1 space-y-1 border-l py-1">
                 {renderItems(item.children || [], depth + 1, visible && expanded)}
               </div>
             </div>
@@ -160,18 +156,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ navSections, onNavigate, isExp
   return (
     <div
       ref={sidebarRef}
-      className={`w-full h-full flex flex-col border-r overflow-y-auto relative`}
-      style={{
-        backgroundColor: 'var(--surface)',
-        borderColor: 'var(--border)'
-      }}
+      className="workspace-sidebar-shell relative flex h-full w-full flex-col overflow-y-auto border-r"
     >
       {setIsExpanded && (
         <button
           type="button"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="absolute right-2 top-2 z-10 rounded p-1.5 text-sm font-bold transition-colors hover:bg-opacity-50"
-          style={{ color: 'var(--text2)', backgroundColor: 'transparent' }}
+          className="workspace-sidebar-control absolute right-2 top-2 z-10 rounded p-1.5 text-sm font-bold transition-colors"
           title={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
           aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
@@ -186,7 +177,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ navSections, onNavigate, isExp
             {isExpanded && (
               <div
                 className="text-[10px] font-mono uppercase tracking-widest mb-2 px-1"
-                style={{ color: 'var(--text3)' }}
+                style={{ color: 'rgb(var(--rentra-admin-sidebar-active))' }}
               >
                 {section.title}
               </div>

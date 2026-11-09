@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -136,6 +136,12 @@ enum AgreementStatus {
   TERMINATED
 }
 
+enum AgreementAmendmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 enum PaymentMethod {
   JAZZCASH
   EASYPAISA
@@ -233,6 +239,26 @@ enum SupportTicketStatus {
   RESOLVED
 }
 
+enum MaintenanceRequestCategory {
+  PLUMBING
+  ELECTRICAL
+  APPLIANCE
+  STRUCTURAL
+  CLEANING
+  OTHER
+}
+
+enum MaintenanceRequestStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum MaintenanceRequestPriority {
+  NORMAL
+  URGENT
+}
+
 enum ReportTargetType {
   PROPERTY
   LISTING
@@ -261,6 +287,20 @@ enum ReviewTargetType {
 enum ReviewType {
   PROPERTY
   LANDLORD
+}
+
+enum AgreementTerminationRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum AgreementTerminationResponseDecision {
+  APPROVED
+  REJECTED
+  ACCEPTED_REJECTION
+  CONTESTED
 }
 
 enum TrustSource {
@@ -302,66 +342,72 @@ enum DisputeType {
   BOOKING
   PAYMENT
   AGREEMENT
+  AGREEMENT_TERMINATION
   RENTAL_ISSUE
 }
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  phone           String    @unique
-  password        String
-  fullName        String
-  cnic            String?   @unique
-  roles           Role[]    @default([TENANT])
-  trustScore      Int       @default(50)
-  isVerified      Boolean   @default(false)
-  emailVerifiedAt DateTime?
-  phoneVerifiedAt DateTime?
-  isSuspended     Boolean   @default(false)
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  phone               String    @unique
+  password            String
+  fullName            String
+  cnic                String?   @unique
+  roles               Role[]    @default([TENANT])
+  trustScore          Int       @default(50)
+  isVerified          Boolean   @default(false)
+  emailVerifiedAt     DateTime?
+  phoneVerifiedAt     DateTime?
+  isSuspended         Boolean   @default(false)
   supportBlockedUntil DateTime?
-  supportWarningCount Int @default(0)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  supportWarningCount Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  profile                 UserProfile?
-  landlordProfile         LandlordProfile?
-  agentProfile            AgentProfile?
-  verificationRecords     VerificationRecord[]
-  properties              Property[]
-  managedProperties       PropertyManager[]
-  listings                Listing[]
-  favorites               Favorite[]
-  savedSearches           SavedSearch[]
-  reviews                 Review[]
-  reviewsAsLandlord       Review[]                 @relation("ReviewLandlord")
-  bookings                Booking[]
-  propertyViews           PropertyView[]
-  notifications           Notification[]
-  reports                 Report[]                 @relation("ReportReporter")
-  reportsAssigned         Report[]                 @relation("AssignedReports")
-  adminActions            AdminAction[]
-  rentalsAsTenant         RentalRequest[]          @relation("RequestTenant")
-  rentalsAsLandlord       RentalRequest[]          @relation("RequestLandlord")
-  tenantAgreements        Agreement[]              @relation("TenantAgreements")
-  landlordAgreements      Agreement[]              @relation("LandlordAgreements")
-  payments                Payment[]
-  boostOrders             BoostOrder[]
-  disputesCreated         Dispute[]                @relation("DisputeCreator")
-  disputesAssigned        Dispute[]                @relation("AssignedDisputes")
-  conversationsAsUser1    Conversation[]           @relation("User1")
-  conversationsAsUser2    Conversation[]           @relation("User2")
-  conversationStates     ConversationUserState[]
-  sentMessages            Message[]                @relation("Sender")
-  messageStars            MessageStar[]
-  verificationTokens      VerificationToken[]
-  resetPasswordTokens     ResetPasswordToken[]
-  refreshTokens           RefreshToken[]
-  trustScores             TrustScore[]
-  verificationSubmissions VerificationSubmission[] @relation("VerificationSubmitter")
-  reviewedVerifications   VerificationSubmission[] @relation("VerificationReviewer")
-  verificationChallenges  VerificationChallenge[]
-  supportTickets          SupportTicket[]
-  supportTicketMessages   SupportTicketMessage[]
+  profile                       UserProfile?
+  landlordProfile               LandlordProfile?
+  agentProfile                  AgentProfile?
+  verificationRecords           VerificationRecord[]
+  properties                    Property[]
+  managedProperties             PropertyManager[]
+  listings                      Listing[]
+  favorites                     Favorite[]
+  savedSearches                 SavedSearch[]
+  reviews                       Review[]
+  reviewsAsLandlord             Review[]                      @relation("ReviewLandlord")
+  agreementPresence             AgreementPresence[]
+  terminationReviewsGiven       AgreementTerminationReview[]  @relation("TerminationReviewReviewer")
+  terminationReviewsReceived    AgreementTerminationReview[]  @relation("TerminationReviewTarget")
+  bookings                      Booking[]
+  propertyViews                 PropertyView[]
+  notifications                 Notification[]
+  reports                       Report[]                      @relation("ReportReporter")
+  reportsAssigned               Report[]                      @relation("AssignedReports")
+  adminActions                  AdminAction[]
+  rentalsAsTenant               RentalRequest[]               @relation("RequestTenant")
+  rentalsAsLandlord             RentalRequest[]               @relation("RequestLandlord")
+  tenantAgreements              Agreement[]                   @relation("TenantAgreements")
+  landlordAgreements            Agreement[]                   @relation("LandlordAgreements")
+  payments                      Payment[]
+  boostOrders                   BoostOrder[]
+  disputesCreated               Dispute[]                     @relation("DisputeCreator")
+  disputesAssigned              Dispute[]                     @relation("AssignedDisputes")
+  conversationsAsUser1          Conversation[]                @relation("User1")
+  conversationsAsUser2          Conversation[]                @relation("User2")
+  conversationStates            ConversationUserState[]
+  sentMessages                  Message[]                     @relation("Sender")
+  messageStars                  MessageStar[]
+  verificationTokens            VerificationToken[]
+  resetPasswordTokens           ResetPasswordToken[]
+  refreshTokens                 RefreshToken[]
+  trustScores                   TrustScore[]
+  verificationSubmissions       VerificationSubmission[]      @relation("VerificationSubmitter")
+  reviewedVerifications         VerificationSubmission[]      @relation("VerificationReviewer")
+  verificationChallenges        VerificationChallenge[]
+  supportTickets                SupportTicket[]
+  supportTicketMessages         SupportTicketMessage[]
+  maintenanceRequestsAsTenant   MaintenanceRequest[]          @relation("MaintenanceTenant")
+  maintenanceRequestsAsLandlord MaintenanceRequest[]          @relation("MaintenanceLandlord")
 }
 
 model UserProfile {
@@ -486,6 +532,7 @@ model Property {
   disputes                Dispute[]
   conversations           Conversation[]
   verificationSubmissions VerificationSubmission[]
+  maintenanceRequests     MaintenanceRequest[]
 
   @@index([ownerId, status])
   @@index([verificationStatus, status])
@@ -869,18 +916,126 @@ model Agreement {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
-  listing       Listing?       @relation(fields: [listingId], references: [id], onDelete: Restrict)
-  property      Property?      @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  tenant        User           @relation("TenantAgreements", fields: [tenantId], references: [id], onDelete: Cascade)
-  landlord      User           @relation("LandlordAgreements", fields: [landlordId], references: [id], onDelete: Cascade)
-  rentalRequest RentalRequest? @relation("AgreementRequest", fields: [rentalRequestId], references: [id], onDelete: SetNull)
-  payments      Payment[]
-  disputes      Dispute[]
-  reviews       Review[]       @relation("ReviewAgreement")
+  listing             Listing?                      @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  property            Property?                     @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  tenant              User                          @relation("TenantAgreements", fields: [tenantId], references: [id], onDelete: Cascade)
+  landlord            User                          @relation("LandlordAgreements", fields: [landlordId], references: [id], onDelete: Cascade)
+  rentalRequest       RentalRequest?                @relation("AgreementRequest", fields: [rentalRequestId], references: [id], onDelete: SetNull)
+  payments            Payment[]
+  disputes            Dispute[]
+  reviews             Review[]                      @relation("ReviewAgreement")
+  maintenanceRequests MaintenanceRequest[]
+  amendments          AgreementAmendment[]
+  terminationRequests AgreementTerminationRequest[]
+  presenceRecords     AgreementPresence[]
+  terminationReviews  AgreementTerminationReview[]
 
   @@index([tenantId, status])
   @@index([landlordId, status])
   @@index([propertyId, status])
+}
+
+model AgreementAmendment {
+  id                      String                   @id @default(cuid())
+  agreementId             String
+  proposedById            String
+  proposedMonthlyRent     Int
+  proposedSecurityDeposit Int
+  reason                  String?
+  status                  AgreementAmendmentStatus @default(PENDING)
+  decidedById             String?
+  decisionNote            String?
+  reviewRating            Int?
+  reviewComment           String?
+  createdAt               DateTime                 @default(now())
+  decidedAt               DateTime?
+  pendingAgreementId      String?                  @unique
+
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@index([agreementId, status, createdAt])
+}
+
+model AgreementTerminationRequest {
+  id                 String                            @id @default(cuid())
+  agreementId        String
+  requestedById      String
+  requestReason      String
+  status             AgreementTerminationRequestStatus @default(PENDING)
+  respondedById      String?
+  decisionReason     String?
+  reviewRating       Int?
+  reviewComment      String?
+  createdAt          DateTime                          @default(now())
+  decidedAt          DateTime?
+  pendingAgreementId String?                           @unique
+
+  agreement Agreement                      @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  responses AgreementTerminationResponse[]
+  reviews   AgreementTerminationReview[]
+
+  @@index([agreementId, status, createdAt])
+}
+
+model AgreementTerminationResponse {
+  id                   String                               @id @default(cuid())
+  terminationRequestId String
+  responderId          String
+  decision             AgreementTerminationResponseDecision
+  reason               String?
+  reviewRating         Int?
+  reviewComment        String?
+  createdAt            DateTime                             @default(now())
+
+  terminationRequest AgreementTerminationRequest @relation(fields: [terminationRequestId], references: [id], onDelete: Cascade)
+
+  @@index([terminationRequestId, createdAt])
+  @@index([decision, createdAt])
+}
+
+model AgreementTerminationReview {
+  id                   String   @id @default(cuid())
+  agreementId          String
+  terminationRequestId String
+  reviewerId           String
+  targetUserId         String
+  rating               Int
+  comment              String
+  createdAt            DateTime @default(now())
+
+  agreement          Agreement                   @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  terminationRequest AgreementTerminationRequest @relation(fields: [terminationRequestId], references: [id], onDelete: Cascade)
+  reviewer           User                        @relation("TerminationReviewReviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  target             User                        @relation("TerminationReviewTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@unique([terminationRequestId, reviewerId])
+  @@index([targetUserId, createdAt])
+}
+
+model AgreementPresence {
+  id          String   @id @default(cuid())
+  agreementId String
+  userId      String
+  seenAt      DateTime @default(now())
+
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([agreementId, userId])
+  @@index([agreementId, seenAt])
+}
+
+model AgreementRejectionEscalation {
+  id                 String   @id @default(cuid())
+  scopeId            String   @unique
+  propertyId         String?
+  listingId          String
+  propertyTitle      String
+  tenantId           String
+  landlordId         String
+  tenantRejections   Int
+  landlordRejections Int
+  createdAt          DateTime @default(now())
 }
 
 model Payment {
@@ -935,7 +1090,7 @@ model BoostOrder {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   items BoostOrderItem[]
 
   @@unique([userId, idempotencyKey])
@@ -1112,11 +1267,11 @@ model Conversation {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  participant1 User      @relation("User1", fields: [participant1Id], references: [id], onDelete: Cascade)
-  participant2 User      @relation("User2", fields: [participant2Id], references: [id], onDelete: Cascade)
-  listing      Listing?  @relation("ConversationListing", fields: [listingId], references: [id], onDelete: SetNull)
-  property     Property? @relation(fields: [propertyId], references: [id], onDelete: SetNull)
-  booking      Booking?  @relation("BookingConversations", fields: [bookingId], references: [id], onDelete: SetNull)
+  participant1 User                    @relation("User1", fields: [participant1Id], references: [id], onDelete: Cascade)
+  participant2 User                    @relation("User2", fields: [participant2Id], references: [id], onDelete: Cascade)
+  listing      Listing?                @relation("ConversationListing", fields: [listingId], references: [id], onDelete: SetNull)
+  property     Property?               @relation(fields: [propertyId], references: [id], onDelete: SetNull)
+  booking      Booking?                @relation("BookingConversations", fields: [bookingId], references: [id], onDelete: SetNull)
   messages     Message[]
   userStates   ConversationUserState[]
 
@@ -1128,7 +1283,7 @@ model Conversation {
 }
 
 model ConversationUserState {
-  id             String       @id @default(cuid())
+  id             String    @id @default(cuid())
   conversationId String
   userId         String
   archivedAt     DateTime?
@@ -1136,12 +1291,12 @@ model ConversationUserState {
   clearedAt      DateTime?
   snoozedUntil   DateTime?
   mutedUntil     DateTime?
-  isMuted        Boolean      @default(false)
-  isFavorite     Boolean      @default(false)
-  isPinned       Boolean      @default(false)
-  isBlocked      Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  isMuted        Boolean   @default(false)
+  isFavorite     Boolean   @default(false)
+  isPinned       Boolean   @default(false)
+  isBlocked      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1161,8 +1316,8 @@ model Message {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  sender       User         @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User          @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
   reports      Report[]
   stars        MessageStar[]
 
@@ -1199,15 +1354,15 @@ model Notification {
 }
 
 model SupportTicket {
-  id          String               @id @default(cuid())
-  userId      String
-  category    SupportTicketCategory
-  subject     String
-  status      SupportTicketStatus   @default(NEW)
-  createdAt   DateTime             @default(now())
-  updatedAt   DateTime             @updatedAt
-  messages    SupportTicketMessage[]
-  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String                 @id @default(cuid())
+  userId    String
+  category  SupportTicketCategory
+  subject   String
+  status    SupportTicketStatus    @default(NEW)
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  messages  SupportTicketMessage[]
+  user      User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status, updatedAt])
   @@index([status, updatedAt])
@@ -1225,6 +1380,32 @@ model SupportTicketMessage {
 
   @@index([ticketId, createdAt])
   @@index([senderId, createdAt])
+}
+
+model MaintenanceRequest {
+  id          String                     @id @default(cuid())
+  agreementId String
+  propertyId  String
+  tenantId    String
+  landlordId  String
+  category    MaintenanceRequestCategory
+  priority    MaintenanceRequestPriority @default(NORMAL)
+  status      MaintenanceRequestStatus   @default(OPEN)
+  subject     String
+  description String
+  resolvedAt  DateTime?
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  property  Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tenant    User      @relation("MaintenanceTenant", fields: [tenantId], references: [id], onDelete: Cascade)
+  landlord  User      @relation("MaintenanceLandlord", fields: [landlordId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status, createdAt])
+  @@index([landlordId, status, createdAt])
+  @@index([propertyId, status])
+  @@index([agreementId])
 }
 
 model SavedSearch {

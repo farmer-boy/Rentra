@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   FurnishedStatus,
+  AgreementStatus,
   HostelBedStatus,
   ListingAvailability,
   ListingStatus,
@@ -27,6 +28,7 @@ import {
 import { PropertyImageDto } from './dto/property-image.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { UpdateHostelBedStatusDto } from './dto/update-hostel-bed-status.dto';
+import { RentEstimateDto } from './dto/rent-estimate.dto';
 import { LocationsService } from '../locations/locations.service';
 import { AuditService } from '../audit/audit.service';
 
@@ -156,9 +158,23 @@ export class ListingsService {
   }
 
   async findAll(query: ListingQueryDto = new ListingQueryDto()) {
+    if (
+      query.minSqft !== undefined &&
+      query.maxSqft !== undefined &&
+      query.minSqft > query.maxSqft
+    ) {
+      throw new BadRequestException('minSqft cannot be greater than maxSqft');
+    }
+
     const where: Prisma.ListingWhereInput = {
       publicationStatus:
         query.publicationStatus ?? ListingPublicationStatus.PUBLISHED,
+      agreements: {
+        none: {
+          status: AgreementStatus.ACTIVE,
+          OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+        },
+      },
     };
 
     if (query.city) where.city = { contains: query.city, mode: 'insensitive' };
@@ -192,6 +208,12 @@ export class ListingsService {
     if (query.furnishedStatus) where.furnishedStatus = query.furnishedStatus;
     if (query.availability) where.availability = query.availability;
     if (query.rentalDuration) where.rentalDuration = query.rentalDuration;
+    if (query.minSqft !== undefined || query.maxSqft !== undefined) {
+      where.sqft = {
+        gte: query.minSqft,
+        lte: query.maxSqft,
+      };
+    }
     const roomFilter: Prisma.HostelRoomWhereInput = {};
     if (query.roomType) {
       roomFilter.roomType = {
@@ -257,7 +279,15 @@ export class ListingsService {
 
   async findFeatured() {
     const items = await this.prisma.listing.findMany({
-      where: { publicationStatus: ListingPublicationStatus.PUBLISHED },
+      where: {
+        publicationStatus: ListingPublicationStatus.PUBLISHED,
+        agreements: {
+          none: {
+            status: AgreementStatus.ACTIVE,
+            OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+          },
+        },
+      },
       orderBy: { createdAt: 'desc' },
       take: 3,
       select: {
@@ -275,6 +305,112 @@ export class ListingsService {
       },
     });
     return items;
+  }
+
+  async estimateRent(query: RentEstimateDto) {
+    const city = query.city.trim();
+    if (city.length < 2) {
+      throw new BadRequestException('Enter a city with at least two characters');
+    }
+
+    const candidates = await this.prisma.listing.findMany({
+      where: {
+        publicationStatus: ListingPublicationStatus.PUBLISHED,
+        availability: ListingAvailability.AVAILABLE,
+        agreements: {
+          none: {
+            status: AgreementStatus.ACTIVE,
+            OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+          },
+        },
+        city: { contains: city, mode: 'insensitive' },
+        rentalDuration: query.rentalDuration ?? RentalDuration.MONTHLY,
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 500,
+      select: {
+        id: true,
+        title: true,
+        city: true,
+        area: true,
+        type: true,
+        bedrooms: true,
+        sqft: true,
+        rent: true,
+        rentalDuration: true,
+      },
+    });
+
+    let comparables = candidates;
+    const matchedFilters: string[] = [];
+    const narrow = <T>(items: T[], predicate: (item: T) => boolean, name: string) => {
+      const matches = items.filter(predicate);
+      if (matches.length < 3) return items;
+      matchedFilters.push(name);
+      return matches;
+    };
+
+    if (query.area?.trim()) {
+      const normalizedArea = query.area.trim().toLocaleLowerCase();
+      comparables = narrow(comparables, (item) =>
+        item.area.toLocaleLowerCase().includes(normalizedArea),
+        'area',
+      );
+    }
+    if (query.propertyType) {
+      comparables = narrow(comparables, (item) => item.type === query.propertyType, 'property type');
+    }
+    if (query.bedrooms !== undefined) {
+      comparables = narrow(
+        comparables,
+        (item) => Math.abs(item.bedrooms - query.bedrooms!) <= 1,
+        'bedrooms',
+      );
+    }
+    if (query.sqft !== undefined) {
+      comparables = narrow(
+        comparables,
+        (item) => item.sqft >= query.sqft! * 0.6 && item.sqft <= query.sqft! * 1.4,
+        'size',
+      );
+    }
+
+    if (!comparables.length) {
+      return {
+        city,
+        area: null,
+        rentalDuration: query.rentalDuration ?? RentalDuration.MONTHLY,
+        matchedFilters,
+        sampleSize: 0,
+        medianRent: null,
+        lowerRange: null,
+        upperRange: null,
+        comparables: [],
+        notice: 'No published, available Rentra listings matched this city and rental period.',
+      };
+    }
+
+    const rents = comparables.map((item) => item.rent).sort((a, b) => a - b);
+    const percentile = (fraction: number) =>
+      rents[Math.floor((rents.length - 1) * fraction)];
+    const middle = Math.floor(rents.length / 2);
+    const medianRent = rents.length % 2
+      ? rents[middle]
+      : Math.round((rents[middle - 1] + rents[middle]) / 2);
+
+    return {
+      city,
+      area: matchedFilters.includes('area') ? query.area?.trim() ?? null : null,
+      rentalDuration: query.rentalDuration ?? RentalDuration.MONTHLY,
+      matchedFilters,
+      sampleSize: comparables.length,
+      medianRent,
+      lowerRange: percentile(0.25),
+      upperRange: percentile(0.75),
+      comparables: comparables.slice(0, 10),
+      notice:
+        'Estimate uses current published Rentra listings only; it is a comparison guide, not a guaranteed market valuation.',
+    };
   }
 
   async findById(id: string) {
@@ -295,7 +431,16 @@ export class ListingsService {
       !listing ||
       (listing.publicationStatus !== ListingPublicationStatus.PUBLISHED &&
         listing.landlordId !== viewerId &&
-        !viewerRoles.includes('ADMIN'))
+        !viewerRoles.includes('ADMIN')) ||
+      (listing && listing.landlordId !== viewerId && !viewerRoles.includes('ADMIN') &&
+        await this.prisma.agreement.findFirst({
+          where: {
+            listingId: id,
+            status: AgreementStatus.ACTIVE,
+            OR: [{ endDate: null }, { endDate: { gt: new Date() } }],
+          },
+          select: { id: true },
+        }))
     ) {
       throw new NotFoundException('Listing not found');
     }

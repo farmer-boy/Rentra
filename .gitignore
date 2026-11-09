@@ -10,3 +10,7 @@ __pycache__/
 .venv/
 *.egg-info/
 .neon
+node_modules
+
+# pnpm local store
+.pnpm-store/

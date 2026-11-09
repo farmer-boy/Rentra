@@ -12,9 +12,22 @@ import {
   Settings,
   Mail,
   User,
+  UserRound,
+  ClipboardCheck,
+  ShieldCheck,
+  Building2,
+  CalendarDays,
+  ClipboardList,
+  FileSignature,
+  CreditCard,
+  Flag,
+  AlertCircle,
+  CheckCircle2,
+  MessageCircle,
+  ScrollText,
+  ChevronDown,
   ChevronRight,
   ChevronLeft,
-  ChevronDown,
   Settings2,
   LifeBuoy,
 } from 'lucide-react';
@@ -22,13 +35,17 @@ import {
 interface SidebarItemBase {
   label: string;
   icon: React.ReactNode;
+  path: string;
   badge?: number;
 }
 
-type SidebarItem = SidebarItemBase & (
-  | { path: string; children?: never }
-  | { path?: never; children: SidebarItem[] }
-);
+interface SidebarMenuGroup {
+  label: string;
+  icon: React.ReactNode;
+  children: SidebarItemBase[];
+}
+
+type SidebarItem = SidebarItemBase | SidebarMenuGroup;
 
 interface AdminSidebarProps {
   onNavigate?: () => void;
@@ -47,7 +64,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const [expandOnHover, setExpandOnHover] = useState(false);
-  const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const menuRef = useRef<HTMLDivElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -115,164 +132,100 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
   const sections: SidebarItem[] = [
     { label: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
     {
-      label: 'Listings & Properties',
+      label: 'Properties',
       icon: <FileText size={20} />,
       children: [
         { label: 'Listings', path: '/admin/listings', icon: <FileText size={18} /> },
-        { label: 'Properties', path: '/admin/properties', icon: <FileText size={18} /> },
-        { label: 'Hosts', path: '/admin/hosts', icon: <Users size={18} /> },
+        { label: 'All properties', path: '/admin/properties', icon: <FileText size={18} /> },
+        { label: 'Apartments', path: '/admin/apartments', icon: <FileText size={18} /> },
+        { label: 'Flats', path: '/admin/flats', icon: <FileText size={18} /> },
+        { label: 'Houses', path: '/admin/houses', icon: <FileText size={18} /> },
+        { label: 'Portions', path: '/admin/portions', icon: <FileText size={18} /> },
+        { label: 'Rooms', path: '/admin/rooms', icon: <FileText size={18} /> },
+        { label: 'Studios', path: '/admin/studios', icon: <FileText size={18} /> },
+        { label: 'Farmhouses', path: '/admin/farmhouses', icon: <FileText size={18} /> },
+        { label: 'PG', path: '/admin/pg', icon: <FileText size={18} /> },
+        { label: 'Shared rooms', path: '/admin/shared-rooms', icon: <FileText size={18} /> },
+        { label: 'Other properties', path: '/admin/other-properties', icon: <FileText size={18} /> },
         { label: 'Hotels', path: '/admin/hotels', icon: <FileText size={18} /> },
         { label: 'Hostels', path: '/admin/hostels', icon: <FileText size={18} /> },
+        { label: 'Guest houses', path: '/admin/guest-houses', icon: <FileText size={18} /> },
       ],
     },
+    { label: 'Hosts', path: '/admin/hosts', icon: <UserRound size={18} /> },
     {
       label: 'Users',
       icon: <Users size={20} />,
       children: [
-        { label: 'All Users', path: '/admin/users', icon: <Users size={18} /> },
-        {
-          label: 'By Role',
-          icon: <Users size={18} />,
-          children: [
-            { label: 'Tenants', path: '/admin/users/tenants', icon: <User size={16} /> },
-            { label: 'Landlords', path: '/admin/users/landlords', icon: <User size={16} /> },
-          ],
-        },
-        {
-          label: 'Account Status',
-          icon: <Settings2 size={18} />,
-          children: [
-            { label: 'Verified', path: '/admin/users/verified', icon: <Settings2 size={16} /> },
-            { label: 'Banned', path: '/admin/users/banned', icon: <Settings2 size={16} /> },
-          ],
-        },
+        { label: 'All users', path: '/admin/users', icon: <Users size={18} /> },
+        { label: 'Tenants', path: '/admin/users/tenants', icon: <User size={18} /> },
+        { label: 'Landlords', path: '/admin/users/landlords', icon: <User size={18} /> },
+        { label: 'Verified users', path: '/admin/users/verified', icon: <Settings2 size={18} /> },
+        { label: 'Banned users', path: '/admin/users/banned', icon: <Settings2 size={18} /> },
       ],
     },
-    {
-      label: 'Operations',
-      icon: <Settings2 size={20} />,
-      children: [
-        { label: 'Reported Items', path: '/admin/reported', icon: <FileText size={18} /> },
-        { label: 'User Verification', path: '/admin/user-verification', icon: <Users size={18} /> },
-        { label: 'Property Verification', path: '/admin/property-verification', icon: <FileText size={18} /> },
-        { label: 'Bookings', path: '/admin/bookings', icon: <FileText size={18} /> },
-        { label: 'Rental Requests', path: '/admin/rental-requests', icon: <FileText size={18} /> },
-        { label: 'Agreements', path: '/admin/agreements', icon: <FileText size={18} /> },
-        { label: 'Payments', path: '/admin/payments', icon: <FileText size={18} /> },
-        { label: 'Reports', path: '/admin/reports', icon: <FileText size={18} /> },
-      ],
-    },
-    {
-      label: 'Disputes',
-      icon: <Scale size={20} />,
-      children: [
-        { label: 'All Disputes', path: '/admin/disputes', icon: <Scale size={18} /> },
-        { label: 'Open', path: '/admin/disputes/open', icon: <Scale size={18} /> },
-        { label: 'Resolved', path: '/admin/disputes/resolved', icon: <Scale size={18} /> },
-      ],
-    },
-    {
-      label: 'Communication',
-      icon: <Mail size={20} />,
-      children: [
-        { label: 'Messages', path: '/admin/messages', icon: <Mail size={18} />, badge: unreadCount || undefined },
-        { label: 'Support Tickets', path: '/admin/support', icon: <LifeBuoy size={18} /> },
-        { label: 'Reviews', path: '/admin/reviews', icon: <Star size={18} /> },
-        { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={18} /> },
-      ],
-    },
-    {
-      label: 'Platform',
-      icon: <BarChart3 size={20} />,
-      children: [
-        { label: 'Audit Log', path: '/admin/audit', icon: <FileText size={18} /> },
-        { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} /> },
-      ],
-    },
-    {
-      label: 'Account',
-      icon: <User size={20} />,
-      children: [
-        { label: 'Profile', path: '/admin/profile', icon: <User size={18} /> },
-        { label: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> },
-      ],
-    },
+    { label: 'All submissions', path: '/admin/approvals', icon: <ClipboardCheck size={18} /> },
+    { label: 'User verification', path: '/admin/user-verification', icon: <ShieldCheck size={18} /> },
+    { label: 'Property verification', path: '/admin/property-verification', icon: <Building2 size={18} /> },
+    { label: 'Bookings', path: '/admin/bookings', icon: <CalendarDays size={18} /> },
+    { label: 'Rental requests', path: '/admin/rental-requests', icon: <ClipboardList size={18} /> },
+    { label: 'Agreements', path: '/admin/agreements', icon: <FileSignature size={18} /> },
+    { label: 'Payments', path: '/admin/payments', icon: <CreditCard size={18} /> },
+    { label: 'Reported items', path: '/admin/reported', icon: <Flag size={18} /> },
+    { label: 'Reports', path: '/admin/reports', icon: <AlertCircle size={18} /> },
+    { label: 'All disputes', path: '/admin/disputes', icon: <Scale size={18} /> },
+    { label: 'Open disputes', path: '/admin/disputes/open', icon: <AlertCircle size={18} /> },
+    { label: 'Resolved disputes', path: '/admin/disputes/resolved', icon: <CheckCircle2 size={18} /> },
+    { label: 'Messages', path: '/admin/messages', icon: <MessageCircle size={18} />, badge: unreadCount || undefined },
+    { label: 'Support tickets', path: '/admin/support', icon: <LifeBuoy size={18} /> },
+    { label: 'Notifications', path: '/admin/notifications', icon: <Bell size={18} /> },
+    { label: 'Reviews', path: '/admin/reviews', icon: <Star size={18} /> },
+    { label: 'Audit log', path: '/admin/audit', icon: <ScrollText size={18} /> },
+    { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} /> },
+    { label: 'Profile', path: '/admin/profile', icon: <User size={18} /> },
+    { label: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> },
   ];
 
   useEffect(() => {
-    const nextOpen: Record<string, boolean> = {};
-    const openAncestors = (items: SidebarItem[], ancestors: string[] = []) => {
-      items.forEach((item) => {
-        const nextAncestors = item.children?.length ? [...ancestors, item.label] : ancestors;
-        if (item.path && isActive(item.path)) ancestors.forEach((ancestor) => { nextOpen[ancestor] = true; });
-        if (item.children) openAncestors(item.children, nextAncestors);
-      });
-    };
-    openAncestors(sections);
-    setOpenItems(nextOpen);
+    sections.forEach((item) => {
+      if ('children' in item && item.children.some((child) => isActive(child.path))) {
+        setOpenGroups((current) => current[item.label] ? current : { ...current, [item.label]: true });
+      }
+    });
   }, [location.pathname]);
 
-  const renderItems = (items: SidebarItem[], depth = 0, visible = true): React.ReactNode => items.map((item) => {
-    const key = item.path || item.label;
-    const hasChildren = Boolean(item.children?.length);
-    const expanded = Boolean(openItems[key]);
-    const active = item.path ? isActive(item.path) : false;
-    const childActive = Boolean(item.children?.some((child) => (
-      (child.path ? isActive(child.path) : false) ||
-      (child.children ? child.children.some((nested) => nested.path ? isActive(nested.path) : false) : false)
-    )));
-    const highlighted = active || childActive;
-    const paddingLeft = isExpanded && depth > 0 ? `${8 + depth * 14}px` : undefined;
-
+  const renderItems = (items: SidebarItem[]): React.ReactNode => items.map((item) => {
+    const hasChildren = 'children' in item;
+    const active = hasChildren ? item.children.some((child) => isActive(child.path)) : isActive(item.path);
+    const key = hasChildren ? item.label : item.path;
+    const groupOpen = hasChildren && Boolean(openGroups[item.label]);
     return (
       <div key={key} className={`relative group w-full ${isExpanded ? '' : 'flex justify-center'}`}>
         {hasChildren ? (
           <button
             type="button"
-            aria-expanded={expanded}
-            tabIndex={visible ? undefined : -1}
+            aria-expanded={groupOpen}
             onClick={() => {
-              if (!isExpanded) setIsExpanded(true);
-              setOpenItems((current) => {
-                const next = { ...current };
-                items.forEach((sibling) => {
-                  if (sibling.children?.length) next[sibling.path || sibling.label] = false;
-                });
-                next[key] = !current[key];
-                return next;
-              });
+              if (!isExpanded) {
+                setIsExpanded(true);
+                setOpenGroups((current) => ({ ...current, [item.label]: true }));
+              }
+              else setOpenGroups((current) => ({ ...current, [item.label]: !current[item.label] }));
             }}
-            className={`flex items-center rounded-lg transition-all duration-200 ${
+            className={`admin-sidebar-item ${active ? 'admin-sidebar-item-parent-active' : ''} flex items-center rounded-lg transition-all duration-200 ${
               isExpanded ? 'w-full gap-2 px-2 py-2' : 'h-8 w-8 justify-center'
             }`}
-            style={{
-              paddingLeft,
-              color: highlighted ? 'var(--green)' : 'var(--text2)',
-              backgroundColor: highlighted ? 'var(--surface2)' : 'transparent',
-            }}
           >
             <span className="relative flex flex-shrink-0 items-center justify-center">{item.icon}</span>
-            {isExpanded && (
-              <>
-                <span className="flex-1 truncate text-left text-sm font-medium">{item.label}</span>
-                {item.badge ? <span className="rounded-full bg-red-500 px-1 text-[9px] text-danger-contrast">{item.badge}</span> : null}
-                {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-              </>
-            )}
+            {isExpanded && <><span className="flex-1 truncate text-left text-sm font-medium">{item.label}</span>{groupOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</>}
           </button>
-        ) : item.path ? (
+        ) : (
           <Link
             to={item.path}
-            onClick={() => handleNavigationClick()}
-            tabIndex={visible ? undefined : -1}
-            className={`flex items-center rounded-lg transition-all duration-200 ${
+            onClick={handleNavigationClick}
+            className={`admin-sidebar-item ${active ? 'admin-sidebar-item-current' : ''} flex items-center rounded-lg transition-all duration-200 ${
               isExpanded ? 'w-full gap-2 px-2 py-2' : 'h-8 w-8 justify-center'
             }`}
-            style={{
-              paddingLeft,
-              color: active ? 'var(--green)' : 'var(--text2)',
-              backgroundColor: active ? 'var(--surface2)' : 'transparent',
-            }}
             title={isExpanded ? undefined : item.label}
           >
             <span className="relative flex flex-shrink-0 items-center justify-center">
@@ -281,7 +234,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             </span>
             {isExpanded && <span className="flex-1 truncate text-sm font-medium">{item.label}</span>}
           </Link>
-        ) : null}
+        )}
         {!isExpanded && (
           <div
             className="pointer-events-none invisible absolute left-full top-1/2 z-50 ml-2 -translate-y-1/2 whitespace-nowrap rounded border px-2 py-1 text-[11px] font-medium group-hover:visible"
@@ -291,15 +244,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </div>
         )}
         {hasChildren && isExpanded && (
-          <div
-            aria-hidden={!expanded}
-            className={`grid transition-[grid-template-rows,opacity] duration-200 ease-in-out ${
-              expanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-            }`}
-          >
+          <div aria-hidden={!groupOpen} className={`grid transition-[grid-template-rows,opacity] duration-200 ease-in-out ${groupOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
             <div className="min-h-0 overflow-hidden">
-              <div className="mt-1 space-y-1 border-l py-1" style={{ borderColor: 'var(--border)' }}>
-                {renderItems(item.children || [], depth + 1, visible && expanded)}
+              <div className="admin-sidebar-submenu-rail mt-1 space-y-1 border-l py-1">
+                {renderItems(item.children)}
               </div>
             </div>
           </div>
@@ -313,10 +261,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       ref={sidebarRef}
       onMouseEnter={handleSidebarMouseEnter}
       onMouseLeave={handleSidebarMouseLeave}
-      className={`h-full flex flex-col border-r relative transition-all duration-300`}
+      className={`admin-sidebar-shell h-full flex flex-col border-r relative transition-all duration-300`}
       style={{
-        backgroundColor: 'var(--surface)',
-        borderColor: 'var(--border)',
         width: isExpanded ? '224px' : '44px'
       }}
     >
@@ -328,13 +274,15 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </div>
 
       {/* Sidebar Control Button - Bottom */}
-      <div className={`border-t px-1 py-2 flex justify-center`} style={{ borderColor: 'var(--border)' }} ref={menuRef}>
+      <div className={`border-t px-1 py-2 flex justify-center`} style={{ borderColor: 'rgb(var(--rentra-admin-sidebar-border))' }} ref={menuRef}>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`rounded-lg flex items-center justify-center transition-all hover:opacity-80`}
+          className={`admin-sidebar-control rounded-lg flex items-center justify-center transition-all`}
           style={{
-            color: 'var(--text2)',
-            backgroundColor: menuOpen ? 'var(--surface2)' : 'transparent',
+            ...(menuOpen && {
+              color: 'rgb(var(--rentra-admin-sidebar-active))',
+              backgroundColor: 'rgb(var(--rentra-admin-sidebar-soft))',
+            }),
             width: '32px',
             height: '32px'
           }}
@@ -376,11 +324,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   setIsExpanded(false);
                   setMenuOpen(false);
                 }}
-                className={`px-3 py-2.5 text-sm text-left transition-colors flex items-center gap-2 border-b`}
+                className={`admin-sidebar-item ${!isExpanded ? 'admin-sidebar-item-parent-active' : ''} px-3 py-2.5 text-sm text-left transition-colors flex items-center gap-2 border-b`}
                 style={{
-                  color: !isExpanded ? 'var(--green)' : 'var(--text2)',
-                  backgroundColor: !isExpanded ? 'var(--surface2)' : 'transparent',
-                  borderColor: 'var(--border)'
+                  borderColor: 'rgb(var(--rentra-admin-sidebar-border))'
                 }}
               >
                 <ChevronLeft size={16} />
@@ -393,11 +339,9 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   setIsExpanded(true);
                   setMenuOpen(false);
                 }}
-                className={`px-3 py-2.5 text-sm text-left transition-colors flex items-center gap-2 border-b`}
+                className={`admin-sidebar-item ${isExpanded ? 'admin-sidebar-item-parent-active' : ''} px-3 py-2.5 text-sm text-left transition-colors flex items-center gap-2 border-b`}
                 style={{
-                  color: isExpanded ? 'var(--green)' : 'var(--text2)',
-                  backgroundColor: isExpanded ? 'var(--surface2)' : 'transparent',
-                  borderColor: 'var(--border)'
+                  borderColor: 'rgb(var(--rentra-admin-sidebar-border))'
                 }}
               >
                 <ChevronRight size={16} />
@@ -411,11 +355,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
                   setIsExpanded(false);
                   setMenuOpen(false);
                 }}
-                className={`px-3 py-2.5 text-sm text-left transition-colors flex items-center gap-2`}
-                style={{
-                  color: expandOnHover ? 'var(--green)' : 'var(--text2)',
-                  backgroundColor: expandOnHover ? 'var(--surface2)' : 'transparent'
-                }}
+                className={`admin-sidebar-item ${expandOnHover ? 'admin-sidebar-item-parent-active' : ''} px-3 py-2.5 text-sm text-left transition-colors flex items-center gap-2`}
               >
                 <ChevronRight size={16} />
                 <span>Expand on Hover</span>

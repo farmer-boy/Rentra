@@ -11,10 +11,17 @@
   --rentra-text: 38 36 33;
   --rentra-text-muted: 90 86 79;
   --rentra-text-subtle: 130 124 115;
-  --rentra-primary: 38 38 36;
-  --rentra-primary-hover: 18 19 18;
-  --rentra-primary-soft: 234 230 223;
+  --rentra-primary: 5 126 91;
+  --rentra-primary-hover: 4 96 70;
+  --rentra-primary-soft: 226 244 235;
   --rentra-primary-contrast: 255 255 255;
+  --rentra-admin-sidebar-bg: 251 246 248;
+  --rentra-admin-sidebar-active: 116 34 61;
+  --rentra-admin-sidebar-active-hover: 94 25 47;
+  --rentra-admin-sidebar-active-foreground: 255 255 255;
+  --rentra-admin-sidebar-soft: 245 231 237;
+  --rentra-admin-sidebar-hover: 249 238 242;
+  --rentra-admin-sidebar-border: 232 214 221;
   --rentra-danger: 190 54 58;
   --rentra-danger-soft: 252 237 237;
   --rentra-danger-contrast: 255 255 255;
@@ -39,17 +46,17 @@
   --rentra-gray-900: 27 26 24;
   --rentra-gray-950: 18 19 18;
 
-  --rentra-green-50: 249 248 246;
-  --rentra-green-100: 244 241 236;
-  --rentra-green-200: 234 230 223;
-  --rentra-green-300: 218 212 203;
-  --rentra-green-400: 180 173 162;
-  --rentra-green-500: 130 124 115;
-  --rentra-green-600: 90 86 79;
-  --rentra-green-700: 61 57 52;
-  --rentra-green-800: 38 36 33;
-  --rentra-green-900: 27 26 24;
-  --rentra-green-950: 18 19 18;
+  --rentra-green-50: 240 253 247;
+  --rentra-green-100: 220 252 231;
+  --rentra-green-200: 187 247 208;
+  --rentra-green-300: 134 239 172;
+  --rentra-green-400: 74 222 128;
+  --rentra-green-500: 34 197 94;
+  --rentra-green-600: 22 163 74;
+  --rentra-green-700: 21 128 61;
+  --rentra-green-800: 22 101 52;
+  --rentra-green-900: 20 83 45;
+  --rentra-green-950: 5 46 22;
 
   --rentra-red-50: 254 242 242;
   --rentra-red-100: 254 226 226;
@@ -126,10 +133,17 @@
   --rentra-text: 241 239 235;
   --rentra-text-muted: 201 197 188;
   --rentra-text-subtle: 160 155 145;
-  --rentra-primary: 234 230 223;
-  --rentra-primary-hover: 255 252 247;
-  --rentra-primary-soft: 60 56 49;
-  --rentra-primary-contrast: 38 36 33;
+  --rentra-primary: 52 211 153;
+  --rentra-primary-hover: 110 231 183;
+  --rentra-primary-soft: 28 67 51;
+  --rentra-primary-contrast: 18 35 28;
+  --rentra-admin-sidebar-bg: 33 26 29;
+  --rentra-admin-sidebar-active: 154 65 91;
+  --rentra-admin-sidebar-active-hover: 174 78 105;
+  --rentra-admin-sidebar-active-foreground: 255 255 255;
+  --rentra-admin-sidebar-soft: 68 42 51;
+  --rentra-admin-sidebar-hover: 50 33 39;
+  --rentra-admin-sidebar-border: 82 54 64;
   --rentra-danger: 255 132 132;
   --rentra-danger-soft: 66 37 38;
   --rentra-danger-contrast: 25 25 24;
@@ -152,17 +166,17 @@
   --rentra-gray-900: 241 239 235;
   --rentra-gray-950: 255 252 247;
 
-  --rentra-green-50: 45 44 41;
-  --rentra-green-100: 61 59 55;
-  --rentra-green-200: 70 67 62;
-  --rentra-green-300: 91 87 80;
-  --rentra-green-400: 130 124 115;
-  --rentra-green-500: 160 155 145;
-  --rentra-green-600: 201 197 188;
-  --rentra-green-700: 218 212 203;
-  --rentra-green-800: 234 230 223;
-  --rentra-green-900: 241 239 235;
-  --rentra-green-950: 255 252 247;
+  --rentra-green-50: 23 48 36;
+  --rentra-green-100: 25 64 44;
+  --rentra-green-200: 28 82 53;
+  --rentra-green-300: 31 105 65;
+  --rentra-green-400: 34 130 78;
+  --rentra-green-500: 22 163 74;
+  --rentra-green-600: 34 197 94;
+  --rentra-green-700: 74 222 128;
+  --rentra-green-800: 134 239 172;
+  --rentra-green-900: 187 247 208;
+  --rentra-green-950: 220 252 231;
 
   --rentra-red-50: 66 37 38;
   --rentra-red-100: 83 42 44;
@@ -214,6 +228,20 @@
   --accent-bg: rgb(var(--rentra-primary-soft));
   --accent-border: rgb(var(--rentra-border-strong));
   --shadow: 0 18px 50px rgb(var(--rentra-shadow) / 32%);
+}
+
+/* Keep the public home page on the same burgundy accent as the role sidebars. */
+.public-home {
+  --rentra-primary: var(--rentra-admin-sidebar-active);
+  --rentra-primary-hover: var(--rentra-admin-sidebar-active-hover);
+  --rentra-primary-soft: var(--rentra-admin-sidebar-soft);
+  --rentra-primary-contrast: var(--rentra-admin-sidebar-active-foreground);
+  --green: rgb(var(--rentra-admin-sidebar-active));
+  --green-hover: rgb(var(--rentra-admin-sidebar-active-hover));
+  --green-soft: rgb(var(--rentra-admin-sidebar-active));
+  --green-dim: rgb(var(--rentra-admin-sidebar-soft));
+  --accent: rgb(var(--rentra-admin-sidebar-active));
+  --accent-bg: rgb(var(--rentra-admin-sidebar-soft));
 }
 
 html {

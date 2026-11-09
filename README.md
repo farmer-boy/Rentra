@@ -1,159 +1,112 @@
-# Turborepo starter
+# Rentra
 
-This Turborepo starter is maintained by the Turborepo core team.
+Rentra is a rental marketplace monorepo built with pnpm + Turborepo.
 
-## Using this example
+## Stack
 
-Run the following command:
+- Web app: React + Vite
+- Backend: NestJS + Prisma + PostgreSQL
+- Mobile app: Expo / React Native
+- Shared packages: database, shared utilities, UI, AI service
 
-```sh
-npx create-turbo@latest
+## Repository structure
+
+```text
+Rentra/
+├── apps/
+│   ├── backend/
+│   ├── web/
+│   └── mobile/
+├── packages/
+│   ├── database/
+│   ├── ai-service/
+│   ├── shared/
+│   └── ui/
+├── docker/
+├── .env.example
+├── PROJECT_GUIDE.md
+├── package.json
+├── pnpm-workspace.yaml
+├── turbo.json
+└── README.md
 ```
 
-## What's inside?
+## Prerequisites
 
-This Turborepo includes the following packages/apps:
+- Node.js LTS
+- pnpm 9
+- PostgreSQL 16 or Docker Desktop
+- Python (only for AI service work)
 
-### Apps and Packages
+## Quick setup
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+From the repo root:
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+```powershell
+pnpm install
+Copy-Item .env.example .env
 ```
 
-Without global `turbo`, use your package manager:
+Then review and adjust `.env` for your local database and service URLs.
 
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
+## Start the database
+
+With Docker:
+
+```powershell
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+Check it:
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```powershell
+docker compose -f docker/docker-compose.yml ps
 ```
 
-Without global `turbo`:
+## Prisma and backend
 
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+Generate Prisma client:
+
+```powershell
+pnpm --filter @rentra/backend exec prisma generate --schema ..\..\packages\database\prisma\schema.prisma
 ```
 
-### Develop
+Run migrations:
 
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
+```powershell
+pnpm --filter @rentra/backend exec prisma migrate dev --schema ..\..\packages\database\prisma\schema.prisma
 ```
 
-Without global `turbo`, use your package manager:
+Start backend:
 
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
+```powershell
+pnpm --filter @rentra/backend start:dev
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+The API runs on `http://localhost:3000/api` and Swagger is at `http://localhost:3000/api/docs`.
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+## Start the web app
 
-```sh
-turbo dev --filter=web
+```powershell
+pnpm --filter web dev
 ```
 
-Without global `turbo`:
+The app usually runs on `http://localhost:5173`.
 
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+## Start mobile app
+
+```powershell
+pnpm --filter mobile start
 ```
 
-### Remote Caching
+## Build verification
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+The monorepo should build cleanly with:
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
+```powershell
+pnpm build
 ```
 
-Without global `turbo`, use your package manager:
+## Additional docs
 
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+For repository-level architecture details, modules, auth usage, and request flow, see [PROJECT_GUIDE.md](./PROJECT_GUIDE.md).
