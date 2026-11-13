@@ -38,6 +38,55 @@ export class ReviewsController {
     return { message: 'All reviews', data: reviews, count: reviews.length };
   }
 
+  @Get('reviews/my')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getMyReceivedReviews(@CurrentUser() user: JwtPayload) {
+    return this.reviewsService.getMyReceivedReviews(user.sub);
+  }
+
+  @Get('reviews/my-submitted')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getMySubmittedReviews(@CurrentUser() user: JwtPayload) {
+    return {
+      data: await this.reviewsService.getMySubmittedReviews(user.sub),
+    };
+  }
+
+  @Get('reviews/eligibility/:agreementId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getReviewEligibility(
+    @Param('agreementId') agreementId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.reviewsService.getEligibility(agreementId, user.sub);
+  }
+
+  @Get('reviews/agreement/:agreementId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getAgreementReviews(
+    @Param('agreementId') agreementId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return {
+      data: await this.reviewsService.getAgreementReviews(
+        agreementId,
+        user.sub,
+      ),
+    };
+  }
+
+  @Get('reviews/user/:userId')
+  async getReviewsForUser(
+    @Param('userId') userId: string,
+    @Query() query: ReviewQueryDto,
+  ) {
+    return this.reviewsService.getLandlordReviews(userId, query);
+  }
+
   @Get('reviews/listing/:listingId')
   async getListingReviews(@Param('listingId') listingId: string) {
     const [reviews, averageRating] = await Promise.all([

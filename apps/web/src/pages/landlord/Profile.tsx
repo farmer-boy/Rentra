@@ -3,6 +3,7 @@ import Card from '../../components/ui/Card';
 import { usersAPI } from '../../api/users';
 import { useAuthStore } from '../../store/authStore';
 import { getApiErrorMessage } from '../../api/api-error';
+import ProfileReviewsCard from '../../components/reviews/ProfileReviewsCard';
 
 interface ProfileData {
   id: string;
@@ -78,6 +79,7 @@ export default function LandlordProfile() {
             </div>
             <p className={`mt-5 text-xs text-text-muted`}>Detailed score factors are not available from the profile API.</p>
           </Card>
+          <ProfileReviewsCard userId={profile.id} />
         </div>
       )}
     </div>

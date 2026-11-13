@@ -8,7 +8,6 @@ import {
 import { reviewsAPI } from '../api/reviews';
 import { searchAPI, type ListingSearchParams } from '../api/search';
 import { listingsAPI } from '../api/listings';
-import type { Review } from '../api/types';
 
 export const rentraQueryKeys = {
   listingSearch: (params: ListingSearchParams) =>
@@ -150,10 +149,7 @@ export function useCancelBooking<T>() {
 export function useMyReviews(userId: string) {
   return useQuery({
     queryKey: rentraQueryKeys.reviewsByUser(userId),
-    queryFn: async () => {
-      const reviews = await reviewsAPI.getAll();
-      return reviews.filter((review: Review) => review.userId === userId);
-    },
+    queryFn: () => reviewsAPI.getMySubmitted(),
     enabled: Boolean(userId),
   });
 }

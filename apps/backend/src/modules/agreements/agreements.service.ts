@@ -5,8 +5,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AgreementAmendmentStatus, AgreementTerminationRequestStatus, AgreementTerminationResponseDecision, AgreementStatus, NotificationType, Prisma, Role } from '@prisma/client';
+import { AgreementAmendmentStatus, AgreementTerminationRequestStatus, AgreementTerminationResponseDecision, AgreementStatus, NotificationType, Prisma, Role, TrustSource } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { TrustScoreService } from '../trust-score/trust-score.service';
 import { TerminateAgreementDto } from './dto/terminate-agreement.dto';
 import { CreateAgreementAmendmentDto } from './dto/create-agreement-amendment.dto';
 import { RespondAgreementAmendmentDto } from './dto/respond-agreement-amendment.dto';
@@ -16,7 +17,10 @@ import { CreateTerminationReviewDto } from './dto/create-termination-review.dto'
 
 @Injectable()
 export class AgreementsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly trustScoreService: TrustScoreService,
+  ) {}
 
   async myAgreements(userId: string) {
     await this.expireElapsedAgreements(userId);
@@ -68,7 +72,7 @@ export class AgreementsService {
     if (!request) throw new BadRequestException('This cancellation was not approved by both parties');
     const targetUserId = userId === agreement.tenantId ? agreement.landlordId : agreement.tenantId;
     try {
-      return await this.prisma.$transaction(async (transaction) => {
+      const review = await this.prisma.$transaction(async (transaction) => {
         const review = await transaction.agreementTerminationReview.create({
           data: { agreementId: id, terminationRequestId: requestId, reviewerId: userId, targetUserId, rating: dto.rating, comment: dto.comment.trim() },
         });
@@ -80,6 +84,12 @@ export class AgreementsService {
         });
         return review;
       });
+      await this.trustScoreService.recalculateForUser(
+        targetUserId,
+        TrustSource.REVIEW,
+        'Received an agreement completion review',
+      );
+      return review;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException('You have already reviewed the other party for this cancellation');

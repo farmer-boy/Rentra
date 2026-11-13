@@ -45,6 +45,9 @@ function makePrisma(overrides: Record<string, any> = {}) {
     review: {
       findMany: async () => Array.from({ length: 3 }, () => ({ rating: 5 })),
     },
+    agreementTerminationReview: {
+      findMany: async () => [],
+    },
     report: {
       findMany: async () =>
         Array.from({ length: 2 }, (_, index) => ({ id: `report-${index}` })),
@@ -153,4 +156,28 @@ test('counts only resolved reports with a confirmed violation outcome', async ()
 
   assert.equal(reportFilter?.violationConfirmed, true);
   assert.equal(result.breakdown.confirmedReportPenalties, 10);
+});
+
+test('includes tenant reviews received by the user in trust score inputs', async () => {
+  let reviewFilter: Record<string, unknown> | undefined;
+  const service = makeService(
+    makePrisma({
+      review: {
+        findMany: async ({ where }: { where: Record<string, unknown> }) => {
+          reviewFilter = where;
+          return [];
+        },
+      },
+    }),
+  );
+
+  await service.calculateForUser('user-1');
+
+  assert.deepEqual(reviewFilter, {
+    OR: [
+      { landlordId: 'user-1' },
+      { tenantId: 'user-1' },
+      { property: { ownerId: 'user-1' } },
+    ],
+  });
 });

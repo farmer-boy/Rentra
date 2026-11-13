@@ -80,8 +80,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
 
   const handleSwitchAccount = async () => {
     try {
-      await logout();
-      navigate('/login');
+      if (logout()) navigate('/login');
     } catch (error) {
       console.error('Switch account failed:', error);
       navigate('/login');
@@ -90,8 +89,7 @@ export const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ isOpen, onClos
 
   const handleLogout = async () => {
     try {
-      await logout();
-      navigate('/login');
+      if (logout()) navigate('/login');
     } catch (error) {
       console.error('Logout failed:', error);
       navigate('/login');

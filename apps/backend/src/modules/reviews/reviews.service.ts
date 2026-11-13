@@ -11,8 +11,10 @@ import {
   Prisma,
   ReviewTargetType,
   ReviewType,
+  TrustSource,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { TrustScoreService } from '../trust-score/trust-score.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { ReviewQueryDto } from './dto/review-query.dto';
 
@@ -30,12 +32,35 @@ const reviewInclude = {
 
 @Injectable()
 export class ReviewsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly trustScoreService: TrustScoreService,
+  ) {}
 
   async create(userId: string, dto: CreateReviewDto) {
+    if (
+      dto.reviewType === ReviewType.LANDLORD ||
+      dto.reviewType === ReviewType.TENANT
+    ) {
+      if (!dto.agreementId) {
+        throw new BadRequestException(
+          'Person-to-person reviews must be linked to a completed rental agreement',
+        );
+      }
+      return this.createAgreementReview(userId, dto);
+    }
+
+    if (dto.rating === undefined) {
+      throw new BadRequestException('A property review rating is required');
+    }
     if (Boolean(dto.bookingId) === Boolean(dto.agreementId)) {
       throw new BadRequestException(
         'Provide exactly one of bookingId or agreementId',
+      );
+    }
+    if (!dto.listingId) {
+      throw new BadRequestException(
+        'A listing is required for a property review',
       );
     }
 
@@ -82,15 +107,8 @@ export class ReviewsService {
           propertyId: listing.propertyId,
           bookingId: dto.bookingId,
           agreementId: dto.agreementId,
-          landlordId:
-            dto.reviewType === ReviewType.LANDLORD
-              ? listing.landlordId
-              : undefined,
           reviewType: dto.reviewType,
-          targetType:
-            dto.reviewType === ReviewType.LANDLORD
-              ? ReviewTargetType.HOST
-              : ReviewTargetType.PROPERTY,
+          targetType: ReviewTargetType.PROPERTY,
           rating: dto.rating,
           comment: dto.comment?.trim() || null,
           cleanliness: dto.cleanliness,
@@ -112,6 +130,233 @@ export class ReviewsService {
       }
       throw error;
     }
+  }
+
+  private async createAgreementReview(userId: string, dto: CreateReviewDto) {
+    if (!dto.agreementId)
+      throw new BadRequestException('Agreement is required');
+
+    const agreement = await this.getCompletedAgreement(dto.agreementId);
+    const isTenantReview = dto.reviewType === ReviewType.TENANT;
+    const expectedReviewerId = isTenantReview
+      ? agreement.landlordId
+      : agreement.tenantId;
+    const targetUserId = isTenantReview
+      ? agreement.tenantId
+      : agreement.landlordId;
+
+    if (userId !== expectedReviewerId) {
+      throw new ForbiddenException(
+        `Only the agreement ${isTenantReview ? 'landlord' : 'tenant'} can submit this review`,
+      );
+    }
+    if (userId === targetUserId) {
+      throw new ForbiddenException('You cannot review yourself');
+    }
+
+    const requiredRatings = isTenantReview
+      ? [
+          dto.behaviour,
+          dto.rentPayment,
+          dto.propertyCare,
+          dto.cleanliness,
+          dto.communication,
+          dto.agreementCompliance,
+        ]
+      : [
+          dto.behaviour,
+          dto.communication,
+          dto.propertyCondition,
+          dto.honesty,
+          dto.maintenance,
+          dto.responseTime,
+        ];
+    if (
+      !requiredRatings.every(
+        (rating): rating is number =>
+          typeof rating === 'number' &&
+          Number.isInteger(rating) &&
+          rating >= 1 &&
+          rating <= 5,
+      )
+    ) {
+      throw new BadRequestException(
+        'Every review category must have a rating from 1 to 5',
+      );
+    }
+    if (typeof dto.wouldRecommend !== 'boolean') {
+      throw new BadRequestException('A recommendation choice is required');
+    }
+
+    const ratings = requiredRatings.filter(
+      (value): value is number => typeof value === 'number',
+    );
+    const rating =
+      Math.round(
+        (ratings.reduce((sum, value) => sum + value, 0) / ratings.length) * 100,
+      ) / 100;
+    const reviewData = {
+      userId,
+      listingId: agreement.listingId,
+      propertyId: agreement.propertyId,
+      agreementId: agreement.id,
+      landlordId: isTenantReview ? undefined : agreement.landlordId,
+      tenantId: isTenantReview ? agreement.tenantId : undefined,
+      reviewType: dto.reviewType,
+      targetType: isTenantReview
+        ? ReviewTargetType.TENANT
+        : ReviewTargetType.HOST,
+      rating,
+      comment: dto.comment?.trim() || null,
+      behaviour: dto.behaviour,
+      communication: dto.communication,
+      ...(isTenantReview
+        ? {
+            rentPayment: dto.rentPayment,
+            propertyCare: dto.propertyCare,
+            cleanliness: dto.cleanliness,
+            agreementCompliance: dto.agreementCompliance,
+          }
+        : {
+            propertyCondition: dto.propertyCondition,
+            honesty: dto.honesty,
+            maintenance: dto.maintenance,
+            responseTime: dto.responseTime,
+          }),
+      wouldRecommend: dto.wouldRecommend,
+    } satisfies Prisma.ReviewUncheckedCreateInput;
+
+    let review: Prisma.ReviewGetPayload<{ include: typeof reviewInclude }>;
+    try {
+      review = await this.prisma.review.create({
+        data: reviewData,
+        include: reviewInclude,
+      });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'You have already reviewed this person for this agreement',
+        );
+      }
+      throw error;
+    }
+
+    await this.trustScoreService.recalculateForUser(
+      targetUserId,
+      TrustSource.REVIEW,
+      'Received a verified rental review',
+    );
+    return { ...review, verifiedRental: true };
+  }
+
+  async getEligibility(agreementId: string, userId: string) {
+    await this.expireAgreementIfElapsed(agreementId);
+    const agreement = await this.prisma.agreement.findUnique({
+      where: { id: agreementId },
+      select: {
+        id: true,
+        tenantId: true,
+        landlordId: true,
+        status: true,
+        endDate: true,
+        tenant: { select: { id: true, fullName: true } },
+        landlord: { select: { id: true, fullName: true } },
+      },
+    });
+    if (!agreement) throw new NotFoundException('Agreement not found');
+    if (agreement.tenantId !== userId && agreement.landlordId !== userId) {
+      throw new ForbiddenException('You cannot review this agreement');
+    }
+
+    const reviewType =
+      userId === agreement.tenantId ? ReviewType.LANDLORD : ReviewType.TENANT;
+    const completed = this.isAgreementCompleted(agreement);
+    const existing = await this.prisma.review.findUnique({
+      where: {
+        agreementId_userId_reviewType: {
+          agreementId,
+          userId,
+          reviewType,
+        },
+      },
+      select: { id: true },
+    });
+    const target =
+      userId === agreement.tenantId ? agreement.landlord : agreement.tenant;
+    const selfReview = target.id === userId;
+    return {
+      agreementId,
+      eligible: completed && !existing && !selfReview,
+      alreadyReviewed: Boolean(existing),
+      reviewType,
+      target,
+      reason: existing
+        ? 'You have already reviewed this agreement'
+        : selfReview
+          ? 'You cannot review yourself'
+          : completed
+            ? null
+            : 'Reviews are available after the rental agreement has ended',
+    };
+  }
+
+  async getAgreementReviews(agreementId: string, userId: string) {
+    const agreement = await this.prisma.agreement.findUnique({
+      where: { id: agreementId },
+      select: { id: true, tenantId: true, landlordId: true },
+    });
+    if (!agreement) throw new NotFoundException('Agreement not found');
+    if (agreement.tenantId !== userId && agreement.landlordId !== userId) {
+      throw new ForbiddenException(
+        'You cannot access reviews for this agreement',
+      );
+    }
+    const reviews = await this.prisma.review.findMany({
+      where: { agreementId },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        ...reviewInclude,
+        tenant: { select: publicReviewer },
+        landlord: { select: publicReviewer },
+      },
+    });
+    return reviews.map((review) => ({
+      ...review,
+      verifiedRental: true,
+      target:
+        review.reviewType === ReviewType.TENANT
+          ? review.tenant
+          : review.landlord,
+    }));
+  }
+
+  async getMySubmittedReviews(userId: string) {
+    const reviews = await this.prisma.review.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        ...reviewInclude,
+        tenant: { select: publicReviewer },
+        landlord: { select: publicReviewer },
+      },
+    });
+    return reviews.map((review) => ({
+      ...review,
+      verifiedRental: Boolean(review.agreementId),
+      target:
+        review.reviewType === ReviewType.TENANT
+          ? review.tenant
+          : review.reviewType === ReviewType.LANDLORD
+            ? review.landlord
+            : null,
+    }));
+  }
+
+  async getMyReceivedReviews(userId: string) {
+    return this.getUserReviews(userId, new ReviewQueryDto());
   }
 
   async findAll() {
@@ -149,6 +394,52 @@ export class ReviewsService {
     return result._avg.rating ?? 0;
   }
 
+  private async getCompletedAgreement(agreementId: string) {
+    await this.expireAgreementIfElapsed(agreementId);
+    const agreement = await this.prisma.agreement.findUnique({
+      where: { id: agreementId },
+      select: {
+        id: true,
+        tenantId: true,
+        landlordId: true,
+        listingId: true,
+        propertyId: true,
+        status: true,
+        endDate: true,
+      },
+    });
+    if (!agreement) throw new NotFoundException('Agreement not found');
+    if (!this.isAgreementCompleted(agreement)) {
+      throw new ForbiddenException(
+        'Reviews are available only after the rental agreement has ended',
+      );
+    }
+    return agreement;
+  }
+
+  private async expireAgreementIfElapsed(agreementId: string) {
+    await this.prisma.agreement.updateMany({
+      where: {
+        id: agreementId,
+        status: AgreementStatus.ACTIVE,
+        endDate: { lte: new Date() },
+      },
+      data: { status: AgreementStatus.EXPIRED },
+    });
+  }
+
+  private isAgreementCompleted(agreement: {
+    status: AgreementStatus;
+    endDate: Date | null;
+  }) {
+    return (
+      (agreement.status === AgreementStatus.ENDED ||
+        agreement.status === AgreementStatus.EXPIRED) &&
+      agreement.endDate !== null &&
+      agreement.endDate <= new Date()
+    );
+  }
+
   async getPropertyReviews(id: string, query: ReviewQueryDto) {
     const property = await this.prisma.property.findUnique({
       where: { id },
@@ -183,20 +474,187 @@ export class ReviewsService {
       select: { id: true },
     });
     if (!user) throw new NotFoundException('User not found');
-    return this.paginate(
-      { reviewType: ReviewType.LANDLORD, landlordId: user.id },
-      query,
-    );
+    return this.getUserReviews(user.id, query);
+  }
+
+  private async getUserReviews(userId: string, query: ReviewQueryDto) {
+    const where: Prisma.ReviewWhereInput = {
+      OR: [
+        {
+          landlordId: userId,
+          reviewType: ReviewType.LANDLORD,
+          agreementId: { not: null },
+        },
+        {
+          tenantId: userId,
+          reviewType: ReviewType.TENANT,
+          agreementId: { not: null },
+        },
+      ],
+    };
+    const skip = (query.page - 1) * query.limit;
+    const take = skip + query.limit;
+    const [
+      reviews,
+      landlordStats,
+      tenantStats,
+      terminationReviews,
+      terminationStats,
+    ] = await Promise.all([
+      this.prisma.review.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take,
+        include: {
+          ...reviewInclude,
+          tenant: { select: publicReviewer },
+          landlord: { select: publicReviewer },
+        },
+      }),
+      this.prisma.review.aggregate({
+        where: {
+          landlordId: userId,
+          reviewType: ReviewType.LANDLORD,
+          agreementId: { not: null },
+        },
+        _count: { _all: true },
+        _avg: {
+          rating: true,
+          behaviour: true,
+          communication: true,
+          propertyCondition: true,
+          honesty: true,
+          maintenance: true,
+          responseTime: true,
+        },
+      }),
+      this.prisma.review.aggregate({
+        where: {
+          tenantId: userId,
+          reviewType: ReviewType.TENANT,
+          agreementId: { not: null },
+        },
+        _count: { _all: true },
+        _avg: {
+          rating: true,
+          behaviour: true,
+          communication: true,
+          rentPayment: true,
+          propertyCare: true,
+          cleanliness: true,
+          agreementCompliance: true,
+        },
+      }),
+      this.prisma.agreementTerminationReview.findMany({
+        where: { targetUserId: userId },
+        orderBy: { createdAt: 'desc' },
+        take,
+        include: {
+          reviewer: { select: publicReviewer },
+          agreement: {
+            select: { id: true, listingId: true, propertyId: true },
+          },
+        },
+      }),
+      this.prisma.agreementTerminationReview.aggregate({
+        where: { targetUserId: userId },
+        _count: { _all: true },
+        _avg: { rating: true },
+      }),
+    ]);
+    const data = [
+      ...reviews.map((review) => ({
+        ...review,
+        source: 'rental' as const,
+        verifiedRental: Boolean(review.agreementId),
+        target:
+          review.reviewType === ReviewType.TENANT
+            ? review.tenant
+            : review.landlord,
+      })),
+      ...terminationReviews.map((review) => ({
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt,
+        reviewType: 'AGREEMENT' as const,
+        agreementId: review.agreementId,
+        user: review.reviewer,
+        listing: null,
+        property: null,
+        source: 'agreement' as const,
+        verifiedRental: true,
+        target: null,
+      })),
+    ]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(skip, skip + query.limit);
+    const regularCount = landlordStats._count._all + tenantStats._count._all;
+    const terminationCount = terminationStats._count._all;
+    const totalCount = regularCount + terminationCount;
+    const ratingTotal =
+      (landlordStats._avg.rating ?? 0) * landlordStats._count._all +
+      (tenantStats._avg.rating ?? 0) * tenantStats._count._all +
+      (terminationStats._avg.rating ?? 0) * terminationCount;
+    const averageRating = totalCount ? ratingTotal / totalCount : 0;
+    return {
+      data,
+      totalCount,
+      count: totalCount,
+      averageRating,
+      ratingSummary: {
+        landlord: {
+          averageRating: landlordStats._avg.rating ?? 0,
+          count: landlordStats._count._all,
+        },
+        tenant: {
+          averageRating: tenantStats._avg.rating ?? 0,
+          count: tenantStats._count._all,
+        },
+        termination: {
+          averageRating: terminationStats._avg.rating ?? 0,
+          count: terminationCount,
+        },
+      },
+      categoryAverages: {
+        landlord: {
+          behaviour: landlordStats._avg.behaviour,
+          communication: landlordStats._avg.communication,
+          propertyCondition: landlordStats._avg.propertyCondition,
+          honesty: landlordStats._avg.honesty,
+          maintenance: landlordStats._avg.maintenance,
+          responseTime: landlordStats._avg.responseTime,
+        },
+        tenant: {
+          behaviour: tenantStats._avg.behaviour,
+          rentPayment: tenantStats._avg.rentPayment,
+          propertyCare: tenantStats._avg.propertyCare,
+          cleanliness: tenantStats._avg.cleanliness,
+          communication: tenantStats._avg.communication,
+          agreementCompliance: tenantStats._avg.agreementCompliance,
+        },
+      },
+      pagination: {
+        page: query.page,
+        limit: query.limit,
+        totalPages: Math.ceil(totalCount / query.limit),
+      },
+    };
   }
 
   async delete(id: string, userId: string) {
     const review = await this.prisma.review.findUnique({
       where: { id },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true, agreementId: true },
     });
     if (!review) throw new NotFoundException('Review not found');
     if (review.userId !== userId) {
       throw new ForbiddenException('You cannot delete this review');
+    }
+    if (review.agreementId) {
+      throw new ForbiddenException(
+        'Verified rental reviews cannot be deleted after submission',
+      );
     }
     return this.prisma.review.delete({ where: { id } });
   }
@@ -297,13 +755,9 @@ export class ReviewsService {
         'Only the agreement tenant can submit a review',
       );
     }
-    const completionStatuses: AgreementStatus[] = [
-      AgreementStatus.ENDED,
-      AgreementStatus.EXPIRED,
-      AgreementStatus.TERMINATED,
-    ];
     if (
-      !completionStatuses.includes(agreement.status) ||
+      (agreement.status !== AgreementStatus.ENDED &&
+        agreement.status !== AgreementStatus.EXPIRED) ||
       !agreement.endDate ||
       agreement.endDate > new Date() ||
       !this.rentalMatchesListing(

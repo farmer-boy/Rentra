@@ -280,6 +280,7 @@ enum ReviewTargetType {
   LISTING
   BOOKING
   HOST
+  TENANT
   HOTEL
   HOSTEL
 }
@@ -287,6 +288,7 @@ enum ReviewTargetType {
 enum ReviewType {
   PROPERTY
   LANDLORD
+  TENANT
 }
 
 enum AgreementTerminationRequestStatus {
@@ -374,40 +376,41 @@ model User {
   favorites                     Favorite[]
   savedSearches                 SavedSearch[]
   reviews                       Review[]
-  reviewsAsLandlord             Review[]                      @relation("ReviewLandlord")
+  reviewsAsLandlord             Review[]                     @relation("ReviewLandlord")
+  reviewsAsTenant               Review[]                     @relation("ReviewTenant")
   agreementPresence             AgreementPresence[]
-  terminationReviewsGiven       AgreementTerminationReview[]  @relation("TerminationReviewReviewer")
-  terminationReviewsReceived    AgreementTerminationReview[]  @relation("TerminationReviewTarget")
+  terminationReviewsGiven       AgreementTerminationReview[] @relation("TerminationReviewReviewer")
+  terminationReviewsReceived    AgreementTerminationReview[] @relation("TerminationReviewTarget")
   bookings                      Booking[]
   propertyViews                 PropertyView[]
   notifications                 Notification[]
-  reports                       Report[]                      @relation("ReportReporter")
-  reportsAssigned               Report[]                      @relation("AssignedReports")
+  reports                       Report[]                     @relation("ReportReporter")
+  reportsAssigned               Report[]                     @relation("AssignedReports")
   adminActions                  AdminAction[]
-  rentalsAsTenant               RentalRequest[]               @relation("RequestTenant")
-  rentalsAsLandlord             RentalRequest[]               @relation("RequestLandlord")
-  tenantAgreements              Agreement[]                   @relation("TenantAgreements")
-  landlordAgreements            Agreement[]                   @relation("LandlordAgreements")
+  rentalsAsTenant               RentalRequest[]              @relation("RequestTenant")
+  rentalsAsLandlord             RentalRequest[]              @relation("RequestLandlord")
+  tenantAgreements              Agreement[]                  @relation("TenantAgreements")
+  landlordAgreements            Agreement[]                  @relation("LandlordAgreements")
   payments                      Payment[]
   boostOrders                   BoostOrder[]
-  disputesCreated               Dispute[]                     @relation("DisputeCreator")
-  disputesAssigned              Dispute[]                     @relation("AssignedDisputes")
-  conversationsAsUser1          Conversation[]                @relation("User1")
-  conversationsAsUser2          Conversation[]                @relation("User2")
+  disputesCreated               Dispute[]                    @relation("DisputeCreator")
+  disputesAssigned              Dispute[]                    @relation("AssignedDisputes")
+  conversationsAsUser1          Conversation[]               @relation("User1")
+  conversationsAsUser2          Conversation[]               @relation("User2")
   conversationStates            ConversationUserState[]
-  sentMessages                  Message[]                     @relation("Sender")
+  sentMessages                  Message[]                    @relation("Sender")
   messageStars                  MessageStar[]
   verificationTokens            VerificationToken[]
   resetPasswordTokens           ResetPasswordToken[]
   refreshTokens                 RefreshToken[]
   trustScores                   TrustScore[]
-  verificationSubmissions       VerificationSubmission[]      @relation("VerificationSubmitter")
-  reviewedVerifications         VerificationSubmission[]      @relation("VerificationReviewer")
+  verificationSubmissions       VerificationSubmission[]     @relation("VerificationSubmitter")
+  reviewedVerifications         VerificationSubmission[]     @relation("VerificationReviewer")
   verificationChallenges        VerificationChallenge[]
   supportTickets                SupportTicket[]
   supportTicketMessages         SupportTicketMessage[]
-  maintenanceRequestsAsTenant   MaintenanceRequest[]          @relation("MaintenanceTenant")
-  maintenanceRequestsAsLandlord MaintenanceRequest[]          @relation("MaintenanceLandlord")
+  maintenanceRequestsAsTenant   MaintenanceRequest[]         @relation("MaintenanceTenant")
+  maintenanceRequestsAsLandlord MaintenanceRequest[]         @relation("MaintenanceLandlord")
 }
 
 model UserProfile {
@@ -1126,27 +1129,38 @@ model PaymentWebhookEvent {
 }
 
 model Review {
-  id            String            @id @default(cuid())
-  userId        String
-  listingId     String?
-  propertyId    String?
-  bookingId     String?
-  agreementId   String?
-  landlordId    String?
-  reviewType    ReviewType        @default(PROPERTY)
-  rating        Int
-  comment       String?
-  cleanliness   Int?
-  location      Int?
-  accuracy      Int?
-  communication Int?
-  facilities    Int?
-  targetType    ReviewTargetType?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id                  String            @id @default(cuid())
+  userId              String
+  listingId           String?
+  propertyId          String?
+  bookingId           String?
+  agreementId         String?
+  landlordId          String?
+  tenantId            String?
+  reviewType          ReviewType        @default(PROPERTY)
+  rating              Float
+  comment             String?
+  behaviour           Int?
+  propertyCondition   Int?
+  honesty             Int?
+  maintenance         Int?
+  responseTime        Int?
+  rentPayment         Int?
+  propertyCare        Int?
+  agreementCompliance Int?
+  wouldRecommend      Boolean?
+  cleanliness         Int?
+  location            Int?
+  accuracy            Int?
+  communication       Int?
+  facilities          Int?
+  targetType          ReviewTargetType?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   landlord  User?      @relation("ReviewLandlord", fields: [landlordId], references: [id], onDelete: Cascade)
+  tenant    User?      @relation("ReviewTenant", fields: [tenantId], references: [id], onDelete: Cascade)
   listing   Listing?   @relation("ReviewListing", fields: [listingId], references: [id], onDelete: SetNull)
   property  Property?  @relation("ReviewProperty", fields: [propertyId], references: [id], onDelete: SetNull)
   booking   Booking?   @relation("ReviewBooking", fields: [bookingId], references: [id], onDelete: SetNull)
@@ -1157,6 +1171,7 @@ model Review {
   @@index([listingId, reviewType, createdAt])
   @@index([propertyId, reviewType, createdAt])
   @@index([landlordId, createdAt])
+  @@index([tenantId, createdAt])
   @@index([userId, createdAt])
   @@index([bookingId])
   @@index([agreementId])

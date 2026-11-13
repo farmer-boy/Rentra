@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useContactMessages } from '../../hooks/useContactMessages';
 import { messagesAPI } from '../../api/messages';
 import { notificationsAPI } from '../../api/notifications';
-import { ArrowLeftRight, Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart } from 'lucide-react';
+import { ArrowLeftRight, Bell, MessageCircle, Settings, LogOut, Lock, Menu, X, Search, Heart, ChevronDown } from 'lucide-react';
 import { getSavedWorkspace, getWorkspaceFromPath, saveWorkspace } from './workspace';
 
 interface NavbarProps {
@@ -75,8 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
   };
 
   const handleLogout = () => {
-    logout();
-    navigate('/login');
+    if (logout()) navigate('/login');
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -267,20 +266,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onMenuClick, sidebarOpen = false
           <button
             ref={profileButtonRef}
             onClick={() => setProfileOpen(!profileOpen)}
-            className="relative flex-shrink-0 p-1 transition-colors rounded-lg"
+            className="relative flex flex-col items-center justify-center gap-0.5 min-w-12 px-1 transition-colors rounded-lg"
             style={{ color: 'var(--text)' }}
             title={user?.fullName}
             aria-label="Open profile menu"
             aria-expanded={profileOpen}
           >
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-semibold"
+            <div className="w-8 h-8 overflow-hidden rounded-full ring-1 ring-border flex items-center justify-center text-[10px] font-semibold"
               style={{ 
                 backgroundColor: 'var(--green)',
                 color: 'var(--bg)'
               }}
             >
-              {initials}
+              {user?.avatarUrl ? <img src={user.avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : initials}
             </div>
+            <span className="flex items-center gap-0.5 text-[10px] leading-none">Me <ChevronDown size={12} /></span>
           </button>
 
           {/* Profile Dropdown Menu */}

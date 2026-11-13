@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { ChevronRight, Monitor, Moon, Sun } from 'lucide-react';
+import { ChevronRight, Monitor, Moon, Sun, UserRound, LockKeyhole, Shield, Bell } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/useTheme';
 import { usersAPI } from '../../api/users';
 import { getApiErrorMessage } from '../../api/api-error';
-import BackToDashboard from '../../components/layout/BackToDashboard';
 
 type MenuSection = 'account-preferences' | 'sign-in-security' | 'data-privacy' | 'notifications';
 type AccountSubMenu = 'profile-info' | 'display' | 'general' | 'syncing' | 'account-management';
@@ -15,6 +14,10 @@ export default function SettingsPage() {
   const [searchParams] = useSearchParams();
   const { user, updateUser } = useAuthStore();
   const { themeMode, setThemeMode } = useTheme();
+  const handleBackToHome = () => {
+    const roles = user?.roles ?? (user?.role ? [user.role] : []);
+    navigate(roles.includes('ADMIN') ? '/admin' : '/dashboard');
+  };
 
   const [activeSection, setActiveSection] = useState<MenuSection>(() => {
     const section = searchParams.get('section');
@@ -37,6 +40,15 @@ export default function SettingsPage() {
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileError, setProfileError] = useState('');
   const [profileMessage, setProfileMessage] = useState('');
+
+  useEffect(() => {
+    const section = searchParams.get('section');
+    setActiveSection(section === 'sign-in-security' || section === 'data-privacy' || section === 'notifications'
+      ? section
+      : 'account-preferences');
+  }, [searchParams]);
+
+  useEffect(() => setThemeDisplayMode(themeMode), [themeMode]);
 
   useEffect(() => {
     usersAPI.getMe().then((data) => {
@@ -64,13 +76,6 @@ export default function SettingsPage() {
     setThemeDisplayMode(mode);
     setThemeMode(mode);
   };
-
-  const handleBackToHome = () => {
-    const role = user?.role || 'TENANT';
-    navigate(role === 'ADMIN' ? '/admin' : role === 'LANDLORD' ? '/landlord' : '/tenant');
-  };
-
-  const initials = user?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
   const renderAccountPreferencesContent = () => {
     switch (activeSubMenu) {
@@ -227,73 +232,49 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-bg text-text">
-      {/* Navbar */}
-      <nav className="bg-surface border-border border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-3 md:px-6 h-16 flex items-center justify-between">
-          <button
-            onClick={handleBackToHome}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            title="Back to Dashboard"
-          >
-            <div className="w-6 h-6 rounded overflow-hidden flex items-center justify-center" style={{ backgroundColor: 'var(--surface2)' }}>
-              <img 
-                src="/logo.jpg" 
-                alt="Rentra logo"
-                className="w-full h-full object-contain" 
-                style={{filter: 'drop-shadow(0 4px 6px rgb(var(--rentra-shadow) / 10%)) drop-shadow(0 0 8px rgb(var(--rentra-shadow) / 5%))'}}
-              />
-            </div>
-          </button>
-
-          <div className="flex items-center gap-3">
-            <div className={`bg-primary-soft border-primary w-8 h-8 rounded-full border flex items-center justify-center text-[11px] font-bold text-primary`}>
-              {initials}
-            </div>
-            <span className={`text-[12px] font-semibold text-text`}>{user?.fullName}</span>
+      <header className="fixed inset-x-0 top-0 z-50 flex h-16 items-center justify-between border-b border-border bg-surface px-4 md:px-7">
+        <button type="button" onClick={handleBackToHome} className="flex items-center gap-2.5" aria-label="Back to dashboard">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-[rgb(var(--rentra-admin-sidebar-bg))] p-1"><img src="/rentra-mark-offwhite.png" alt="" className="h-full w-full object-contain" /></span>
+          <span className="text-lg font-bold text-text">Rentra</span>
+        </button>
+        <div className="flex items-center gap-2.5">
+          <div className="grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-border bg-[rgb(var(--rentra-admin-sidebar-active))] text-xs font-bold text-[rgb(var(--rentra-admin-sidebar-active-foreground))]">
+            {user?.avatarUrl ? <img src={user.avatarUrl} alt="Profile" className="h-full w-full object-cover" /> : user?.fullName?.split(' ').map((part) => part[0]).join('').toUpperCase() || 'U'}
           </div>
+          <span className="hidden text-sm font-semibold text-text sm:inline">{user?.fullName}</span>
         </div>
-      </nav>
-
+      </header>
       {/* Main Content */}
-      <div className="pt-3 md:pt-6">
+      <div className="min-h-screen pt-20 md:ml-64">
         <div className="max-w-6xl mx-auto px-3 md:px-6">
-          <BackToDashboard />
-          <div className="mb-4 md:mb-8">
+          <div className="mb-6 md:mb-8">
             <h1 className={`text-xl md:text-3xl font-bold text-text mb-1 md:mb-2`}>Settings</h1>
             <p className={`text-[11px] md:text-sm text-text-muted`}>Manage your account preferences and security settings</p>
           </div>
 
           <div className="flex flex-col md:flex-row gap-3 md:gap-6">
             {/* Left Sidebar */}
-            <div className="w-full flex-shrink-0 md:w-64">
-              <div className="bg-surface border-border rounded-lg border overflow-hidden md:sticky md:top-[100px] text-[11px] md:text-[12px]">
-                <button
-                  onClick={() => { setActiveSection('account-preferences'); setActiveSubMenu('profile-info'); }}
-                  className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'account-preferences' ? 'bg-primary-soft text-primary border-primary/50' : 'text-text-muted hover:bg-surface-2 border-border'}`}
-                >
-                  ACCOUNT PREFERENCES
-                </button>
+            <div className="fixed inset-y-16 left-0 z-40 hidden w-64 flex-shrink-0 md:block">
+              <div className="h-full overflow-y-auto border-r text-[11px] md:text-[12px]" style={{ backgroundColor: 'rgb(var(--rentra-admin-sidebar-bg))', borderColor: 'rgb(var(--rentra-admin-sidebar-border))' }}>
+                <div className="flex items-center gap-3 border-b px-4 py-5" style={{ borderColor: 'rgb(var(--rentra-admin-sidebar-border))' }}>
+                  <img src="/rentra-mark-offwhite.png" alt="" className="h-9 w-9 rounded-lg bg-[rgb(var(--rentra-admin-sidebar-active))] p-1 object-contain" />
+                  <span className="text-lg font-bold" style={{ color: 'var(--text)' }}>Settings</span>
+                </div>
+                {[{ id: 'profile-info', label: 'Profile information', icon: <UserRound size={17} /> }, { id: 'display', label: 'Display', icon: <Monitor size={17} /> }, { id: 'general', label: 'General preferences', icon: <Sun size={17} /> }, { id: 'syncing', label: 'Syncing options', icon: <ChevronRight size={17} /> }, { id: 'account-management', label: 'Account management', icon: <UserRound size={17} /> }].map((item) => (
+                  <button key={item.id} onClick={() => { setActiveSection('account-preferences'); setActiveSubMenu(item.id as AccountSubMenu); }} className={`flex w-full items-center gap-3 border-b px-3 py-3 text-left text-[10px] font-semibold transition-colors md:px-4 md:text-[12px] ${activeSection === 'account-preferences' && activeSubMenu === item.id ? 'bg-[rgb(var(--rentra-admin-sidebar-active))] text-[rgb(var(--rentra-admin-sidebar-active-foreground))]' : 'text-text hover:bg-[rgb(var(--rentra-admin-sidebar-hover))]'}`} style={{ borderColor: 'rgb(var(--rentra-admin-sidebar-border))' }}>
+                    {item.icon}<span>{item.label}</span>
+                  </button>
+                ))}
 
-                {activeSection === 'account-preferences' && (
-                  <div className="bg-bg border-border">
-                    {[{ id: 'profile-info', label: 'Profile Information' }, { id: 'display', label: 'Display' }, { id: 'general', label: 'General Preferences' }, { id: 'syncing', label: 'Syncing Options' }, { id: 'account-management', label: 'Account Management' }].map((item) => (
-                      <button key={item.id} onClick={() => setActiveSubMenu(item.id as AccountSubMenu)} className={`w-full text-left px-3 md:px-6 py-2 md:py-2.5 text-[9px] md:text-[11px] flex items-center justify-between transition-colors ${activeSubMenu === item.id ? 'bg-primary-soft text-primary font-medium' : 'text-text-muted hover:bg-surface-2'}`}>
-                        {item.label}
-                        {activeSubMenu === item.id && <ChevronRight size={12} className={'text-primary'} />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <button onClick={() => setActiveSection('sign-in-security')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'sign-in-security' ? 'bg-primary-soft text-primary border-primary/50' : 'text-text-muted hover:bg-surface-2 border-border'}`}>
+                <button onClick={() => setActiveSection('sign-in-security')} className={`flex w-full items-center gap-3 border-b px-3 py-3 text-left text-[10px] font-semibold tracking-wide transition-colors md:px-4 md:text-[12px] ${activeSection === 'sign-in-security' ? 'bg-[rgb(var(--rentra-admin-sidebar-active))] text-[rgb(var(--rentra-admin-sidebar-active-foreground))]' : 'text-text hover:bg-[rgb(var(--rentra-admin-sidebar-hover))]'}`} style={{ borderColor: 'rgb(var(--rentra-admin-sidebar-border))' }}><LockKeyhole size={17} />
                   SIGN IN & SECURITY
                 </button>
 
-                <button onClick={() => setActiveSection('data-privacy')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors border-b ${activeSection === 'data-privacy' ? 'bg-primary-soft text-primary border-primary/50' : 'text-text-muted hover:bg-surface-2 border-border'}`}>
+                <button onClick={() => setActiveSection('data-privacy')} className={`flex w-full items-center gap-3 border-b px-3 py-3 text-left text-[10px] font-semibold tracking-wide transition-colors md:px-4 md:text-[12px] ${activeSection === 'data-privacy' ? 'bg-[rgb(var(--rentra-admin-sidebar-active))] text-[rgb(var(--rentra-admin-sidebar-active-foreground))]' : 'text-text hover:bg-[rgb(var(--rentra-admin-sidebar-hover))]'}`} style={{ borderColor: 'rgb(var(--rentra-admin-sidebar-border))' }}><Shield size={17} />
                   DATA PRIVACY
                 </button>
 
-                <button onClick={() => setActiveSection('notifications')} className={`w-full text-left px-2 md:px-4 py-2 md:py-3 text-[10px] md:text-[12px] font-mono tracking-widest transition-colors ${activeSection === 'notifications' ? 'bg-primary-soft text-primary' : 'text-text-muted hover:bg-surface-2'}`}>
+                <button onClick={() => setActiveSection('notifications')} className={`flex w-full items-center gap-3 px-3 py-3 text-left text-[10px] font-semibold tracking-wide transition-colors md:px-4 md:text-[12px] ${activeSection === 'notifications' ? 'bg-[rgb(var(--rentra-admin-sidebar-active))] text-[rgb(var(--rentra-admin-sidebar-active-foreground))]' : 'text-text hover:bg-[rgb(var(--rentra-admin-sidebar-hover))]'}`}><Bell size={17} />
                   NOTIFICATIONS
                 </button>
               </div>
@@ -302,11 +283,10 @@ export default function SettingsPage() {
             {/* Right Content */}
             <div className="flex-1 w-full">
               {activeSection === 'account-preferences' && (
-                <div className="bg-surface border-border rounded-lg border p-3 md:p-8">
+                <div className="rounded-xl border border-border bg-surface p-5 md:p-8">
                   {renderAccountPreferencesContent()}
                 </div>
               )}
-
               {activeSection === 'sign-in-security' && (
                 <div className="bg-surface border-border rounded-lg border p-3 md:p-8">
                   <h3 className={`text-sm md:text-lg font-semibold text-text mb-3 md:mb-4`}>Sign In & Security</h3>
@@ -334,3 +314,6 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+
+

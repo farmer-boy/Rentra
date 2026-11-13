@@ -9,8 +9,6 @@ import {
   Bell,
   Star,
   BarChart3,
-  Settings,
-  Mail,
   User,
   UserRound,
   ClipboardCheck,
@@ -183,7 +181,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     { label: 'Audit log', path: '/admin/audit', icon: <ScrollText size={18} /> },
     { label: 'Analytics', path: '/admin/analytics', icon: <BarChart3 size={18} /> },
     { label: 'Profile', path: '/admin/profile', icon: <User size={18} /> },
-    { label: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> },
   ];
 
   useEffect(() => {

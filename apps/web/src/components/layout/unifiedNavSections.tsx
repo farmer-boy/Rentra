@@ -14,7 +14,7 @@ export function getUnifiedNavSections(
   const sections: NavSection[] = [
     {
       title: 'DASHBOARD',
-      items: [{ icon: <LayoutDashboard size={16} />, label: 'Overview', path: tenantWorkspace ? '/dashboard' : '/dashboard/landlord' }],
+      items: [{ icon: <LayoutDashboard size={16} />, label: 'Dashboard', path: tenantWorkspace ? '/dashboard' : '/dashboard/landlord' }],
     },
   ];
 
@@ -76,7 +76,6 @@ export function getUnifiedNavSections(
         { icon: <TrendingUp size={16} />, label: 'Rent estimator', path: '/dashboard/rent-estimator' },
         { icon: <Eye size={16} />, label: 'Fake listing detector', path: '/dashboard/fake-detector' },
       ] : []),
-      { icon: <Settings size={16} />, label: 'Settings', path: '/dashboard/settings' },
     ],
   });
 

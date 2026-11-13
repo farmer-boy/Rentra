@@ -178,24 +178,49 @@ export interface CreateDisputeRequest {
 export interface Review {
   id: string;
   userId: string;
-  listingId: string;
+  listingId: string | null;
   propertyId?: string | null;
   bookingId?: string | null;
   agreementId?: string | null;
-  reviewType: 'PROPERTY' | 'LANDLORD';
+  landlordId?: string | null;
+  tenantId?: string | null;
+  reviewType: 'PROPERTY' | 'LANDLORD' | 'TENANT';
   rating: number;
   comment: string | null;
+  behaviour?: number | null;
+  communication?: number | null;
+  propertyCondition?: number | null;
+  honesty?: number | null;
+  maintenance?: number | null;
+  responseTime?: number | null;
+  rentPayment?: number | null;
+  propertyCare?: number | null;
+  cleanliness?: number | null;
+  agreementCompliance?: number | null;
+  wouldRecommend?: boolean | null;
+  verifiedRental?: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateReviewRequest {
-  reviewType: 'PROPERTY' | 'LANDLORD';
-  listingId: string;
+  reviewType: 'PROPERTY' | 'LANDLORD' | 'TENANT';
+  listingId?: string;
   bookingId?: string;
   agreementId?: string;
-  rating: number;
+  rating?: number;
   comment?: string;
+  behaviour?: number;
+  communication?: number;
+  propertyCondition?: number;
+  honesty?: number;
+  maintenance?: number;
+  responseTime?: number;
+  rentPayment?: number;
+  propertyCare?: number;
+  cleanliness?: number;
+  agreementCompliance?: number;
+  wouldRecommend?: boolean;
 }
 
 // API Response types

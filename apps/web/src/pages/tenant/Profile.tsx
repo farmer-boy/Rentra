@@ -4,6 +4,7 @@ import Pill from '../../components/ui/Pill';
 import { useAuthStore } from '../../store/authStore';
 import { usersAPI } from '../../api/users';
 import { getApiErrorMessage } from '../../api/api-error';
+import ProfileReviewsCard from '../../components/reviews/ProfileReviewsCard';
 
 interface ProfileData {
   id: string;
@@ -70,6 +71,7 @@ export default function Profile() {
             {profile.trustScore == null ? <p className="text-sm text-gray-500">A trust score is not available for this account.</p> : <div className="flex items-center gap-3"><div className="w-20 h-20 rounded-full bg-green-500/10 border-2 border-green-500 flex items-center justify-center font-bold text-green-600"><div className="text-center"><div className="text-2xl">{profile.trustScore}</div><div className="text-[8px]">/100</div></div></div><p className="text-sm text-gray-600">Current account trust score</p></div>}
             <p className="mt-5 text-xs text-gray-500">Detailed score factors and rental history are not available from the profile API.</p>
           </Card>
+          <ProfileReviewsCard userId={profile.id} />
         </div>
       )}
     </div>

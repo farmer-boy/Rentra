@@ -127,7 +127,11 @@ export class TrustScoreService {
       }),
       this.prisma.review.findMany({
         where: {
-          OR: [{ landlordId: userId }, { property: { ownerId: userId } }],
+          OR: [
+            { landlordId: userId },
+            { tenantId: userId },
+            { property: { ownerId: userId } },
+          ],
         },
         select: { rating: true },
       }),
@@ -141,6 +145,12 @@ export class TrustScoreService {
         select: { id: true },
       }),
     ]);
+
+    const agreementReviews =
+      await this.prisma.agreementTerminationReview.findMany({
+        where: { targetUserId: userId },
+        select: { rating: true },
+      });
 
     const cancelledBookings = await this.prisma.booking.findMany({
       where: {
@@ -174,7 +184,7 @@ export class TrustScoreService {
       trustScoreConfig.caps.successfulPayments,
     );
 
-    const validReviewRatings = receivedReviews
+    const validReviewRatings = [...receivedReviews, ...agreementReviews]
       .map((review) => review.rating)
       .filter(
         (rating) => typeof rating === 'number' && rating >= 1 && rating <= 5,

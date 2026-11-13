@@ -190,6 +190,16 @@ function AppContent() {
             <SettingsPage />
           </ProtectedRoute>
         } />
+        <Route path="/dashboard/settings" element={
+          <ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}>
+            <SettingsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/settings" element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <SettingsPage />
+          </ProtectedRoute>
+        } />
 
         {/* Separate tenant and approved landlord workspaces */}
         <Route path="/dashboard" element={
@@ -235,7 +245,6 @@ function AppContent() {
           <Route path="host-profile" element={<LandlordCapabilityRoute><LandlordProfile /></LandlordCapabilityRoute>} />
           <Route path="my-reviews" element={<ReviewsAndRatings />} />
           <Route path="host-reviews" element={<LandlordCapabilityRoute><LandlordReviews /></LandlordCapabilityRoute>} />
-          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         {/* Keep old bookmarks working, but send them into the one dashboard. */}
@@ -292,7 +301,6 @@ function AppContent() {
           <Route path="disputes/resolved" element={<AdminAllDisputes />} />
           <Route path="analytics" element={<AdminPlatformAnalytics />} />
           <Route path="profile" element={<AdminProfile />} />
-          <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

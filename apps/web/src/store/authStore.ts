@@ -49,6 +49,9 @@ export const useAuthStore = create<AuthState>((set, get) => {
       }),
 
     logout: () => {
+      const shouldLogout = window.confirm('Kya aap logout karna chahte hain? Cancel chunein to login rahenge.');
+      if (!shouldLogout) return false;
+
       void authAPI.logout().catch((error: unknown) => {
         console.warn(
           'Could not revoke the remote Rentra session.',
@@ -58,6 +61,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       clearStoredSession();
       set({ user: null, token: null, isAuthenticated: false });
       window.dispatchEvent(new Event('rentra:session-cleared'));
+      return true;
     },
 
     initialize: async () => {

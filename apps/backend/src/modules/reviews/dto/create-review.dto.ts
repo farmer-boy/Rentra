@@ -1,12 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ReviewType } from '@prisma/client';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -15,13 +17,16 @@ export class CreateReviewDto {
   @IsEnum(ReviewType)
   reviewType!: ReviewType;
 
-  @ApiProperty({ description: 'Listing associated with the completed rental' })
+  @ApiPropertyOptional({
+    description: 'Required only for legacy property reviews',
+  })
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  listingId!: string;
+  listingId?: string;
 
   @ApiPropertyOptional({
-    description: 'Completed short-term booking; provide this or agreementId',
+    description: 'Completed short-term booking for a property review',
   })
   @IsOptional()
   @IsString()
@@ -29,23 +34,86 @@ export class CreateReviewDto {
   bookingId?: string;
 
   @ApiPropertyOptional({
-    description: 'Completed long-term agreement; provide this or bookingId',
+    description: 'Completed rental agreement for a person-to-person review',
   })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
   agreementId?: string;
 
-  @ApiProperty({ minimum: 1, maximum: 5 })
+  @ApiPropertyOptional({
+    minimum: 1,
+    maximum: 5,
+    description:
+      'Legacy property-review rating; person-review rating is calculated',
+  })
+  @IsOptional()
   @IsInt()
   @Min(1)
   @Max(5)
-  rating!: number;
+  rating?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: 2000 })
   @IsOptional()
   @IsString()
+  @MaxLength(2000)
   comment?: string;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  behaviour?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  communication?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  propertyCondition?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  honesty?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  maintenance?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  responseTime?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rentPayment?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  propertyCare?: number;
 
   @ApiPropertyOptional({ minimum: 1, maximum: 5 })
   @IsOptional()
@@ -73,12 +141,19 @@ export class CreateReviewDto {
   @IsInt()
   @Min(1)
   @Max(5)
-  communication?: number;
+  facilities?: number;
 
   @ApiPropertyOptional({ minimum: 1, maximum: 5 })
   @IsOptional()
   @IsInt()
   @Min(1)
   @Max(5)
-  facilities?: number;
+  agreementCompliance?: number;
+
+  @ApiPropertyOptional({
+    description: 'Whether you would recommend this person',
+  })
+  @IsOptional()
+  @IsBoolean()
+  wouldRecommend?: boolean;
 }

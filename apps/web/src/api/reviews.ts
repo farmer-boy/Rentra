@@ -24,6 +24,15 @@ export interface PropertyReviewsResponse {
   pagination: { page: number; limit: number; totalPages: number };
 }
 
+export interface ReviewEligibility {
+  agreementId: string;
+  eligible: boolean;
+  alreadyReviewed: boolean;
+  reviewType: 'LANDLORD' | 'TENANT';
+  target: { id: string; fullName: string };
+  reason: string | null;
+}
+
 export const reviewsAPI = {
   getAll: async (): Promise<Review[]> =>
     (await api.get<{ data: Review[] }>('/reviews')).data.data,
@@ -35,16 +44,29 @@ export const reviewsAPI = {
     (await api.post<{ data: Review }>('/reviews', data)).data.data,
 
   getForUser: async (userId: string) =>
-    (
-      await api.get(`/users/${userId}/reviews`)
-    ).data,
+    (await api.get(`/reviews/user/${userId}`)).data,
+  getMyReceived: async () => (await api.get('/reviews/my')).data,
+  getMySubmitted: async (): Promise<Review[]> =>
+    (await api.get<{ data: Review[] }>('/reviews/my-submitted')).data.data,
+  getEligibility: async (agreementId: string): Promise<ReviewEligibility> =>
+    (await api.get<ReviewEligibility>(`/reviews/eligibility/${agreementId}`))
+      .data,
+  getForAgreement: async (agreementId: string): Promise<Review[]> =>
+    (await api.get<{ data: Review[] }>(`/reviews/agreement/${agreementId}`))
+      .data.data,
   getForProperty: async (
     propertyId: string,
     params: Record<string, unknown> = {},
   ): Promise<PropertyReviewsResponse> =>
-    (await api.get<PropertyReviewsResponse>(`/properties/${propertyId}/reviews`, { params })).data,
+    (
+      await api.get<PropertyReviewsResponse>(
+        `/properties/${propertyId}/reviews`,
+        { params },
+      )
+    ).data,
   getForListing: async (listingId: string) =>
-    (await api.get<{ data: Review[] }>(`/reviews/listing/${listingId}`)).data.data,
+    (await api.get<{ data: Review[] }>(`/reviews/listing/${listingId}`)).data
+      .data,
   getListingSummary: async (listingId: string): Promise<ListingReviewSummary> =>
     (await api.get<ListingReviewSummary>(`/reviews/listing/${listingId}`)).data,
   remove: async (id: string) => (await api.delete(`/reviews/${id}`)).data,

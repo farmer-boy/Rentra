@@ -28,6 +28,7 @@ export interface User {
   trustScore: number;
   isVerified: boolean;
   createdAt: string;
+  avatarUrl?: string | null;
 }
 
 export interface AuthState {
@@ -37,7 +38,7 @@ export interface AuthState {
   isInitialized: boolean;
   login: (user: User, token: string) => void;
   updateUser: (user: Partial<User>) => void;
-  logout: () => void;
+  logout: () => boolean;
   initialize: () => Promise<void>;
 }
 
