@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AgreementAmendmentStatus, AgreementTerminationRequestStatus, AgreementTerminationResponseDecision, AgreementStatus, NotificationType, Prisma, Role, TrustSource } from '@prisma/client';
+import { AgreementAmendmentStatus, AgreementTerminationRequestStatus, AgreementTerminationResponseDecision, AgreementStatus, NotificationType, Prisma, RentalRequestStatus, Role, TrustSource } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { TrustScoreService } from '../trust-score/trust-score.service';
 import { TerminateAgreementDto } from './dto/terminate-agreement.dto';
@@ -163,7 +163,7 @@ export class AgreementsService {
   async respondToTerminationRequest(id: string, requestId: string, userId: string, dto: RespondTerminationRequestDto) {
     const agreement = await this.prisma.agreement.findUnique({
       where: { id },
-      select: { id: true, listingId: true, propertyId: true, tenantId: true, landlordId: true, status: true, endDate: true, listing: { select: { propertyId: true, title: true } }, property: { select: { title: true } } },
+      select: { id: true, listingId: true, propertyId: true, rentalRequestId: true, tenantId: true, landlordId: true, status: true, endDate: true, listing: { select: { propertyId: true, title: true } }, property: { select: { title: true } } },
     });
     if (!agreement) throw new NotFoundException('Agreement not found');
     this.assertParticipant(agreement.tenantId, agreement.landlordId, userId);
@@ -204,6 +204,15 @@ export class AgreementsService {
       });
       if (approved) {
         await transaction.agreement.update({ where: { id }, data: { status: AgreementStatus.TERMINATED, terminationReason: request.requestReason } });
+        if (agreement.rentalRequestId) {
+          await transaction.rentalRequest.updateMany({
+            where: {
+              id: agreement.rentalRequestId,
+              status: RentalRequestStatus.ACCEPTED,
+            },
+            data: { status: RentalRequestStatus.CANCELLED },
+          });
+        }
       } else {
         const title = agreement.property?.title ?? agreement.listing?.title ?? 'Rental property';
         await this.notifyUnlessViewing(transaction, id, request.requestedById, {

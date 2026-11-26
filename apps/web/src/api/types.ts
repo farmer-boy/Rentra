@@ -39,11 +39,9 @@ export interface AuthResponse {
 
 export interface TrustScore {
   userId: string;
-  overallScore: number;
-  responseRate: number;
-  verificationLevel: string;
-  createdAt: string;
-  updatedAt: string;
+  trustScore: number;
+  breakdown: Record<string, number>;
+  calculatedAt: string;
 }
 
 // Listing types
@@ -220,6 +218,13 @@ export interface CreateReviewRequest {
   propertyCare?: number;
   cleanliness?: number;
   agreementCompliance?: number;
+    responsiveness?: number;
+    propertyAccuracy?: number;
+    agreementFairness?: number;
+    privacy?: number;
+    ruleFollowing?: number;
+    moveOut?: number;
+    quickTags?: string[];
   wouldRecommend?: boolean;
 }
 

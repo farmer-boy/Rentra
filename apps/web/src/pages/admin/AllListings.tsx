@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import Card from '../../components/ui/Card';
 import { FileText } from 'lucide-react';
 import { adminAPI, type AdminListingRecord } from '../../api/admin';
 
 const AdminListings = () => {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
+  const [verificationFilter, setVerificationFilter] = useState<'ALL' | 'UNVERIFIED'>('ALL');
   const { data, isFetching, isError } = useQuery({
-    queryKey: ['admin', 'listings', { page, limit: 20 }],
-    queryFn: () => adminAPI.getAllListings({ page, limit: 20 }),
+    queryKey: ['admin', 'listings', { page, limit: 20, verificationFilter }],
+    queryFn: () => adminAPI.getAllListings({ page, limit: 20, ...(verificationFilter === 'UNVERIFIED' ? { verificationStatus: 'UNVERIFIED' } : {}) }),
   });
   const listings: AdminListingRecord[] = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -40,6 +43,10 @@ const AdminListings = () => {
       <div>
         <h1 className="text-3xl font-bold text-gray-900  mb-2">All Listings</h1>
         <p className="text-gray-600 ">Manage and moderate all property listings</p>
+        <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Listing verification filter">
+          <button type="button" role="tab" aria-selected={verificationFilter === 'ALL'} onClick={() => { setVerificationFilter('ALL'); setPage(1); }} className={`rounded-lg border px-4 py-2 text-sm font-semibold ${verificationFilter === 'ALL' ? 'border-blue-600 bg-blue-600 text-white' : 'bg-surface text-text'}`}>All listings</button>
+          <button type="button" role="tab" aria-selected={verificationFilter === 'UNVERIFIED'} onClick={() => { setVerificationFilter('UNVERIFIED'); setPage(1); }} className={`rounded-lg border px-4 py-2 text-sm font-semibold ${verificationFilter === 'UNVERIFIED' ? 'border-amber-600 bg-amber-600 text-white' : 'bg-surface text-text'}`}>Unverified</button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-4">
@@ -73,13 +80,14 @@ const AdminListings = () => {
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Price</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Listing status</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-900 ">Publication</th>
+                {verificationFilter === 'UNVERIFIED' && <th className="text-left py-3 px-4 font-semibold text-gray-900">Review</th>}
               </tr>
             </thead>
             <tbody>
               {isFetching && listings.length === 0 ? (
-                <tr><td colSpan={6} className="py-8 text-center text-gray-500">Loading listings...</td></tr>
+                <tr><td colSpan={verificationFilter === 'UNVERIFIED' ? 7 : 6} className="py-8 text-center text-gray-500">Loading listings...</td></tr>
               ) : listings.length === 0 ? (
-                <tr><td colSpan={6} className="py-8 text-center text-gray-500">{error ? 'Listing records are unavailable.' : 'No listings found.'}</td></tr>
+                <tr><td colSpan={verificationFilter === 'UNVERIFIED' ? 7 : 6} className="py-8 text-center text-gray-500">{error ? 'Listing records are unavailable.' : verificationFilter === 'UNVERIFIED' ? 'No unverified properties found.' : 'No listings found.'}</td></tr>
               ) : listings.map((listing) => (
                 <tr key={listing.id} className="border-b border-gray-100  hover:bg-gray-50  transition">
                   <td className="py-3 px-4">
@@ -108,6 +116,7 @@ const AdminListings = () => {
                       {listing.publicationStatus.replaceAll('_', ' ')}
                     </span>
                   </td>
+                  {verificationFilter === 'UNVERIFIED' && <td className="py-3 px-4"><div className="space-y-1"><span className={`block px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(listing.property?.verificationStatus ?? 'UNVERIFIED')}`}>{(listing.property?.verificationStatus ?? 'UNVERIFIED').replaceAll('_', ' ')}</span>{listing.propertyId && <button type="button" onClick={() => navigate(`/admin/property-verification?propertyId=${encodeURIComponent(listing.propertyId!)}`)} className="text-xs font-semibold text-blue-700 underline">Review / approve / reject</button>}</div></td>}
                 </tr>
               ))}
             </tbody>

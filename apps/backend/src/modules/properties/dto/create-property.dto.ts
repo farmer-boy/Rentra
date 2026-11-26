@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
+  IsBoolean,
   IsInt,
   IsLatitude,
   IsLongitude,
@@ -13,6 +14,7 @@ import {
 } from 'class-validator';
 import {
   FurnishedStatus,
+  HostelGenderPolicy,
   ListingAvailability,
   PropertyType,
   RentalDuration,
@@ -69,6 +71,34 @@ export class CreatePropertyDto {
   @IsInt()
   @Min(0)
   areaSizeSqft?: number;
+
+  @ApiPropertyOptional({ minimum: 0 })
+  @IsOptional() @Type(() => Number) @Min(0)
+  areaSizeMarla?: number;
+
+  @ApiPropertyOptional({ maxLength: 24 })
+  @IsOptional() @IsString() @MaxLength(24)
+  areaSizeUnit?: string;
+
+  @ApiPropertyOptional({ maxLength: 40 })
+  @IsOptional() @IsString() @MaxLength(40)
+  floor?: string;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 50, description: 'Hostel beds in each room.' })
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(50)
+  hostelBedsPerRoom?: number;
+
+  @ApiPropertyOptional({ minimum: 0 })
+  @IsOptional() @Type(() => Number) @IsInt() @Min(0)
+  hostelRentPerBed?: number;
+
+  @ApiPropertyOptional({ enum: HostelGenderPolicy })
+  @IsOptional() @IsEnum(HostelGenderPolicy)
+  hostelGenderPolicy?: HostelGenderPolicy;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional() @IsBoolean()
+  mealsIncluded?: boolean;
 
   @ApiPropertyOptional({ enum: FurnishedStatus })
   @IsOptional()

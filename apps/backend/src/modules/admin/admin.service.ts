@@ -793,10 +793,9 @@ export class AdminService {
       }),
       ...(query.verificationStatus && {
         property: {
-          verificationStatus: this.enumFilter(
-            query.verificationStatus,
-            Object.values(VerificationStatus),
-          ),
+          verificationStatus: query.verificationStatus === 'UNVERIFIED'
+            ? { in: [VerificationStatus.UNVERIFIED, VerificationStatus.PENDING] }
+            : this.enumFilter(query.verificationStatus, Object.values(VerificationStatus)),
         },
       }),
       ...this.dateRange(query),
@@ -891,6 +890,7 @@ export class AdminService {
       unpublishedListings,
       approvedListings,
       pendingReviewListings,
+      unverifiedListings,
       totalAgreements,
       activeAgreements,
       totalDisputes,
@@ -900,6 +900,7 @@ export class AdminService {
       totalRequests,
       openReports,
       pendingVerifications,
+      unsubmittedPropertyVerifications,
       paymentsByStatus,
       trends,
     ] = await Promise.all([
@@ -912,6 +913,7 @@ export class AdminService {
       this.prisma.listing.count({ where: { publicationStatus: ListingPublicationStatus.UNPUBLISHED } }),
       this.prisma.listing.count({ where: { property: { verificationStatus: VerificationStatus.APPROVED } } }),
       this.prisma.listing.count({ where: { property: { verificationStatus: VerificationStatus.PENDING } } }),
+      this.prisma.listing.count({ where: { property: { verificationStatus: { in: [VerificationStatus.UNVERIFIED, VerificationStatus.PENDING] } } } }),
       this.prisma.agreement.count(),
       this.prisma.agreement.count({ where: { status: 'ACTIVE' } }),
       this.prisma.dispute.count(),
@@ -922,6 +924,15 @@ export class AdminService {
       this.prisma.report.count({ where: { status: ReportStatus.OPEN } }),
       this.prisma.verificationSubmission.count({
         where: { status: VerificationStatus.PENDING },
+      }),
+      this.prisma.property.count({
+        where: {
+          status: { in: [PropertyStatus.PENDING_VERIFICATION, PropertyStatus.ACTIVE] },
+          verificationStatus: { in: [VerificationStatus.UNVERIFIED, VerificationStatus.PENDING] },
+          verificationSubmissions: {
+            none: { kind: VerificationKind.PROPERTY, status: VerificationStatus.PENDING },
+          },
+        },
       }),
       this.prisma.payment.groupBy({
         by: ['status', 'currency'],
@@ -955,6 +966,7 @@ export class AdminService {
         unpublished: unpublishedListings,
         approved: approvedListings,
         pendingReview: pendingReviewListings,
+        unverified: unverifiedListings,
       },
       agreements: {
         total: totalAgreements,
@@ -967,7 +979,7 @@ export class AdminService {
       bookings: { total: totalBookings, completed: completedBookings },
       rentalRequests: { total: totalRequests },
       reports: { open: openReports },
-      verifications: { pending: pendingVerifications },
+      verifications: { pending: pendingVerifications + unsubmittedPropertyVerifications },
       payments: {
         byStatus: paymentTotals,
         note: 'Payment amounts are gross transaction volume, not platform revenue.',

@@ -2,6 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ReviewType } from '@prisma/client';
 import {
   IsBoolean,
+  IsArray,
+  ArrayMaxSize,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -53,10 +55,10 @@ export class CreateReviewDto {
   @Max(5)
   rating?: number;
 
-  @ApiPropertyOptional({ maxLength: 2000 })
+  @ApiPropertyOptional({ maxLength: 500 })
   @IsOptional()
   @IsString()
-  @MaxLength(2000)
+  @MaxLength(500)
   comment?: string;
 
   @ApiPropertyOptional({ minimum: 1, maximum: 5 })
@@ -149,6 +151,34 @@ export class CreateReviewDto {
   @Min(1)
   @Max(5)
   agreementCompliance?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional() @IsInt() @Min(1) @Max(5)
+  responsiveness?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional() @IsInt() @Min(1) @Max(5)
+  propertyAccuracy?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional() @IsInt() @Min(1) @Max(5)
+  agreementFairness?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional() @IsInt() @Min(1) @Max(5)
+  privacy?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional() @IsInt() @Min(1) @Max(5)
+  ruleFollowing?: number;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 5 })
+  @IsOptional() @IsInt() @Min(1) @Max(5)
+  moveOut?: number;
+
+  @ApiPropertyOptional({ type: [String], maxItems: 5 })
+  @IsOptional() @IsArray() @ArrayMaxSize(5) @IsString({ each: true })
+  quickTags?: string[];
 
   @ApiPropertyOptional({
     description: 'Whether you would recommend this person',

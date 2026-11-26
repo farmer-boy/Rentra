@@ -8,6 +8,7 @@ import { getApiErrorMessage } from '../../api/api-error';
 
 type MenuSection = 'account-preferences' | 'sign-in-security' | 'data-privacy' | 'notifications';
 type AccountSubMenu = 'profile-info' | 'display' | 'general' | 'syncing' | 'account-management';
+type LanguagePreference = 'en' | 'ur';
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -29,6 +30,13 @@ export default function SettingsPage() {
   });
   const [activeSubMenu, setActiveSubMenu] = useState<AccountSubMenu>('profile-info');
   const [themeDisplayMode, setThemeDisplayMode] = useState<'device' | 'dark' | 'light'>(themeMode);
+  const [languagePreference, setLanguagePreference] = useState<LanguagePreference>(() => {
+    try {
+      return localStorage.getItem('rentra.language') === 'ur' ? 'ur' : 'en';
+    } catch {
+      return 'en';
+    }
+  });
   
   // Profile form state
   const [profileData, setProfileData] = useState({
@@ -75,6 +83,15 @@ export default function SettingsPage() {
   const handleThemeChange = (mode: 'device' | 'dark' | 'light') => {
     setThemeDisplayMode(mode);
     setThemeMode(mode);
+  };
+
+  const handleLanguageChange = (language: LanguagePreference) => {
+    setLanguagePreference(language);
+    try {
+      localStorage.setItem('rentra.language', language);
+    } catch (error) {
+      console.warn('Unable to save the language preference.', error);
+    }
   };
 
   const renderAccountPreferencesContent = () => {
@@ -200,7 +217,19 @@ export default function SettingsPage() {
           <div className="space-y-4 md:space-y-6">
             <div>
               <h3 className={`text-xs md:text-sm font-semibold text-text mb-3 md:mb-4`}>General Preferences</h3>
-              <p className={`text-xs text-text-muted`}>General account preferences are not currently supported by the settings API.</p>
+              <label htmlFor="language-preference" className="block max-w-md">
+                <span className="block text-xs font-medium text-text">Language</span>
+                <span className="mt-1 block text-xs text-text-muted">Choose your preferred language. This preference is saved in this browser; most Rentra screens currently remain in English.</span>
+                <select
+                  id="language-preference"
+                  value={languagePreference}
+                  onChange={(event) => handleLanguageChange(event.target.value as LanguagePreference)}
+                  className="mt-3 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text"
+                >
+                  <option value="en">English</option>
+                  <option value="ur">اردو</option>
+                </select>
+              </label>
             </div>
           </div>
         );

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ImagePlus, Trash2 } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, ImagePlus, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { listingsAPI } from '../../api/listings';
 import { propertiesAPI, type PropertyRecord } from '../../api/properties';
@@ -9,6 +9,7 @@ import { verificationAPI } from '../../api/verification';
 import Card from '../../components/ui/Card';
 import { useAuthStore } from '../../store/authStore';
 import { AREA_UNITS, convertAreaToSquareFeet, getAreaUnit } from '../../utils/areaUnits';
+import PropertyLocationPicker from '../../components/maps/PropertyLocationPicker';
 
 const PROPERTY_TYPES = [
   ['HOUSE', 'House'],
@@ -29,8 +30,11 @@ const PROPERTY_TYPES = [
 const RENTAL_MODES = ['DAILY', 'NIGHTLY', 'WEEKLY', 'MONTHLY', 'LONG_TERM'] as const;
 const AMENITY_SUGGESTIONS = ['Wi-Fi', 'Parking', 'Air conditioning', 'Kitchen', 'Heating', 'Laundry', 'Security'];
 const STEPS = ['Property', 'Location', 'Pricing', 'Facilities', 'Preview'];
-const MAX_IMAGES = 12;
+const MIN_IMAGES = 5;
+const MAX_IMAGES = 15;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const PHOTO_CATEGORIES = [['EXTERIOR', 'Exterior'], ['MAIN_ROOM', 'Main room'], ['KITCHEN', 'Kitchen'], ['BATHROOM', 'Bathroom'], ['BEDROOM', 'Bedroom'], ['OTHER', 'Other']] as const;
+const fileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
 
 interface PropertyForm {
   title: string;
@@ -43,6 +47,10 @@ interface PropertyForm {
   bathrooms: string;
   areaSize: string;
   areaSizeUnit: string;
+  floor: string;
+  hostelBedsPerRoom: string;
+  hostelGenderPolicy: string;
+  mealsIncluded: boolean;
   furnishedStatus: string;
   country: string;
   province: string;
@@ -50,6 +58,8 @@ interface PropertyForm {
   area: string;
   blockSector: string;
   address: string;
+  latitude: string;
+  longitude: string;
   rules: string;
   amenities: string;
   evidenceUrls: string;
@@ -70,6 +80,12 @@ interface EditableProperty extends PropertyRecord {
   securityDeposit?: number | null;
   bathrooms?: number;
   areaSizeSqft?: number | null;
+  areaSizeMarla?: number | null;
+  areaSizeUnit?: string | null;
+  floor?: string | null;
+  hostelBedsPerRoom?: number | null;
+  hostelGenderPolicy?: string | null;
+  mealsIncluded?: boolean;
   furnishedStatus?: string;
   rules?: string | null;
   images?: ExistingImage[];
@@ -94,6 +110,10 @@ const emptyForm = (): PropertyForm => ({
   bathrooms: '1',
   areaSize: '',
   areaSizeUnit: 'sqft',
+  floor: '',
+  hostelBedsPerRoom: '4',
+  hostelGenderPolicy: '',
+  mealsIncluded: false,
   furnishedStatus: 'UNFURNISHED',
   country: 'Pakistan',
   province: '',
@@ -101,6 +121,8 @@ const emptyForm = (): PropertyForm => ({
   area: '',
   blockSector: '',
   address: '',
+  latitude: '',
+  longitude: '',
   rules: '',
   amenities: '',
   evidenceUrls: '',
@@ -120,8 +142,12 @@ const toForm = (property: EditableProperty): PropertyForm => ({
   securityDeposit: property.securityDeposit == null ? '' : String(property.securityDeposit),
   bedrooms: String(property.bedrooms ?? 0),
   bathrooms: String(property.bathrooms ?? 1),
-  areaSize: property.areaSizeSqft == null ? '' : String(property.areaSizeSqft),
-  areaSizeUnit: 'sqft',
+  areaSize: property.areaSizeUnit?.startsWith('marla') && property.areaSizeMarla != null ? String(property.areaSizeMarla) : property.areaSizeSqft == null ? '' : String(property.areaSizeSqft),
+  areaSizeUnit: property.areaSizeUnit ?? 'sqft',
+  floor: String(property.floor ?? ''),
+  hostelBedsPerRoom: String(property.hostelBedsPerRoom ?? 4),
+  hostelGenderPolicy: String(property.hostelGenderPolicy ?? ''),
+  mealsIncluded: Boolean(property.mealsIncluded),
   furnishedStatus: property.furnishedStatus ?? 'UNFURNISHED',
   country:
     (typeof property.country === 'string' ? property.country : null) ??
@@ -132,6 +158,8 @@ const toForm = (property: EditableProperty): PropertyForm => ({
   area: property.area ?? '',
   blockSector: '',
   address: property.address ?? '',
+  latitude: property.latitude == null ? '' : String(property.latitude),
+  longitude: property.longitude == null ? '' : String(property.longitude),
   rules: property.rules ?? '',
   amenities: property.amenities?.map((item) => item.amenity?.name).filter(Boolean).join(', ') ?? '',
   evidenceUrls: '',
@@ -145,6 +173,7 @@ export default function LandlordPostProperty() {
   const [form, setForm] = useState<PropertyForm>(emptyForm);
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
+  const [photoTags, setPhotoTags] = useState<Record<string, string>>({});
   const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
   const [initialImages, setInitialImages] = useState<ExistingImage[]>([]);
   const [propertyStatus, setPropertyStatus] = useState<string>();
@@ -178,7 +207,11 @@ export default function LandlordPostProperty() {
           const property = await propertiesAPI.details<EditableProperty>(propertyId);
           if (!active) return;
           setForm(toForm(property));
-          setExistingImages(property.images ?? []);
+          const normalizedImages = (property.images ?? []).map((image) => ({
+            ...image,
+            altText: PHOTO_CATEGORIES.some(([value]) => value === image.altText) ? image.altText : 'OTHER',
+          }));
+          setExistingImages(normalizedImages);
           setInitialImages(property.images ?? []);
           setPropertyStatus(property.status);
           setVerificationStatus(property.verificationStatus);
@@ -257,8 +290,10 @@ export default function LandlordPostProperty() {
       if (!form.title.trim()) errors.push('property title');
       if (!form.type) errors.push('property type');
       if (!form.description.trim()) errors.push('description');
-      if (!Number.isInteger(Number(form.bedrooms)) || Number(form.bedrooms) < 0) errors.push('bedrooms');
-      if (!Number.isInteger(Number(form.bathrooms)) || Number(form.bathrooms) < 0) errors.push('bathrooms');
+      if (form.type !== 'HOSTEL' && !Number.isInteger(Number(form.bedrooms)) || form.type !== 'HOSTEL' && Number(form.bedrooms) < 0) errors.push('bedrooms');
+      if (form.type !== 'HOSTEL' && (!Number.isInteger(Number(form.bathrooms)) || Number(form.bathrooms) < 0)) errors.push('bathrooms');
+      if (form.type === 'HOSTEL' && (!Number.isInteger(Number(form.hostelBedsPerRoom)) || Number(form.hostelBedsPerRoom) < 1)) errors.push('beds per room');
+      if (form.type === 'HOSTEL' && !form.hostelGenderPolicy) errors.push('hostel gender policy');
     }
     if (targetStep === 1) {
       if (!form.country.trim()) errors.push('country');
@@ -266,6 +301,9 @@ export default function LandlordPostProperty() {
       if (!form.city.trim()) errors.push('city');
       if (!form.area.trim()) errors.push('area / neighborhood');
       if (!form.address.trim()) errors.push('street address');
+      if ((form.latitude.trim() === '') !== (form.longitude.trim() === '')) errors.push('both map coordinates or neither');
+      if (form.latitude.trim() && (!Number.isFinite(Number(form.latitude)) || Number(form.latitude) < -90 || Number(form.latitude) > 90)) errors.push('a valid map latitude');
+      if (form.longitude.trim() && (!Number.isFinite(Number(form.longitude)) || Number(form.longitude) < -180 || Number(form.longitude) > 180)) errors.push('a valid map longitude');
     }
     if (targetStep === 2) {
       if (!Number.isInteger(price) || price < 0) errors.push('a whole-number rent of zero or more');
@@ -273,6 +311,9 @@ export default function LandlordPostProperty() {
       if (form.areaSize && (!Number.isFinite(Number(form.areaSize)) || Number(form.areaSize) < 0)) errors.push('a valid property area');
     }
     if (targetStep === 3) {
+      const count = existingImages.length + files.length;
+      if (count < MIN_IMAGES) errors.push(`at least ${MIN_IMAGES} property photos`);
+      if (count > MAX_IMAGES) errors.push(`no more than ${MAX_IMAGES} property photos`);
       const evidence = form.evidenceUrls.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
       if (evidence.length > 10) errors.push('no more than 10 verification links');
       if (evidence.some((url) => {
@@ -304,15 +345,28 @@ export default function LandlordPostProperty() {
     }
   };
 
-  const chooseFiles = (selected: FileList | null) => {
+  const chooseFiles = async (selected: FileList | null) => {
     const picked = Array.from(selected ?? []);
-    const allowed = picked.filter((file) => file.type.startsWith('image/') && file.size <= MAX_IMAGE_BYTES);
+    const validTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    const allowed = picked.filter((file) => validTypes.has(file.type) && file.size <= MAX_IMAGE_BYTES);
     if (allowed.length !== picked.length) {
-      toast.error('Only image files up to 10 MB each can be uploaded.');
+      toast.error('Photos must be JPG, PNG, or WebP and 10 MB or smaller.');
     }
-    const remaining = Math.max(0, MAX_IMAGES - existingImages.length);
-    if (allowed.length > remaining) toast.error(`A property can have at most ${MAX_IMAGES} images.`);
-    setFiles(allowed.slice(0, remaining));
+    const dimensionChecked: File[] = [];
+    for (const file of allowed) {
+      try {
+        const bitmap = await createImageBitmap(file);
+        const largeEnough = bitmap.width >= 720 && bitmap.height >= 720;
+        bitmap.close();
+        if (largeEnough) dimensionChecked.push(file);
+        else toast.error(`${file.name} must be at least 720 × 720 pixels.`);
+      } catch { toast.error(`${file.name} could not be read as an image.`); }
+    }
+    const remaining = Math.max(0, MAX_IMAGES - existingImages.length - files.length);
+    if (dimensionChecked.length > remaining) toast.error(`A property can have at most ${MAX_IMAGES} photos.`);
+    const next = dimensionChecked.slice(0, remaining);
+    setFiles((current) => [...current, ...next]);
+    setPhotoTags((current) => ({ ...current, ...Object.fromEntries(next.map((file) => [fileKey(file), 'OTHER'])) }));
   };
 
   const moveImage = <T,>(items: T[], index: number, direction: -1 | 1, setItems: (next: T[]) => void) => {
@@ -326,10 +380,16 @@ export default function LandlordPostProperty() {
   const saveProperty = async (submitForVerification: boolean) => {
     if (submitLock.current) return;
     const errors = [...validationErrors(0), ...validationErrors(1), ...validationErrors(2), ...validationErrors(3)];
+    if (submitForVerification) {
+      const count = existingImages.length + files.length;
+      if (count < MIN_IMAGES) errors.push(`at least ${MIN_IMAGES} photos`);
+      if (count > MAX_IMAGES) errors.push(`no more than ${MAX_IMAGES} photos`);
+    }
     if (errors.length) {
-      setSubmitError(`Please correct: ${[...new Set(errors)].join(', ')}.`);
-      toast.error('Some property details need attention before saving.');
-      setStep(errors.some((item) => ['country', 'province', 'city', 'area / neighborhood', 'street address'].includes(item)) ? 1 : errors.some((item) => item.includes('rent') || item.includes('deposit') || item.includes('area')) ? 2 : 0);
+      const missingDetails = [...new Set(errors)];
+      setSubmitError(`Please complete or correct: ${missingDetails.join(', ')}.`);
+      toast.error(`Please complete: ${missingDetails.join(', ')}.`);
+      setStep(errors.some((item) => ['country', 'province', 'city', 'area / neighborhood', 'street address'].includes(item)) ? 1 : errors.some((item) => item.includes('rent') || item.includes('deposit') || item.includes('area')) ? 2 : errors.some((item) => item.includes('photos') || item.includes('verification link') || item.includes('HTTPS')) ? 3 : 0);
       return;
     }
 
@@ -349,6 +409,15 @@ export default function LandlordPostProperty() {
         bathrooms: Number(form.bathrooms),
         ...(form.areaSize !== '' && {
           areaSizeSqft: Math.round(convertAreaToSquareFeet(Number(form.areaSize), form.areaSizeUnit)),
+          areaSizeUnit: form.areaSizeUnit,
+        }),
+        ...(form.areaSizeUnit.startsWith('marla') && form.areaSize !== '' && { areaSizeMarla: Number(form.areaSize) }),
+        ...(form.floor.trim() && { floor: form.floor.trim() }),
+        ...(form.type === 'HOSTEL' && {
+          hostelBedsPerRoom: Number(form.hostelBedsPerRoom),
+          hostelRentPerBed: Number(form.price),
+          hostelGenderPolicy: form.hostelGenderPolicy,
+          mealsIncluded: form.mealsIncluded,
         }),
         furnishedStatus: form.furnishedStatus,
         country: form.country.trim(),
@@ -357,6 +426,7 @@ export default function LandlordPostProperty() {
         area: form.area.trim(),
         ...(form.blockSector.trim() && { blockSector: form.blockSector.trim() }),
         address: form.address.trim(),
+        ...(form.latitude.trim() && form.longitude.trim() && { latitude: Number(form.latitude), longitude: Number(form.longitude) }),
         rules: form.rules.trim(),
       };
 
@@ -377,13 +447,14 @@ export default function LandlordPostProperty() {
         propertiesAPI.updateImage(savedProperty!.id, image.id, {
           sortOrder: index,
           isPrimary: index === 0,
+          altText: image.altText ?? undefined,
         }),
       ));
 
       if (files.length) {
         const body = new FormData();
         files.forEach((file) => body.append('files', file));
-        body.append('altText', 'Property photo');
+        body.append('photoCategories', JSON.stringify(files.map((file) => photoTags[fileKey(file)] ?? 'OTHER')));
         await propertiesAPI.uploadImages(savedProperty.id, body);
       }
 
@@ -467,13 +538,16 @@ export default function LandlordPostProperty() {
             </select>
           </label>
           <div className="grid gap-4 sm:grid-cols-3">
-            <label className="block text-sm font-medium">Bedrooms<input className={inputClass} type="number" min="0" step="1" value={form.bedrooms} onChange={(event) => update('bedrooms', event.target.value)} /></label>
-            <label className="block text-sm font-medium">Bathrooms<input className={inputClass} type="number" min="0" step="1" value={form.bathrooms} onChange={(event) => update('bathrooms', event.target.value)} /></label>
-            <label className="block text-sm font-medium">Furnishing
+            {form.type === 'HOSTEL' ? <label className="block text-sm font-medium">Beds per room<input className={inputClass} type="number" min="1" max="50" step="1" value={form.hostelBedsPerRoom} onChange={(event) => update('hostelBedsPerRoom', event.target.value)} /></label> : <label className="block text-sm font-medium">Bedrooms<input className={inputClass} type="number" min="0" step="1" value={form.bedrooms} onChange={(event) => update('bedrooms', event.target.value)} /></label>}
+            {form.type !== 'HOSTEL' && <label className="block text-sm font-medium">Bathrooms<input className={inputClass} type="number" min="0" step="1" value={form.bathrooms} onChange={(event) => update('bathrooms', event.target.value)} /></label>}
+            {form.type !== 'HOSTEL' && <label className="block text-sm font-medium">Furnishing
               <select className={inputClass} value={form.furnishedStatus} onChange={(event) => update('furnishedStatus', event.target.value)}>
                 {['FURNISHED', 'SEMI_FURNISHED', 'UNFURNISHED'].map((value) => <option key={value} value={value}>{statusLabel(value)}</option>)}
               </select>
-            </label>
+            </label>}
+            {['HOUSE', 'APARTMENT', 'FLAT', 'PORTION', 'STUDIO'].includes(form.type) && <label className="block text-sm font-medium">Floor<input className={inputClass} value={form.floor} onChange={(event) => update('floor', event.target.value)} placeholder="Ground, 1st, upper, lower" /></label>}
+            {form.type === 'HOSTEL' && <label className="block text-sm font-medium">Accommodation<select className={inputClass} value={form.hostelGenderPolicy} onChange={(event) => update('hostelGenderPolicy', event.target.value)}><option value="">Choose boys / girls / mixed</option><option value="MALE">Boys</option><option value="FEMALE">Girls</option><option value="MIXED">Mixed</option></select></label>}
+            {form.type === 'HOSTEL' && <label className="flex items-center gap-2 text-sm font-medium"><input type="checkbox" checked={form.mealsIncluded} onChange={(event) => update('mealsIncluded', event.target.checked)} />Meals included</label>}
           </div>
           <label className="block text-sm font-medium">Description<textarea className={inputClass} maxLength={5000} rows={5} value={form.description} onChange={(event) => update('description', event.target.value)} /></label>
         </Card>
@@ -482,7 +556,7 @@ export default function LandlordPostProperty() {
       {step === 1 && (
         <Card className="space-y-4 p-5">
           <h2 className="text-lg font-bold">Location</h2>
-          <p className="text-sm text-gray-600 ">Enter the property location. The backend resolves these names into Rentra’s location hierarchy; coordinates are optional and are not guessed.</p>
+          <p className="text-sm text-gray-600 ">Enter the written address, then click the map to pin the exact property location. The pin is saved with the property.</p>
           <div className="grid gap-4 sm:grid-cols-2">
             {([
               ['country', 'Country'],
@@ -497,6 +571,7 @@ export default function LandlordPostProperty() {
               </label>
             ))}
           </div>
+          <PropertyLocationPicker latitude={form.latitude} longitude={form.longitude} onChange={(latitude, longitude) => setForm((current) => ({ ...current, latitude, longitude }))} />
         </Card>
       )}
 
@@ -509,14 +584,14 @@ export default function LandlordPostProperty() {
                 {RENTAL_MODES.map((value) => <option key={value} value={value}>{statusLabel(value)}</option>)}
               </select>
             </label>
-            <label className="block text-sm font-medium">{form.rentalMode === 'NIGHTLY' || form.rentalMode === 'DAILY' ? 'Daily / nightly price (PKR)' : 'Rent (PKR)'}
+            <label className="block text-sm font-medium">{form.type === 'HOSTEL' ? 'Rent per bed (PKR)' : form.rentalMode === 'NIGHTLY' || form.rentalMode === 'DAILY' ? 'Daily / nightly price (PKR)' : 'Rent (PKR)'}
               <input className={inputClass} type="number" min="0" step="1" value={form.price} onChange={(event) => update('price', event.target.value)} required />
             </label>
             <label className="block text-sm font-medium">Security deposit (PKR, optional)
               <input className={inputClass} type="number" min="0" step="1" value={form.securityDeposit} onChange={(event) => update('securityDeposit', event.target.value)} />
             </label>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium" htmlFor="property-area-size">Property area (optional)</label>
+              <label className="block text-sm font-medium" htmlFor="property-area-size">Property area {['HOUSE', 'APARTMENT', 'FLAT', 'PORTION'].includes(form.type) ? '(sq ft or marla)' : '(optional)'}</label>
               <div className="mt-1 grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                 <input id="property-area-size" className={inputClass.replace('mt-1 ', '')} type="number" min="0" step="0.01" value={form.areaSize} onChange={(event) => update('areaSize', event.target.value)} placeholder="Enter area" />
                 <select className={inputClass.replace('mt-1 ', '')} aria-label="Property area unit" value={form.areaSizeUnit} onChange={(event) => update('areaSizeUnit', event.target.value)}>
@@ -532,24 +607,25 @@ export default function LandlordPostProperty() {
       {step === 3 && (
         <Card className="space-y-4 p-5">
           <h2 className="text-lg font-bold">Amenities, images, and verification evidence</h2>
+          <p className="text-sm text-gray-600">Add at least 5 and no more than 15 photos to continue. Current count: {existingImages.length + files.length}/{MAX_IMAGES}.</p>
           <label className="block text-sm font-medium">Amenities <span className="font-normal text-gray-500">(comma-separated names)</span>
             <input className={inputClass} value={form.amenities} onChange={(event) => update('amenities', event.target.value)} placeholder={AMENITY_SUGGESTIONS.join(', ')} />
           </label>
-          <label className="block text-sm font-medium">Property photos <span className="font-normal text-gray-500">(up to 12 total; image files up to 10 MB each)</span>
-            <input className={`${inputClass} file:mr-3 file:rounded file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5`} type="file" accept="image/*" multiple onChange={(event) => chooseFiles(event.target.files)} />
+          <label className="block text-sm font-medium">Property photos <span className="font-normal text-gray-500">(5–15 for verification; JPG, PNG, WebP; at least 720 × 720 pixels; max 10 MB each)</span>
+            <input className={`${inputClass} file:mr-3 file:rounded file:border-0 file:bg-emerald-50 file:px-3 file:py-1.5`} type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={(event) => void chooseFiles(event.target.files)} />
           </label>
           {(existingImages.length > 0 || files.length > 0) && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {existingImages.map((image, index) => (
                 <div key={image.id} className="overflow-hidden rounded-lg border">
-                  <img src={image.url} alt={image.altText || `Property image ${index + 1}`} className="h-28 w-full object-cover" />
-                  <div className="flex items-center justify-between p-2 text-xs"><span>Saved image {index + 1}</span><span className="flex items-center gap-2"><button type="button" aria-label={`Move saved image ${index + 1} up`} disabled={index === 0} onClick={() => moveImage(existingImages, index, -1, setExistingImages)}><ArrowUp size={14} /></button><button type="button" aria-label={`Move saved image ${index + 1} down`} disabled={index === existingImages.length - 1} onClick={() => moveImage(existingImages, index, 1, setExistingImages)}><ArrowDown size={14} /></button><button type="button" aria-label="Remove saved image" onClick={() => setExistingImages((items) => items.filter((item) => item.id !== image.id))}><Trash2 size={15} /></button></span></div>
+                  <div className="relative"><img src={image.url} alt={image.altText || `Property image ${index + 1}`} className="h-28 w-full object-cover" /><button type="button" aria-label={`Remove saved photo ${index + 1}`} title="Remove photo" onClick={() => setExistingImages((items) => items.filter((item) => item.id !== image.id))} className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white shadow hover:bg-red-600"><X size={14} /></button></div>
+                  <div className="space-y-2 p-2 text-xs"><select className="w-full rounded border px-2 py-1" aria-label={`Saved photo ${index + 1} category`} value={PHOTO_CATEGORIES.some(([value]) => value === image.altText) ? image.altText! : 'OTHER'} onChange={(event) => setExistingImages((items) => items.map((item) => item.id === image.id ? { ...item, altText: event.target.value } : item))}>{PHOTO_CATEGORIES.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select><div className="flex items-center justify-between"><span>Saved photo {index + 1}</span><span className="flex items-center gap-2"><button type="button" aria-label={`Move saved image ${index + 1} up`} disabled={index === 0} onClick={() => moveImage(existingImages, index, -1, setExistingImages)}><ArrowUp size={14} /></button><button type="button" aria-label={`Move saved image ${index + 1} down`} disabled={index === existingImages.length - 1} onClick={() => moveImage(existingImages, index, 1, setExistingImages)}><ArrowDown size={14} /></button></span></div></div>
                 </div>
               ))}
               {files.map((file, index) => (
                 <div key={`${file.name}-${index}`} className="overflow-hidden rounded-lg border">
-                  <img src={imageUrls[index] ?? ''} alt={file.name} className="h-28 w-full object-cover" />
-                  <div className="flex items-center justify-between gap-2 p-2 text-xs"><span className="truncate">{file.name}</span><span className="flex shrink-0 gap-2"><button type="button" aria-label={`Move new image ${index + 1} up`} disabled={index === 0} onClick={() => moveImage(files, index, -1, setFiles)}><ArrowUp size={14} /></button><button type="button" aria-label={`Move new image ${index + 1} down`} disabled={index === files.length - 1} onClick={() => moveImage(files, index, 1, setFiles)}><ArrowDown size={14} /></button></span></div>
+                  <div className="relative"><img src={imageUrls[index] ?? ''} alt={file.name} className="h-28 w-full object-cover" /><button type="button" aria-label={`Remove ${file.name}`} title="Remove photo" onClick={() => { setFiles((items) => items.filter((_, itemIndex) => itemIndex !== index)); setPhotoTags((tags) => { const next = { ...tags }; delete next[fileKey(file)]; return next; }); }} className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white shadow hover:bg-red-600"><X size={14} /></button></div>
+                  <div className="space-y-2 p-2 text-xs"><select className="w-full rounded border px-2 py-1" aria-label={`${file.name} photo category`} value={photoTags[fileKey(file)] ?? 'OTHER'} onChange={(event) => setPhotoTags((tags) => ({ ...tags, [fileKey(file)]: event.target.value }))}>{PHOTO_CATEGORIES.map(([value,label]) => <option key={value} value={value}>{label}</option>)}</select><div className="flex items-center justify-between gap-2"><span className="truncate">{file.name}</span><span className="flex shrink-0 gap-2"><button type="button" aria-label={`Move new image ${index + 1} up`} disabled={index === 0} onClick={() => moveImage(files, index, -1, setFiles)}><ArrowUp size={14} /></button><button type="button" aria-label={`Move new image ${index + 1} down`} disabled={index === files.length - 1} onClick={() => moveImage(files, index, 1, setFiles)}><ArrowDown size={14} /></button></span></div></div>
                 </div>
               ))}
             </div>
@@ -593,7 +669,9 @@ export default function LandlordPostProperty() {
             <button type="button" onClick={() => {
               const errors = validationErrors();
               if (errors.length) {
-                setSubmitError(`Please complete: ${errors.join(', ')}.`);
+                setSubmitError(`Please complete or correct: ${errors.join(', ')}.`);
+                if (errors.some((error) => error.includes('verification link') || error.includes('HTTPS'))) toast.error('Fix the verification evidence links before continuing.');
+                if (step === 3 && errors.some((error) => error.includes('property photos'))) toast.error(`Add ${Math.max(0, MIN_IMAGES - existingImages.length - files.length)} more photo(s) to continue.`);
                 return;
               }
               setSubmitError('');

@@ -1,6 +1,7 @@
 import { CreateRoomTypeDto } from './dto/create-room-type.dto';
 import {
   Body,
+  BadRequestException,
   Controller,
   Delete,
   Get,
@@ -255,10 +256,18 @@ export class PropertiesController {
     return this.propertiesService.remove(id, user.sub);
   }
 
+  @Post(':id/repost')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new listing from a verified property after its agreement ends' })
+  repost(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.propertiesService.repost(id, user.sub);
+  }
+
   @Post(':id/images')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    FilesInterceptor('files', 12, {
+    FilesInterceptor('files', 15, {
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
@@ -270,6 +279,7 @@ export class PropertiesController {
       properties: {
         files: { type: 'array', items: { type: 'string', format: 'binary' } },
         altText: { type: 'string' },
+        photoCategories: { type: 'string', description: 'JSON array of category values, one for each file.' },
       },
       required: ['files'],
     },
@@ -280,8 +290,19 @@ export class PropertiesController {
     @CurrentUser() user: JwtPayload,
     @UploadedFiles() files: ImageUploadFile[],
     @Body('altText') altText?: string,
+    @Body('photoCategories') photoCategoriesJson?: string,
   ) {
-    return this.propertiesService.addImages(id, user.sub, files ?? [], altText);
+    let photoCategories: string[] | undefined;
+    if (photoCategoriesJson) {
+      try {
+        const parsed: unknown = JSON.parse(photoCategoriesJson);
+        if (!Array.isArray(parsed) || !parsed.every((value) => typeof value === 'string')) throw new Error('invalid');
+        photoCategories = parsed;
+      } catch {
+        throw new BadRequestException('Photo categories must be a JSON array.');
+      }
+    }
+    return this.propertiesService.addImages(id, user.sub, files ?? [], altText, photoCategories);
   }
 
   @Patch(':id/images/:imageId')

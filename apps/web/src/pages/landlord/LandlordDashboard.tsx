@@ -61,6 +61,14 @@ interface DashboardData {
   bookings: HostBooking[];
   notifications: NotificationRecord[];
   reviews: HostReview[];
+  reviewsUnavailable: boolean;
+}
+
+function withEndpointContext<T>(endpoint: string, request: Promise<T>): Promise<T> {
+  return request.catch((cause: unknown) => {
+    const message = cause instanceof Error ? cause.message : 'Unknown request error';
+    throw new Error(`${endpoint}: ${message}`);
+  });
 }
 
 export default function LandlordDashboard() {
@@ -80,17 +88,25 @@ export default function LandlordDashboard() {
     setLoading(true);
     setError('');
     try {
-      const [listings, analytics, requests, agreements, notifications, reviewResponse] = await Promise.all([
-        listingsAPI.getMyListings<HostListing>({ page: 1, limit: 100 }),
-        listingsAPI.getLandlordAnalytics(),
-        rentalRequestsAPI.received<HostRentalRequest>(),
-        agreementsAPI.mine<HostAgreement>(),
-        notificationsAPI.list(),
-        reviewsAPI.getForUser(user.id),
+      const [listings, analytics, requests, agreements, notifications] = await Promise.all([
+        withEndpointContext('GET /listings/landlord/my-listings', listingsAPI.getMyListings<HostListing>({ page: 1, limit: 100 })),
+        withEndpointContext('GET /listings/landlord/analytics', listingsAPI.getLandlordAnalytics()),
+        withEndpointContext('GET /rental-requests/received', rentalRequestsAPI.received<HostRentalRequest>()),
+        withEndpointContext('GET /agreements/my', agreementsAPI.mine<HostAgreement>()),
+        withEndpointContext('GET /notifications', notificationsAPI.list()),
       ]);
+      const reviewResult = await withEndpointContext(
+        `GET /reviews/user/${user.id}`,
+        reviewsAPI.getForUser(user.id),
+      ).then(
+        (response) => ({ response, unavailable: false }),
+        () => ({ response: { data: [] }, unavailable: true }),
+      );
       const propertyIds = [...new Set(listings.map((listing) => listing.propertyId).filter((id): id is string => Boolean(id)))];
-      const bookingGroups = await Promise.all(propertyIds.map((id) => bookingsAPI.propertyBookings<HostBooking>(id)));
-      const reviewRecords = (reviewResponse as { data?: HostReview[] }).data ?? [];
+      const bookingGroups = await Promise.all(propertyIds.map((id) =>
+        withEndpointContext(`GET /properties/${id}/bookings`, bookingsAPI.propertyBookings<HostBooking>(id)),
+      ));
+      const reviewRecords = (reviewResult.response as { data?: HostReview[] }).data ?? [];
       setData({
         listings,
         analytics: analytics as DashboardData['analytics'],
@@ -99,6 +115,7 @@ export default function LandlordDashboard() {
         bookings: [...new Map(bookingGroups.flat().map((booking) => [booking.id, booking])).values()],
         notifications,
         reviews: reviewRecords,
+        reviewsUnavailable: reviewResult.unavailable,
       });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Dashboard data could not be loaded.');
@@ -184,7 +201,7 @@ export default function LandlordDashboard() {
           <div className="grid gap-4 lg:grid-cols-3">
             <Card className="p-5"><div className="mb-3 flex items-center justify-between"><h2 className="font-bold">Pending requests</h2><button type="button" onClick={() => navigate('/landlord/applications')} className="text-xs font-semibold text-emerald-700">View all</button></div>{pendingRequests.length === 0 ? <p className="text-sm text-gray-500">No requests need a decision.</p> : pendingRequests.slice(0, 4).map((request) => <button type="button" key={request.id} onClick={() => navigate('/landlord/applications')} className="block w-full border-t py-2 text-left text-sm">Request <span className="font-mono text-xs">{request.id.slice(0, 10)}</span></button>)}</Card>
             <Card className="p-5"><div className="mb-3 flex items-center justify-between"><h2 className="flex items-center gap-2 font-bold"><Bell size={16} />Notifications</h2><button type="button" onClick={() => navigate('/landlord/notifications')} className="text-xs font-semibold text-emerald-700">View all</button></div>{recentNotifications.length === 0 ? <p className="text-sm text-gray-500">No notifications.</p> : recentNotifications.map((notification) => <div key={notification.id} className="border-t py-2"><p className="text-sm font-semibold">{notification.title}</p><p className="line-clamp-2 text-xs text-gray-500">{notification.message}</p></div>)}</Card>
-            <Card className="p-5"><div className="mb-3 flex items-center justify-between"><h2 className="flex items-center gap-2 font-bold"><Star size={16} />Recent reviews</h2><button type="button" onClick={() => navigate('/landlord/reviews')} className="text-xs font-semibold text-emerald-700">View all</button></div>{recentReviews.length === 0 ? <p className="text-sm text-gray-500">No host reviews yet.</p> : recentReviews.map((review) => <div key={review.id} className="border-t py-2"><p className="text-sm font-semibold">{review.user?.fullName ?? 'Tenant'} · {review.rating}/5</p><p className="line-clamp-2 text-xs text-gray-500">{review.comment || 'No written comment.'}</p><p className="text-[10px] text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</p></div>)}</Card>
+            <Card className="p-5"><div className="mb-3 flex items-center justify-between"><h2 className="flex items-center gap-2 font-bold"><Star size={16} />Recent reviews</h2><button type="button" onClick={() => navigate('/landlord/reviews')} className="text-xs font-semibold text-emerald-700">View all</button></div>{recentReviews.length === 0 ? <p className="text-sm text-gray-500">{data.reviewsUnavailable ? 'Reviews are temporarily unavailable.' : 'No host reviews yet.'}</p> : recentReviews.map((review) => <div key={review.id} className="border-t py-2"><p className="text-sm font-semibold">{review.user?.fullName ?? 'Tenant'} · {review.rating}/5</p><p className="line-clamp-2 text-xs text-gray-500">{review.comment || 'No written comment.'}</p><p className="text-[10px] text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</p></div>)}</Card>
           </div>
           <p className="flex items-start gap-2 text-xs text-gray-500"><CheckCircle2 size={14} className="mt-0.5 shrink-0" />Status and summary values come from Rentra APIs. Earnings/payouts are intentionally not included in this non-payment update.</p>
         </>

@@ -40,10 +40,12 @@ export default function ProfileReviewsCard({ userId }: { userId: string }) {
         </div>
         <div className="text-right">
           <p className="text-xl font-extrabold text-text">
-            {typeof summary?.averageRating === 'number'
+            {(summary?.count ?? 0) < 3
+              ? 'New'
+              : typeof summary?.averageRating === 'number'
               ? summary.averageRating.toFixed(2)
               : '—'}{' '}
-            / 5
+            {(summary?.count ?? 0) >= 3 && '/ 5'}
           </p>
           <p className="text-xs text-text-muted">
             {summary?.count ?? 0} review{summary?.count === 1 ? '' : 's'}

@@ -501,7 +501,14 @@ model Property {
   bedrooms           Int                 @default(0)
   bathrooms          Int                 @default(0)
   areaSizeSqft       Int?
+  areaSizeMarla      Float?
+  areaSizeUnit       String?
+  floor              String?
   furnishedStatus    FurnishedStatus     @default(UNFURNISHED)
+  hostelBedsPerRoom  Int?
+  hostelRentPerBed   Int?
+  hostelGenderPolicy HostelGenderPolicy?
+  mealsIncluded      Boolean             @default(false)
   availability       ListingAvailability @default(AVAILABLE)
   rules              String?
   status             PropertyStatus      @default(PENDING_VERIFICATION)
@@ -893,7 +900,7 @@ model RentalRequest {
   agreements Agreement[] @relation("AgreementRequest")
   payments   Payment[]
 
-  @@unique([listingId, tenantId])
+  @@index([listingId, tenantId])
   @@index([landlordId, status])
   @@index([tenantId, status])
   @@index([propertyId, status])
@@ -1148,6 +1155,13 @@ model Review {
   rentPayment         Int?
   propertyCare        Int?
   agreementCompliance Int?
+  responsiveness      Int?
+  propertyAccuracy    Int?
+  agreementFairness   Int?
+  privacy             Int?
+  ruleFollowing        Int?
+  moveOut              Int?
+  quickTags            String[]          @default([])
   wouldRecommend      Boolean?
   cleanliness         Int?
   location            Int?

@@ -6,6 +6,7 @@ import { listingsAPI, type ListingPage } from '../../api/listings';
 import { propertiesAPI } from '../../api/properties';
 import { toApiError } from '../../api/api-error';
 import { useAuthStore } from '../../store/authStore';
+import toast from 'react-hot-toast';
 
 interface HostListing {
   id: string;
@@ -127,6 +128,19 @@ export default function MyProperties() {
     }
   };
 
+  const repostProperty = async (listing: HostListing) => {
+    if (!listing.propertyId) return;
+    setBusyId(listing.id);
+    setActionError('');
+    try {
+      const result = await propertiesAPI.repost(listing.propertyId);
+      toast.success(result.message);
+      setReload((value) => value + 1);
+    } catch (cause) {
+      setActionError(toApiError(cause).message || 'The property could not be reposted.');
+    } finally { setBusyId(null); }
+  };
+
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
@@ -169,6 +183,7 @@ export default function MyProperties() {
                   {listing.propertyId ? <button type="button" onClick={() => navigate(`/dashboard/post-property?propertyId=${encodeURIComponent(listing.propertyId!)}`)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold"><Edit3 size={14} />Edit</button> : <span className="self-center text-xs text-gray-500">No linked property record; editing is not available for this older listing.</span>}
                   <button type="button" onClick={() => navigate(`/dashboard/listings/${listing.id}`)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-xs font-semibold"><Eye size={14} />Preview</button>
                   {listing.publicationStatus === 'PUBLISHED' && <button type="button" disabled={busyId !== null} onClick={() => void unpublish(listing)} className="rounded-lg border px-3 py-2 text-xs font-semibold disabled:opacity-50">{busyId === listing.id ? 'Saving…' : 'Unpublish'}</button>}
+                  {listing.propertyId && listing.property?.verificationStatus === 'APPROVED' && listing.publicationStatus !== 'PUBLISHED' && <button type="button" disabled={busyId !== null} onClick={() => void repostProperty(listing)} className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-primary-contrast disabled:opacity-50">{busyId === listing.id ? 'Reposting…' : 'Repost verified property'}</button>}
                   {listing.propertyId && !['EXPIRED', 'SUSPENDED'].includes(listing.property?.status ?? '') && <button type="button" disabled={busyId !== null} onClick={() => void expireProperty(listing)} className="ml-auto inline-flex items-center gap-1 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 disabled:opacity-50"><Trash2 size={14} />Expire</button>}
                 </div>
               </Card>

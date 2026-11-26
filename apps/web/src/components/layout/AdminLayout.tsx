@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import AdminSidebar from './AdminSidebar';
-import Navbar from './Navbar';
+import AdminNavbar from './AdminNavbar';
 import BackToDashboard from './BackToDashboard';
 
 const AdminLayout = () => {
@@ -18,7 +18,7 @@ const AdminLayout = () => {
 
   return (
     <div className="flex h-[100dvh] min-h-0 flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg)', scrollbarGutter: 'stable' }}>
-      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
+      <AdminNavbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} sidebarOpen={sidebarOpen} />
       <div className="relative flex min-h-0 flex-1 overflow-hidden">
         <div className="z-40 hidden h-full shrink-0 md:flex" style={{ width: 'fit-content' }}>
           <AdminSidebar

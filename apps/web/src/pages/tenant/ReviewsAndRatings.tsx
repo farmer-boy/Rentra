@@ -11,6 +11,8 @@ import {
   useMyReviews,
 } from '../../hooks/useRentraQueries';
 import { agreementsAPI } from '../../api/agreements';
+import { listingsAPI } from '../../api/listings';
+import { usersAPI } from '../../api/users';
 import AgreementReviewCard from '../../components/agreements/AgreementReviewCard';
 
 interface Review {
@@ -61,6 +63,11 @@ interface ReceivedReview {
   agreementCompliance?: number | null;
 }
 
+interface PropertyReview extends Review {
+  property: string;
+  user?: { fullName?: string };
+}
+
 const reviewCategoryLabels: Record<string, string> = {
   behaviour: 'Behaviour & Attitude',
   communication: 'Communication',
@@ -77,6 +84,25 @@ const reviewCategoryLabels: Record<string, string> = {
 export default function ReviewsAndRatings() {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const isLandlord = Boolean(user?.roles?.includes('LANDLORD') || user?.role === 'LANDLORD');
+  const profileQuery = useQuery({
+    queryKey: ['users', 'me', 'trust-score', user?.id],
+    queryFn: () => usersAPI.getTrustScore(user!.id),
+    enabled: Boolean(user?.id),
+    refetchInterval: 15_000,
+  });
+  const propertyReviewsQuery = useQuery({
+    queryKey: ['reviews', 'my-property-reviews', user?.id],
+    queryFn: async () => {
+      const listings = await listingsAPI.getMyListings<{ id: string; title: string }>();
+      const groups = await Promise.all(listings.map(async (listing) => {
+        const summary = await reviewsAPI.getListingSummary(listing.id);
+        return summary.data.map((review) => ({ ...review, property: listing.title }));
+      }));
+      return groups.flat().sort((a, b) => b.createdAt.localeCompare(a.createdAt)) as PropertyReview[];
+    },
+    enabled: Boolean(user?.id && isLandlord),
+  });
   const reviewsQuery = useMyReviews(user?.id ?? '');
   const bookingsQuery = useBookings<CompletedBooking>();
   const agreementsQuery = useQuery({
@@ -88,6 +114,7 @@ export default function ReviewsAndRatings() {
     queryKey: ['reviews', 'received', user?.id],
     queryFn: () => reviewsAPI.getMyReceived(),
     enabled: Boolean(user?.id),
+    refetchInterval: 15_000,
   });
   const reviews = reviewsQuery.data as Review[] | undefined;
   const receivedReviews = (
@@ -104,7 +131,7 @@ export default function ReviewsAndRatings() {
       }
     | undefined;
   const completedAgreements = (agreementsQuery.data ?? []).filter((agreement) =>
-    ['ENDED', 'EXPIRED'].includes(agreement.status),
+    ['ENDED', 'EXPIRED', 'TERMINATED'].includes(agreement.status),
   );
   const [selectedBooking, setSelectedBooking] = useState('');
   const [rating, setRating] = useState(5);
@@ -147,49 +174,23 @@ export default function ReviewsAndRatings() {
           review.bookingId === booking.id && review.reviewType === 'PROPERTY',
       ),
   );
-  const loading =
-    Boolean(user?.id) &&
-    (reviewsQuery.isPending ||
-      bookingsQuery.isPending ||
-      agreementsQuery.isPending);
-  const error =
-    reviewsQuery.isError || bookingsQuery.isError || agreementsQuery.isError;
-
   return (
     <div>
       <div className="mb-6">
         <h1 className={`text-xl font-extrabold tracking-tight text-text`}>
-          My Reviews & Ratings
+          Reviews & Trust
         </h1>
         <p className={`mt-1 text-[13px] text-text-muted`}>
-          Review completed stays. The backend checks rental eligibility and
-          prevents duplicate reviews.
+          Your trust score, reviews received, and reviews you have given across your tenant and landlord activity.
         </p>
       </div>
 
-      {loading ? (
-        <Card className="p-5">
-          <p className="text-sm text-gray-500">
-            Loading completed stays and reviews...
-          </p>
-        </Card>
-      ) : error ? (
-        <Card className="p-5">
-          <p role="alert" className="text-sm text-red-600">
-            Your bookings or reviews could not be loaded.
-          </p>
-          <button
-            onClick={() => {
-              void reviewsQuery.refetch();
-              void bookingsQuery.refetch();
-            }}
-            className="mt-2 text-sm font-semibold text-emerald-700"
-          >
-            Retry
-          </button>
-        </Card>
-      ) : (
-        <>
+      <Card className="mb-5 flex flex-wrap items-center justify-between gap-4 p-5">
+        <div><h2 className="font-bold text-text">Your trust score</h2><p className="mt-1 text-sm text-text-muted">Current score from your Rentra account profile</p></div>
+        {profileQuery.isPending ? <span className="text-sm text-text-muted">Loading…</span> : profileQuery.isError ? <span role="alert" className="text-sm text-red-600">Trust score could not be loaded.</span> : profileQuery.data?.trustScore == null ? <span className="text-sm text-text-muted">Not available</span> : <span className="rounded-full bg-primary/10 px-4 py-2 text-lg font-extrabold text-primary">{profileQuery.data.trustScore}<span className="ml-1 text-xs font-semibold">/100</span></span>}
+      </Card>
+
+      <>
           <Card className="p-5">
             <div className="mb-4">
               <h2 className="font-bold">Review a completed rental agreement</h2>
@@ -198,7 +199,11 @@ export default function ReviewsAndRatings() {
                 ends.
               </p>
             </div>
-            {completedAgreements.length ? (
+            {agreementsQuery.isPending ? (
+              <p className="py-3 text-sm text-text-muted">Loading agreements…</p>
+            ) : agreementsQuery.isError ? (
+              <div className="py-3"><p role="alert" className="text-sm text-red-700">Rental agreements could not be loaded.</p><button type="button" onClick={() => void agreementsQuery.refetch()} className="mt-2 text-sm font-semibold text-emerald-700">Retry</button></div>
+            ) : completedAgreements.length ? (
               <div className="space-y-3">
                 {completedAgreements.map((agreement) => (
                   <AgreementReviewCard
@@ -215,9 +220,9 @@ export default function ReviewsAndRatings() {
             )}
           </Card>
 
-          {completedBookings.length > 0 && (
-            <Card className="mb-5 p-5">
+          <Card className="mb-5 p-5">
               <h2 className="mb-3 font-bold">Review a completed stay</h2>
+              {bookingsQuery.isPending || reviewsQuery.isPending ? <p className="py-3 text-sm text-text-muted">Loading bookings…</p> : bookingsQuery.isError || reviewsQuery.isError ? <div className="py-3"><p role="alert" className="text-sm text-red-700">{bookingsQuery.isError ? 'Bookings could not be loaded.' : 'Your submitted reviews could not be loaded.'}</p><button type="button" onClick={() => { void bookingsQuery.refetch(); void reviewsQuery.refetch(); }} className="mt-2 text-sm font-semibold text-emerald-700">Retry</button></div> : completedBookings.length === 0 ? <p className="py-3 text-sm text-text-muted">No completed stays are available to review.</p> : <>
               <label className="block text-sm font-medium">
                 Completed booking
                 <select
@@ -277,14 +282,18 @@ export default function ReviewsAndRatings() {
                   </button>
                 </form>
               )}
-            </Card>
-          )}
+              </>}
+          </Card>
 
           <Card>
             <h2 className={`mb-4 text-lg font-bold text-text`}>
               Reviews I've Given ({reviews?.length ?? 0})
             </h2>
-            {!reviews?.length ? (
+            {reviewsQuery.isPending ? (
+              <p className="py-6 text-center text-sm text-text-muted">Loading submitted reviews…</p>
+            ) : reviewsQuery.isError ? (
+              <div className="py-6 text-center"><p role="alert" className="text-sm text-red-700">Your submitted reviews could not be loaded.</p><button type="button" onClick={() => void reviewsQuery.refetch()} className="mt-2 text-sm font-semibold text-emerald-700">Retry</button></div>
+            ) : !reviews?.length ? (
               <p className="py-6 text-center text-sm text-gray-500">
                 {completedBookings.length
                   ? 'You have no reviews yet. You can review a completed stay above.'
@@ -436,9 +445,9 @@ export default function ReviewsAndRatings() {
                             {review.user?.fullName ?? 'Rentra user'}
                           </p>
                           <p className="text-xs text-text-muted">
-                            {review.reviewType === 'TENANT'
+                            {review.reviewType === 'LANDLORD'
                               ? 'Landlord review'
-                              : review.reviewType === 'LANDLORD'
+                              : review.reviewType === 'TENANT'
                                 ? 'Tenant review'
                                 : 'Agreement review'}{' '}
                             · {new Date(review.createdAt).toLocaleDateString()}
@@ -488,8 +497,12 @@ export default function ReviewsAndRatings() {
               </div>
             )}
           </Card>
-        </>
-      )}
+
+          {isLandlord && <Card className="mt-5 p-5">
+            <div className="mb-4"><h2 className="text-lg font-bold text-text">Property reviews</h2><p className="mt-1 text-sm text-text-muted">Tenant feedback submitted for your listed properties.</p></div>
+            {propertyReviewsQuery.isPending ? <p className="py-4 text-center text-sm text-text-muted">Loading property reviews…</p> : propertyReviewsQuery.isError ? <p role="alert" className="py-4 text-center text-sm text-red-700">Property reviews could not be loaded.</p> : !propertyReviewsQuery.data?.length ? <p className="py-6 text-center text-sm text-text-muted">No property reviews have been received yet.</p> : <div className="space-y-3">{propertyReviewsQuery.data.map((review) => <article key={review.id} className="rounded-lg border border-border bg-surface-2 p-4"><div className="flex flex-wrap items-start justify-between gap-2"><div><p className="font-semibold text-text">{review.user?.fullName ?? 'Rentra user'}</p><p className="text-xs text-text-muted">{review.property} · {new Date(review.createdAt).toLocaleDateString()}</p></div><span className="font-bold text-amber-600">★ {review.rating} / 5</span></div>{review.comment && <p className="mt-3 text-sm text-text-muted">{review.comment}</p>}</article>)}</div>}
+          </Card>}
+      </>
     </div>
   );
 }

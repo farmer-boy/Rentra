@@ -157,19 +157,19 @@ export class ReviewsService {
     const requiredRatings = isTenantReview
       ? [
           dto.behaviour,
-          dto.rentPayment,
-          dto.propertyCare,
-          dto.cleanliness,
-          dto.communication,
-          dto.agreementCompliance,
+          dto.responsiveness,
+          dto.maintenance,
+          dto.propertyAccuracy,
+          dto.agreementFairness,
+          dto.privacy,
         ]
       : [
           dto.behaviour,
+          dto.rentPayment,
+          dto.propertyCare,
           dto.communication,
-          dto.propertyCondition,
-          dto.honesty,
-          dto.maintenance,
-          dto.responseTime,
+          dto.ruleFollowing,
+          dto.moveOut,
         ];
     if (
       !requiredRatings.every(
@@ -195,6 +195,10 @@ export class ReviewsService {
       Math.round(
         (ratings.reduce((sum, value) => sum + value, 0) / ratings.length) * 100,
       ) / 100;
+    const quickTags = [...new Set(dto.quickTags ?? [])].slice(0, 5);
+    if (quickTags.some((tag) => tag.length > 32)) {
+      throw new BadRequestException('Review tags must be 32 characters or fewer');
+    }
     const reviewData = {
       userId,
       listingId: agreement.listingId,
@@ -208,21 +212,15 @@ export class ReviewsService {
         : ReviewTargetType.HOST,
       rating,
       comment: dto.comment?.trim() || null,
+      quickTags,
       behaviour: dto.behaviour,
       communication: dto.communication,
       ...(isTenantReview
-        ? {
-            rentPayment: dto.rentPayment,
-            propertyCare: dto.propertyCare,
-            cleanliness: dto.cleanliness,
-            agreementCompliance: dto.agreementCompliance,
-          }
-        : {
-            propertyCondition: dto.propertyCondition,
-            honesty: dto.honesty,
-            maintenance: dto.maintenance,
-            responseTime: dto.responseTime,
-          }),
+        ? { responsiveness: dto.responsiveness, maintenance: dto.maintenance,
+            propertyAccuracy: dto.propertyAccuracy, agreementFairness: dto.agreementFairness,
+            privacy: dto.privacy }
+        : { rentPayment: dto.rentPayment, propertyCare: dto.propertyCare,
+            ruleFollowing: dto.ruleFollowing, moveOut: dto.moveOut }),
       wouldRecommend: dto.wouldRecommend,
     } satisfies Prisma.ReviewUncheckedCreateInput;
 
@@ -244,11 +242,14 @@ export class ReviewsService {
       throw error;
     }
 
-    await this.trustScoreService.recalculateForUser(
-      targetUserId,
-      TrustSource.REVIEW,
-      'Received a verified rental review',
-    );
+    const otherSide = await this.prisma.review.findFirst({
+      where: { agreementId: agreement.id, userId: { not: userId } },
+      select: { id: true },
+    });
+    if (otherSide) {
+      await this.trustScoreService.recalculateForUser(targetUserId, TrustSource.REVIEW, 'Received a verified rental review');
+      await this.trustScoreService.recalculateForUser(userId, TrustSource.REVIEW, 'Submitted a verified rental review');
+    }
     return { ...review, verifiedRental: true };
   }
 
@@ -432,11 +433,9 @@ export class ReviewsService {
     status: AgreementStatus;
     endDate: Date | null;
   }) {
-    return (
-      (agreement.status === AgreementStatus.ENDED ||
-        agreement.status === AgreementStatus.EXPIRED) &&
-      agreement.endDate !== null &&
-      agreement.endDate <= new Date()
+    return agreement.status === AgreementStatus.TERMINATED || (
+      (agreement.status === AgreementStatus.ENDED || agreement.status === AgreementStatus.EXPIRED) &&
+      agreement.endDate !== null && agreement.endDate <= new Date()
     );
   }
 
@@ -562,8 +561,16 @@ export class ReviewsService {
         _avg: { rating: true },
       }),
     ]);
+    const pageAgreementIds = [...new Set(reviews.map((review) => review.agreementId).filter((id): id is string => Boolean(id)))];
+    const pairedReviews = pageAgreementIds.length ? await this.prisma.review.findMany({
+      where: { agreementId: { in: pageAgreementIds } }, select: { agreementId: true, reviewType: true },
+    }) : [];
+    const submittedSides = new Map<string, Set<ReviewType>>();
+    for (const paired of pairedReviews) { if (!paired.agreementId) continue; const sides = submittedSides.get(paired.agreementId) ?? new Set<ReviewType>(); sides.add(paired.reviewType); submittedSides.set(paired.agreementId, sides); }
+    const visibleReviews = reviews.filter((review) => !review.agreementId ||
+      ((submittedSides.get(review.agreementId)?.has(ReviewType.LANDLORD) && submittedSides.get(review.agreementId)?.has(ReviewType.TENANT)) || Date.now() >= review.createdAt.getTime() + 14 * 86400000));
     const data = [
-      ...reviews.map((review) => ({
+      ...visibleReviews.map((review) => ({
         ...review,
         source: 'rental' as const,
         verifiedRental: Boolean(review.agreementId),
@@ -591,7 +598,7 @@ export class ReviewsService {
       .slice(skip, skip + query.limit);
     const regularCount = landlordStats._count._all + tenantStats._count._all;
     const terminationCount = terminationStats._count._all;
-    const totalCount = regularCount + terminationCount;
+    const totalCount = visibleReviews.length;
     const ratingTotal =
       (landlordStats._avg.rating ?? 0) * landlordStats._count._all +
       (tenantStats._avg.rating ?? 0) * tenantStats._count._all +

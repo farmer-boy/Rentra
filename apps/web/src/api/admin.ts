@@ -51,7 +51,7 @@ export interface AdminUserDetails extends AdminUserRecord {
 
 export interface AdminListingRecord {
   id: string;
-  propertyId: string;
+  propertyId: string | null;
   title: string;
   type: string;
   status: string;
@@ -60,7 +60,7 @@ export interface AdminListingRecord {
   city: string;
   createdAt: string;
   landlord: { id: string; fullName: string };
-  property: { verificationStatus: string };
+  property: { verificationStatus: string } | null;
 }
 
 export interface AdminPropertyRecord {

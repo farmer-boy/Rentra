@@ -30,6 +30,7 @@ interface ListingStats {
   unpublished?: number;
   approved?: number;
   pendingReview?: number;
+  unverified?: number;
 }
 
 const definitions: Record<string, ResourceDefinition> = {
@@ -299,13 +300,14 @@ export default function AdminResourcePage() {
   const definition = definitions[resourceKey];
   const [result, setResult] = useState<ResourcePageResult | null>(null);
   const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
+  const routeSearch = searchParams.get('search') ?? '';
+  const [search, setSearch] = useState(routeSearch);
   const routeStatus = searchParams.get('status') ?? '';
   const routePublicationStatus = searchParams.get('publicationStatus') ?? '';
   const routeVerificationStatus = searchParams.get('verificationStatus') ?? '';
   const [status, setStatus] = useState(routeStatus);
   const [appliedFilters, setAppliedFilters] = useState({
-    search: '',
+    search: routeSearch,
     status: routeStatus,
     publicationStatus: routePublicationStatus,
     verificationStatus: routeVerificationStatus,
@@ -324,14 +326,15 @@ export default function AdminResourcePage() {
 
   useEffect(() => {
     setStatus(routeStatus);
+    setSearch(routeSearch);
     setAppliedFilters({
-      search: '',
+      search: routeSearch,
       status: routeStatus,
       publicationStatus: routePublicationStatus,
       verificationStatus: routeVerificationStatus,
     });
     setPage(1);
-  }, [routeStatus, routePublicationStatus, routeVerificationStatus]);
+  }, [routeSearch, routeStatus, routePublicationStatus, routeVerificationStatus]);
 
   useEffect(() => {
     if (resourceKey !== 'listings') return;
@@ -434,6 +437,8 @@ export default function AdminResourcePage() {
         ? 'verified'
         : routeVerificationStatus === 'PENDING'
           ? 'pending'
+        : routeVerificationStatus === 'UNVERIFIED'
+          ? 'unverified'
           : 'total';
   const listingCards = [
     { key: 'total', label: 'TOTAL LISTINGS', value: listingStats?.total, path: '/admin/listings' },
@@ -441,6 +446,7 @@ export default function AdminResourcePage() {
     { key: 'unpublished', label: 'UNPUBLISHED', value: listingStats?.unpublished, path: '/admin/listings?publicationStatus=UNPUBLISHED' },
     { key: 'verified', label: 'VERIFIED', value: listingStats?.approved, path: '/admin/listings?verificationStatus=APPROVED' },
     { key: 'pending', label: 'PENDING REVIEW', value: listingStats?.pendingReview, path: '/admin/listings?verificationStatus=PENDING' },
+    { key: 'unverified', label: 'UNVERIFIED', value: listingStats?.unverified, path: '/admin/listings?verificationStatus=UNVERIFIED' },
   ];
 
   const runAction = async (row: Row, action: string) => {
@@ -476,7 +482,7 @@ export default function AdminResourcePage() {
       <header>
         <h1 className="text-2xl font-bold text-gray-900 ">{definition.title}</h1>
         <p className="mt-1 text-sm text-gray-600 ">
-          Read-only administration view. Moderation and financial state changes remain in their audited workflows.
+          {resourceKey === 'listings' ? 'Choose Unverified to review property details, then approve or reject the verification.' : 'Read-only administration view. Moderation and financial state changes remain in their audited workflows.'}
         </p>
       </header>
 
@@ -495,7 +501,7 @@ export default function AdminResourcePage() {
       )}
 
       {resourceKey === 'listings' && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
           {listingCards.map((item) => (
             <button
               key={item.key}
@@ -566,16 +572,20 @@ export default function AdminResourcePage() {
                 <tr><td className="p-6 text-center text-sm text-gray-500" colSpan={definition.columns.length + Number(showActions)}>No records found.</td></tr>
               ) : rows.map((row, index) => {
                 const listingId = resourceKey === 'listings' && typeof row.id === 'string' ? row.id : '';
+                const propertyId = typeof row.propertyId === 'string' ? row.propertyId : '';
+                const verificationStatus = getValue(row, 'property.verificationStatus');
+                const needsVerification = resourceKey === 'listings' && propertyId && ['UNVERIFIED', 'PENDING'].includes(String(verificationStatus));
+                const reviewPath = needsVerification ? `/admin/property-verification?propertyId=${encodeURIComponent(propertyId)}` : '';
                 return (
                 <tr
                   key={String(row.id ?? index)}
                   className={`border-b border-gray-100 ${listingId ? 'cursor-pointer transition-colors hover:bg-primary/5 focus:bg-primary/5' : ''}`}
-                  onClick={listingId ? () => navigate(`/admin/listings/${encodeURIComponent(listingId)}`) : undefined}
+                  onClick={listingId ? () => navigate(reviewPath || `/admin/listings/${encodeURIComponent(listingId)}`) : undefined}
                   onKeyDown={listingId ? (event) => {
                     if (event.target !== event.currentTarget) return;
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      navigate(`/admin/listings/${encodeURIComponent(listingId)}`);
+                      navigate(reviewPath || `/admin/listings/${encodeURIComponent(listingId)}`);
                     }
                   } : undefined}
                   tabIndex={listingId ? 0 : undefined}
@@ -593,6 +603,7 @@ export default function AdminResourcePage() {
                   ))}
                   {showActions && (
                     <td className="px-4 py-3">
+                      {needsVerification && <button type="button" onClick={(event) => { event.stopPropagation(); navigate(reviewPath); }} className="mr-2 rounded border border-blue-600 px-2 py-1 text-xs font-semibold text-blue-700">Review / approve / reject</button>}
                       {resourceKey === 'listings' && row.publicationStatus !== 'UNPUBLISHED' && row.status !== 'REMOVED' && (
                         <button type="button" onClick={(event) => { event.stopPropagation(); void runAction(row, 'unpublish-listing'); }} className="mr-2 rounded border border-amber-500 px-2 py-1 text-xs text-amber-700 ">
                           Unpublish

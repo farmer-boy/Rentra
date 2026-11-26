@@ -46,20 +46,6 @@ export class RentalRequestsService {
       throw new BadRequestException('You cannot request your own property');
     }
 
-    const existing = await this.prisma.rentalRequest.findFirst({
-      where: {
-        tenantId,
-        propertyId,
-        status: {
-          in: [RentalRequestStatus.PENDING, RentalRequestStatus.ACCEPTED],
-        },
-      },
-    });
-    if (existing)
-      throw new BadRequestException(
-        'You already have an active request for this property',
-      );
-
     const moveInDate = dto.moveInDate ? new Date(dto.moveInDate) : null;
     if (moveInDate && Number.isNaN(moveInDate.getTime())) {
       throw new BadRequestException('moveInDate must be a valid date');
@@ -67,6 +53,52 @@ export class RentalRequestsService {
 
     try {
       return await this.prisma.$transaction(async (transaction) => {
+        // Serialize requests for this property so concurrent submissions cannot
+        // both pass the active-request check after the historical unique index
+        // is removed.
+        await transaction.$executeRaw(
+          Prisma.sql`SELECT pg_advisory_xact_lock(hashtext(${propertyId}))`,
+        );
+        const existing = await transaction.rentalRequest.findFirst({
+          where: {
+            tenantId,
+            propertyId,
+            status: RentalRequestStatus.PENDING,
+          },
+          select: { id: true },
+        });
+        if (existing) {
+          throw new BadRequestException(
+            'You already have an active request for this property',
+          );
+        }
+
+        const activeAgreement = await transaction.agreement.findFirst({
+          where: {
+            tenantId,
+            propertyId,
+            status: AgreementStatus.ACTIVE,
+          },
+          select: { id: true },
+        });
+        if (activeAgreement) {
+          throw new BadRequestException(
+            'You already have an active agreement for this property',
+          );
+        }
+
+        // Recover accepted requests left behind by agreements cancelled before
+        // cancellation cleanup was added. Do not let these stale rows block a
+        // new application after the agreement has ended.
+        await transaction.rentalRequest.updateMany({
+          where: {
+            tenantId,
+            propertyId,
+            status: RentalRequestStatus.ACCEPTED,
+          },
+          data: { status: RentalRequestStatus.CANCELLED },
+        });
+
         const request = await transaction.rentalRequest.create({
           data: {
             tenantId,

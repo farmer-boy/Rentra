@@ -246,7 +246,7 @@ export class VerificationService {
     await this.assertContactVerified(userId);
     const property = await this.prisma.property.findUnique({
       where: { id: propertyId },
-      select: { id: true, ownerId: true, verificationStatus: true },
+      select: { id: true, ownerId: true, verificationStatus: true, images: { select: { altText: true } } },
     });
     if (!property) throw new NotFoundException('Property not found');
     if (property.ownerId !== userId) {
@@ -254,6 +254,9 @@ export class VerificationService {
     }
     if (property.verificationStatus === VerificationStatus.APPROVED) {
       throw new ConflictException('Property is already verified');
+    }
+    if (property.images.length < 5 || property.images.length > 15) {
+      throw new BadRequestException('Property verification needs 5 to 15 photos.');
     }
     const existing = await this.prisma.verificationSubmission.findFirst({
       where: {
@@ -355,7 +358,7 @@ export class VerificationService {
       }),
       this.prisma.property.findMany({
         where: {
-          status: PropertyStatus.PENDING_VERIFICATION,
+          status: { in: [PropertyStatus.PENDING_VERIFICATION, PropertyStatus.ACTIVE] },
           verificationStatus: { in: [VerificationStatus.UNVERIFIED, VerificationStatus.PENDING] },
           verificationSubmissions: {
             none: { kind: VerificationKind.PROPERTY, status: VerificationStatus.PENDING },
@@ -391,10 +394,20 @@ export class VerificationService {
         where: { id: propertyId },
         include: {
           owner: { select: { id: true, fullName: true, email: true, phone: true, emailVerifiedAt: true, phoneVerifiedAt: true } },
-          images: { select: { url: true }, orderBy: { sortOrder: 'asc' } },
+          images: { select: { url: true, altText: true, sortOrder: true }, orderBy: { sortOrder: 'asc' } },
+          amenities: { include: { amenity: { select: { name: true } } } },
+          listings: {
+            take: 1,
+            orderBy: { createdAt: 'desc' },
+            include: {
+              images: { select: { url: true, altText: true, sortOrder: true }, orderBy: { sortOrder: 'asc' } },
+              amenities: { include: { amenity: { select: { name: true } } } },
+              hostelDetails: true,
+            },
+          },
         },
       });
-      if (!property || property.status !== PropertyStatus.PENDING_VERIFICATION || property.verificationStatus === VerificationStatus.REJECTED) {
+      if (!property || (property.status !== PropertyStatus.PENDING_VERIFICATION && property.status !== PropertyStatus.ACTIVE) || property.verificationStatus === VerificationStatus.REJECTED) {
         throw new NotFoundException('Pending property verification was not found');
       }
       return {
@@ -403,7 +416,7 @@ export class VerificationService {
         status: VerificationStatus.PENDING,
         submittedAt: property.createdAt,
         user: property.owner,
-        property: { id: property.id, title: property.title, address: property.address },
+        property,
         details: {
           description: property.description,
           propertyType: property.propertyType,
@@ -415,7 +428,7 @@ export class VerificationService {
           city: property.city,
           address: property.address,
         },
-        evidenceUrls: property.images.map((image) => image.url),
+        evidenceUrls: [],
       };
     }
 
@@ -432,7 +445,22 @@ export class VerificationService {
             phoneVerifiedAt: true,
           },
         },
-        property: { select: { id: true, title: true, address: true } },
+        property: {
+          include: {
+            owner: { select: { id: true, fullName: true, isVerified: true, trustScore: true } },
+            images: { select: { url: true, altText: true, sortOrder: true }, orderBy: { sortOrder: 'asc' } },
+            amenities: { include: { amenity: { select: { name: true } } } },
+            listings: {
+              take: 1,
+              orderBy: { createdAt: 'desc' },
+              include: {
+                images: { select: { url: true, altText: true, sortOrder: true }, orderBy: { sortOrder: 'asc' } },
+                amenities: { include: { amenity: { select: { name: true } } } },
+                hostelDetails: true,
+              },
+            },
+          },
+        },
       },
     });
     if (!submission)

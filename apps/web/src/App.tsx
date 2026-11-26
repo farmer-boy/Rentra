@@ -32,7 +32,6 @@ import TenantRentalRequests from './pages/tenant/RentalRequests';
 import TenantBookings from './pages/tenant/Bookings';
 import AIDetector from './pages/tenant/AIDetector';
 import RentEstimator from './pages/tenant/RentEstimator';
-import TrustScores from './pages/tenant/TrustScores';
 import Agreements from './pages/tenant/Agreements';
 import Payments from './pages/tenant/Payments';
 import Disputes from './pages/tenant/Disputes';
@@ -52,8 +51,6 @@ import PaymentsReceived from './pages/landlord/PaymentsReceived';
 import IncomeReport from './pages/landlord/IncomeReport';
 import LandlordMaintenanceRequests from './pages/landlord/MaintenanceRequests';
 import LandlordFakeDetector from './pages/landlord/FakeDetector';
-import LandlordTrustScores from './pages/landlord/TrustScores';
-import LandlordReviews from './pages/landlord/Reviews';
 import LandlordDashboard from './pages/landlord/LandlordDashboard';
 import LandlordBookings from './pages/landlord/Bookings';
 import LandlordAvailability from './pages/landlord/Availability';
@@ -236,15 +233,16 @@ function AppContent() {
           <Route path="fake-detector" element={<AIDetector />} />
           <Route path="host-detector" element={<LandlordCapabilityRoute><LandlordFakeDetector /></LandlordCapabilityRoute>} />
           <Route path="rent-estimator" element={<RentEstimator />} />
-          <Route path="trust-scores" element={<TrustScores />} />
-          <Route path="host-trust" element={<LandlordCapabilityRoute><LandlordTrustScores /></LandlordCapabilityRoute>} />
+          <Route path="reviews-trust" element={<ReviewsAndRatings />} />
+          <Route path="trust-scores" element={<ReviewsAndRatings />} />
+          <Route path="host-trust" element={<LandlordCapabilityRoute><ReviewsAndRatings /></LandlordCapabilityRoute>} />
           <Route path="host-verification" element={<ProtectedRoute allowedRoles={['TENANT', 'LANDLORD']}><LandlordVerification /></ProtectedRoute>} />
           <Route path="tenants" element={<LandlordCapabilityRoute><MyTenants /></LandlordCapabilityRoute>} />
           <Route path="boost" element={<LandlordCapabilityRoute><RentraBoost /></LandlordCapabilityRoute>} />
           <Route path="profile" element={<Profile />} />
           <Route path="host-profile" element={<LandlordCapabilityRoute><LandlordProfile /></LandlordCapabilityRoute>} />
           <Route path="my-reviews" element={<ReviewsAndRatings />} />
-          <Route path="host-reviews" element={<LandlordCapabilityRoute><LandlordReviews /></LandlordCapabilityRoute>} />
+          <Route path="host-reviews" element={<LandlordCapabilityRoute><ReviewsAndRatings /></LandlordCapabilityRoute>} />
         </Route>
 
         {/* Keep old bookmarks working, but send them into the one dashboard. */}

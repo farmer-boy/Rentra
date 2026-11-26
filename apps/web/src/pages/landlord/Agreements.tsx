@@ -14,6 +14,7 @@ import type { AgreementTerminationRequest } from '../../api/agreements';
 import AgreementPresencePulse from '../../components/agreements/AgreementPresencePulse';
 import AgreementTerminationDisputeButton from '../../components/agreements/AgreementTerminationDisputeButton';
 import AgreementDisputeEligibilityStatus from '../../components/agreements/AgreementDisputeEligibilityStatus';
+import AgreementReviewCard from '../../components/agreements/AgreementReviewCard';
 
 interface Agreement {
   id: string;
@@ -185,6 +186,7 @@ const LandlordAgreements = () => {
                     </>
                   )}
                   {!!agreement.terminationRequests?.length && <TerminationRequestsPanel agreementId={agreement.id} tenantId={agreement.tenantId} currentUserId={user?.id} requests={agreement.terminationRequests} onUpdated={(updated) => setAgreements((current) => current.map((item) => item.id === updated.id ? { ...item, status: updated.status, terminationReason: updated.terminationReason, terminationRequests: updated.terminationRequests, disputeEligibility: updated.disputeEligibility } : item))} />}
+                  {['ENDED', 'EXPIRED', 'TERMINATED'].includes(agreement.status) && !agreement.terminationRequests?.some((request) => request.status === 'APPROVED') && <div className="mt-4"><AgreementReviewCard agreement={agreement} /></div>}
                   {agreement.pdfUrl && <a href={agreement.pdfUrl} target="_blank" rel="noreferrer" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:underline">View agreement document</a>}
                 </Card>
               ))}

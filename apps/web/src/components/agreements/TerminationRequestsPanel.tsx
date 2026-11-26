@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { agreementsAPI, type AgreementTerminationRequest } from '../../api/agreements';
 import type { Agreement } from '../../api/types';
-import AgreementTerminationReviewForm from './AgreementTerminationReviewForm';
+import AgreementReviewCard from './AgreementReviewCard';
 
 export default function TerminationRequestsPanel({
   agreementId,
@@ -75,7 +75,7 @@ export default function TerminationRequestsPanel({
         {request.responses?.map((response) => <div key={response.id} className="mt-2 border-t border-rose-200 pt-2">{response.decision === 'REJECTED' ? <p>Rejection by {response.responderId === tenantId ? 'tenant' : 'landlord'}: {response.reason}</p> : response.decision === 'CONTESTED' ? <p>Requester contested the rejection: {response.reason}</p> : response.decision === 'ACCEPTED_REJECTION' ? <p>Requester accepted the rejection.</p> : <p>Cancellation approved by {response.responderId === tenantId ? 'tenant' : 'landlord'}.</p>}</div>)}
         {request.decisionReason && !request.responses?.length && <p className="mt-1">Rejection reason: {request.decisionReason}</p>}
         {request.reviews?.map((review) => <p key={review.id} className="mt-1 text-green-800">Review from {review.reviewerId === tenantId ? 'tenant' : 'landlord'}: {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)} · {review.comment}</p>)}
-        {request.status === 'APPROVED' && <AgreementTerminationReviewForm agreementId={agreementId} request={request} currentUserId={currentUserId} />}
+        {request.status === 'APPROVED' && <div className="mt-3"><AgreementReviewCard agreement={{ id: agreementId, status: 'TERMINATED', endDate: null, agreementName: 'Review this completed rental' }} /></div>}
         {canRespond && <div className="mt-3 flex flex-wrap gap-2"><button type="button" disabled={saving} onClick={() => void respond(request, 'APPROVE')} className="rounded-lg bg-green-700 px-3 py-2 text-xs font-semibold text-white disabled:opacity-50">Approve cancellation</button><button type="button" disabled={saving} onClick={() => { setSelected(request); setError(''); }} className="rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 disabled:opacity-50">Reject and review</button></div>}
         {request.status === 'REJECTED' && isRequester && <div className="mt-3 flex flex-wrap gap-2"><button type="button" disabled={saving} onClick={() => void respondToRejection(request, 'ACCEPT_REJECTION')} className="rounded-lg border border-border px-3 py-2 text-xs font-semibold text-text">Accept this rejection</button><button type="button" disabled={saving} onClick={() => { setContestSelected(request); setError(''); }} className="rounded-lg bg-amber-700 px-3 py-2 text-xs font-semibold text-white">Contest rejection</button></div>}
       </div>;

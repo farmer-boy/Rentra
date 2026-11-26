@@ -1,0 +1,309 @@
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [NestFactory] Starting Nest application...
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] AppModule dependencies initialized +53ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] PrismaModule dependencies initialized +6ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] PassportModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ConfigHostModule dependencies initialized +13ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] AuditModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ConfigModule dependencies initialized +3ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ConfigModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] LocationsModule dependencies initialized +2ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] FavoritesModule dependencies initialized +4ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] JwtModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] TrustScoreModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] PaymentsModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ContactModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] MessagesModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] SavedSearchesModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] NotificationsModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] RentalRequestsModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] MaintenanceModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] BoostModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] RecommendationsModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] UsersModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] AgreementsModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ReviewsModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] DisputesModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] SupportModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ReportsModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] VerificationModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] BookingsModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] PropertiesModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] ListingsModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] AdminModule dependencies initialized +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [InstanceLoader] AuthModule dependencies initialized +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] AuthController {/api/auth}: +120ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/register, POST} route +5ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/register/verify, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/register/resend-code, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/login, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/google/login, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/login/verify, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/refresh, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/logout, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/verify-email, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/verify-email/request, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/forgot-password, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/reset-password, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/auth/me, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] UsersController {/api/users}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/me, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/me, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/me/landlord-profile, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/me/landlord-profile, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/me/landlord-profile, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id, PUT} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id/suspend, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id/unsuspend, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id/verify, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] TrustScoreController {/api}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id/trust-score, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/trust-score/recalculate, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] ListingsController {/api/listings}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/featured, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/rent-estimate, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/landlord/my-listings, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/landlord/analytics, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/hostel-beds/:bedId/status, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/view, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/publish, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/unpublish, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/availability, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/images, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/images/upload, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/images/:imageId, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id/amenities, PUT} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/listings/:id, DELETE} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] LocationsController {/api/locations}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/locations/countries, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/locations/provinces, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/locations/cities, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/locations/areas, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/locations/search, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/locations/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] AgreementsController {/api/agreements}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/my, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/presence, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/terminate, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/termination-requests/:requestId/respond, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/termination-requests/:requestId/outcome, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/termination-requests/:requestId/reviews, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/amendments, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/agreements/:id/amendments/:amendmentId/respond, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] PaymentsController {/api/payments}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/my, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/tenant/my-payments, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/agreement/:agreementId, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/providers/:provider/webhook, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/:id/verify, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/:id/refund, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/:id/receipt, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/payments/:id, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] DisputesController {/api/disputes}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/disputes, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/disputes/my, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/disputes/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] ReviewsController {/api}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/my, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/my-submitted, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/eligibility/:agreementId, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/agreement/:agreementId, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/user/:userId, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/listing/:listingId, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reviews/:id, DELETE} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/reviews, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/users/:id/reviews, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] ContactController {/api/contact}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/contact/message, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/contact/messages, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/contact/message/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/contact/message/:id/read, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/contact/message/:id, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] MessagesController {/api/messages}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:otherUserId, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversations, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/send, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/:messageId, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/:messageId, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/:messageId/star, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/unread-count, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/notifications, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/notifications/:notificationId/read, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/read, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/unread, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/archive, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/unarchive, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/mute, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/unmute, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/favorite, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/pin, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/block, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/messages/conversation/:conversationId/clear, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] ConversationsController {/api/conversations}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/conversations, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/conversations, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/conversations/:id, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/conversations/:id/messages, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/conversations/:id/messages, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] AdminController {/api/admin}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/users, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/users/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/users/:id/notices, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/users/:id/suspend, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/users/:id/unsuspend, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/users/:id/verify, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/landlord-profiles, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/landlord-profiles/:id/verify, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/listings, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/properties, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/bookings, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/rental-requests, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/agreements, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/payments, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reviews, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/audit-events, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/notifications, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/listings/:id/verify, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/listings/:id/flag, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/resolve, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/resolve, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/status, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/assign, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/notes, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/request-information, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/disputes/:id/close, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/dashboard/stats, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/dashboard/activity, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] FavoritesController {/api/favorites}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/favorites, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/favorites/:listingId, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/favorites/:listingId, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/favorites/:listingId, DELETE} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] PropertiesController {/api/properties}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/search, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/nearby, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/room-types, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/room-types, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/availability, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/availability/block, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/availability/block, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/view, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/stats, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/images, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/images/:imageId, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/images/:imageId, DELETE} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/amenities, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/amenities/:amenityId, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/status, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/managers, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/managers/:userId, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] AmenitiesController {/api/amenities}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/amenities, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] RoomTypesController {/api/room-types}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/room-types/:id, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/room-types/:id, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] SavedSearchesController {/api/saved-searches}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/saved-searches, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/saved-searches, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/saved-searches/:id, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/saved-searches/:id, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] NotificationsController {/api/notifications}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/notifications, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/notifications/unread-count, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/notifications/read-all, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/notifications, DELETE} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/notifications/:id/read, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] RentalRequestsController {/api}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/rental-requests, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/my, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/received, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/:id/review-profile, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/:id/accept, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/:id/reject, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/:id/request-information, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/:id/respond-information, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/rental-requests/:id/cancel, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] BookingsController {/api}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/bookings, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/bookings/my, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/bookings/:id, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/bookings/:id/cancel, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/properties/:id/bookings, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] ReportsController {/api/reports}: +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reports, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reports/my, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/reports/:id, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] AdminReportsController {/api/admin/reports}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/assign, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/resolve, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/notes, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/request-information, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/suspend-user, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/remove-listing, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/restore-listing, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/reinstate-user, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/admin/reports/:id/status, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] VerificationController {/api/verification}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/phone/send, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/phone/confirm, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/submissions, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/properties/:id, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/me, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/admin/submissions, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/admin/submissions/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/admin/submissions/:id, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/verification/admin/submissions/:id/revoke, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] RecommendationsController {/api/recommendations}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/recommendations, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] BoostController {/api/boost}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/boost/catalog, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/boost/orders, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/boost/orders/my, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/boost/orders/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] SupportController {/api/support}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/tickets, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/tickets, GET} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/tickets/:id, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/tickets/:id/replies, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/admin/tickets, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/admin/tickets/:id/status, PATCH} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/admin/tickets/:id/warn, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/admin/tickets/:id/replies, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/admin/users/:id/restrict, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/support/admin/users/:id/restore, POST} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RoutesResolver] MaintenanceController {/api/maintenance}: +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/maintenance, POST} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/maintenance/my, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/maintenance/received, GET} route +0ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [RouterExplorer] Mapped {/api/maintenance/:id/status, PATCH} route +1ms
+[Nest] 25680  - 11/26/2026, 10:23:22 AM     LOG [NestApplication] Nest application successfully started +75ms
+
+    Rentra Backend is running!
+    API: http://localhost:3000/api
+    Swagger Docs: http://localhost:3000/api/docs
+  

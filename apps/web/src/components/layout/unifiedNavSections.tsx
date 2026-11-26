@@ -57,8 +57,6 @@ export function getUnifiedNavSections(
         { icon: <TrendingUp size={16} />, label: 'Income report', path: '/dashboard/income' },
         { icon: <ShieldCheck size={16} />, label: 'Host verification', path: '/dashboard/host-verification' },
         { icon: <Eye size={16} />, label: 'Listing detector', path: '/dashboard/host-detector' },
-        { icon: <TrendingUp size={16} />, label: 'Tenant trust scores', path: '/dashboard/host-trust' },
-        { icon: <Star size={16} />, label: 'Property reviews', path: '/dashboard/host-reviews' },
       ],
     });
   }
@@ -69,10 +67,9 @@ export function getUnifiedNavSections(
       { icon: <MessageCircle size={16} />, label: 'Messages', path: '/dashboard/messages' },
       { icon: <LifeBuoy size={16} />, label: 'Help & Support', path: '/dashboard/support' },
       { icon: <Bell size={16} />, label: 'Notifications', path: '/dashboard/notifications' },
+      { icon: <Star size={16} />, label: 'Reviews & trust', path: '/dashboard/reviews-trust' },
       { icon: <User size={16} />, label: 'Profile', path: tenantWorkspace ? '/dashboard/profile' : '/dashboard/host-profile' },
       ...(tenantWorkspace ? [
-        { icon: <ShieldCheck size={16} />, label: 'Trust score', path: '/dashboard/trust-scores' },
-        { icon: <Star size={16} />, label: 'My reviews', path: '/dashboard/my-reviews' },
         { icon: <TrendingUp size={16} />, label: 'Rent estimator', path: '/dashboard/rent-estimator' },
         { icon: <Eye size={16} />, label: 'Fake listing detector', path: '/dashboard/fake-detector' },
       ] : []),

@@ -12,6 +12,7 @@ export interface UploadedImage {
   publicId: string;
 }
 
+
 @Injectable()
 export class UploadService {
   private configured = false;
@@ -29,6 +30,7 @@ export class UploadService {
           folder: 'rentra/properties',
           resource_type: 'image',
           filename_override: file.originalname,
+          transformation: [{ width: 1600, height: 1600, crop: 'limit', quality: 'auto', fetch_format: 'auto' }],
         },
         (error, result) => {
           if (error || !result) {

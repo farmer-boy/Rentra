@@ -133,7 +133,7 @@ export class TrustScoreService {
             { property: { ownerId: userId } },
           ],
         },
-        select: { rating: true },
+        select: { id: true, rating: true, agreementId: true, reviewType: true, createdAt: true },
       }),
       this.prisma.report.findMany({
         where: {
@@ -184,7 +184,15 @@ export class TrustScoreService {
       trustScoreConfig.caps.successfulPayments,
     );
 
-    const validReviewRatings = [...receivedReviews, ...agreementReviews]
+    const reviewedAgreementIds = [...new Set(receivedReviews.map((review) => review.agreementId).filter((id): id is string => Boolean(id)))];
+    const reviewPairs = reviewedAgreementIds.length ? await this.prisma.review.findMany({
+      where: { agreementId: { in: reviewedAgreementIds } }, select: { agreementId: true, reviewType: true },
+    }) : [];
+    const sides = new Map<string, Set<string>>();
+    for (const pair of reviewPairs) { if (!pair.agreementId) continue; const set = sides.get(pair.agreementId) ?? new Set<string>(); set.add(pair.reviewType); sides.set(pair.agreementId, set); }
+    const personReviews = receivedReviews.filter((review) => !review.agreementId ||
+      ((sides.get(review.agreementId)?.has('LANDLORD') && sides.get(review.agreementId)?.has('TENANT')) || Date.now() >= review.createdAt.getTime() + 14 * 86400000));
+    const validReviewRatings = [...personReviews, ...agreementReviews]
       .map((review) => review.rating)
       .filter(
         (rating) => typeof rating === 'number' && rating >= 1 && rating <= 5,
@@ -194,14 +202,9 @@ export class TrustScoreService {
         ? validReviewRatings.reduce((sum, rating) => sum + rating, 0) /
           validReviewRatings.length
         : 0;
+    // Three stars are neutral; ratings above/below that point raise/lower trust.
     const reviewContribution = validReviewRatings.length
-      ? Math.min(
-          Math.round(
-            (averageReviewRating / 5) *
-              trustScoreConfig.caps.reviewContribution,
-          ),
-          trustScoreConfig.caps.reviewContribution,
-        )
+      ? Math.round(((averageReviewRating - 3) / 2) * trustScoreConfig.caps.reviewContribution)
       : 0;
 
     const cancellationPenalty = Math.min(
@@ -223,10 +226,9 @@ export class TrustScoreService {
       emailVerification +
       identityVerification +
       completedRentals +
-      successfulPaymentContribution +
-      reviewContribution;
+      successfulPaymentContribution;
     const finalScore = clampTrustScore(
-      baseScore + totalPositive - cancellationPenalty - confirmedReportPenalty,
+      baseScore + totalPositive + reviewContribution - cancellationPenalty - confirmedReportPenalty,
     );
 
     const result: TrustScoreCalculationResult = {

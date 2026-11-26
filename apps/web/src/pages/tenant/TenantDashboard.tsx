@@ -45,7 +45,7 @@ export default function TenantDashboard() {
 
   useEffect(() => {
     let active = true;
-    usersAPI.getMe()
+    const refreshProfile = () => usersAPI.getMe()
       .then((data) => {
         if (active) setProfile(data);
       })
@@ -55,11 +55,13 @@ export default function TenantDashboard() {
       .finally(() => {
         if (active) setProfileLoading(false);
       });
+    void refreshProfile();
+    const profileTimer = window.setInterval(() => void refreshProfile(), 15_000);
     if (user?.id) {
       agreementsAPI.mine<DashboardAgreement>()
         .then((records) => {
           if (!active) return;
-          const signedStatuses = new Set(['ACTIVE', 'ENDED', 'CANCELLED', 'EXPIRED', 'TERMINATED']);
+          const signedStatuses = new Set(['ACTIVE', 'ENDED', 'EXPIRED', 'TERMINATED']);
           const mine = records.filter((agreement) => agreement.tenantId === user.id);
           setTenantAgreements(mine);
           setSignedAgreementCount(mine.filter((agreement) => signedStatuses.has(agreement.status)).length);
@@ -83,13 +85,18 @@ export default function TenantDashboard() {
       setDisputesLoading(false);
       setFakeReportsLoading(false);
     }
-    return () => { active = false; };
+    return () => { active = false; window.clearInterval(profileTimer); };
   }, [user?.id]);
 
   const rentalHistory = tenantAgreements.filter((agreement) => (
     ['ACTIVE', 'ENDED', 'EXPIRED', 'TERMINATED'].includes(agreement.status)
   ));
-  const rentedPropertyCount = new Set(rentalHistory.map((agreement) => agreement.listingId).filter(Boolean)).size;
+  const rentedPropertyCount = new Set(
+    tenantAgreements
+      .filter((agreement) => agreement.status === 'ACTIVE')
+      .map((agreement) => agreement.listingId)
+      .filter(Boolean),
+  ).size;
 
   const quickActions = [
     { icon: <Home size={16} />, label: 'Browse Listings', path: '/tenant/listings', color: 'bg-blue-500/20 text-blue-600' },
@@ -126,9 +133,9 @@ export default function TenantDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 md:gap-3 mb-4">
         {[
-          { label: 'MY RENTED PROPERTIES', value: agreementsLoading ? '…' : agreementsError ? 'Unavailable' : rentedPropertyCount, change: undefined, color: undefined, path: '/tenant/agreement?status=SIGNED' },
+          { label: 'MY ACTIVE RENTALS', value: agreementsLoading ? '…' : agreementsError ? 'Unavailable' : rentedPropertyCount, change: undefined, color: undefined, path: '/tenant/agreement?status=ACTIVE' },
           { label: 'FAKE REPORTS CONFIRMED', value: fakeReportsLoading ? '…' : fakeReportsError ? 'Unavailable' : fakeReportCount ?? '—', change: undefined, color: 'text-red-600', path: '/tenant/detector' },
-          { label: 'AGREEMENTS SIGNED', value: agreementsLoading ? '…' : agreementsError ? 'Unavailable' : signedAgreementCount ?? '—', change: undefined, color: 'text-green-600', path: '/tenant/agreement?status=SIGNED' },
+          { label: 'SIGNED AGREEMENTS (HISTORY)', value: agreementsLoading ? '…' : agreementsError ? 'Unavailable' : signedAgreementCount ?? '—', change: undefined, color: 'text-green-600', path: '/tenant/agreement?status=SIGNED' },
           { label: 'DISPUTES RESOLVED', value: disputesLoading ? '…' : disputesError ? 'Unavailable' : resolvedDisputeCount ?? '—', change: undefined, color: 'text-yellow-600', path: '/tenant/disputes?status=RESOLVED' },
         ].map((item) => (
           <button key={item.label} type="button" onClick={() => navigate(item.path)} className="rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">

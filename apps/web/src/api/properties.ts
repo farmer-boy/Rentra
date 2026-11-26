@@ -52,6 +52,7 @@ export const propertiesAPI = {
     (await api.patch<T>(`/properties/${id}`, body)).data,
   expire: async (id: string) =>
     (await api.delete<{ id: string; status: string }>(`/properties/${id}`)).data,
+  repost: async (id: string) => (await api.post<{ listingId: string; status: string; message: string }>(`/properties/${id}/repost`)).data,
   stats: async (id: string, params?: Record<string, unknown>) =>
     (await api.get(`/properties/${id}/stats`, { params })).data,
   recordView: async (id: string, sessionId?: string) =>

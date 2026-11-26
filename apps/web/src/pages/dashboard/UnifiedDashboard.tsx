@@ -79,7 +79,7 @@ export default function UnifiedDashboard() {
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => navigate('/dashboard/messages')} className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text hover:bg-surface2"><MessageCircle size={16} />Messages</button>
           <button type="button" onClick={() => navigate('/dashboard/notifications')} className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text hover:bg-surface2"><Bell size={16} />Notifications</button>
-          <button type="button" onClick={() => navigate('/dashboard/my-reviews')} className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text hover:bg-surface2"><Star size={16} />Reviews</button>
+          <button type="button" onClick={() => navigate('/dashboard/reviews-trust')} className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text hover:bg-surface2"><Star size={16} />Reviews & trust</button>
           <button type="button" onClick={() => navigate('/dashboard/settings')} className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text hover:bg-surface2"><Settings size={16} />Settings</button>
           <button type="button" onClick={() => navigate('/dashboard/rent-estimator')} className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text hover:bg-surface2"><TrendingUp size={16} />Rent estimator</button>
         </div>

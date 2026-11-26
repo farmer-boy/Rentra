@@ -10,25 +10,28 @@ interface ReviewAgreement {
   endDate: string | null;
   listing?: { title?: string } | null;
   property?: { title?: string } | null;
+  agreementName?: string;
 }
 
 const landlordCategories = [
-  ['behaviour', 'Behaviour & Attitude'],
-  ['communication', 'Communication'],
-  ['propertyCondition', 'Property Condition'],
-  ['honesty', 'Honesty & Transparency'],
-  ['maintenance', 'Maintenance & Support'],
-  ['responseTime', 'Response Time'],
+  ['behaviour', 'Behaviour'],
+  ['responsiveness', 'Responsiveness'],
+  ['maintenance', 'Maintenance'],
+  ['propertyAccuracy', 'Property accuracy'],
+  ['agreementFairness', 'Agreement fairness'],
+  ['privacy', 'Privacy'],
 ] as const;
 
 const tenantCategories = [
-  ['behaviour', 'Behaviour & Attitude'],
-  ['rentPayment', 'Rent Payment Punctuality'],
-  ['propertyCare', 'Property Care'],
-  ['cleanliness', 'Cleanliness'],
+  ['behaviour', 'Behaviour'],
+  ['rentPayment', 'Rent payment'],
+  ['propertyCare', 'Property care'],
   ['communication', 'Communication'],
-  ['agreementCompliance', 'Rules & Agreement Compliance'],
+  ['ruleFollowing', 'Rule following'],
+  ['moveOut', 'Move-out'],
 ] as const;
+
+const quickTagOptions = ['Helpful', 'Responsive', 'Late repairs', 'Fair terms', 'Clean tenant', 'Paid on time', 'Cared for property', 'Poor communication', 'Smooth handover'];
 
 export default function AgreementReviewCard({
   agreement,
@@ -39,10 +42,12 @@ export default function AgreementReviewCard({
   const eligibilityQuery = useQuery({
     queryKey: ['reviews', 'eligibility', agreement.id],
     queryFn: () => reviewsAPI.getEligibility(agreement.id),
+    refetchInterval: (query) => query.state.data?.eligible || query.state.data?.alreadyReviewed ? false : 5000,
   });
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [comment, setComment] = useState('');
   const [wouldRecommend, setWouldRecommend] = useState<boolean | null>(null);
+  const [quickTags, setQuickTags] = useState<string[]>([]);
   const categories =
     eligibilityQuery.data?.reviewType === 'TENANT'
       ? tenantCategories
@@ -54,6 +59,8 @@ export default function AgreementReviewCard({
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['reviews'] }),
         queryClient.invalidateQueries({ queryKey: ['agreements'] }),
+        queryClient.invalidateQueries({ queryKey: ['users', 'me'] }),
+        queryClient.invalidateQueries({ queryKey: ['trust-score'] }),
       ]);
     },
     onError: (error: unknown) => {
@@ -70,7 +77,7 @@ export default function AgreementReviewCard({
 
   const eligibility = eligibilityQuery.data;
   const agreementName =
-    agreement.listing?.title ?? agreement.property?.title ?? 'Completed rental';
+    agreement.agreementName ?? agreement.listing?.title ?? agreement.property?.title ?? 'Completed rental';
   const allRated = categories.every(([key]) => ratings[key] !== undefined);
 
   return (
@@ -97,9 +104,7 @@ export default function AgreementReviewCard({
           Checking review eligibility...
         </p>
       ) : eligibilityQuery.isError ? (
-        <p role="alert" className="mt-3 text-sm text-red-700">
-          Review eligibility could not be checked.
-        </p>
+        <div className="mt-3"><p role="alert" className="text-sm text-red-700">Review eligibility could not be checked.</p><button type="button" onClick={() => void eligibilityQuery.refetch()} className="mt-1 text-sm font-semibold text-emerald-700">Retry eligibility check</button></div>
       ) : eligibility?.eligible ? (
         <form
           className="mt-4 space-y-4"
@@ -114,6 +119,7 @@ export default function AgreementReviewCard({
               reviewType: eligibility.reviewType,
               ...categoryRatings,
               comment: comment.trim() || undefined,
+              quickTags,
               wouldRecommend,
             });
           }}
@@ -161,7 +167,7 @@ export default function AgreementReviewCard({
 
           <fieldset>
             <legend className="text-sm font-medium text-text">
-              Would you recommend this person?
+              Would you rent with this person again?
             </legend>
             <div className="mt-2 flex gap-2">
               {[true, false].map((choice) => (
@@ -183,15 +189,19 @@ export default function AgreementReviewCard({
           </fieldset>
 
           <label className="block text-sm font-medium text-text">
-            Written review (optional)
+            Comment (optional, up to 500 characters)
             <textarea
-              maxLength={2000}
+              maxLength={500}
               rows={3}
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               className="mt-1 block w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
             />
           </label>
+          <fieldset>
+            <legend className="text-sm font-medium text-text">Quick tags (optional)</legend>
+            <div className="mt-2 flex flex-wrap gap-2">{quickTagOptions.map((tag) => <button key={tag} type="button" aria-pressed={quickTags.includes(tag)} onClick={() => setQuickTags((current) => current.includes(tag) ? current.filter((item) => item !== tag) : current.length < 5 ? [...current, tag] : current)} className={`rounded-full border px-3 py-1 text-xs ${quickTags.includes(tag) ? 'border-primary bg-primary/10 text-primary' : 'border-border text-text-muted'}`}>{tag}</button>)}</div>
+          </fieldset>
           <button
             type="submit"
             disabled={

@@ -125,57 +125,58 @@ textarea {
   }
 }
 
-/* Admin navigation uses a localized burgundy accent in both themes. */
+/* Admin navigation follows the navy workspace treatment used by the admin dashboard. */
 .admin-sidebar-shell {
-  background-color: rgb(var(--rentra-admin-sidebar-bg));
-  border-color: rgb(var(--rentra-admin-sidebar-border));
+  color: #e7edf8;
+  background-color: #101d3b;
+  border-color: #243354;
 }
 
 .admin-sidebar-item {
-  color: var(--text2);
+  color: #b7c3da;
   background-color: transparent;
 }
 
 .admin-sidebar-item > span:first-child {
-  color: rgb(var(--rentra-admin-sidebar-active));
+  color: #94a9d0;
 }
 
 .admin-sidebar-item:hover {
-  color: rgb(var(--rentra-admin-sidebar-active));
-  background-color: rgb(var(--rentra-admin-sidebar-hover));
+  color: #fff;
+  background-color: #1b2b50;
 }
 
 .admin-sidebar-item-parent-active {
-  color: rgb(var(--rentra-admin-sidebar-active));
-  background-color: rgb(var(--rentra-admin-sidebar-soft));
+  color: #fff;
+  background-color: #24385f;
 }
 
 .admin-sidebar-item-parent-active:hover {
-  color: rgb(var(--rentra-admin-sidebar-active));
-  background-color: rgb(var(--rentra-admin-sidebar-soft));
+  color: #fff;
+  background-color: #2b426f;
 }
 
 .admin-sidebar-item-current,
 .admin-sidebar-item-current:hover {
-  color: rgb(var(--rentra-admin-sidebar-active-foreground));
-  background-color: rgb(var(--rentra-admin-sidebar-active));
+  color: #fff;
+  background-color: #315cc5;
 }
 
 .admin-sidebar-item-current > span:first-child {
-  color: rgb(var(--rentra-admin-sidebar-active-foreground));
+  color: #fff;
 }
 
 .admin-sidebar-item-current:hover {
-  background-color: rgb(var(--rentra-admin-sidebar-active-hover));
+  background-color: #3b68d6;
 }
 
 .admin-sidebar-submenu-rail {
-  border-color: rgb(var(--rentra-admin-sidebar-border));
+  border-color: #2b3b5d;
 }
 
 .admin-sidebar-control:hover {
-  color: rgb(var(--rentra-admin-sidebar-active));
-  background-color: rgb(var(--rentra-admin-sidebar-hover));
+  color: #fff;
+  background-color: #1b2b50;
 }
 
 .workspace-sidebar-shell {

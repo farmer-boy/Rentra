@@ -7,6 +7,7 @@ import {
 import { createHmac } from 'crypto';
 import {
   FurnishedStatus,
+  AgreementStatus,
   ListingAvailability,
   ListingPublicationStatus,
   ListingStatus,
@@ -15,6 +16,7 @@ import {
   Role,
   RentalDuration,
   VerificationStatus,
+  VerificationKind,
 } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { UploadService, ImageUploadFile } from '../listings/upload.service';
@@ -30,6 +32,7 @@ import {
 import { PropertyStatsQueryDto } from './dto/property-stats-query.dto';
 import { NearbyPropertiesDto } from './dto/nearby-properties.dto';
 import { AuditService } from '../audit/audit.service';
+import { inspectPropertyImage, PROPERTY_PHOTO_CATEGORIES } from './property-image-validation';
 
 const EARTH_RADIUS_KM = 6371.0088;
 
@@ -83,6 +86,13 @@ export class PropertiesService {
           bedrooms: dto.bedrooms,
           bathrooms: dto.bathrooms,
           areaSizeSqft: dto.areaSizeSqft,
+          areaSizeMarla: dto.areaSizeMarla,
+          areaSizeUnit: dto.areaSizeUnit,
+          floor: dto.floor?.trim(),
+          hostelBedsPerRoom: dto.hostelBedsPerRoom,
+          hostelRentPerBed: dto.hostelRentPerBed,
+          hostelGenderPolicy: dto.hostelGenderPolicy,
+          mealsIncluded: dto.mealsIncluded ?? false,
           furnishedStatus: dto.furnishedStatus ?? FurnishedStatus.UNFURNISHED,
           availability: dto.availability ?? ListingAvailability.AVAILABLE,
           rules: dto.rules,
@@ -591,8 +601,6 @@ export class PropertiesService {
           : current.status;
 
     const materialDetailsChanged = [
-      dto.title,
-      dto.description,
       dto.type,
       dto.address,
       dto.country,
@@ -600,8 +608,9 @@ export class PropertiesService {
       dto.area,
       dto.latitude,
       dto.longitude,
-      dto.price,
       dto.areaSizeSqft,
+      dto.areaSizeMarla,
+      dto.areaSizeUnit,
     ].some((value) => value !== undefined);
     const propertyData: Prisma.PropertyUpdateInput = {
       ...(dto.title !== undefined && { title: dto.title.trim() }),
@@ -615,6 +624,13 @@ export class PropertiesService {
       ...(dto.bedrooms !== undefined && { bedrooms: dto.bedrooms }),
       ...(dto.bathrooms !== undefined && { bathrooms: dto.bathrooms }),
       ...(dto.areaSizeSqft !== undefined && { areaSizeSqft: dto.areaSizeSqft }),
+      ...(dto.areaSizeMarla !== undefined && { areaSizeMarla: dto.areaSizeMarla }),
+      ...(dto.areaSizeUnit !== undefined && { areaSizeUnit: dto.areaSizeUnit }),
+      ...(dto.floor !== undefined && { floor: dto.floor.trim() }),
+      ...(dto.hostelBedsPerRoom !== undefined && { hostelBedsPerRoom: dto.hostelBedsPerRoom }),
+      ...(dto.hostelRentPerBed !== undefined && { hostelRentPerBed: dto.hostelRentPerBed }),
+      ...(dto.hostelGenderPolicy !== undefined && { hostelGenderPolicy: dto.hostelGenderPolicy }),
+      ...(dto.mealsIncluded !== undefined && { mealsIncluded: dto.mealsIncluded }),
       ...(dto.furnishedStatus !== undefined && {
         furnishedStatus: dto.furnishedStatus,
       }),
@@ -725,6 +741,67 @@ export class PropertiesService {
     return { id, status: PropertyStatus.EXPIRED };
   }
 
+  async repost(id: string, requesterId: string) {
+    return this.prisma.$transaction(async (transaction) => {
+      const rows = await transaction.$queryRaw<Array<{ id: string }>>`SELECT id FROM "Property" WHERE id = ${id} FOR UPDATE`;
+      if (!rows.length) throw new NotFoundException('Property not found');
+      const property = await transaction.property.findUnique({
+        where: { id },
+        include: { images: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] }, amenities: { select: { amenityId: true } }, listings: { orderBy: { createdAt: 'desc' }, take: 1 } },
+      });
+      if (!property) throw new NotFoundException('Property not found');
+      if (property.ownerId !== requesterId) throw new ForbiddenException('Only the property owner can repost this property');
+      if (property.verificationStatus !== VerificationStatus.APPROVED) throw new BadRequestException('Only verified properties can be reposted');
+      const activeAgreement = await transaction.agreement.findFirst({ where: { propertyId: id, status: { in: [AgreementStatus.ACTIVE, AgreementStatus.PENDING, AgreementStatus.DRAFT] } }, select: { id: true } });
+      if (activeAgreement) throw new BadRequestException('Reposting is available after the previous agreement has ended or been cancelled.');
+      const activeListing = await transaction.listing.findFirst({ where: { propertyId: id, status: { in: [ListingStatus.PUBLISHED, ListingStatus.PENDING] } }, select: { id: true } });
+      if (activeListing) throw new BadRequestException('This property already has an active listing.');
+      const previous = property.listings[0];
+      const latestApproved = await transaction.verificationSubmission.findFirst({ where: { propertyId: id, kind: VerificationKind.PROPERTY, status: VerificationStatus.APPROVED }, orderBy: { reviewedAt: 'desc' }, select: { details: true } });
+      const approvedPhotos = latestApproved?.details && typeof latestApproved.details === 'object' && !Array.isArray(latestApproved.details) && 'approvedPhotoUrls' in latestApproved.details
+        ? (latestApproved.details as Prisma.JsonObject).approvedPhotoUrls
+        : undefined;
+      const currentUrls = property.images.map((image) => image.url);
+      const photosDiffer = !Array.isArray(approvedPhotos) || approvedPhotos.length !== currentUrls.length || approvedPhotos.some((url, index) => url !== currentUrls[index]);
+      const status = photosDiffer ? ListingStatus.PENDING : ListingStatus.PUBLISHED;
+      const created = await transaction.listing.create({
+        data: {
+          propertyId: property.id,
+          title: property.title,
+          description: property.description ?? '',
+          rules: property.rules,
+          area: property.area ?? '',
+          city: property.city ?? '',
+          address: property.address,
+          type: property.propertyType,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          unitCount: 1,
+          roomCount: property.bedrooms,
+          sqft: property.areaSizeSqft ?? 0,
+          rent: property.price,
+          deposit: property.securityDeposit,
+          rentalDuration: property.rentalMode,
+          listingMode: this.toListingMode(property.rentalMode),
+          latitude: property.latitude,
+          longitude: property.longitude,
+          status,
+          publicationStatus: photosDiffer ? ListingPublicationStatus.UNPUBLISHED : ListingPublicationStatus.PUBLISHED,
+          availability: ListingAvailability.AVAILABLE,
+          furnishedStatus: property.furnishedStatus,
+          photos: currentUrls,
+          landlordId: property.ownerId,
+          locationId: property.locationId,
+          ...(property.propertyType === 'HOSTEL' && property.hostelGenderPolicy ? { hostelDetails: { create: { buildingName: property.title, genderPolicy: property.hostelGenderPolicy, bedCapacity: Math.max(1, property.hostelBedsPerRoom ?? 1), availableBeds: Math.max(1, property.hostelBedsPerRoom ?? 1), messIncluded: property.mealsIncluded } } } : {}),
+        },
+      });
+      if (property.images.length) await transaction.propertyImage.updateMany({ where: { propertyId: id }, data: { listingId: created.id } });
+      for (const amenity of property.amenities) await transaction.propertyAmenity.create({ data: { listingId: created.id, amenityId: amenity.amenityId } });
+      await transaction.property.update({ where: { id }, data: { status: PropertyStatus.ACTIVE, availability: ListingAvailability.AVAILABLE } });
+      return { listingId: created.id, status: photosDiffer ? 'PENDING_REVIEW' : 'ACTIVE', message: photosDiffer ? 'The photos or video need a quick admin review before this repost goes live.' : 'The verified property has been reposted.' };
+    });
+  }
+
   async updateStatus(id: string, status: PropertyStatus) {
     const property = await this.prisma.property.findUnique({
       where: { id },
@@ -831,17 +908,16 @@ export class PropertiesService {
     requesterId: string,
     files: ImageUploadFile[],
     altText?: string,
+    photoCategories?: string[],
   ) {
     await this.assertCanManage(propertyId, requesterId);
     if (!files.length)
       throw new BadRequestException('Upload at least one image');
-    if (files.length > 12)
-      throw new BadRequestException('Upload no more than 12 images at once');
-    for (const file of files) {
-      if (!file.mimetype.startsWith('image/')) {
-        throw new BadRequestException('Only image files can be uploaded');
-      }
-    }
+    if (files.length > 15) throw new BadRequestException('Upload no more than 15 photos.');
+    if (photoCategories && photoCategories.length !== files.length) throw new BadRequestException('Choose a category for each photo.');
+    const categories = photoCategories ?? files.map(() => 'OTHER');
+    if (categories.some((category) => !PROPERTY_PHOTO_CATEGORIES.has(category))) throw new BadRequestException('A photo category is invalid.');
+    for (const file of files) inspectPropertyImage(file.buffer, file.mimetype);
 
     const [currentImageCount, listing] = await Promise.all([
       this.prisma.propertyImage.count({ where: { propertyId } }),
@@ -851,6 +927,7 @@ export class PropertiesService {
         orderBy: { createdAt: 'asc' },
       }),
     ]);
+    if (currentImageCount + files.length > 15) throw new BadRequestException('A property can have no more than 15 photos.');
 
     const uploaded: Array<{ secureUrl: string; publicId: string }> = [];
     try {
@@ -863,7 +940,7 @@ export class PropertiesService {
           listingId: listing?.id,
           url: image.secureUrl,
           publicId: image.publicId,
-          altText: altText ?? files[index].originalname,
+          altText: categories[index] ?? altText ?? files[index].originalname,
           sortOrder: currentImageCount + index,
           isPrimary: currentImageCount === 0 && index === 0,
         })),

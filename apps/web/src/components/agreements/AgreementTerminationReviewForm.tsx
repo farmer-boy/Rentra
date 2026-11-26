@@ -1,15 +1,20 @@
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import { agreementsAPI, type AgreementTerminationRequest } from '../../api/agreements';
 
 export default function AgreementTerminationReviewForm({
   agreementId,
   request,
   currentUserId,
+  onSaved,
 }: {
   agreementId: string;
   request: AgreementTerminationRequest;
   currentUserId?: string;
+  onSaved?: () => Promise<void> | void;
 }) {
+  const queryClient = useQueryClient();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [saving, setSaving] = useState(false);
@@ -25,6 +30,10 @@ export default function AgreementTerminationReviewForm({
     try {
       await agreementsAPI.reviewCancellation(agreementId, request.id, { rating, comment: comment.trim() });
       setSubmitted(true);
+      toast.success('Your cancellation review was saved.');
+      void queryClient.invalidateQueries({ queryKey: ['reviews'] });
+      void queryClient.invalidateQueries({ queryKey: ['users', 'me'] });
+      try { await onSaved?.(); } catch { /* The review is saved even if refreshing the agreement fails. */ }
     } catch (cause) {
       const message = (cause as { response?: { data?: { message?: string | string[] } } })?.response?.data?.message;
       setError(Array.isArray(message) ? message.join(', ') : message ?? 'Could not save your review.');

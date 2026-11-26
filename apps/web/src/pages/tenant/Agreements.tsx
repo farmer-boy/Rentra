@@ -11,6 +11,7 @@ import AgreementAmendmentsPanel from '../../components/agreements/AgreementAmend
 import AgreementPresencePulse from '../../components/agreements/AgreementPresencePulse';
 import AgreementTerminationDisputeButton from '../../components/agreements/AgreementTerminationDisputeButton';
 import AgreementDisputeEligibilityStatus from '../../components/agreements/AgreementDisputeEligibilityStatus';
+import AgreementReviewCard from '../../components/agreements/AgreementReviewCard';
 import type { AgreementAmendment } from '../../api/types';
 
 interface Agreement {
@@ -157,6 +158,7 @@ export default function Agreements() {
                   </p>
                 )}
                 {!!agreement.terminationRequests?.length && <TerminationRequestsPanel agreementId={agreement.id} tenantId={agreement.tenantId} currentUserId={user.id} requests={agreement.terminationRequests} onUpdated={(updated) => setAgreements((current) => current.map((item) => item.id === updated.id ? { ...item, status: updated.status, terminationReason: updated.terminationReason, terminationRequests: updated.terminationRequests, disputeEligibility: updated.disputeEligibility } : item))} />}
+                {['ENDED', 'EXPIRED', 'TERMINATED'].includes(agreement.status) && !agreement.terminationRequests?.some((request) => request.status === 'APPROVED') && <div className="mt-4"><AgreementReviewCard agreement={agreement} /></div>}
                 {agreement.status === 'ACTIVE' && !agreement.terminationRequests?.some((request) => request.status === 'PENDING') && (
                   <TerminateAgreementButton
                     agreementId={agreement.id}
